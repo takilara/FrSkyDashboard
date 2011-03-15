@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, Frskydash!</string>
+    <string name="app_name">FrSky Dashboard</string>
+    <string name="customUnits">Custom Units</string>
+    <string name="rawUnits">Raw</string>
+    <string name="RSSItx">RSSItx</string>
+    <string name="RSSIrx">RSSIrx</string>
+</resources>

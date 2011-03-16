@@ -66,7 +66,8 @@
     	android:layout_marginBottom="1dip" 
     	android:gravity="bottom" 
     	android:layout_gravity="bottom">
-        <Button android:text="Button" android:id="@+id/button2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	<Button android:text="Talk" android:id="@+id/btnSpeak" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+        <Button android:text="Module Settings" android:id="@+id/btnTest2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
         <Button android:text="Test" android:id="@+id/btnTest1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
     	<View
         	android:layout_height="2dip"

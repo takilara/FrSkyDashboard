@@ -17,11 +17,25 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
     private static final String TAG = "FrSky"; 
     private TextToSpeech mTts;
     
+    private int AD1;
+    private int AD2;
+    MyApp globals;
+    
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        // Fetch globals:
+        //MyApp appState = ((MyApp)getApplicationContext());
+        globals = (MyApp) this.getApplication();
+        AD1 = globals.createChannel("AD1", "First analog channel", 0, (float) 0.5, "V","Volt");
+        float newVal = globals.setChannelById(AD1, 200);
+        
+        TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
+		ad1Val.setText(Float.toString(newVal));
+        
         
         // Click Listeners
         View btnTest1 = findViewById(R.id.btnTest1);
@@ -77,7 +91,10 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
     	case R.id.btnTest1:
     		Log.i(TAG,"Clicked Test");
     		TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
-    		ad1Val.setText("3.5");
+    		float newVal = globals.setChannelById(AD1, 100);
+    		ad1Val.setText(Float.toString(newVal));
+    		
+    		//ad1Val.setText("3.5");
     		break;
     	case R.id.btnTest2:
     		Log.i(TAG,"Switch activity");

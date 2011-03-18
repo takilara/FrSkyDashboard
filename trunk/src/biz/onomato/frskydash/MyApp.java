@@ -15,6 +15,7 @@ public class MyApp extends Application {
 	private String[] hUnit;
 	private String[] hLongUnit;
 	private int channels=0;
+	private Channel[] objs;
 	
 	public MyApp(){
 		hRaw = new int[MAX_CHANNELS];
@@ -25,11 +26,14 @@ public class MyApp extends Application {
 		hFactor = new float[MAX_CHANNELS];
 		hUnit = new String[MAX_CHANNELS];
 		hLongUnit = new String[MAX_CHANNELS];
+		objs = new Channel[MAX_CHANNELS];
 
 	}
 	
 	public int createChannel(String name,String description,float offset,float factor,String unit,String longUnit)
 	{
+		Channel AD1 =  new Channel(name, description, offset, factor, unit, longUnit);
+		objs[channels] = AD1;
 		Log.i("MyApp","createChannel");
 		hRaw[channels]=-1;
 		hVal[channels]=-1;
@@ -43,8 +47,15 @@ public class MyApp extends Application {
 		return channels-1;
 	}
 	
+	public Channel getChannelById(int id)
+	{
+		return objs[id];
+	}
+	
+	
 	public float setChannelById(int id,int rawVal)
 	{
+		objs[id].setRaw(rawVal);
 		
 		Log.i("MyApp","Set channel to some value");
 		hRaw[id] = rawVal;

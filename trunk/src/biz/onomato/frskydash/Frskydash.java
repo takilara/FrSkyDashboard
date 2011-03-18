@@ -19,6 +19,7 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
     
     private int AD1;
     private int AD2;
+    private Channel oAd1;
     MyApp globals;
     
 	/** Called when the activity is first created. */
@@ -29,9 +30,15 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
         
         // Fetch globals:
         //MyApp appState = ((MyApp)getApplicationContext());
-        globals = (MyApp) this.getApplication();
-        AD1 = globals.createChannel("AD1", "First analog channel", 0, (float) 0.5, "V","Volt");
-        float newVal = globals.setChannelById(AD1, 200);
+        //globals = (MyApp) this.getApplication();
+        globals = ((MyApp)getApplicationContext());
+
+        AD1 = globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
+        //float newVal = globals.setChannelById(AD1, 200);
+        
+        oAd1 = globals.getChannelById(AD1);
+        
+        Float newVal = oAd1.setRaw(50);
         
         TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
 		ad1Val.setText(Float.toString(newVal));
@@ -78,7 +85,7 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
     }
     
     private void sayHello() {
-    	String myGreeting = "Main cell voltage: 3.4 Volt";
+    	String myGreeting = "Text to Speech now enabled.";
     	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
     }
     
@@ -91,7 +98,8 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
     	case R.id.btnTest1:
     		Log.i(TAG,"Clicked Test");
     		TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
-    		float newVal = globals.setChannelById(AD1, 100);
+    		//float newVal = globals.setChannelById(AD1, 100);
+    		Float newVal = oAd1.setRaw(10);
     		ad1Val.setText(Float.toString(newVal));
     		
     		//ad1Val.setText("3.5");
@@ -103,8 +111,7 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
     		break;
     	case R.id.btnSpeak:
     		Log.i(TAG,"SPEAK something");
-    		//sayHello();
-    		saySomething("Main cell voltage: 3.8 Volt, estimated time left: 3.5 minutes");
+    		saySomething(oAd1.getDescription()+": "+Float.toString(oAd1.getValue())+" "+oAd1.getLongUnit());
     		break;
     	}
     	

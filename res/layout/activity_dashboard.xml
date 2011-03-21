@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:orientation="vertical">
+    <RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/radioGroup1" android:orientation="horizontal" android:layout_gravity="center" >
+    </RadioGroup>
+    
+    <TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center" android:stretchColumns="1" android:id="@+id/tableLayout1">
+        <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView 
+           		android:layout_column="1"
+             	android:text="0"
+             	android:id="@+id/ad1Value"
+             	android:layout_width="wrap_content"
+             	android:layout_height="wrap_content"
+             	android:textSize="50sp"
+             	android:gravity="right"/>
+            <TextView
+            	android:layout_column="3"
+            	android:text="V"
+            	android:id="@+id/ad1Unit"
+            	android:layout_height="wrap_content"
+            	android:layout_marginLeft="10dip"
+            	android:layout_marginRight="10dip"
+            	android:textSize="20sp"
+            	android:layout_width="wrap_content"
+            	android:gravity="left"/>
+        </TableRow>
+        <View
+        	android:layout_height="2dip"
+        	android:background="#FF909090" />
+        
+        <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView 
+           		android:layout_column="1"
+             	android:text="0"
+             	android:id="@+id/ad2Value"
+             	android:layout_width="wrap_content"
+             	android:layout_height="wrap_content"
+             	android:textSize="50sp"
+             	android:gravity="right"/>
+            <TextView
+            	android:layout_column="3"
+            	android:text="V"
+            	android:id="@+id/ad2Unit"
+            	android:layout_height="wrap_content"
+            	android:layout_marginLeft="10dip"
+            	android:layout_marginRight="10dip"
+            	android:textSize="20sp"
+            	android:layout_width="wrap_content"
+            	android:gravity="left"/>
+        </TableRow>
+        <View
+        	android:layout_height="2dip"
+        	android:background="#FF909090" />
+    </TableLayout>
+    <TableLayout 
+    	android:layout_width="fill_parent" 
+    	android:layout_height="fill_parent" 
+    	android:stretchColumns="*"
+    	android:layout_marginBottom="1dip" 
+    	android:gravity="bottom" 
+    	android:layout_gravity="bottom">
+    	<Button android:text="Talk" android:id="@+id/btnSpeak" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+        <Button android:text="Module Settings" android:id="@+id/btnTest2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+        <Button android:text="Test" android:id="@+id/btnTest1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	<View
+        	android:layout_height="2dip"
+        	android:background="#FF909090" />
+        <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="@string/RSSItx" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" android:layout_gravity="bottom"/>
+            <TextView android:text="@string/RSSItx" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
+        </TableRow>
+        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="0" android:id="@+id/rssitxValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
+            <TextView android:text="0" android:id="@+id/rssirxValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
+        </TableRow>
+    </TableLayout>
+</LinearLayout>

@@ -13,7 +13,7 @@ public class ModuleSettingsActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.modulesettings);
+		setContentView(R.layout.activity_modulesettings);
 		
 		globals = ((MyApp)getApplicationContext());
 
@@ -24,7 +24,6 @@ public class ModuleSettingsActivity extends Activity {
         
         TextView test = (TextView) findViewById(R.id.textView1);
 		test.setText(Float.toString(oAd1.getValue()));
-		
 		
         
 	}

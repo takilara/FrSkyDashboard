@@ -1,25 +1,23 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.app.TabActivity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.speech.tts.TextToSpeech;
+
 import android.os.Bundle;
+import android.widget.TabHost;
 import android.widget.TextView;
 import java.util.Locale;
 
 
 
 
-public class Frskydash extends Activity implements OnClickListener, TextToSpeech.OnInitListener {
-    private static final String TAG = "FrSky"; 
-    private TextToSpeech mTts;
-    
-    private int AD1;
-    private int AD2;
-    private Channel oAd1;
+public class Frskydash extends TabActivity {
+	
+	private static final String TAG = "Tab Host"; 
     MyApp globals;
     
 	/** Called when the activity is first created. */
@@ -28,94 +26,61 @@ public class Frskydash extends Activity implements OnClickListener, TextToSpeech
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        // Fetch globals:
-        //MyApp appState = ((MyApp)getApplicationContext());
-        //globals = (MyApp) this.getApplication();
+        // Do any globals
         globals = ((MyApp)getApplicationContext());
+        globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
+        
+        Resources res = getResources(); // Resource object to get Drawables
+        TabHost tabHost = getTabHost();  // The activity TabHost
+        TabHost.TabSpec spec;  // Resusable TabSpec for each tab
+        Intent intent;  // Reusable Intent for each tab
 
-        AD1 = globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
-        //float newVal = globals.setChannelById(AD1, 200);
+        // Create an Intent to launch an Activity for the tab (to be reused)
+        intent = new Intent().setClass(this, DashboardActivity.class);
+
+        // Initialize a TabSpec for each tab and add it to the TabHost
+        spec = tabHost.newTabSpec("dashboard").setIndicator("Dashboard",
+                          //res.getDrawable(R.drawable.ic_tab_artists))
+        			   res.getDrawable(R.drawable.icon))
+                      .setContent(intent);
+        tabHost.addTab(spec);
+
+        // ModuleSettings
+        intent = new Intent().setClass(this, ModuleSettingsActivity.class);
+        spec = tabHost.newTabSpec("modulesettings").setIndicator("Module Settings",
+                          res.getDrawable(R.drawable.icon))
+                      .setContent(intent);
+        tabHost.addTab(spec);
+
+        // Channel config
         
-        oAd1 = globals.getChannelById(AD1);
+        intent = new Intent().setClass(this, ChannelConfigActivity.class);
+        spec = tabHost.newTabSpec("channelconfig").setIndicator("Channel Config",
+                          res.getDrawable(R.drawable.icon))
+                      .setContent(intent);
+        tabHost.addTab(spec);
+
+        // Application settings
+        intent = new Intent().setClass(this, ModuleSettingsActivity.class);
+        spec = tabHost.newTabSpec("applicationsettings").setIndicator("Application Settings",
+                          res.getDrawable(R.drawable.icon))
+                      .setContent(intent);
+        tabHost.addTab(spec);
         
-        Float newVal = oAd1.setRaw(50);
+        // Simulator
+        intent = new Intent().setClass(this, SimulatorActivity.class);
+        spec = tabHost.newTabSpec("simulator").setIndicator("Simulator",
+                          res.getDrawable(R.drawable.icon))
+                      .setContent(intent);
+        tabHost.addTab(spec);
         
-        TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
-		ad1Val.setText(Float.toString(newVal));
         
-        
-        // Click Listeners
-        View btnTest1 = findViewById(R.id.btnTest1);
-        btnTest1.setOnClickListener(this);
-        
-        View btnTest2 = findViewById(R.id.btnTest2);
-        btnTest2.setOnClickListener(this);
-        
-        View btnSpeak = findViewById(R.id.btnSpeak);
-        btnSpeak.setOnClickListener(this);
-        
-        // Text to speech
-        mTts = new TextToSpeech(this,
-        		this //TextToSpeech.OnInitListener
-        		);
+        tabHost.setCurrentTab(0);
+
     }
     
-    public void onInit(int status) {
-    	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-    	if (status == TextToSpeech.SUCCESS) {
-    	int result = mTts.setLanguage(Locale.US);
-    	if (result == TextToSpeech.LANG_MISSING_DATA ||
-    	result == TextToSpeech.LANG_NOT_SUPPORTED) {
-    	// Lanuage data is missing or the language is not supported.
-    	Log.e(TAG, "Language is not available.");
-    	} else {
-    	// Check the documentation for other possible result codes.
-    	// For example, the language may be available for the locale,
-    	// but not for the specified country and variant.
-    	// The TTS engine has been successfully initialized.
-    	// Allow the user to press the button for the app to speak again.
-    	
-    	// Greet the user.
-    	sayHello();
-    	}
-    	} else {
-    	// Initialization failed.
-    	Log.e(TAG, "Could not initialize TextToSpeech.");
-    	}
-    }
-    
-    private void sayHello() {
-    	String myGreeting = "Text to Speech now enabled.";
-    	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
-    }
-    
-    private void saySomething(String myText) {
-    	mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
-    }
-    
-    public void onClick(View v) {
-    	switch (v.getId()) {
-    	case R.id.btnTest1:
-    		Log.i(TAG,"Clicked Test");
-    		TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
-    		//float newVal = globals.setChannelById(AD1, 100);
-    		Float newVal = oAd1.setRaw(10);
-    		ad1Val.setText(Float.toString(newVal));
-    		
-    		//ad1Val.setText("3.5");
-    		break;
-    	case R.id.btnTest2:
-    		Log.i(TAG,"Switch activity");
-    		Intent intent = new Intent(this, ModuleSettingsActivity.class);
-    		startActivity(intent);
-    		break;
-    	case R.id.btnSpeak:
-    		Log.i(TAG,"SPEAK something");
-    		saySomething(oAd1.getDescription()+": "+Float.toString(oAd1.getValue())+" "+oAd1.getLongUnit());
-    		break;
-    	}
-    	
-    }
+        
+   
     
     
     

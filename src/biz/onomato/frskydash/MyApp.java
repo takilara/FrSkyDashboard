@@ -3,6 +3,10 @@ package biz.onomato.frskydash;
 import android.app.Application;
 import android.util.Log;
 import java.util.HashMap;
+import java.util.Locale;
+
+
+
 
 public class MyApp extends Application {
 	private int MAX_CHANNELS=4;
@@ -16,6 +20,8 @@ public class MyApp extends Application {
 	private String[] hLongUnit;
 	private int channels=0;
 	private Channel[] objs;
+	
+	private String TAG="Globals";
 	
 	public MyApp(){
 		hRaw = new int[MAX_CHANNELS];
@@ -62,6 +68,7 @@ public class MyApp extends Application {
 		hVal[id]=hRaw[id]*hFactor[id]+hOffset[id];
 		return (float) (hVal[id]);
 	}
+	    
 
 }
 

@@ -68,6 +68,26 @@ public class MyApp extends Application {
 		hVal[id]=hRaw[id]*hFactor[id]+hOffset[id];
 		return (float) (hVal[id]);
 	}
+	
+	public String frameToHuman(int[] in)
+	{
+		StringBuffer buf = new StringBuffer();
+//		byte[] inB = new byte[in.length()];
+//		char[] inC = in.toCharArray();
+//		inB = in.getBytes();
+		for(int n=0;n<in.length;n++)
+		{
+			String hex = Integer.toHexString(in[n]);
+			if(hex.length()==1)
+			{
+				buf.append('0');
+			}
+			buf.append(hex);
+			buf.append(' ');
+		}
+		String out = buf.toString();
+		return out;
+	}
 	    
 
 }

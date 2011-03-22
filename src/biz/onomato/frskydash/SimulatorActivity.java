@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.util.Log;
 import android.widget.SeekBar;
 
 public class SimulatorActivity extends Activity implements OnSeekBarChangeListener {
@@ -83,7 +84,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	    		rssirx_raw_tv.setText(Integer.toString(prog));
 	    		break;
 		}
-		outFrame_tv.setText(genString());
+		int[] frame = genFrame();
+		outFrame_tv.setText(globals.frameToHuman(frame));
 	}
 	
 	public void onStartTrackingTouch(SeekBar sb)
@@ -94,45 +96,55 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	{
 	}
 
-	private String genString()
+	private int[] genFrame()
 	{
-		String tString = "";
-		StringBuffer buf = new StringBuffer();
+		int[] inBuf = new int[4];
+		int[] buf = new int[30];
 		
-		buf.append(Character.forDigit(126,10)); // 7E
-		buf.append(Character.forDigit(254,10)); // FE
+		inBuf[0] = ad1_raw;
+		inBuf[1] = ad2_raw;
+		inBuf[2] = rssirx_raw;
+		inBuf[3] = rssitx_raw*2 & 0xff;
 		
-		// ADD AD1
-		if(ad1_raw==126)
+		// Add the header
+		buf[0] = 0x7e;
+		buf[1] = 0xfe;
+
+		// loop through the simulated values to see if we need to bytestuff the array
+		int i = 2;
+		for(int n=0;n<inBuf.length;n++)
 		{
-			buf.append(Character.forDigit(125,10)); // 7D
-			buf.append(Character.forDigit(94,10));    // 5E
-		}
-		else
-		{
-			buf.append(Character.forDigit(ad1_raw,10));
-		}
-		
-		// ADD AD2
-		if(ad2_raw==126)
-		{
-			buf.append(Character.forDigit(125,10));   // 7D
-			buf.append(Character.forDigit(94,10));    // 5E
-		}
-		else
-		{
-			buf.append(Character.forDigit(ad2_raw,10));
-		}
-		
-		for(int n=0;n<6;n++)
-		{
-			buf.append(Character.forDigit(0,10));
+			if(inBuf[n]==0x7e)
+			{
+				buf[i]=0x7d;
+				buf[i+1]=0x5e;
+				i++;
+			}
+			else
+			{
+				buf[i] = inBuf[n];
+			}
+			i++;
 		}
 		
-		buf.append(Character.forDigit(126,16)); // 7E
+		// add the last 4 0x00's
+		for(int n=0;n<4;n++)
+		{
+			buf[i]=0x00;
+			i++;
+		}
 		
-		tString = buf.toString();
-		return tString;
+		// add the ending 0x7e
+		buf[i] = 0x7e;
+		
+		int[] outBuf = new int[i+1];
+		
+		for(int n=0;n<i+1;n++)
+		{
+			outBuf[n]=buf[n];
+		}
+		
+		return outBuf;
 	}
 	
 }

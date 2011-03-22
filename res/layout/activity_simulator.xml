@@ -28,8 +28,8 @@
         	android:layout_height="2dip"
         	android:background="#FF909090" 
         	android:layout_width="match_parent" />
-        <TextView android:layout_height="wrap_content" android:id="@+id/textView5" android:text="TextView" android:layout_width="match_parent"></TextView>
-        <TextView android:layout_height="wrap_content" android:id="@+id/outFrame" android:text="FEAAAAAAA" android:layout_width="match_parent"></TextView>
+        <TextView android:layout_height="wrap_content" android:id="@+id/textView5" android:text="Frame:" android:layout_width="match_parent"></TextView>
+        <TextView android:layout_height="wrap_content" android:id="@+id/outFrame" android:text="" android:layout_width="match_parent"></TextView>
         <View
         	android:layout_height="2dip"
         	android:background="#FF909090" 

@@ -69,15 +69,91 @@ public class MyApp extends Application {
 		return (float) (hVal[id]);
 	}
 	
-	public String frameToHuman(int[] in)
+	public boolean parseFrame(int[] frame)
+	{
+		boolean ok=true;
+		
+		
+		switch(frame[1])
+		{
+			// Analog values
+			case 0xfe:
+				ok = parseAnalogFrame(frame);
+				break;
+			
+			default:
+				ok=false;
+				break;
+		}
+		return ok;
+	}
+	
+	public boolean parseAnalogFrame(int[] frame)
+	{
+		boolean ok=true;
+		int ad1,ad2 = -1;
+		int rssirx,rssitx=-1;
+		
+		// only do bytestuff decoding if neccessary
+		if(frame.length>11)
+		{
+			frame = frameDecode(frame);
+		}
+		ad1 = frame[2];
+		ad2 = frame[3];
+		rssirx = frame[4];
+		rssitx = (int) frame[5]/2;
+
+		
+		return ok;
+	}
+	
+	public int[] frameDecode(int[] frame)
+	{
+		if(frame.length>11)
+		{
+			int[] outFrame = new int[11];
+			
+			outFrame[0] = frame[0];
+			outFrame[1] = frame[1];
+			int xor = 0x00;
+			int i = 2;
+			
+			for(int n=2;n<frame.length;n++)
+			{
+				if(frame[n]!=0x7d)
+				{
+					outFrame[i] = frame[n]^xor;
+					i++;
+					xor = 0x00;
+				}
+				else
+				{
+					xor = 0x20;
+				}
+			}
+			
+			Log.i("FRAME decode","Pre:  "+frameToHuman(frame));
+			Log.i("FRAME decode","Post: "+frameToHuman(outFrame));
+			
+			return outFrame;
+		}
+		else
+		{
+			return frame;
+		}	
+	}
+	
+	public String frameToHuman(int[] frame)
 	{
 		StringBuffer buf = new StringBuffer();
 //		byte[] inB = new byte[in.length()];
 //		char[] inC = in.toCharArray();
 //		inB = in.getBytes();
-		for(int n=0;n<in.length;n++)
+		for(int n=0;n<frame.length;n++)
 		{
-			String hex = Integer.toHexString(in[n]);
+			String hex = Integer.toHexString(frame[n]);
+			// Need to append in case it returns 0xf etc
 			if(hex.length()==1)
 			{
 				buf.append('0');

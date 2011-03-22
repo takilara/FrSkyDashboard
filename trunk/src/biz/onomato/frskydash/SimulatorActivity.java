@@ -3,12 +3,13 @@ package biz.onomato.frskydash;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.util.Log;
 import android.widget.SeekBar;
 
-public class SimulatorActivity extends Activity implements OnSeekBarChangeListener {
+public class SimulatorActivity extends Activity implements OnSeekBarChangeListener, OnClickListener {
 	private static final String TAG = "Simulator";
 	private Channel oAd1;
     MyApp globals;
@@ -22,6 +23,10 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     private TextView rssitx_raw_tv;
     private TextView rssirx_raw_tv;
     private TextView outFrame_tv;
+    
+    private View btnSend;
+    private int[] simFrame;
+    
     
     private int ad1_raw, ad2_raw,rssitx_raw,rssirx_raw;
 	
@@ -54,6 +59,9 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         rssirx_raw_tv = (TextView) findViewById(R.id.sim_rssirxraw);
         
         outFrame_tv = (TextView) findViewById(R.id.outFrame);
+        
+        btnSend = findViewById(R.id.sim_btnSend);
+        btnSend.setOnClickListener(this);
 
         ad1_raw		= 0;
         ad2_raw		= 0;
@@ -62,6 +70,13 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         
 	}
 	
+	public void onClick(View v) {
+    	switch (v.getId()) {
+    		case R.id.sim_btnSend:
+    			globals.parseFrame(simFrame);
+    			break;
+    	}
+    }
 	
 	public void onProgressChanged(SeekBar sb,int prog,boolean from_user)
 	{
@@ -84,8 +99,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	    		rssirx_raw_tv.setText(Integer.toString(prog));
 	    		break;
 		}
-		int[] frame = genFrame();
-		outFrame_tv.setText(globals.frameToHuman(frame));
+		simFrame = genFrame();
+		outFrame_tv.setText(globals.frameToHuman(simFrame));
 	}
 	
 	public void onStartTrackingTouch(SeekBar sb)

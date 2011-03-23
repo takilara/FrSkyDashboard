@@ -1,6 +1,9 @@
 package biz.onomato.frskydash;
 
+import android.util.Log;
+
 public class Channel {
+	private static final String TAG = "Channel";
 	private int _raw;
 	private float _val;
 	private String _name;
@@ -25,13 +28,15 @@ public class Channel {
 	{
 		_raw = raw;
 		_val = _raw * _factor+_offset;
-		return _val;
+		return getValue();
 	}
 	
 	// Getters
 	public float getValue()
 	{
-		return _val;
+		
+		float tVal = Math.round(_val*100f)/100f;
+		return tVal;
 	}
 	public String getDescription()
 	{

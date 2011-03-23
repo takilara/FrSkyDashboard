@@ -68,6 +68,9 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         rssitx_raw	= 0;
         rssirx_raw 	= 0;
         
+        simFrame = genFrame();
+		outFrame_tv.setText(globals.frameToHuman(simFrame));
+        
 	}
 	
 	public void onClick(View v) {

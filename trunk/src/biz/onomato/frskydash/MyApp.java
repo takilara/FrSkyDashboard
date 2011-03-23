@@ -21,6 +21,8 @@ public class MyApp extends Application {
 	private int channels=0;
 	private Channel[] objs;
 	
+	public Channel AD1,AD2,RSSIrx,RSSItx;
+	
 	private String TAG="Globals";
 	
 	public MyApp(){
@@ -34,6 +36,17 @@ public class MyApp extends Application {
 		hLongUnit = new String[MAX_CHANNELS];
 		objs = new Channel[MAX_CHANNELS];
 
+		int tad1 = createChannel("AD1", "Main cell voltage", 0, (float) 0.1/6, "V","Volt");
+		AD1 = getChannelById(tad1);
+		
+		int tad2 = createChannel("AD2", "Receiver cell voltage", 0, (float) 0.5, "V","Volt");
+		AD2 = getChannelById(tad2);
+		
+		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
+		RSSIrx = getChannelById(trssirx);
+		
+		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
+		RSSItx = getChannelById(trssitx);
 	}
 	
 	public int createChannel(String name,String description,float offset,float factor,String unit,String longUnit)
@@ -88,8 +101,12 @@ public class MyApp extends Application {
 		return ok;
 	}
 	
+	// we know an analog frame to contain AD1,AD2,RSSItx and RSSIrx,
+	// therefore we can use the globals for these.
+	
 	public boolean parseAnalogFrame(int[] frame)
 	{
+		Log.i("Globals","Parse analog frame");
 		boolean ok=true;
 		int ad1,ad2 = -1;
 		int rssirx,rssitx=-1;
@@ -99,10 +116,10 @@ public class MyApp extends Application {
 		{
 			frame = frameDecode(frame);
 		}
-		ad1 = frame[2];
-		ad2 = frame[3];
-		rssirx = frame[4];
-		rssitx = (int) frame[5]/2;
+		AD1.setRaw(frame[2]);
+		AD2.setRaw(frame[3]);
+		RSSIrx.setRaw(frame[4]);
+		RSSItx.setRaw((int) frame[5]/2);
 
 		
 		return ok;

@@ -23,7 +23,9 @@ public class ModuleSettingsActivity extends Activity {
         
         
         TextView test = (TextView) findViewById(R.id.textView1);
-		test.setText(Float.toString(oAd1.getValue()));
+		//test.setText(Float.toString(oAd1.getValue()));
+        //test.setText(oAd1.getValue().toPlainString());
+        test.setText(oAd1.toString());
 		
         
 	}
@@ -33,6 +35,6 @@ public class ModuleSettingsActivity extends Activity {
 	{
 		super.onResume();
 		TextView test = (TextView) findViewById(R.id.textView1);
-		test.setText(Float.toString(oAd1.getValue()));
+		test.setText(oAd1.toString());
 	}
 }

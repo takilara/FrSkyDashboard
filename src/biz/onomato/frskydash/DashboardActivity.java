@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
 import java.util.Locale;
+import java.math.MathContext;
 
 
 
@@ -52,16 +53,14 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         //oAd1 = globals.getChannelById(AD1);
         oAd1 = globals.getChannelById(0);
         
-        Float newVal = globals.AD1.setRaw(50);
-        
+       
         
         tv_ad1_val = (TextView) findViewById(R.id.ad1Value);
         tv_ad2_val = (TextView) findViewById(R.id.ad2Value);
         tv_rssitx_val = (TextView) findViewById(R.id.rssitxValue);
         tv_rssirx_val = (TextView) findViewById(R.id.rssirxValue);
         
-        tv_ad1_val.setText(Float.toString(newVal));
-        
+   
         
         // Click Listeners
         View btnTest1 = findViewById(R.id.btnTest1);
@@ -88,11 +87,14 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
 			public void run()
 			{
 				//Log.i(TAG,"Update GUI");
-		    	tv_ad1_val.setText(Float.toString(globals.AD1.getValue()));
-		    	tv_ad2_val.setText(Float.toString(globals.AD2.getValue()));
-		    	tv_rssitx_val.setText(Float.toString(globals.RSSItx.getValue()));
-		    	tv_rssirx_val.setText(Float.toString(globals.RSSIrx.getValue()));
-		    	
+		    	tv_ad1_val.setText(globals.AD1.toString());
+		    	tv_ad2_val.setText(globals.AD2.toString());
+		    	tv_rssitx_val.setText(globals.RSSItx.toString());
+		    	tv_rssirx_val.setText(globals.RSSIrx.toString());
+				
+				
+				
+				
 				tickHandler.postDelayed(this, 100);
 			}
 		};
@@ -158,8 +160,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	switch (v.getId()) {
     	case R.id.btnTest1:
     		Log.i(TAG,"Clicked Test");
-    		tv_ad1_val.setText(Float.toString(globals.AD1.setRaw(10)));
-    		//ad1Val.setText("3.5");
+    		tv_ad1_val.setText(globals.AD1.toString());
     		break;
     	case R.id.btnTest2:
     		Log.i(TAG,"Switch activity");
@@ -168,7 +169,8 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     		break;
     	case R.id.btnSpeak:
     		Log.i(TAG,"SPEAK something");
-    		saySomething(globals.AD1.getDescription()+": "+Float.toString(globals.AD1.getValue())+" "+globals.AD1.getLongUnit());
+    		//saySomething(globals.AD1.getDescription()+": "+Float.toString(globals.AD1.getValue())+" "+globals.AD1.getLongUnit());
+    		saySomething(globals.AD1.getDescription()+": "+globals.AD1.toString()+" "+globals.AD1.getLongUnit());
     		break;
     	}
     	

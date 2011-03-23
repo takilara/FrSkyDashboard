@@ -8,14 +8,15 @@ import java.util.Locale;
 
 
 
+
 public class MyApp extends Application {
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
-	private float[] hVal;
+	private double[] hVal;
 	private String[] hName;
 	private String[] hDescription;
-	private float[] hOffset;
-	private float[] hFactor;
+	private double[] hOffset;
+	private double[] hFactor;
 	private String[] hUnit;
 	private String[] hLongUnit;
 	private int channels=0;
@@ -27,19 +28,19 @@ public class MyApp extends Application {
 	
 	public MyApp(){
 		hRaw = new int[MAX_CHANNELS];
-		hVal = new float[MAX_CHANNELS];
+		hVal = new double[MAX_CHANNELS];
 		hName = new String[MAX_CHANNELS];
 		hDescription = new String[MAX_CHANNELS];
-		hOffset = new float[MAX_CHANNELS];
-		hFactor = new float[MAX_CHANNELS];
+		hOffset = new double[MAX_CHANNELS];
+		hFactor = new double[MAX_CHANNELS];
 		hUnit = new String[MAX_CHANNELS];
 		hLongUnit = new String[MAX_CHANNELS];
 		objs = new Channel[MAX_CHANNELS];
 
-		int tad1 = createChannel("AD1", "Main cell voltage", 0, (float) 0.1/6, "V","Volt");
+		int tad1 = createChannel("AD1", "Main cell voltage", 0, (double) 0.1/6, "V","Volt");
 		AD1 = getChannelById(tad1);
 		
-		int tad2 = createChannel("AD2", "Receiver cell voltage", 0, (float) 0.5, "V","Volt");
+		int tad2 = createChannel("AD2", "Receiver cell voltage", 0, (double) 0.5, "V","Volt");
 		AD2 = getChannelById(tad2);
 		
 		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
@@ -49,7 +50,7 @@ public class MyApp extends Application {
 		RSSItx = getChannelById(trssitx);
 	}
 	
-	public int createChannel(String name,String description,float offset,float factor,String unit,String longUnit)
+	public int createChannel(String name,String description,double offset,double factor,String unit,String longUnit)
 	{
 		Channel AD1 =  new Channel(name, description, offset, factor, unit, longUnit);
 		objs[channels] = AD1;
@@ -72,14 +73,14 @@ public class MyApp extends Application {
 	}
 	
 	
-	public float setChannelById(int id,int rawVal)
+	public double setChannelById(int id,int rawVal)
 	{
 		objs[id].setRaw(rawVal);
 		
 		Log.i("MyApp","Set channel to some value");
 		hRaw[id] = rawVal;
 		hVal[id]=hRaw[id]*hFactor[id]+hOffset[id];
-		return (float) (hVal[id]);
+		return (double) (hVal[id]);
 	}
 	
 	public boolean parseFrame(int[] frame)

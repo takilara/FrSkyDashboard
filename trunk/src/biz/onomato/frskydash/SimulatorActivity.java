@@ -8,8 +8,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.util.Log;
 import android.widget.SeekBar;
-import java.util.TimerTask;
-import java.util.Timer;
 import android.os.Handler;
 import java.lang.Runnable;
 

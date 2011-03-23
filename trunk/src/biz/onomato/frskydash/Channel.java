@@ -1,18 +1,22 @@
 package biz.onomato.frskydash;
 
 import android.util.Log;
+import java.math.MathContext;
+
 
 public class Channel {
 	private static final String TAG = "Channel";
 	private int _raw;
-	private float _val;
+	private double _val;
 	private String _name;
 	private String _description;
-	private float _offset;
-	private float _factor;
+	private double _offset;
+	private double _factor;
+	private int _precision;
 	private String _unit;
 	private String _longUnit;
-	public Channel(String name,String description,float offset,float factor,String unit,String longUnit)
+	private MathContext _mc;
+	public Channel(String name,String description,double offset,double factor,String unit,String longUnit)
 	{
 		_raw=-1;
 		_val=-1;
@@ -22,22 +26,34 @@ public class Channel {
 		_factor = factor;
 		_unit = unit;
 		_longUnit = longUnit;
+		_mc = new MathContext(2);
+		_precision = 2;
 	}
 	
-	public float setRaw(int raw)
+	public double setRaw(int raw)
 	{
 		_raw = raw;
 		_val = _raw * _factor+_offset;
 		return getValue();
 	}
 	
-	// Getters
-	public float getValue()
+	public void setPrecision(int precision)
 	{
-		
-		float tVal = Math.round(_val*100f)/100f;
+		_precision = precision;
+	}
+	
+	// Getters
+	public double getValue()
+	{
+		double tVal = Math.round(_val*100f)/100f;
 		return tVal;
 	}
+	
+	public String toString()
+	{
+		return String.format("%."+_precision+"f", getValue());
+	}
+	
 	public String getDescription()
 	{
 		return _description;

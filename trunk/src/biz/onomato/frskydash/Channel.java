@@ -66,5 +66,10 @@ public class Channel {
 	{
 		return _longUnit;
 	}
+	
+	public String toVoiceString()
+	{
+		return getDescription()+": "+toString()+" "+getLongUnit();
+	}
 
 }

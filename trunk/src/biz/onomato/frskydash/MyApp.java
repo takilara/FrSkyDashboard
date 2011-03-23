@@ -42,12 +42,15 @@ public class MyApp extends Application {
 		
 		int tad2 = createChannel("AD2", "Receiver cell voltage", 0, (double) 0.5, "V","Volt");
 		AD2 = getChannelById(tad2);
+		AD2.setPrecision(1);
 		
 		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
 		RSSIrx = getChannelById(trssirx);
+		RSSIrx.setPrecision(0);
 		
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
+		RSSItx.setPrecision(0);
 	}
 	
 	public int createChannel(String name,String description,double offset,double factor,String unit,String longUnit)

@@ -23,7 +23,7 @@ public class MyApp extends Application {
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
-	private String TAG="Globals";
+	private static final String TAG="Globals";
 	
 	public MyApp(){
 		hRaw = new int[MAX_CHANNELS];
@@ -106,7 +106,7 @@ public class MyApp extends Application {
 	
 	public boolean parseAnalogFrame(int[] frame)
 	{
-		Log.i("Globals","Parse analog frame");
+		//Log.i("Globals","Parse analog frame");
 		boolean ok=true;
 		int ad1,ad2 = -1;
 		int rssirx,rssitx=-1;

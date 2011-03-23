@@ -8,6 +8,10 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.util.Log;
 import android.widget.SeekBar;
+import java.util.TimerTask;
+import java.util.Timer;
+import android.os.Handler;
+import java.lang.Runnable;
 
 public class SimulatorActivity extends Activity implements OnSeekBarChangeListener, OnClickListener {
 	private static final String TAG = "Simulator";
@@ -23,9 +27,15 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     private TextView rssitx_raw_tv;
     private TextView rssirx_raw_tv;
     private TextView outFrame_tv;
+    private boolean _simEnabled;
     
     private View btnSend;
+    private View btnSimTgl;
     private int[] simFrame;
+    
+ 
+    private Handler tickHandler;
+    private Runnable runnableTick;
     
     
     private int ad1_raw, ad2_raw,rssitx_raw,rssirx_raw;
@@ -33,6 +43,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		_simEnabled=false;
 		setContentView(R.layout.activity_simulator);
 		
 		globals = ((MyApp)getApplicationContext());
@@ -63,6 +74,9 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         btnSend = findViewById(R.id.sim_btnSend);
         btnSend.setOnClickListener(this);
 
+        btnSimTgl = findViewById(R.id.sim_tglBtn1);
+        btnSimTgl.setOnClickListener(this);
+        
         ad1_raw		= 0;
         ad2_raw		= 0;
         rssitx_raw	= 0;
@@ -70,14 +84,47 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         
         simFrame = genFrame();
 		outFrame_tv.setText(globals.frameToHuman(simFrame));
+		
+		tickHandler = new Handler();
+		
+		runnableTick = new Runnable() {
+			@Override
+			public void run()
+			{
+				sb_ad1.setProgress(sb_ad1.getProgress()+1);
+				if(sb_ad1.getProgress()>=255) {sb_ad1.setProgress(0);}
+				
+				sb_ad2.setProgress(sb_ad2.getProgress()-1);
+				if(sb_ad2.getProgress()<=0) {sb_ad2.setProgress(255);}
+				
+				//Log.i("SIM","Automatic post new frame");
+				
+				simFrame = genFrame();
+				//outFrame_tv.setText(globals.frameToHuman(simFrame));
+				globals.parseFrame(simFrame);
+				tickHandler.postDelayed(this, 30);
+			}
+		};
+		
+		
         
 	}
 	
 	public void onClick(View v) {
+		//Log.i(TAG,"Some button clicked");
     	switch (v.getId()) {
     		case R.id.sim_btnSend:
     			globals.parseFrame(simFrame);
     			break;
+    		case R.id.sim_tglBtn1:
+    			_simEnabled = !_simEnabled;
+    			if(_simEnabled){
+    				tickHandler.post(runnableTick);
+    			}
+    			else
+    			{
+    				tickHandler.removeCallbacks(runnableTick);
+    			}
     	}
     }
 	
@@ -164,5 +211,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		
 		return outBuf;
 	}
+	
+	// task testing
+	
 	
 }

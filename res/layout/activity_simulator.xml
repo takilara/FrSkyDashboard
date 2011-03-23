@@ -35,5 +35,6 @@
         	android:background="#FF909090" 
         	android:layout_width="match_parent" />
         <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/sim_btnSend" android:text="Send"></Button>
+        <ToggleButton android:text="Continous" android:id="@+id/sim_tglBtn1" android:layout_width="match_parent" android:textOn="Cyclic Sim On" android:textOff="Cyclic Sim Off" android:layout_height="wrap_content"></ToggleButton>
         
     </LinearLayout>

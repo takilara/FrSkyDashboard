@@ -61,15 +61,16 @@
     	android:layout_marginBottom="1dip" 
     	android:gravity="bottom" 
     	android:layout_gravity="bottom">
-    	<Button android:text="Talk" android:id="@+id/btnSpeak" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-        <Button android:text="Module Settings" android:id="@+id/btnTest2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-        <Button android:text="Test" android:id="@+id/btnTest1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	<Button android:text="Talk" android:id="@+id/btnSpeak" android:layout_width="wrap_content" android:layout_height="40dip"></Button>
+    	<ToggleButton android:textOn="Cyclic Speaker On" android:textOff="Cyclic Speaker Off" android:id="@+id/dash_tglSpeak" android:layout_width="wrap_content" android:text="ToggleButton" android:layout_height="40dip"></ToggleButton>
+        <Button android:text="Module Settings" android:id="@+id/btnTest2" android:layout_width="wrap_content" android:layout_height="40dip"></Button>
+        <Button android:text="Test" android:id="@+id/btnTest1" android:layout_width="wrap_content" android:layout_height="40dip"></Button>
     	<View
         	android:layout_height="2dip"
         	android:background="#FF909090" />
         <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:text="@string/RSSItx" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" android:layout_gravity="bottom"/>
-            <TextView android:text="@string/RSSItx" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
+            <TextView android:text="@string/RSSIrx" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
         </TableRow>
         <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:text="0" android:id="@+id/rssitxValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />

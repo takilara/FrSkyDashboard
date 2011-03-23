@@ -123,6 +123,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     			{
     				tickHandler.removeCallbacks(runnableTick);
     			}
+    			break;
     	}
     }
 	

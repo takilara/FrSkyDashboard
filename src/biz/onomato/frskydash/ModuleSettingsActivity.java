@@ -27,4 +27,12 @@ public class ModuleSettingsActivity extends Activity {
 		
         
 	}
+	
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		TextView test = (TextView) findViewById(R.id.textView1);
+		test.setText(Float.toString(oAd1.getValue()));
+	}
 }

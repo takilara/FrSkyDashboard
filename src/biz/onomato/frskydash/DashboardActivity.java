@@ -23,6 +23,8 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     private Channel oAd1;
     MyApp globals;
     
+    private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val;
+    
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,10 +47,15 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         //oAd1 = globals.getChannelById(AD1);
         oAd1 = globals.getChannelById(0);
         
-        Float newVal = oAd1.setRaw(50);
+        Float newVal = globals.AD1.setRaw(50);
         
-        TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
-		ad1Val.setText(Float.toString(newVal));
+        
+        tv_ad1_val = (TextView) findViewById(R.id.ad1Value);
+        tv_ad2_val = (TextView) findViewById(R.id.ad2Value);
+        tv_rssitx_val = (TextView) findViewById(R.id.rssitxValue);
+        tv_rssirx_val = (TextView) findViewById(R.id.rssirxValue);
+        
+        tv_ad1_val.setText(Float.toString(newVal));
         
         
         // Click Listeners
@@ -66,6 +73,16 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         mTts = new TextToSpeech(globals,
         		this //TextToSpeech.OnInitListener
         		);
+    }
+    
+    @Override
+    public void onResume (){
+    	super.onResume();
+    	
+    	tv_ad1_val.setText(Float.toString(globals.AD1.getValue()));
+    	tv_ad2_val.setText(Float.toString(globals.AD2.getValue()));
+    	tv_rssitx_val.setText(Float.toString(globals.RSSItx.getValue()));
+    	tv_rssirx_val.setText(Float.toString(globals.RSSIrx.getValue()));
     }
     
     public void onInit(int status) {
@@ -108,11 +125,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	switch (v.getId()) {
     	case R.id.btnTest1:
     		Log.i(TAG,"Clicked Test");
-    		TextView ad1Val = (TextView) findViewById(R.id.ad1Value);
-    		//float newVal = globals.setChannelById(AD1, 100);
-    		Float newVal = oAd1.setRaw(10);
-    		ad1Val.setText(Float.toString(newVal));
-    		
+    		tv_ad1_val.setText(Float.toString(globals.AD1.setRaw(10)));
     		//ad1Val.setText("3.5");
     		break;
     	case R.id.btnTest2:
@@ -122,7 +135,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     		break;
     	case R.id.btnSpeak:
     		Log.i(TAG,"SPEAK something");
-    		saySomething(oAd1.getDescription()+": "+Float.toString(oAd1.getValue())+" "+oAd1.getLongUnit());
+    		saySomething(globals.AD1.getDescription()+": "+Float.toString(globals.AD1.getValue())+" "+globals.AD1.getLongUnit());
     		break;
     	}
     	

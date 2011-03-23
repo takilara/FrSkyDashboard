@@ -28,7 +28,8 @@ public class Frskydash extends TabActivity {
         
         // Do any globals
         globals = ((MyApp)getApplicationContext());
-        globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
+        
+        //globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
         
         Resources res = getResources(); // Resource object to get Drawables
         TabHost tabHost = getTabHost();  // The activity TabHost

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.speech.tts.TextToSpeech;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.TextView;
 import java.util.Locale;
 
@@ -21,6 +22,10 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     private int AD1;
     private int AD2;
     private Channel oAd1;
+    
+    private Handler tickHandler;
+    private Runnable runnableTick;
+    
     MyApp globals;
     
     private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val;
@@ -73,17 +78,45 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         mTts = new TextToSpeech(globals,
         		this //TextToSpeech.OnInitListener
         		);
+        
+        
+        // Code to update GUI cyclic
+        tickHandler = new Handler();
+		tickHandler.postDelayed(runnableTick, 100);
+		runnableTick = new Runnable() {
+			@Override
+			public void run()
+			{
+				//Log.i(TAG,"Update GUI");
+		    	tv_ad1_val.setText(Float.toString(globals.AD1.getValue()));
+		    	tv_ad2_val.setText(Float.toString(globals.AD2.getValue()));
+		    	tv_rssitx_val.setText(Float.toString(globals.RSSItx.getValue()));
+		    	tv_rssirx_val.setText(Float.toString(globals.RSSIrx.getValue()));
+		    	
+				tickHandler.postDelayed(this, 100);
+			}
+		};
     }
+    
+    
     
     @Override
     public void onResume (){
     	super.onResume();
     	
-    	tv_ad1_val.setText(Float.toString(globals.AD1.getValue()));
-    	tv_ad2_val.setText(Float.toString(globals.AD2.getValue()));
-    	tv_rssitx_val.setText(Float.toString(globals.RSSItx.getValue()));
-    	tv_rssirx_val.setText(Float.toString(globals.RSSIrx.getValue()));
+    	// enable updates
+    	Log.i(TAG,"Resume");
+    	tickHandler.post(runnableTick);
+    	
     }
+    
+    @Override
+    public void onPause(){
+    	super.onPause();
+    	Log.i(TAG,"Pause");
+    	tickHandler.removeCallbacks(runnableTick);
+    }
+    
     
     public void onInit(int status) {
     	Log.i(TAG,"TTS init");

@@ -244,7 +244,9 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     @Override
     public void onDestroy(){
     	//mTts.stop();
-    	//mTts.shutdown();
+    	_cyclicSpeakEnabled=false;
+    	speakHandler.removeCallbacks(runnableSpeaker);
+    	mTts.shutdown();
     	super.onDestroy();
     }
     

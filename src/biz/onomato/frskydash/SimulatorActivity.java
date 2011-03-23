@@ -211,6 +211,12 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		return outBuf;
 	}
 	
+	public void onDestroy(){
+    	//mTts.stop();
+		_simEnabled = false;
+		tickHandler.removeCallbacks(runnableTick);
+       	super.onDestroy();
+    }
 	// task testing
 	
 	

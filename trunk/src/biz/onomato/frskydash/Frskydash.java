@@ -20,14 +20,22 @@ public class Frskydash extends TabActivity {
 	private static final String TAG = "Tab Host"; 
     MyApp globals;
     
+    private SimulatorService mSimService;
+    
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG,"onCreate");
         setContentView(R.layout.main);
+        
+        
         
         // Do any globals
         globals = ((MyApp)getApplicationContext());
+        
+        
+
         
         //globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
         
@@ -79,6 +87,38 @@ public class Frskydash extends TabActivity {
         tabHost.setCurrentTab(0);
 
     }
+    
+    @Override
+    public void onBackPressed() {
+    	Log.i(TAG,"Back pressed");
+    	return;
+    }
+    
+    public void onDestroy(){
+    	super.onDestroy();
+    	//mTts.stop();
+    	Log.i(TAG,"onDestroy");
+    }
+    
+    public void onPause(){
+    	super.onPause();
+    	//mTts.stop();
+    	Log.i(TAG,"onPause");
+    }
+    
+    public void onResume(){
+    	super.onResume();
+    	//mTts.stop();
+    	Log.i(TAG,"onResume");
+    }
+    
+    public void onStop(){
+    	super.onStop();
+    	//mTts.stop();
+    	Log.i(TAG,"onStop");
+    }
+
+    
     
         
    

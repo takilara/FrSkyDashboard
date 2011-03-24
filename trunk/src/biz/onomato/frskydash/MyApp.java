@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import android.app.Application;
+import android.content.Intent;
 import android.util.Log;
 import java.util.HashMap;
 import java.util.Locale;
@@ -10,8 +11,10 @@ import java.util.Locale;
 
 
 public class MyApp extends Application {
+	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
+	
 	private double[] hVal;
 	private String[] hName;
 	private String[] hDescription;
@@ -24,9 +27,10 @@ public class MyApp extends Application {
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
-	private static final String TAG="Globals";
+	private static final String TAG="Application";
 	
 	public MyApp(){
+		Log.i(TAG,"Creator");
 		hRaw = new int[MAX_CHANNELS];
 		hVal = new double[MAX_CHANNELS];
 		hName = new String[MAX_CHANNELS];
@@ -51,7 +55,16 @@ public class MyApp extends Application {
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
+		
+		
+		
+        // launch simulator service
+        //Intent svc = new Intent(this, SimulatorService.class);
+        //startService(svc);
+		
 	}
+	
+
 	
 	public int createChannel(String name,String description,double offset,double factor,String unit,String longUnit)
 	{

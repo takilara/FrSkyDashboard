@@ -45,7 +45,14 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG,"onCreate");
         setContentView(R.layout.activity_dashboard);
+        try {
+        	speakHandler.removeCallbacks(runnableSpeaker);
+        }
+        catch(Exception e) {
+        }
+        finally {}
         
         
         Intent checkIntent = new Intent();
@@ -91,6 +98,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         
         btnTglSpeak = findViewById(R.id.dash_tglSpeak);
         btnTglSpeak.setOnClickListener(this);
+        btnTglSpeak.setPressed(_cyclicSpeakEnabled);
         
         
         
@@ -124,7 +132,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
 				mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 				mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 				
-
+				speakHandler.removeCallbacks(runnableSpeaker);
 		    	speakHandler.postDelayed(this, _speakDelay);
 			}
 		};
@@ -141,16 +149,22 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	super.onResume();
     	
     	// enable updates
-    	Log.i(TAG,"Resume");
+    	Log.i(TAG,"onResume");
+    	
     	tickHandler.post(runnableTick);
     	//speakHandler.postDelayed(runnableSpeaker, 20000);
     	
+    	speakHandler.removeCallbacks(runnableSpeaker);
+    	if(_cyclicSpeakEnabled)
+    	{
+    		speakHandler.postDelayed(runnableSpeaker,_speakDelay);
+    	}
     }
     
     @Override
     public void onPause(){
     	super.onPause();
-    	Log.i(TAG,"Pause");
+    	Log.i(TAG,"onPause");
     	tickHandler.removeCallbacks(runnableTick);
     	//speakHandler.removeCallbacks(runnableSpeaker);
     }
@@ -212,11 +226,14 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	case R.id.dash_tglSpeak:
 			_cyclicSpeakEnabled = !_cyclicSpeakEnabled;
 			if(_cyclicSpeakEnabled){
+				Log.i(TAG,"Enable cyclic speaker");
+				speakHandler.removeCallbacks(runnableSpeaker);
 				speakHandler.post(runnableSpeaker);
 				//speakHandler.postDelayed(runnableSpeaker, _speakDelay);
 			}
 			else
 			{
+				Log.i(TAG,"Disable cyclic speaker");
 				speakHandler.removeCallbacks(runnableSpeaker);
 			}
 			break;
@@ -242,14 +259,38 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     }
     
     @Override
-    public void onDestroy(){
-    	//mTts.stop();
+    public void onBackPressed() {
+    	Log.i(TAG,"Back pressed");
+    	
+    	// Stop speaker
     	_cyclicSpeakEnabled=false;
     	speakHandler.removeCallbacks(runnableSpeaker);
     	mTts.shutdown();
-    	super.onDestroy();
+    	
+ 	
+    	this.finish();
+    	return;
     }
     
+    @Override
+    public void onDestroy(){
+    	//mTts.stop();
+    	Log.i(TAG,"onDestroy");
+    	super.onDestroy();
+    	_cyclicSpeakEnabled=false;
+    	speakHandler.removeCallbacks(runnableSpeaker);
+    	mTts.shutdown();
+    	
+    }
+    
+    
+    
+    
+    public void onStop(){
+    	super.onStop();
+    	//mTts.stop();
+    	Log.i(TAG,"onStop");
+    }
     
 }
 

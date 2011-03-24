@@ -41,6 +41,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.i(TAG,"onCreate");
 		_simEnabled=false;
 		setContentView(R.layout.activity_simulator);
 		
@@ -100,6 +101,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 				simFrame = genFrame();
 				//outFrame_tv.setText(globals.frameToHuman(simFrame));
 				globals.parseFrame(simFrame);
+				
+				tickHandler.removeCallbacks(runnableTick);
 				tickHandler.postDelayed(this, 30);
 			}
 		};
@@ -117,6 +120,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     		case R.id.sim_tglBtn1:
     			_simEnabled = !_simEnabled;
     			if(_simEnabled){
+    				tickHandler.removeCallbacks(runnableTick);
     				tickHandler.post(runnableTick);
     			}
     			else
@@ -212,12 +216,40 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	}
 	
 	public void onDestroy(){
-    	//mTts.stop();
+		super.onDestroy();
+		Log.i(TAG,"onDestroy");
+		//mTts.stop();
 		_simEnabled = false;
 		tickHandler.removeCallbacks(runnableTick);
-       	super.onDestroy();
+       	
     }
 	// task testing
 	
+
+    public void onBackPressed(){
+    	Log.i(TAG,"Back pressed");
+		_simEnabled = false;
+		tickHandler.removeCallbacks(runnableTick);
+    	this.finish();
+    }
 	
+    public void onPause(){
+    	
+    	super.onPause();
+    	//mTts.stop();
+    	Log.i(TAG,"onPause");
+    }
+    
+    public void onResume(){
+    	super.onResume();
+    	//mTts.stop();
+    	Log.i(TAG,"onResume");
+    	btnSimTgl.setPressed(_simEnabled);
+    }
+    
+    public void onStop(){
+    	super.onStop();
+    	//mTts.stop();
+    	Log.i(TAG,"onStop");
+    }
 }

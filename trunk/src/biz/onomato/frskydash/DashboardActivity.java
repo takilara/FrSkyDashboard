@@ -10,6 +10,8 @@ import android.speech.tts.TextToSpeech;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+
 import java.util.Locale;
 import java.math.MathContext;
 
@@ -28,17 +30,15 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     private Handler tickHandler;
     private Runnable runnableTick;
     
-    // Used for Cyclic speak
-    private Handler speakHandler;
-    private Runnable runnableSpeaker;
     
-    private int _speakDelay;
+	// Used for Cyclic speak
+
     private int MY_DATA_CHECK_CODE;
     
     MyApp globals;
     
     private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val;
-    private View btnTglSpeak;
+    private ToggleButton btnTglSpeak;
     private boolean _cyclicSpeakEnabled;
     
 	/** Called when the activity is first created. */
@@ -47,38 +47,29 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         super.onCreate(savedInstanceState);
         Log.i(TAG,"onCreate");
         setContentView(R.layout.activity_dashboard);
-        try {
-        	speakHandler.removeCallbacks(runnableSpeaker);
-        }
-        catch(Exception e) {
-        }
-        finally {}
         
-        
-        Intent checkIntent = new Intent();
-        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
-        
-        
-        _cyclicSpeakEnabled = false;
-        _speakDelay = 30000;
         //Activity parent = getParent();
         //Context context = (parent == null ? this : parent);
         
-
+		
+        
+        // Check for TTS
+        Intent checkSpeakIntent = new Intent();
+        checkSpeakIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkSpeakIntent, MY_DATA_CHECK_CODE);
+        
+        
+        
+        
         
         // Fetch globals:
-        //MyApp appState = ((MyApp)getApplicationContext());
-        //globals = (MyApp) this.getApplication();
         globals = ((MyApp)getApplicationContext());
 
-        //AD1 = globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
-        
         //oAd1 = globals.getChannelById(AD1);
         oAd1 = globals.getChannelById(0);
         
        
-        
+        // Setup the form items        
         tv_ad1_val = (TextView) findViewById(R.id.ad1Value);
         tv_ad2_val = (TextView) findViewById(R.id.ad2Value);
         tv_rssitx_val = (TextView) findViewById(R.id.rssitxValue);
@@ -86,7 +77,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         
    
         
-        // Click Listeners
+        // Setup Click Listeners
         View btnTest1 = findViewById(R.id.btnTest1);
         btnTest1.setOnClickListener(this);
         
@@ -96,9 +87,9 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         View btnSpeak = findViewById(R.id.btnSpeak);
         btnSpeak.setOnClickListener(this);
         
-        btnTglSpeak = findViewById(R.id.dash_tglSpeak);
+        btnTglSpeak = (ToggleButton) findViewById(R.id.dash_tglSpeak);
         btnTglSpeak.setOnClickListener(this);
-        btnTglSpeak.setPressed(_cyclicSpeakEnabled);
+        btnTglSpeak.setChecked(globals.getCyclicSpeechEnabled());
         
         
         
@@ -118,27 +109,6 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
 		    	tickHandler.postDelayed(this, 100);
 			}
 		};
-		
-		// Cyclic speaker
-        speakHandler = new Handler();
-		
-		runnableSpeaker = new Runnable() {
-			@Override
-			public void run()
-			{
-				Log.i(TAG,"Cyclic Speak stuff");
-				mTts.speak(globals.AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				mTts.speak(globals.AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				
-				speakHandler.removeCallbacks(runnableSpeaker);
-		    	speakHandler.postDelayed(this, _speakDelay);
-			}
-		};
-		
-		
-		//speakHandler.postDelayed(runnableSpeaker, _speakDelay);
 
     }
     
@@ -154,11 +124,6 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	tickHandler.post(runnableTick);
     	//speakHandler.postDelayed(runnableSpeaker, 20000);
     	
-    	speakHandler.removeCallbacks(runnableSpeaker);
-    	if(_cyclicSpeakEnabled)
-    	{
-    		speakHandler.postDelayed(runnableSpeaker,_speakDelay);
-    	}
     }
     
     @Override
@@ -170,6 +135,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     }
     
     
+    // Used to 
     public void onInit(int status) {
     	Log.i(TAG,"TTS init");
     	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
@@ -196,15 +162,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	}
     }
     
-    private void sayHello() {
-    	String myGreeting = "Text to Speech now enabled.";
-    	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
-    }
     
-    private void saySomething(String myText) {
-    	mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
-    	//globals.saySomething(myText);
-    }
     
     public void onClick(View v) {
     	switch (v.getId()) {
@@ -220,24 +178,12 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     		break;
     	case R.id.btnSpeak:
     		Log.i(TAG,"SPEAK something");
-    		saySomething(globals.AD1.toVoiceString());
+    		globals.saySomething(globals.AD1.toVoiceString());
     		break;
     	
     	case R.id.dash_tglSpeak:
-			_cyclicSpeakEnabled = !_cyclicSpeakEnabled;
-			if(_cyclicSpeakEnabled){
-				Log.i(TAG,"Enable cyclic speaker");
-				speakHandler.removeCallbacks(runnableSpeaker);
-				speakHandler.post(runnableSpeaker);
-				//speakHandler.postDelayed(runnableSpeaker, _speakDelay);
-			}
-			else
-			{
-				Log.i(TAG,"Disable cyclic speaker");
-				speakHandler.removeCallbacks(runnableSpeaker);
-			}
+    		globals.setCyclicSpeech(btnTglSpeak.isChecked());
 			break;
-	    	
 	    }
     }
     
@@ -246,8 +192,11 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 // success, create the TTS instance
-                mTts = new TextToSpeech(globals, this);
-                sayHello();
+                //mTts = new TextToSpeech(globals, this);
+                
+                mTts = globals.createSpeaker();
+                
+                //sayHello();
             } else {
                 // missing data, install it
                 Intent installIntent = new Intent();
@@ -262,11 +211,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     public void onBackPressed() {
     	Log.i(TAG,"Back pressed");
     	
-    	// Stop speaker
-    	_cyclicSpeakEnabled=false;
-    	speakHandler.removeCallbacks(runnableSpeaker);
-    	mTts.shutdown();
-    	
+    	globals.die();
  	
     	this.finish();
     	return;
@@ -277,9 +222,6 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	//mTts.stop();
     	Log.i(TAG,"onDestroy");
     	super.onDestroy();
-    	_cyclicSpeakEnabled=false;
-    	speakHandler.removeCallbacks(runnableSpeaker);
-    	mTts.shutdown();
     	
     }
     

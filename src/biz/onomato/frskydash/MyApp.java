@@ -2,6 +2,9 @@ package biz.onomato.frskydash;
 
 import android.app.Application;
 import android.content.Intent;
+import android.os.Handler;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import java.util.HashMap;
 import java.util.Locale;
@@ -10,7 +13,7 @@ import java.util.Locale;
 
 
 
-public class MyApp extends Application {
+public class MyApp extends Application implements OnInitListener {
 	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
@@ -28,6 +31,14 @@ public class MyApp extends Application {
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
 	private static final String TAG="Application";
+	
+	private TextToSpeech mTts;
+    private Handler speakHandler;
+    private Runnable runnableSpeaker;
+    private int _speakDelay;
+    private boolean _cyclicSpeechEnabled;
+
+	
 	
 	public MyApp(){
 		Log.i(TAG,"Creator");
@@ -55,16 +66,111 @@ public class MyApp extends Application {
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
-		
+		_cyclicSpeechEnabled = false;
 		
 		
         // launch simulator service
         //Intent svc = new Intent(this, SimulatorService.class);
         //startService(svc);
 		
+		// Cyclic speak stuff
+		_speakDelay = 30000;
+        speakHandler = new Handler();
+		runnableSpeaker = new Runnable() {
+			@Override
+			public void run()
+			{
+				Log.i(TAG,"Cyclic Speak stuff");
+				mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				
+				speakHandler.removeCallbacks(runnableSpeaker);
+		    	speakHandler.postDelayed(this, _speakDelay);
+			}
+		};
+
+		
+	}
+
+	@Override
+	public void onCreate()
+	{
+		Log.i(TAG,"onCreate");
 	}
 	
+	public void startCyclicSpeaker()
+	{
+		// Stop it before starting it
+		Log.i(TAG,"Start Cyclic Speaker");
+		speakHandler.removeCallbacks(runnableSpeaker);
+		speakHandler.post(runnableSpeaker);
+		_cyclicSpeechEnabled = true;
+	}
+	public void stopCyclicSpeaker()
+	{
+		Log.i(TAG,"Stop Cyclic Speaker");
+		speakHandler.removeCallbacks(runnableSpeaker);
+		mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
+		_cyclicSpeechEnabled = false;
+	}
 
+	public boolean getCyclicSpeechEnabled()
+	{
+		return _cyclicSpeechEnabled;
+	}
+	
+	public void setCyclicSpeech(boolean state)
+	{
+		_cyclicSpeechEnabled = state;
+		if(_cyclicSpeechEnabled)
+		{
+			startCyclicSpeaker();
+		}
+		else
+		{
+			stopCyclicSpeaker();
+		}
+	}
+	
+	public TextToSpeech createSpeaker()
+	{
+		mTts = new TextToSpeech(this, this);
+		return mTts;
+	}
+	
+	public void onInit(int status) {
+    	Log.i(TAG,"TTS init");
+    	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
+    	if (status == TextToSpeech.SUCCESS) {
+    	int result = mTts.setLanguage(Locale.US);
+    	if (result == TextToSpeech.LANG_MISSING_DATA ||
+    	result == TextToSpeech.LANG_NOT_SUPPORTED) {
+    	// Lanuage data is missing or the language is not supported.
+    	Log.e(TAG, "Language is not available.");
+    	} else {
+    	// Check the documentation for other possible result codes.
+    	// For example, the language may be available for the locale,
+    	// but not for the specified country and variant.
+    	// The TTS engine has been successfully initialized.
+    	// Allow the user to press the button for the app to speak again.
+    	
+    	// Greet the user.
+    		String myGreeting = "Application has enabled Text to Speech";
+        	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
+    	}
+    	} else {
+    	// Initialization failed.
+    	Log.i(TAG,"Something wrong with TTS");
+    	Log.e(TAG, "Could not initialize TextToSpeech.");
+    	}
+    }
+	
+	public void saySomething(String myText)
+	{
+		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
+	}
 	
 	public int createChannel(String name,String description,double offset,double factor,String unit,String longUnit)
 	{
@@ -199,6 +305,12 @@ public class MyApp extends Application {
 		return out;
 	}
 	    
+	// perform any cleanup
+	public void die()
+	{
+		stopCyclicSpeaker();
+		mTts.shutdown();
+	}
 
 }
 

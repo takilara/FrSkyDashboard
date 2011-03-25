@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 import android.util.Log;
 import android.widget.SeekBar;
 import android.os.Handler;
@@ -28,7 +29,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     private boolean _simEnabled;
     
     private View btnSend;
-    private View btnSimTgl;
+    private ToggleButton btnSimTgl;
     private int[] simFrame;
     
  
@@ -73,7 +74,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         btnSend = findViewById(R.id.sim_btnSend);
         btnSend.setOnClickListener(this);
 
-        btnSimTgl = findViewById(R.id.sim_tglBtn1);
+        btnSimTgl = (ToggleButton) findViewById(R.id.sim_tglBtn1);
         btnSimTgl.setOnClickListener(this);
         
         ad1_raw		= 0;
@@ -118,7 +119,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     			globals.parseFrame(simFrame);
     			break;
     		case R.id.sim_tglBtn1:
-    			_simEnabled = !_simEnabled;
+    			_simEnabled = btnSimTgl.isChecked();
     			if(_simEnabled){
     				tickHandler.removeCallbacks(runnableTick);
     				tickHandler.post(runnableTick);
@@ -230,6 +231,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     	Log.i(TAG,"Back pressed");
 		_simEnabled = false;
 		tickHandler.removeCallbacks(runnableTick);
+		globals.die();
     	this.finish();
     }
 	

@@ -212,8 +212,8 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	Log.i(TAG,"Back pressed");
     	
     	globals.die();
- 	
-    	this.finish();
+    	super.onBackPressed();
+    	
     	return;
     }
     

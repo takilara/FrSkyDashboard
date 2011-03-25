@@ -91,6 +91,8 @@ public class Frskydash extends TabActivity {
     @Override
     public void onBackPressed() {
     	Log.i(TAG,"Back pressed");
+    	globals.die();
+    	super.onBackPressed();
     	return;
     }
     

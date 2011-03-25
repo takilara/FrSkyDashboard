@@ -232,7 +232,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		_simEnabled = false;
 		tickHandler.removeCallbacks(runnableTick);
 		globals.die();
-    	this.finish();
+		super.onBackPressed();
+    	//this.finish();
     }
 	
     public void onPause(){

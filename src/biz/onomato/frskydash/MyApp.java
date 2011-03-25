@@ -1,8 +1,10 @@
 package biz.onomato.frskydash;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
@@ -37,6 +39,8 @@ public class MyApp extends Application implements OnInitListener {
     private Runnable runnableSpeaker;
     private int _speakDelay;
     private boolean _cyclicSpeechEnabled;
+    
+    PowerManager.WakeLock wl;
 
 	
 	
@@ -98,6 +102,10 @@ public class MyApp extends Application implements OnInitListener {
 	public void onCreate()
 	{
 		Log.i(TAG,"onCreate");
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
+		 Log.i(TAG,"Acquire wakelock");
+		 wl.acquire();
 	}
 	
 	public void startCyclicSpeaker()
@@ -308,6 +316,9 @@ public class MyApp extends Application implements OnInitListener {
 	// perform any cleanup
 	public void die()
 	{
+		Log.i(TAG,"Shutting Down");
+		Log.i(TAG,"Releasing Wakelock");
+		wl.release();
 		stopCyclicSpeaker();
 		mTts.shutdown();
 	}

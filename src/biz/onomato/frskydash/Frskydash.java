@@ -20,7 +20,7 @@ public class Frskydash extends TabActivity {
 	private static final String TAG = "Tab Host"; 
     MyApp globals;
     
-    private SimulatorService mSimService;
+    
     
 	/** Called when the activity is first created. */
     @Override

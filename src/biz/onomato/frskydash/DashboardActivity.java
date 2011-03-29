@@ -91,7 +91,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         btnTglSpeak.setOnClickListener(this);
         btnTglSpeak.setChecked(globals.getCyclicSpeechEnabled());
         
-        
+        globals.getWakeLock();
         
         // Code to update GUI cyclic
         tickHandler = new Handler();
@@ -120,7 +120,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	
     	// enable updates
     	Log.i(TAG,"onResume");
-    	
+    	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
     	//speakHandler.postDelayed(runnableSpeaker, 20000);
     	

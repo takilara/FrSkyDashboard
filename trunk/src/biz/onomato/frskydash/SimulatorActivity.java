@@ -82,32 +82,30 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         rssitx_raw	= 0;
         rssirx_raw 	= 0;
         
-        simFrame = genFrame();
+        simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw,rssitx_raw);
 		outFrame_tv.setText(globals.frameToHuman(simFrame));
 		
-		tickHandler = new Handler();
+		// Code to update GUI cyclic
+        tickHandler = new Handler();
 		
 		runnableTick = new Runnable() {
 			@Override
 			public void run()
 			{
-				sb_ad1.setProgress(sb_ad1.getProgress()+1);
-				if(sb_ad1.getProgress()>=255) {sb_ad1.setProgress(0);}
-				
-				sb_ad2.setProgress(sb_ad2.getProgress()-1);
-				if(sb_ad2.getProgress()<=0) {sb_ad2.setProgress(255);}
-				
-				//Log.i("SIM","Automatic post new frame");
-				
-				simFrame = genFrame();
-				//outFrame_tv.setText(globals.frameToHuman(simFrame));
-				globals.parseFrame(simFrame);
-				
-				tickHandler.removeCallbacks(runnableTick);
-				tickHandler.postDelayed(this, 30);
+//				Log.i(TAG,"Update GUI");
+				if(globals.sim.running)
+				{
+					sb_ad1.setProgress(globals.sim._ad1);
+					sb_ad2.setProgress(globals.sim._ad2);
+					sb_rssirx.setProgress(globals.sim._rssirx);
+					sb_rssitx.setProgress(globals.sim._rssitx);
+			    	
+			    	
+				}
+				tickHandler.postDelayed(this, 100);
 			}
 		};
-		
+		tickHandler.postDelayed(runnableTick, 100);
 		
         
 	}
@@ -119,14 +117,13 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     			globals.parseFrame(simFrame);
     			break;
     		case R.id.sim_tglBtn1:
-    			_simEnabled = btnSimTgl.isChecked();
-    			if(_simEnabled){
-    				tickHandler.removeCallbacks(runnableTick);
-    				tickHandler.post(runnableTick);
+    			
+    			if(btnSimTgl.isChecked()){
+    				globals.sim.start();
     			}
     			else
     			{
-    				tickHandler.removeCallbacks(runnableTick);
+    				globals.sim.stop();
     			}
     			break;
     	}
@@ -134,27 +131,34 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	
 	public void onProgressChanged(SeekBar sb,int prog,boolean from_user)
 	{
-		switch (sb.getId()) {
-	    	case R.id.sim_sb_ad1:
-	    		ad1_raw = prog;
-	    		ad1_raw_tv.setText(Integer.toString(prog));
-	    		break;
-	    	case R.id.sim_sb_ad2:
-	    		ad2_raw = prog;
-	    		ad2_raw_tv.setText(Integer.toString(prog));
-	    		
-	    		break;
-	    	case R.id.sim_sb_rssitx:
-	    		rssitx_raw = prog;
-	    		rssitx_raw_tv.setText(Integer.toString(prog));
-	    		break;
-	    	case R.id.sim_sb_rssirx:
-	    		rssirx_raw = prog;
-	    		rssirx_raw_tv.setText(Integer.toString(prog));
-	    		break;
-		}
-		simFrame = genFrame();
+		if(true){
+			switch (sb.getId()) {
+		    	case R.id.sim_sb_ad1:
+		    		ad1_raw = prog;
+		    		globals.sim._ad1 = ad1_raw;
+		    		ad1_raw_tv.setText(Integer.toString(prog));
+		    		break;
+		    	case R.id.sim_sb_ad2:
+		    		ad2_raw = prog;
+		    		globals.sim._ad2 = ad2_raw;
+		    		ad2_raw_tv.setText(Integer.toString(prog));
+		    		
+		    		break;
+		    	case R.id.sim_sb_rssitx:
+		    		rssitx_raw = prog;
+		    		globals.sim._rssitx = rssitx_raw;
+		    		rssitx_raw_tv.setText(Integer.toString(prog));
+		    		break;
+		    	case R.id.sim_sb_rssirx:
+		    		rssirx_raw = prog;
+		    		globals.sim._rssirx = rssirx_raw;
+		    		rssirx_raw_tv.setText(Integer.toString(prog));
+		    		break;
+			}
+		
+		simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssitx_raw,rssirx_raw);
 		outFrame_tv.setText(globals.frameToHuman(simFrame));
+		}
 	}
 	
 	public void onStartTrackingTouch(SeekBar sb)
@@ -165,63 +169,13 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	{
 	}
 
-	private int[] genFrame()
-	{
-		int[] inBuf = new int[4];
-		int[] buf = new int[30];
-		
-		inBuf[0] = ad1_raw;
-		inBuf[1] = ad2_raw;
-		inBuf[2] = rssirx_raw;
-		inBuf[3] = rssitx_raw*2 & 0xff;
-		
-		// Add the header
-		buf[0] = 0x7e;
-		buf[1] = 0xfe;
-
-		// loop through the simulated values to see if we need to bytestuff the array
-		int i = 2;
-		for(int n=0;n<inBuf.length;n++)
-		{
-			if(inBuf[n]==0x7e)
-			{
-				buf[i]=0x7d;
-				buf[i+1]=0x5e;
-				i++;
-			}
-			else
-			{
-				buf[i] = inBuf[n];
-			}
-			i++;
-		}
-		
-		// add the last 4 0x00's
-		for(int n=0;n<4;n++)
-		{
-			buf[i]=0x00;
-			i++;
-		}
-		
-		// add the ending 0x7e
-		buf[i] = 0x7e;
-		
-		int[] outBuf = new int[i+1];
-		
-		for(int n=0;n<i+1;n++)
-		{
-			outBuf[n]=buf[n];
-		}
-		
-		return outBuf;
-	}
+	
 	
 	public void onDestroy(){
 		super.onDestroy();
 		Log.i(TAG,"onDestroy");
 		//mTts.stop();
-		_simEnabled = false;
-		tickHandler.removeCallbacks(runnableTick);
+		globals.sim.stop();
        	
     }
 	// task testing
@@ -229,8 +183,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 
     public void onBackPressed(){
     	Log.i(TAG,"Back pressed");
-		_simEnabled = false;
-		tickHandler.removeCallbacks(runnableTick);
+		
 		globals.die();
 		super.onBackPressed();
     	//this.finish();
@@ -240,14 +193,17 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     	
     	super.onPause();
     	//mTts.stop();
+    	tickHandler.removeCallbacks(runnableTick);
     	Log.i(TAG,"onPause");
     }
     
     public void onResume(){
     	super.onResume();
     	//mTts.stop();
+    	tickHandler.removeCallbacks(runnableTick);
+    	tickHandler.post(runnableTick);
     	Log.i(TAG,"onResume");
-    	btnSimTgl.setPressed(_simEnabled);
+    	btnSimTgl.setChecked(globals.sim.running);
     }
     
     public void onStop(){

@@ -40,6 +40,9 @@ public class MyApp extends Application implements OnInitListener {
     private int _speakDelay;
     private boolean _cyclicSpeechEnabled;
     
+    public Simulator sim;
+    
+    
     PowerManager.WakeLock wl;
 
 	
@@ -72,6 +75,7 @@ public class MyApp extends Application implements OnInitListener {
 		RSSItx.setPrecision(0);
 		_cyclicSpeechEnabled = false;
 		
+		sim = new Simulator(this);
 		
         // launch simulator service
         //Intent svc = new Intent(this, SimulatorService.class);
@@ -104,8 +108,22 @@ public class MyApp extends Application implements OnInitListener {
 		Log.i(TAG,"onCreate");
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
-		 Log.i(TAG,"Acquire wakelock");
-		 wl.acquire();
+		 
+		 //wl.acquire();
+		 getWakeLock();
+	}
+	
+	public void getWakeLock()
+	{
+		if(!wl.isHeld())
+		{
+			Log.i(TAG,"Acquire wakelock");
+			wl.acquire();
+		}
+		else
+		{
+			Log.i(TAG,"Wakelock already acquired");
+		}
 	}
 	
 	public void startCyclicSpeaker()
@@ -318,8 +336,19 @@ public class MyApp extends Application implements OnInitListener {
 	{
 		Log.i(TAG,"Shutting Down");
 		Log.i(TAG,"Releasing Wakelock");
-		wl.release();
+		if(wl.isHeld())
+		{
+			wl.release();
+		}
+		AD1.setRaw(0);
+		AD2.setRaw(0);
+		RSSIrx.setRaw(0);
+		RSSItx.setRaw(0);
+		
+		
+		sim.reset();
 		stopCyclicSpeaker();
+		sim.stop();
 		mTts.shutdown();
 	}
 

@@ -1,6 +1,9 @@
 package biz.onomato.frskydash;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -15,7 +18,7 @@ import java.util.Locale;
 
 
 
-public class MyApp extends Application implements OnInitListener {
+public class MyApp extends Application implements OnInitListener  {
 	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
@@ -33,6 +36,11 @@ public class MyApp extends Application implements OnInitListener {
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
 	private static final String TAG="Application";
+	private static final int HELLO_ID = 1;
+	private static final int FLAG_NO_CREATE=536870912;
+	private static final int FLAG_UPDATE_CURRENT=134217728;
+    private int MY_DATA_CHECK_CODE;
+
 	
 	private TextToSpeech mTts;
     private Handler speakHandler;
@@ -109,9 +117,43 @@ public class MyApp extends Application implements OnInitListener {
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
 		 
+		 
+
+
+
+	        
 		 //wl.acquire();
 		 getWakeLock();
+		 
+		 
 	}
+	
+	public void onInit(int status) {
+    	Log.i(TAG,"TTS initialized");
+    	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
+    	if (status == TextToSpeech.SUCCESS) {
+    	int result = mTts.setLanguage(Locale.US);
+    	if (result == TextToSpeech.LANG_MISSING_DATA ||
+    	result == TextToSpeech.LANG_NOT_SUPPORTED) {
+    	// Lanuage data is missing or the language is not supported.
+    	Log.e(TAG, "Language is not available.");
+    	} else {
+    	// Check the documentation for other possible result codes.
+    	// For example, the language may be available for the locale,
+    	// but not for the specified country and variant.
+    	// The TTS engine has been successfully initialized.
+    	// Allow the user to press the button for the app to speak again.
+    	
+    	// Greet the user.
+    		String myGreeting = "Application has enabled Text to Speech";
+        	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
+    	}
+    	} else {
+    	// Initialization failed.
+    	Log.i(TAG,"Something wrong with TTS");
+    	Log.e(TAG, "Could not initialize TextToSpeech.");
+    	}
+    }
 	
 	public void getWakeLock()
 	{
@@ -124,7 +166,15 @@ public class MyApp extends Application implements OnInitListener {
 		{
 			Log.i(TAG,"Wakelock already acquired");
 		}
+		
+		
+		
+		
+		 
 	}
+	
+	
+
 	
 	public void startCyclicSpeaker()
 	{
@@ -162,36 +212,12 @@ public class MyApp extends Application implements OnInitListener {
 	
 	public TextToSpeech createSpeaker()
 	{
+		Log.i(TAG,"Create Speaker");
 		mTts = new TextToSpeech(this, this);
 		return mTts;
 	}
 	
-	public void onInit(int status) {
-    	Log.i(TAG,"TTS init");
-    	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-    	if (status == TextToSpeech.SUCCESS) {
-    	int result = mTts.setLanguage(Locale.US);
-    	if (result == TextToSpeech.LANG_MISSING_DATA ||
-    	result == TextToSpeech.LANG_NOT_SUPPORTED) {
-    	// Lanuage data is missing or the language is not supported.
-    	Log.e(TAG, "Language is not available.");
-    	} else {
-    	// Check the documentation for other possible result codes.
-    	// For example, the language may be available for the locale,
-    	// but not for the specified country and variant.
-    	// The TTS engine has been successfully initialized.
-    	// Allow the user to press the button for the app to speak again.
-    	
-    	// Greet the user.
-    		String myGreeting = "Application has enabled Text to Speech";
-        	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
-    	}
-    	} else {
-    	// Initialization failed.
-    	Log.i(TAG,"Something wrong with TTS");
-    	Log.e(TAG, "Could not initialize TextToSpeech.");
-    	}
-    }
+	
 	
 	public void saySomething(String myText)
 	{
@@ -256,6 +282,7 @@ public class MyApp extends Application implements OnInitListener {
 	public boolean parseAnalogFrame(int[] frame)
 	{
 		//Log.i("Globals","Parse analog frame");
+		//Log.i(TAG,frame.toString());
 		boolean ok=true;
 		int ad1,ad2 = -1;
 		int rssirx,rssitx=-1;
@@ -269,7 +296,7 @@ public class MyApp extends Application implements OnInitListener {
 		AD2.setRaw(frame[3]);
 		RSSIrx.setRaw(frame[4]);
 		RSSItx.setRaw((int) frame[5]/2);
-
+		//Log.i(TAG,frameToHuman(frame));
 		
 		return ok;
 	}
@@ -350,6 +377,8 @@ public class MyApp extends Application implements OnInitListener {
 		stopCyclicSpeaker();
 		sim.stop();
 		mTts.shutdown();
+		Intent intent = new Intent(this, FrSkyServer.class);
+		stopService(intent);
 	}
 
 }

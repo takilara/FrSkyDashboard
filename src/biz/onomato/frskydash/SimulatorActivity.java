@@ -82,7 +82,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         rssitx_raw	= 0;
         rssirx_raw 	= 0;
         
-        simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw,rssitx_raw);
+        simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
 		outFrame_tv.setText(globals.frameToHuman(simFrame));
 		
 		// Code to update GUI cyclic
@@ -156,7 +156,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		    		break;
 			}
 		
-		simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssitx_raw,rssirx_raw);
+		simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
 		outFrame_tv.setText(globals.frameToHuman(simFrame));
 		}
 	}

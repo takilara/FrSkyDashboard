@@ -218,10 +218,10 @@ public class DashboardActivity extends Activity implements OnClickListener {
     public void onBackPressed() {
     	Log.i(TAG,"Back pressed");
     	
-    	//Intent intent = new Intent(this, FrSkyServer.class);
+    	Intent intent = new Intent(this, FrSkyServer.class);
     	//intent.putExtra("command", "die");
     	//startService(intent);
-    	//stopService(intent);
+    	stopService(intent);
     	
     	globals.die();
     	super.onBackPressed();

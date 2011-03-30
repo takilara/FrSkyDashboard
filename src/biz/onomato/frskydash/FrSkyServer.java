@@ -43,9 +43,20 @@ public class FrSkyServer extends Service {
     	 CharSequence text = "FrSkyServer Started";
     	 Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
     	 //notification.defaults |= Notification.FLAG_ONGOING_EVENT;
+    	 notification.flags = Notification.DEFAULT_LIGHTS;
+    	 notification.flags |= Notification.FLAG_ONGOING_EVENT;
+    	 notification.flags |= Notification.FLAG_NO_CLEAR;
+    	 //notification.flags |= Notification.FLAG_FOREGROUND_SERVICE; 
+    	 
+    	 //Intent notificationIntent = new Intent(this,MyApp.class);
+    	 Intent notificationIntent = new Intent(this,Frskydash.class);
+    	 notificationIntent.setAction(Intent.ACTION_MAIN);
+         notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+    	 
     	 // http://developer.android.com/guide/topics/ui/notifiers/notifications.html
     	 PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-    	                new Intent(this, MyApp.class), 0);
+    			 notificationIntent, 0);
     	notification.setLatestEventInfo(this, "FrSkyDash",
     	      text, contentIntent);
     	//nm.notify("Service Started", notification);

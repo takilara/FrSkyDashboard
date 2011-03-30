@@ -1,6 +1,8 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -85,7 +87,17 @@ public class Frskydash extends TabActivity {
         
         
         tabHost.setCurrentTab(0);
+        this.startService(new Intent().setClass(this, FrSkyServer.class));
+        
+        
+        
+        
+        
 
+        
+        
+        
+        
     }
     
     @Override

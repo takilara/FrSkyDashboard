@@ -18,7 +18,7 @@ import java.math.MathContext;
 
 
 
-public class DashboardActivity extends Activity implements OnClickListener, TextToSpeech.OnInitListener {
+public class DashboardActivity extends Activity implements OnClickListener {
     private static final String TAG = "Dashboard"; 
     private TextToSpeech mTts;
     
@@ -54,6 +54,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
 		
         
         // Check for TTS
+        Log.i(TAG,"Checking for TTS");
         Intent checkSpeakIntent = new Intent();
         checkSpeakIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkSpeakIntent, MY_DATA_CHECK_CODE);
@@ -93,6 +94,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
         
         globals.getWakeLock();
         
+        
         // Code to update GUI cyclic
         tickHandler = new Handler();
 		tickHandler.postDelayed(runnableTick, 100);
@@ -122,6 +124,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	Log.i(TAG,"onResume");
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
+    	//globals.showIcon();
     	//speakHandler.postDelayed(runnableSpeaker, 20000);
     	
     }
@@ -136,6 +139,7 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     
     
     // Used to 
+    /*
     public void onInit(int status) {
     	Log.i(TAG,"TTS init");
     	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
@@ -161,14 +165,15 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     	Log.e(TAG, "Could not initialize TextToSpeech.");
     	}
     }
-    
+    */
     
     
     public void onClick(View v) {
     	switch (v.getId()) {
     	case R.id.btnTest1:
     		Log.i(TAG,"Clicked Test");
-    		globals.AD1.setRaw(100);
+    		//globals.AD1.setRaw(100);
+    		this.startService(new Intent(this, FrSkyServer.class));
     		//tv_ad1_val.setText(globals.AD1.toString());
     		break;
     	case R.id.btnTest2:
@@ -187,9 +192,11 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
 	    }
     }
     
+    
     protected void onActivityResult(
             int requestCode, int resultCode, Intent data) {
         if (requestCode == MY_DATA_CHECK_CODE) {
+        	Log.i(TAG,"Check for TTS complete");
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 // success, create the TTS instance
                 //mTts = new TextToSpeech(globals, this);
@@ -210,6 +217,11 @@ public class DashboardActivity extends Activity implements OnClickListener, Text
     @Override
     public void onBackPressed() {
     	Log.i(TAG,"Back pressed");
+    	
+    	//Intent intent = new Intent(this, FrSkyServer.class);
+    	//intent.putExtra("command", "die");
+    	//startService(intent);
+    	//stopService(intent);
     	
     	globals.die();
     	super.onBackPressed();

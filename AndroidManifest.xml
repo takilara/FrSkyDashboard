@@ -25,7 +25,12 @@
         	android:label="@string/app_name" />
         <activity android:name=".SimulatorActivity"
         	android:label="@string/app_name" />
+        <activity android:name=".ActivityScanDevices"
+        	android:label="@string/app_name" />
+        	
         <service android:name="FrSkyServer" android:label="@string/app_name"></service>
     </application>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 </manifest>

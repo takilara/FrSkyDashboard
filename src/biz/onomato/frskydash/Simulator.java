@@ -12,12 +12,15 @@ public class Simulator {
     private int[] _simFrame;
     public boolean running;
     
+    //private FrSkyServer context;
     private MyApp context;
+    private MyApp globals;
     
     private static final String TAG="Simulator Class";
     
 	public Simulator(Context cnt)
 	{
+		//context = (FrSkyServer) cnt;
 		context = (MyApp) cnt;
 		Log.i(TAG,"constructor");
 		running = false;
@@ -26,7 +29,7 @@ public class Simulator {
 		_rssirx = 0;
 		_rssitx = 0;
 		
-		
+		//globals = ((MyApp) getApplicationContext());	
 		
 		simHandler = new Handler();
 		

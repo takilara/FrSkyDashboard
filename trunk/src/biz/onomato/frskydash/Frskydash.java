@@ -36,8 +36,8 @@ public class Frskydash extends TabActivity {
         // Do any globals
         globals = ((MyApp)getApplicationContext());
         
-        
-
+        //Start the server service
+        this.startService(new Intent().setClass(this, FrSkyServer.class));
         
         //globals.createChannel("AD1", "Main cell voltage", 0, (float) 0.5, "V","Volt");
         
@@ -87,7 +87,7 @@ public class Frskydash extends TabActivity {
         
         
         tabHost.setCurrentTab(0);
-        this.startService(new Intent().setClass(this, FrSkyServer.class));
+        
         
         
         

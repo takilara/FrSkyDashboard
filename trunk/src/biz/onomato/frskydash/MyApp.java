@@ -51,12 +51,15 @@ public class MyApp extends Application implements OnInitListener  {
     public Simulator sim;
     
     
-    PowerManager.WakeLock wl;
+    //PowerManager.WakeLock wl;
 
 	
 	
 	public MyApp(){
-		Log.i(TAG,"Creator");
+		Log.i(TAG,"Constructor");
+	
+		
+		
 		hRaw = new int[MAX_CHANNELS];
 		hVal = new double[MAX_CHANNELS];
 		hName = new String[MAX_CHANNELS];
@@ -114,8 +117,9 @@ public class MyApp extends Application implements OnInitListener  {
 	public void onCreate()
 	{
 		Log.i(TAG,"onCreate");
-		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
+		
+		//PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		 //wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
 		 
 		 
 
@@ -123,7 +127,7 @@ public class MyApp extends Application implements OnInitListener  {
 
 	        
 		 //wl.acquire();
-		 getWakeLock();
+		 //getWakeLock();
 		 
 		 
 	}
@@ -155,6 +159,7 @@ public class MyApp extends Application implements OnInitListener  {
     	}
     }
 	
+	/*
 	public void getWakeLock()
 	{
 		if(!wl.isHeld())
@@ -166,13 +171,8 @@ public class MyApp extends Application implements OnInitListener  {
 		{
 			Log.i(TAG,"Wakelock already acquired");
 		}
-		
-		
-		
-		
-		 
 	}
-	
+	*/
 	
 
 	
@@ -362,11 +362,7 @@ public class MyApp extends Application implements OnInitListener  {
 	public void die()
 	{
 		Log.i(TAG,"Shutting Down");
-		Log.i(TAG,"Releasing Wakelock");
-		if(wl.isHeld())
-		{
-			wl.release();
-		}
+		
 		AD1.setRaw(0);
 		AD2.setRaw(0);
 		RSSIrx.setRaw(0);

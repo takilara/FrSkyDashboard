@@ -6,4 +6,14 @@
     <string name="rawUnits">Raw</string>
     <string name="RSSItx">RSSItx</string>
     <string name="RSSIrx">RSSIrx</string>
+    
+    <string name="settings_label">Settings...</string>
+    <string name="settings_title">Global Settings</string>
+    <string name="settings_shortcut">s</string>
+    
+    <string name="scan_bluetooth_label">BT scan</string>
+    <string name="scan_bluetooth_title">Scan for new BT devices</string>
+    
+    <string name="connect_bluetooth_label">Connect...</string>
+    <string name="connect_bluetooth_title">Connect to stored device</string>
 </resources>

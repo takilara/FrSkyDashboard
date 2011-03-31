@@ -18,8 +18,8 @@ import java.util.Locale;
 
 
 
-public class MyApp extends Application implements OnInitListener  {
-	
+public class MyApp extends Application  {
+	private static final String TAG="Application";	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
 	
@@ -35,31 +35,13 @@ public class MyApp extends Application implements OnInitListener  {
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
-	private static final String TAG="Application";
-	private static final int HELLO_ID = 1;
-	private static final int FLAG_NO_CREATE=536870912;
-	private static final int FLAG_UPDATE_CURRENT=134217728;
-    private int MY_DATA_CHECK_CODE;
 
-	
-	private TextToSpeech mTts;
-    private Handler speakHandler;
-    private Runnable runnableSpeaker;
-    private int _speakDelay;
-    private boolean _cyclicSpeechEnabled;
     
     public Simulator sim;
-    
-    
-    //PowerManager.WakeLock wl;
-
-	
 	
 	public MyApp(){
 		Log.i(TAG,"Constructor");
 	
-		
-		
 		hRaw = new int[MAX_CHANNELS];
 		hVal = new double[MAX_CHANNELS];
 		hName = new String[MAX_CHANNELS];
@@ -84,146 +66,17 @@ public class MyApp extends Application implements OnInitListener  {
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
-		_cyclicSpeechEnabled = false;
 		
 		sim = new Simulator(this);
-		
-        // launch simulator service
-        //Intent svc = new Intent(this, SimulatorService.class);
-        //startService(svc);
-		
-		// Cyclic speak stuff
-		_speakDelay = 30000;
-        speakHandler = new Handler();
-		runnableSpeaker = new Runnable() {
-			@Override
-			public void run()
-			{
-				Log.i(TAG,"Cyclic Speak stuff");
-				mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				
-				speakHandler.removeCallbacks(runnableSpeaker);
-		    	speakHandler.postDelayed(this, _speakDelay);
-			}
-		};
-
-		
 	}
 
 	@Override
 	public void onCreate()
 	{
 		Log.i(TAG,"onCreate");
-		
-		//PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		 //wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
-		 
-		 
-
-
-
-	        
-		 //wl.acquire();
-		 //getWakeLock();
-		 
-		 
 	}
-	
-	public void onInit(int status) {
-    	Log.i(TAG,"TTS initialized");
-    	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-    	if (status == TextToSpeech.SUCCESS) {
-    	int result = mTts.setLanguage(Locale.US);
-    	if (result == TextToSpeech.LANG_MISSING_DATA ||
-    	result == TextToSpeech.LANG_NOT_SUPPORTED) {
-    	// Lanuage data is missing or the language is not supported.
-    	Log.e(TAG, "Language is not available.");
-    	} else {
-    	// Check the documentation for other possible result codes.
-    	// For example, the language may be available for the locale,
-    	// but not for the specified country and variant.
-    	// The TTS engine has been successfully initialized.
-    	// Allow the user to press the button for the app to speak again.
-    	
-    	// Greet the user.
-    		String myGreeting = "Application has enabled Text to Speech";
-        	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
-    	}
-    	} else {
-    	// Initialization failed.
-    	Log.i(TAG,"Something wrong with TTS");
-    	Log.e(TAG, "Could not initialize TextToSpeech.");
-    	}
-    }
-	
-	/*
-	public void getWakeLock()
-	{
-		if(!wl.isHeld())
-		{
-			Log.i(TAG,"Acquire wakelock");
-			wl.acquire();
-		}
-		else
-		{
-			Log.i(TAG,"Wakelock already acquired");
-		}
-	}
-	*/
 	
 
-	
-	public void startCyclicSpeaker()
-	{
-		// Stop it before starting it
-		Log.i(TAG,"Start Cyclic Speaker");
-		speakHandler.removeCallbacks(runnableSpeaker);
-		speakHandler.post(runnableSpeaker);
-		_cyclicSpeechEnabled = true;
-	}
-	public void stopCyclicSpeaker()
-	{
-		Log.i(TAG,"Stop Cyclic Speaker");
-		speakHandler.removeCallbacks(runnableSpeaker);
-		mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
-		_cyclicSpeechEnabled = false;
-	}
-
-	public boolean getCyclicSpeechEnabled()
-	{
-		return _cyclicSpeechEnabled;
-	}
-	
-	public void setCyclicSpeech(boolean state)
-	{
-		_cyclicSpeechEnabled = state;
-		if(_cyclicSpeechEnabled)
-		{
-			startCyclicSpeaker();
-		}
-		else
-		{
-			stopCyclicSpeaker();
-		}
-	}
-	
-	public TextToSpeech createSpeaker()
-	{
-		Log.i(TAG,"Create Speaker");
-		mTts = new TextToSpeech(this, this);
-		return mTts;
-	}
-	
-	
-	
-	public void saySomething(String myText)
-	{
-		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
-	}
-	
 	public int createChannel(String name,String description,double offset,double factor,String unit,String longUnit)
 	{
 		Channel AD1 =  new Channel(name, description, offset, factor, unit, longUnit);
@@ -370,9 +223,9 @@ public class MyApp extends Application implements OnInitListener  {
 		
 		
 		sim.reset();
-		stopCyclicSpeaker();
+		//stopCyclicSpeaker();
 		sim.stop();
-		mTts.shutdown();
+		//mTts.shutdown();
 		Intent intent = new Intent(this, FrSkyServer.class);
 		stopService(intent);
 	}

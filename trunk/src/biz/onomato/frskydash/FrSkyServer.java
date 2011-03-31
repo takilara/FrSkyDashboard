@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,13 +19,13 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import android.widget.Toast;
 
-public class FrSkyServer extends Service {
+public class FrSkyServer extends Service implements OnInitListener {
 	
-	private Handler speakHandler;
-    private Runnable runnableSpeaker;
+
     
 	private static final String TAG="FrSkyServerService";
 	private static final int NOTIFICATION_ID=56;
@@ -43,11 +44,18 @@ public class FrSkyServer extends Service {
 	public static final int CMD_START_SPEECH	=	 2;
 	public static final int CMD_STOP_SPEECH		=	 3;
 	
-	
+	private TextToSpeech mTts;
+	private int _speakDelay;
+	private Handler speakHandler;
+    private Runnable runnableSpeaker;
 	
 	private final IBinder mBinder = new MyBinder();
 	
 	private WakeLock wl;
+	private boolean _cyclicSpeechEnabled;
+	private MyApp globals;
+	
+	public Simulator sim;
 	
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
@@ -109,6 +117,29 @@ public class FrSkyServer extends Service {
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
 		 getWakeLock();
+		 
+		 globals = ((MyApp)getApplicationContext());
+		 
+		 
+		 //sim = new Simulator(this);
+		 
+		 _cyclicSpeechEnabled = false;
+		 _speakDelay = 30000;
+	        speakHandler = new Handler();
+			runnableSpeaker = new Runnable() {
+				@Override
+				public void run()
+				{
+					Log.i(TAG,"Cyclic Speak stuff");
+					mTts.speak(globals.AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					mTts.speak(globals.AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					
+					speakHandler.removeCallbacks(runnableSpeaker);
+			    	speakHandler.postDelayed(this, _speakDelay);
+				}
+			};
 	}
 	
 	
@@ -173,11 +204,7 @@ public class FrSkyServer extends Service {
 	public void die()
 	{
 		Log.i(TAG,"Die, perform cleanup");
-		Log.i(TAG,"Releasing Wakelock");
-		if(wl.isHeld())
-		{
-			wl.release();
-		}
+
 		stopSelf();
 	}
 	
@@ -189,9 +216,45 @@ public class FrSkyServer extends Service {
 		super.onDestroy();
 		Log.i(TAG,"onDestroy");
 		
+		Log.i(TAG,"Releasing Wakelock");
+		if(wl.isHeld())
+		{
+			wl.release();
+		}
+		stopCyclicSpeaker();
+		mTts.shutdown();
+		
+		
 		stopForeground(true);
 	    Toast.makeText(this, "Service destroyed at " + time.getTime(), Toast.LENGTH_LONG).show();
 	}
+	
+	public void onInit(int status) {
+    	Log.i(TAG,"TTS initialized");
+    	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
+    	if (status == TextToSpeech.SUCCESS) {
+    	int result = mTts.setLanguage(Locale.US);
+    	if (result == TextToSpeech.LANG_MISSING_DATA ||
+    	result == TextToSpeech.LANG_NOT_SUPPORTED) {
+    	// Lanuage data is missing or the language is not supported.
+    	Log.e(TAG, "Language is not available.");
+    	} else {
+    	// Check the documentation for other possible result codes.
+    	// For example, the language may be available for the locale,
+    	// but not for the specified country and variant.
+    	// The TTS engine has been successfully initialized.
+    	// Allow the user to press the button for the app to speak again.
+    	
+    	// Greet the user.
+    		String myGreeting = "Application has enabled Text to Speech";
+        	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
+    	}
+    	} else {
+    	// Initialization failed.
+    	Log.i(TAG,"Something wrong with TTS");
+    	Log.e(TAG, "Could not initialize TextToSpeech.");
+    	}
+    }
 	
 	
 	// *************************************************
@@ -208,9 +271,74 @@ public class FrSkyServer extends Service {
 		t[10] = 0xfe;
 		return t;
 	}
-	public void setCyclicSpeech(boolean state)
+	
+	public TextToSpeech createSpeaker()
 	{
-		Log.i(TAG,"set speaker to "+state);
+		Log.i(TAG,"Create Speaker");
+		mTts = new TextToSpeech(this, this);
+		return mTts;
+	}
+	
+	public void saySomething(String myText)
+	{
+		Log.i(TAG,"Speak something");
+		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
+	}
+	
+	public void startCyclicSpeaker()
+	{
+		// Stop it before starting it
+		Log.i(TAG,"Start Cyclic Speaker");
+		speakHandler.removeCallbacks(runnableSpeaker);
+		speakHandler.post(runnableSpeaker);
+		_cyclicSpeechEnabled = true;
+	}
+	public void stopCyclicSpeaker()
+	{
+		Log.i(TAG,"Stop Cyclic Speaker");
+		speakHandler.removeCallbacks(runnableSpeaker);
+		mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
+		_cyclicSpeechEnabled = false;
 	}
 
+	public boolean getCyclicSpeechEnabled()
+	{
+		return _cyclicSpeechEnabled;
+	}
+	
+	public void setCyclicSpeech(boolean state)
+	{
+		_cyclicSpeechEnabled = state;
+		if(_cyclicSpeechEnabled)
+		{
+			startCyclicSpeaker();
+		}
+		else
+		{
+			stopCyclicSpeaker();
+		}
+	}
+	
+	public void simStart()
+	{
+		Log.i(TAG,"Sim Start");
+	}
+	
+	public void simStop()
+	{
+		Log.i(TAG,"Sim Stop");
+	}
+	
+	public void setSimStarted(boolean state)
+	{
+		if(state)
+		{
+			simStart();
+			
+		}
+		else
+		{
+			simStop();
+		}
+	}
 }

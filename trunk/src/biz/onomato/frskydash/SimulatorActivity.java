@@ -1,8 +1,11 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -36,6 +39,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
  
     private Handler tickHandler;
     private Runnable runnableTick;
+    private FrSkyServer server;
     
     
     private int ad1_raw, ad2_raw,rssitx_raw,rssirx_raw;
@@ -108,8 +112,42 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		};
 		tickHandler.postDelayed(runnableTick, 100);
 		
-        
+		doBindService();
 	}
+	
+	
+	void doBindService() {
+    	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
+		Log.i(TAG,"Start the server service if it is not already started");
+		startService(new Intent(this, FrSkyServer.class));
+		Log.i(TAG,"Try to bind to the service");
+		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
+		//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
+    }
+    
+    void doUnbindService() {
+            if (server != null) {
+            // Detach our existing connection.
+            unbindService(mConnection);
+        }
+    }
+    
+    
+    
+
+    
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			server = ((FrSkyServer.MyBinder) binder).getService();
+			Log.i(TAG,"Bound to Service");
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+			server = null;
+		}
+	};
+	
 	
 	public void onClick(View v) {
 		//Log.i(TAG,"Some button clicked");
@@ -118,7 +156,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     			globals.parseFrame(simFrame);
     			break;
     		case R.id.sim_tglBtn1:
-    			
+    			if(server !=null) server.setSimStarted(btnSimTgl.isChecked());
     			if(btnSimTgl.isChecked()){
     				globals.sim.start();
     			}

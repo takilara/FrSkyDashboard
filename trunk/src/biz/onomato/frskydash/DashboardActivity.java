@@ -25,11 +25,11 @@ import java.math.MathContext;
 
 public class DashboardActivity extends Activity implements OnClickListener {
     private static final String TAG = "Dashboard"; 
-    private TextToSpeech mTts;
+    //private TextToSpeech mTts;
     
-    private int AD1;
-    private int AD2;
-    private Channel oAd1;
+    //private int AD1;
+    //private int AD2;
+    //private Channel oAd1;
     
     // Used for GUI updates
     private Handler tickHandler;
@@ -44,11 +44,10 @@ public class DashboardActivity extends Activity implements OnClickListener {
     
     private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val;
     private ToggleButton btnTglSpeak;
-    private boolean _cyclicSpeakEnabled;
     
     private IntentFilter mIntentFilter;
     // service stuff
-    private FrSkyServer s;
+    private FrSkyServer server;
     
 	/** Called when the activity is first created. */
     @Override
@@ -76,7 +75,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
         globals = ((MyApp)getApplicationContext());
 
         //oAd1 = globals.getChannelById(AD1);
-        oAd1 = globals.getChannelById(0);
+        //oAd1 = globals.getChannelById(0);
         
        
         // Setup the form items        
@@ -99,7 +98,8 @@ public class DashboardActivity extends Activity implements OnClickListener {
         
         btnTglSpeak = (ToggleButton) findViewById(R.id.dash_tglSpeak);
         btnTglSpeak.setOnClickListener(this);
-        btnTglSpeak.setChecked(globals.getCyclicSpeechEnabled());
+        //btnTglSpeak.setChecked(globals.getCyclicSpeechEnabled());
+        
         
         //globals.getWakeLock();
         
@@ -127,24 +127,8 @@ public class DashboardActivity extends Activity implements OnClickListener {
 		// Service stuff
 		doBindService();
     }
-    void doBindService() {
-    	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
-		Log.i(TAG,"Start the server service if it is not already started");
-		startService(new Intent(this, FrSkyServer.class));
-		Log.i(TAG,"Try to bind to the service");
-		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
-		//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
-    }
     
-    void doUnbindService() {
-            if (s != null) {
-            // Detach our existing connection.
-            unbindService(mConnection);
-        }
-    }
-    
-    
-    // Can be used to detect broadcasts from Service
+ // Can be used to detect broadcasts from Service
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -158,17 +142,38 @@ public class DashboardActivity extends Activity implements OnClickListener {
         	//doBindService();
         }
     };
+    
+    
+    void doBindService() {
+    	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
+		Log.i(TAG,"Start the server service if it is not already started");
+		startService(new Intent(this, FrSkyServer.class));
+		Log.i(TAG,"Try to bind to the service");
+		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
+		//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
+    }
+    
+    void doUnbindService() {
+            if (server != null) {
+            // Detach our existing connection.
+            unbindService(mConnection);
+        }
+    }
+    
+    
+    
 
     
     private ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			s = ((FrSkyServer.MyBinder) binder).getService();
+			server = ((FrSkyServer.MyBinder) binder).getService();
+			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
 			Log.i(TAG,"Bound to Service");
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			s = null;
+			server = null;
 		}
 	};
     
@@ -206,8 +211,8 @@ public class DashboardActivity extends Activity implements OnClickListener {
     	case R.id.btnTest1:
     		Log.i(TAG,"Clicked Test");
     		// Testing controlling the service useing bound methods
-    		if (s != null) {
-    			int[] cf = s.getCurrentFrame();
+    		if (server != null) {
+    			int[] cf = server.getCurrentFrame();
     			
     			Log.i(TAG,"Data from service:"+globals.frameToHuman(cf));
     		}
@@ -223,13 +228,14 @@ public class DashboardActivity extends Activity implements OnClickListener {
     		break;
     	case R.id.btnSpeak:
     		Log.i(TAG,"SPEAK something");
-    		globals.saySomething(globals.AD1.toVoiceString());
+    		//globals.saySomething(globals.AD1.toVoiceString());
+    		if(server!=null) server.saySomething(globals.AD1.toVoiceString());
     		break;
     	
     	case R.id.dash_tglSpeak:
     		
-    		globals.setCyclicSpeech(btnTglSpeak.isChecked());
-    		if(s!=null) {s.setCyclicSpeech(btnTglSpeak.isChecked());}
+    		//globals.setCyclicSpeech(btnTglSpeak.isChecked());
+    		if(server!=null) {server.setCyclicSpeech(btnTglSpeak.isChecked());}
     		
     		
     		
@@ -257,7 +263,8 @@ public class DashboardActivity extends Activity implements OnClickListener {
                 // success, create the TTS instance
                 //mTts = new TextToSpeech(globals, this);
                 
-                mTts = globals.createSpeaker();
+                //mTts = globals.createSpeaker();
+            	if(server!=null)	server.createSpeaker();
                 
                 //sayHello();
             } else {

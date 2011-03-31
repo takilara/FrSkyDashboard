@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -184,6 +185,10 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     public void onBackPressed(){
     	Log.i(TAG,"Back pressed");
 		
+    	Intent intent = new Intent(this, FrSkyServer.class);
+    	stopService(intent);
+
+    	
 		globals.die();
 		super.onBackPressed();
     	//this.finish();

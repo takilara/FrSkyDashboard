@@ -85,6 +85,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//return null;
 	}
 	
+
+	
     private void showNotification() {
     	 CharSequence text = "FrSkyServer Started";
     	 Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
@@ -154,10 +156,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 					//mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					//mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					
-					mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					for(int n=0;n<MAX_CHANNELS;n++)
+					{
+						if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					}
+					
+					//mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					//mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					//mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					//mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					
 					speakHandler.removeCallbacks(runnableSpeaker);
 			    	speakHandler.postDelayed(this, _speakDelay);
@@ -232,6 +239,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 
+
 	
 	@Override
 	public void onDestroy()
@@ -247,10 +255,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		stopCyclicSpeaker();
 		mTts.shutdown();
 		
-		AD1.setRaw(0);
-		AD2.setRaw(0);
-		RSSIrx.setRaw(0);
-		RSSItx.setRaw(0);
+		//AD1.setRaw(0);
+		//AD2.setRaw(0);
+		//RSSIrx.setRaw(0);
+		//RSSItx.setRaw(0);
+		resetChannels();
 		
 		simStop();
 		sim.reset();
@@ -328,10 +337,20 @@ public class FrSkyServer extends Service implements OnInitListener {
 		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
 		RSSIrx = getChannelById(trssirx);
 		RSSIrx.setPrecision(0);
+		RSSIrx.silent = true;
 		
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
+		RSSItx.silent = true;
+	}
+	
+	private void resetChannels()
+	{
+		for(int n=0;n<MAX_CHANNELS;n++)
+		{
+			getChannelById(n).setRaw(0);
+		}
 	}
 	
 	public Channel getChannelById(int id)

@@ -13,11 +13,15 @@ public class Channel {
 	private double _offset;
 	private double _factor;
 	private int _precision;
+	 
 	private String _unit;
 	private String _longUnit;
 	private MathContext _mc;
+	public boolean silent;
+	
 	public Channel(String name,String description,double offset,double factor,String unit,String longUnit)
 	{
+		silent = false;
 		_raw=-1;
 		_val=-1;
 		_name = name;

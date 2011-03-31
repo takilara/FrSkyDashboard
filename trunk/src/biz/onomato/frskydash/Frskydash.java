@@ -20,7 +20,7 @@ import java.util.Locale;
 public class Frskydash extends TabActivity {
 	
 	private static final String TAG = "Tab Host"; 
-    MyApp globals;
+    //MyApp globals;
     
     
     
@@ -34,7 +34,7 @@ public class Frskydash extends TabActivity {
         
         
         // Do any globals
-        globals = ((MyApp)getApplicationContext());
+        //globals = ((MyApp)getApplicationContext());
         
         //Start the server service
         this.startService(new Intent().setClass(this, FrSkyServer.class));
@@ -103,7 +103,7 @@ public class Frskydash extends TabActivity {
     @Override
     public void onBackPressed() {
     	Log.i(TAG,"Back pressed");
-    	globals.die();
+    	//globals.die();
     	super.onBackPressed();
     	return;
     }

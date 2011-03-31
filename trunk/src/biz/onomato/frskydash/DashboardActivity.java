@@ -40,7 +40,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
 
     private int MY_DATA_CHECK_CODE;
     
-    MyApp globals;
+    //MyApp globals;
     
     private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val;
     private ToggleButton btnTglSpeak;
@@ -72,7 +72,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
         
         
         // Fetch globals:
-        globals = ((MyApp)getApplicationContext());
+        //globals = ((MyApp)getApplicationContext());
 
         //oAd1 = globals.getChannelById(AD1);
         //oAd1 = globals.getChannelById(0);
@@ -112,10 +112,10 @@ public class DashboardActivity extends Activity implements OnClickListener {
 			public void run()
 			{
 				//Log.i(TAG,"Update GUI");
-		    	tv_ad1_val.setText(globals.AD1.toString());
-		    	tv_ad2_val.setText(globals.AD2.toString());
-		    	tv_rssitx_val.setText(globals.RSSItx.toString());
-		    	tv_rssirx_val.setText(globals.RSSIrx.toString());
+		    	tv_ad1_val.setText(server.AD1.toString());
+		    	tv_ad2_val.setText(server.AD2.toString());
+		    	tv_rssitx_val.setText(server.RSSItx.toString());
+		    	tv_rssirx_val.setText(server.RSSIrx.toString());
 
 		    	tickHandler.postDelayed(this, 100);
 			}
@@ -214,7 +214,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
     		if (server != null) {
     			int[] cf = server.getCurrentFrame();
     			
-    			Log.i(TAG,"Data from service:"+globals.frameToHuman(cf));
+    			Log.i(TAG,"Data from service:"+Frame.frameToHuman(cf));
     		}
     		else
     		{
@@ -229,7 +229,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
     	case R.id.btnSpeak:
     		Log.i(TAG,"SPEAK something");
     		//globals.saySomething(globals.AD1.toVoiceString());
-    		if(server!=null) server.saySomething(globals.AD1.toVoiceString());
+    		if(server!=null) server.saySomething(server.AD1.toVoiceString());
     		break;
     	
     	case R.id.dash_tglSpeak:
@@ -284,7 +284,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
     	Intent intent = new Intent(this, FrSkyServer.class);
     	stopService(intent);
     	
-    	globals.die();
+    	//globals.die();
     	super.onBackPressed();
     	
     	return;

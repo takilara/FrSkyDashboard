@@ -18,8 +18,7 @@ import java.lang.Runnable;
 
 public class SimulatorActivity extends Activity implements OnSeekBarChangeListener, OnClickListener {
 	private static final String TAG = "SimulatorActivity";
-	private Channel oAd1;
-    MyApp globals;
+	
     private SeekBar sb_ad1;
     private SeekBar sb_ad2;
     private SeekBar sb_rssitx;
@@ -30,7 +29,6 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     private TextView rssitx_raw_tv;
     private TextView rssirx_raw_tv;
     private TextView outFrame_tv;
-    private boolean _simEnabled;
     
     private View btnSend;
     private ToggleButton btnSimTgl;
@@ -49,14 +47,12 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i(TAG,"onCreate");
-		_simEnabled=false;
 		setContentView(R.layout.activity_simulator);
 		
-		globals = ((MyApp)getApplicationContext());
 
         //float newVal = globals.setChannelById(AD1, 200);
         
-        oAd1 = globals.getChannelById(0);
+        //oAd1 = globals.getChannelById(0);
         
         sb_ad1 = (SeekBar) findViewById(R.id.sim_sb_ad1);
         sb_ad1.setOnSeekBarChangeListener(this);
@@ -171,7 +167,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     	switch (v.getId()) {
     		case R.id.sim_btnSend:
     			//globals.parseFrame(simFrame);
-    			globals.parseFrame(_currentFrame);
+    			if(server !=null) server.parseFrame(_currentFrame);
     			break;
     		case R.id.sim_tglBtn1:
     			if(server !=null) server.setSimStarted(btnSimTgl.isChecked());
@@ -249,7 +245,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     	stopService(intent);
 
     	
-		globals.die();
+		//globals.die();
 		super.onBackPressed();
     	//this.finish();
     }

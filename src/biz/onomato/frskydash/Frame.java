@@ -4,14 +4,77 @@ import android.util.Log;
 
 public class Frame {
 	private static final String TAG="Frame";
+	
+	public static final int FRAMETYPE_UNDEFINED=-1;
+	public static final int FRAMETYPE_ANALOG=0;
+	public int frametype;
 	private int[] _frame;
+	
+	public int ad1,ad2,rssirx,rssitx = 0;
 	
 	public Frame(int[] frame)
 	{
 		//Log.i(TAG,"Constructor");
+		
+		// fix bytestuffing
+		if(frame.length>11)
+		{
+			frame = frameDecode(frame);
+		}
+		
 		_frame = frame;
+		
+		switch(frame[1])
+		{
+			// Analog values
+			case 0xfe:
+				frametype=FRAMETYPE_ANALOG;
+				ad1 = frame[2];
+				ad2 = frame[3];
+				rssirx = frame[4];
+				rssitx = (int) frame[5]/2;
+				break;
+			default:
+				frametype=FRAMETYPE_UNDEFINED;
+				break;
+		}
 	}
 	
+	private int[] frameDecode(int[] frame)
+	{
+		if(frame.length>11)
+		{
+			int[] outFrame = new int[11];
+			
+			outFrame[0] = frame[0];
+			outFrame[1] = frame[1];
+			int xor = 0x00;
+			int i = 2;
+			
+			for(int n=2;n<frame.length;n++)
+			{
+				if(frame[n]!=0x7d)
+				{
+					outFrame[i] = frame[n]^xor;
+					i++;
+					xor = 0x00;
+				}
+				else
+				{
+					xor = 0x20;
+				}
+			}
+			
+			Log.i("FRAME decode","Pre:  "+frameToHuman(frame));
+			Log.i("FRAME decode","Post: "+frameToHuman(outFrame));
+			
+			return outFrame;
+		}
+		else
+		{
+			return frame;
+		}	
+	}
 	
 	public Frame()
 	{
@@ -70,6 +133,7 @@ public class Frame {
 		
 		return new Frame(outBuf);
 	}
+	
 	
 	
 	public static String frameToHuman(int[] frame)

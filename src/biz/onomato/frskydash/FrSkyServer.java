@@ -57,6 +57,22 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public Simulator sim;
 	
+	private int MAX_CHANNELS=4;
+	private int[] hRaw;
+	
+	private double[] hVal;
+	private String[] hName;
+	private String[] hDescription;
+	private double[] hOffset;
+	private double[] hFactor;
+	private String[] hUnit;
+	private String[] hLongUnit;
+	private int channels=0;
+	private Channel[] objs;
+	
+	public Channel AD1,AD2,RSSIrx,RSSItx;
+	
+	
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	
@@ -109,6 +125,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
 		showNotification();		
 		
+		setupChannels();
+		
 		Log.i(TAG,"Broadcast that i've started");
 		Intent i = new Intent();
 		i.setAction(MESSAGE_STARTED);
@@ -121,7 +139,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 globals = ((MyApp)getApplicationContext());
 		 
 		 
-		 sim = new Simulator(globals);
+		 sim = new Simulator(this);
 		 
 		 _cyclicSpeechEnabled = false;
 		 _speakDelay = 30000;
@@ -131,10 +149,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 				public void run()
 				{
 					Log.i(TAG,"Cyclic Speak stuff");
-					mTts.speak(globals.AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					mTts.speak(globals.AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					//mTts.speak(globals.AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					//mTts.speak(globals.AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					//mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					//mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					
+					mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					
 					speakHandler.removeCallbacks(runnableSpeaker);
 			    	speakHandler.postDelayed(this, _speakDelay);
@@ -224,6 +247,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		stopCyclicSpeaker();
 		mTts.shutdown();
 		
+		AD1.setRaw(0);
+		AD2.setRaw(0);
+		RSSIrx.setRaw(0);
+		RSSItx.setRaw(0);
 		
 		simStop();
 		sim.reset();
@@ -262,6 +289,55 @@ public class FrSkyServer extends Service implements OnInitListener {
     	}
     }
 	
+	public int createChannel(String name,String description,double offset,double factor,String unit,String longUnit)
+	{
+		Channel AD1 =  new Channel(name, description, offset, factor, unit, longUnit);
+		objs[channels] = AD1;
+		Log.i("MyApp","createChannel");
+		hRaw[channels]=-1;
+		hVal[channels]=-1;
+		hName[channels]=name;
+		hDescription[channels]=description;
+		hOffset[channels]=offset;
+		hFactor[channels]=factor;
+		hUnit[channels]=unit;
+		hLongUnit[channels]=longUnit;
+		channels += 1;
+		return channels-1;
+	}
+	
+	private void setupChannels()
+	{
+		hRaw = new int[MAX_CHANNELS];
+		hVal = new double[MAX_CHANNELS];
+		hName = new String[MAX_CHANNELS];
+		hDescription = new String[MAX_CHANNELS];
+		hOffset = new double[MAX_CHANNELS];
+		hFactor = new double[MAX_CHANNELS];
+		hUnit = new String[MAX_CHANNELS];
+		hLongUnit = new String[MAX_CHANNELS];
+		objs = new Channel[MAX_CHANNELS];
+
+		int tad1 = createChannel("AD1", "Main cell voltage", 0, (double) 0.1/6, "V","Volt");
+		AD1 = getChannelById(tad1);
+		
+		int tad2 = createChannel("AD2", "Receiver cell voltage", 0, (double) 0.5, "V","Volt");
+		AD2 = getChannelById(tad2);
+		AD2.setPrecision(1);
+		
+		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
+		RSSIrx = getChannelById(trssirx);
+		RSSIrx.setPrecision(0);
+		
+		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
+		RSSItx = getChannelById(trssitx);
+		RSSItx.setPrecision(0);
+	}
+	
+	public Channel getChannelById(int id)
+	{
+		return objs[id];
+	}
 	
 	// *************************************************
 	// Public methods
@@ -348,5 +424,29 @@ public class FrSkyServer extends Service implements OnInitListener {
 		{
 			simStop();
 		}
+	}
+	
+	public boolean parseFrame(Frame f)
+	{
+		//int [] frame = f.toInts(); 
+		boolean ok=true;
+		
+		
+		switch(f.frametype)
+		{
+			// Analog values
+			case Frame.FRAMETYPE_ANALOG:
+				// get AD1, AD2 etc from frame
+				AD1.setRaw(f.ad1);
+				AD2.setRaw(f.ad2);
+				RSSIrx.setRaw(f.rssirx);
+				RSSItx.setRaw(f.rssitx);
+				break;
+			
+			default:
+				Log.i(TAG,"Frametype currently not supported");
+				break;
+		}
+		return ok;
 	}
 }

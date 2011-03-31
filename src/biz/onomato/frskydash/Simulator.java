@@ -1,5 +1,6 @@
 package biz.onomato.frskydash;
 
+import android.app.Service;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
@@ -13,15 +14,16 @@ public class Simulator {
     public boolean running;
     
     //private FrSkyServer context;
-    private MyApp context;
-    private MyApp globals;
+    
+    private FrSkyServer server;
+    
     
     private static final String TAG="Simulator Class";
     
-	public Simulator(Context cnt)
+	public Simulator(Service srv)
 	{
 		//context = (FrSkyServer) cnt;
-		context = (MyApp) cnt;
+		server = (FrSkyServer) srv;
 		Log.i(TAG,"constructor");
 		running = false;
 		_ad1 = 0;
@@ -50,7 +52,7 @@ public class Simulator {
 				_simFrame = f.toInts();
 
 				//context.parseFrame(_simFrame);
-				context.parseFrame(f);
+				server.parseFrame(f);
 				//outFrame_tv.setText(globals.frameToHuman(simFrame));
 				//globals.parseFrame(simFrame);
 				

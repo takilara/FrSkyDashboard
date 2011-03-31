@@ -45,9 +45,12 @@ public class Simulator {
 				
 				//Log.i("SIM","Automatic post new frame");
 				
-				_simFrame = genFrame(_ad1,_ad2,_rssirx,_rssitx);
+				//_simFrame = genFrame(_ad1,_ad2,_rssirx,_rssitx);
+				Frame f = Frame.FrameFromAnalog(_ad1,_ad2,_rssirx,_rssitx);
+				_simFrame = f.toInts();
 
-				context.parseFrame(_simFrame);
+				//context.parseFrame(_simFrame);
+				context.parseFrame(f);
 				//outFrame_tv.setText(globals.frameToHuman(simFrame));
 				//globals.parseFrame(simFrame);
 				

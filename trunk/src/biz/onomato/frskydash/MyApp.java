@@ -106,8 +106,10 @@ public class MyApp extends Application  {
 		return (double) (hVal[id]);
 	}
 	
-	public boolean parseFrame(int[] frame)
+	//public boolean parseFrame(int[] frame)
+	public boolean parseFrame(Frame f)
 	{
+		int [] frame = f.toInts(); 
 		boolean ok=true;
 		
 		

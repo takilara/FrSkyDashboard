@@ -87,8 +87,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
         rssitx_raw	= 0;
         rssirx_raw 	= 0;
         
-        simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
-		outFrame_tv.setText(globals.frameToHuman(simFrame));
+         
+		
 		
 		// Code to update GUI cyclic
         tickHandler = new Handler();
@@ -98,12 +98,12 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 			public void run()
 			{
 //				Log.i(TAG,"Update GUI");
-				if(globals.sim.running)
+				if(server.sim.running)
 				{
-					sb_ad1.setProgress(globals.sim._ad1);
-					sb_ad2.setProgress(globals.sim._ad2);
-					sb_rssirx.setProgress(globals.sim._rssirx);
-					sb_rssitx.setProgress(globals.sim._rssitx);
+					sb_ad1.setProgress(server.sim._ad1);
+					sb_ad2.setProgress(server.sim._ad2);
+					sb_rssirx.setProgress(server.sim._rssirx);
+					sb_rssitx.setProgress(server.sim._rssitx);
 			    	
 			    	
 				}
@@ -128,7 +128,11 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     void doUnbindService() {
             if (server != null) {
             // Detach our existing connection.
-            unbindService(mConnection);
+	        	try {
+	        		unbindService(mConnection);
+	        	}
+	        	catch (Exception e)
+	        	{}
         }
     }
     
@@ -141,6 +145,9 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
+			btnSimTgl.setChecked(server.sim.running);
+			simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
+			outFrame_tv.setText(globals.frameToHuman(simFrame));
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -157,6 +164,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     			break;
     		case R.id.sim_tglBtn1:
     			if(server !=null) server.setSimStarted(btnSimTgl.isChecked());
+    			/*
     			if(btnSimTgl.isChecked()){
     				globals.sim.start();
     			}
@@ -164,6 +172,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     			{
     				globals.sim.stop();
     			}
+    			*/
     			break;
     	}
     }
@@ -174,28 +183,28 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 			switch (sb.getId()) {
 		    	case R.id.sim_sb_ad1:
 		    		ad1_raw = prog;
-		    		globals.sim._ad1 = ad1_raw;
+		    		server.sim._ad1 = ad1_raw;
 		    		ad1_raw_tv.setText(Integer.toString(prog));
 		    		break;
 		    	case R.id.sim_sb_ad2:
 		    		ad2_raw = prog;
-		    		globals.sim._ad2 = ad2_raw;
+		    		server.sim._ad2 = ad2_raw;
 		    		ad2_raw_tv.setText(Integer.toString(prog));
 		    		
 		    		break;
 		    	case R.id.sim_sb_rssitx:
 		    		rssitx_raw = prog;
-		    		globals.sim._rssitx = rssitx_raw;
+		    		server.sim._rssitx = rssitx_raw;
 		    		rssitx_raw_tv.setText(Integer.toString(prog));
 		    		break;
 		    	case R.id.sim_sb_rssirx:
 		    		rssirx_raw = prog;
-		    		globals.sim._rssirx = rssirx_raw;
+		    		server.sim._rssirx = rssirx_raw;
 		    		rssirx_raw_tv.setText(Integer.toString(prog));
 		    		break;
 			}
 		
-		simFrame = globals.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
+		simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
 		outFrame_tv.setText(globals.frameToHuman(simFrame));
 		}
 	}
@@ -213,8 +222,9 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 	public void onDestroy(){
 		super.onDestroy();
 		Log.i(TAG,"onDestroy");
+		doUnbindService();
 		//mTts.stop();
-		globals.sim.stop();
+		//globals.sim.stop();
        	
     }
 	// task testing
@@ -235,18 +245,22 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     public void onPause(){
     	
     	super.onPause();
-    	//mTts.stop();
-    	tickHandler.removeCallbacks(runnableTick);
     	Log.i(TAG,"onPause");
+    	//mTts.stop();
+    	//doUnbindService();
+    	tickHandler.removeCallbacks(runnableTick);
+    	
     }
     
     public void onResume(){
     	super.onResume();
     	//mTts.stop();
+    	doBindService();
+    	
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
     	Log.i(TAG,"onResume");
-    	btnSimTgl.setChecked(globals.sim.running);
+    	//btnSimTgl.setChecked(server.sim.running);
     }
     
     public void onStop(){

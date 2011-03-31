@@ -121,7 +121,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 globals = ((MyApp)getApplicationContext());
 		 
 		 
-		 //sim = new Simulator(this);
+		 sim = new Simulator(globals);
 		 
 		 _cyclicSpeechEnabled = false;
 		 _speakDelay = 30000;
@@ -225,6 +225,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		mTts.shutdown();
 		
 		
+		simStop();
+		sim.reset();
+		
+		//stopCyclicSpeaker();
+		
+		
 		stopForeground(true);
 	    Toast.makeText(this, "Service destroyed at " + time.getTime(), Toast.LENGTH_LONG).show();
 	}
@@ -322,11 +328,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public void simStart()
 	{
 		Log.i(TAG,"Sim Start");
+		sim.start();
 	}
 	
 	public void simStop()
 	{
 		Log.i(TAG,"Sim Stop");
+		sim.stop();
 	}
 	
 	public void setSimStarted(boolean state)

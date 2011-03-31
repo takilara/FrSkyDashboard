@@ -35,10 +35,6 @@ public class MyApp extends Application  {
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
-
-    
-    public Simulator sim;
-	
 	public MyApp(){
 		Log.i(TAG,"Constructor");
 	
@@ -67,7 +63,7 @@ public class MyApp extends Application  {
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
 		
-		sim = new Simulator(this);
+		//sim = new Simulator(this);
 	}
 
 	@Override
@@ -222,10 +218,7 @@ public class MyApp extends Application  {
 		RSSItx.setRaw(0);
 		
 		
-		sim.reset();
-		//stopCyclicSpeaker();
-		sim.stop();
-		//mTts.shutdown();
+		
 		Intent intent = new Intent(this, FrSkyServer.class);
 		stopService(intent);
 	}

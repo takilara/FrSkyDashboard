@@ -17,7 +17,7 @@ import android.os.Handler;
 import java.lang.Runnable;
 
 public class SimulatorActivity extends Activity implements OnSeekBarChangeListener, OnClickListener {
-	private static final String TAG = "Simulator";
+	private static final String TAG = "SimulatorActivity";
 	private Channel oAd1;
     MyApp globals;
     private SeekBar sb_ad1;
@@ -40,6 +40,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     private Handler tickHandler;
     private Runnable runnableTick;
     private FrSkyServer server;
+    private Frame _currentFrame;
     
     
     private int ad1_raw, ad2_raw,rssitx_raw,rssirx_raw;
@@ -146,8 +147,17 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			btnSimTgl.setChecked(server.sim.running);
-			simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
-			outFrame_tv.setText(globals.frameToHuman(simFrame));
+			//simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
+			 
+			
+			//Frame f = new Frame(simFrame);
+			_currentFrame = Frame.FrameFromAnalog(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
+			//Frame f = Frame.FrameFromAnalog(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
+			Log.i(TAG,"FC (member): "+_currentFrame.toHuman());
+			//Log.i(TAG,"FC (class ): "+Frame.frameToHuman(simFrame));
+			
+			
+			outFrame_tv.setText(_currentFrame.toHuman());
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -160,7 +170,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		//Log.i(TAG,"Some button clicked");
     	switch (v.getId()) {
     		case R.id.sim_btnSend:
-    			globals.parseFrame(simFrame);
+    			//globals.parseFrame(simFrame);
+    			globals.parseFrame(_currentFrame);
     			break;
     		case R.id.sim_tglBtn1:
     			if(server !=null) server.setSimStarted(btnSimTgl.isChecked());
@@ -204,8 +215,9 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		    		break;
 			}
 		
-		simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
-		outFrame_tv.setText(globals.frameToHuman(simFrame));
+		//simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
+		_currentFrame = Frame.FrameFromAnalog(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
+		outFrame_tv.setText(_currentFrame.toHuman());
 		}
 	}
 	

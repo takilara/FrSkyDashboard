@@ -5,6 +5,8 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TabActivity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -17,7 +19,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Locale;
+import java.util.UUID;
 
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +38,18 @@ public class Frskydash extends TabActivity {
 	private static final String TAG = "Tab Host"; 
     //MyApp globals;
 	private FrSkyServer server;
-	private int REQUEST_ENABLE_BT;
+	
+    private static final boolean D = true;
+    private BluetoothAdapter mBluetoothAdapter = null;
+    private BluetoothSocket btSocket = null;
+    private OutputStream outStream = null;
+    //Well known SPP UUID (will *probably* map to RFCOMM channel 1 (default) if not in use);
+    //see comments in onResume().
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+    private static String address = "00:21:86:CB:E7:46"; //<== hardcode your robot (server) MAC address here...
+    //00:19:5D:EE:39:BA	-	FrSky1
+    //00:21:86:CB:E7:46	-	NOR-654824J-1
     
     
     
@@ -99,7 +117,8 @@ public class Frskydash extends TabActivity {
         
         tabHost.setCurrentTab(0);
         
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Log.i(TAG,"Check for BT");
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
         	Log.i(TAG,"Device does not support Bluetooth");
@@ -109,38 +128,102 @@ public class Frskydash extends TabActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+    	Log.i(TAG,"Create Menu");
     	super.onCreateOptionsMenu(menu);
     	MenuInflater inflater = getMenuInflater();
     	inflater.inflate(R.menu.menu, menu);
     	return true;
     }
     
+    public void connBt()
+    {
+    	//When this returns, it will 'know' about the server, via it's MAC address.
+    	BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+    	Log.i(TAG,"Trying to connect to the device");
+    	        //We need two things before we can successfully connect	(authentication issues
+    	        //aside): a MAC address, which we already have, and an RFCOMM channel.
+    	        //Because RFCOMM channels (aka ports) are limited in number, Android doesn't allow
+    	        //you to use them directly; instead you request a RFCOMM mapping based on a service
+    	        //ID. In our case, we will use the well-known SPP Service ID. This ID is in UUID
+    	        //(GUID to you Microsofties) format. Given the UUID, Android will handle the
+    	        //mapping for you. Generally, this will return RFCOMM 1, but not always; it
+    	        //depends what other BlueTooth services are in use on your Android device.
+    	        try {
+    	                   btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
+    	        } catch (IOException e) {
+    	            Log.e(TAG, "ON RESUME: Socket creation failed.", e);
+    	        }
+
+    	        //Discovery may be going on, e.g., if you're running a 'scan for devices' search
+    	        //from your handset's Bluetooth settings, so we call cancelDiscovery(). It doesn't
+    	        //hurt to call it, but it might hurt not to... discovery is a heavyweight process;
+    	        //you don't want it in progress when a connection attempt is made.
+    	        mBluetoothAdapter.cancelDiscovery();
+
+    	        //Blocking connect, for a simple client nothing else can happen until a successful
+    	        //connection is made, so we don't care if it blocks.
+    	        Log.i(TAG,"Start connect method");
+    	        try {
+    	        	btSocket.connect();
+    	            Log.e(TAG, "ON RESUME: BT connection established, data transfer link open.");
+    	        } catch (IOException e) {
+    	            try {
+    	                btSocket.close();
+    	            } catch (IOException e2) {
+    	                Log.e(TAG, "ON RESUME: Unable to close socket during connection failure", e2);
+    	            }
+    	        }
+    	        Log.i(TAG,"End connect method");
+    	        
+
+    	        //Create a data stream so we can talk to server.
+    	        if(D)
+    	                   Log.e(TAG, "+ ABOUT TO SAY SOMETHING TO SERVER +");
+    	        try {
+    	            outStream = btSocket.getOutputStream();
+    	        } catch (IOException e) {
+    	            Log.e(TAG, "ON RESUME: Output stream creation failed.", e);
+    	        }
+
+    	        String message = "Hello message from client to server.";
+    	        byte[] msgBuffer = message.getBytes();
+    	        try {
+    	            outStream.write(msgBuffer);
+    	        } catch (IOException e) {
+    	            Log.e(TAG, "ON RESUME: Exception during write.", e);
+    	        }
+    }
+    
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-    	BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    	Log.i(TAG,"User has clicked something");
     	switch(item.getItemId()) 
     	{
     		case R.id.settings:
     			Log.i(TAG,"User clicked on Settings");
+    			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			break;
     		case R.id.scan_bluetooth:
     			Log.i(TAG,"User clicked on Scan");
-    			if (mBluetoothAdapter != null){ 
-	    			if(!mBluetoothAdapter.isEnabled())
-	    			{
-	    				Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	    			    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-	    			}
-	    			else
-	    			{
-	    				Intent intent = new Intent().setClass(getApplicationContext(), ActivityScanDevices.class);
-	                	startActivity(intent);
-	    			}
-    			}
+    			//Toast.makeText(this, "User clicked on Scan", Toast.LENGTH_LONG).show();
+    			
+    			Intent intent = new Intent().setClass(getApplicationContext(), ActivityScanDevices.class);
+            	startActivity(intent);
     			break;
     		case R.id.connect_bluetooth:
     			Log.i(TAG,"User clicked on Connect");
+    			//Toast.makeText(this, "User clicked on Connect", Toast.LENGTH_LONG).show();
+    			if (mBluetoothAdapter != null)
+    			{
+    				connBt();
+    				
+    			}
+    			else
+    			{
+    				Log.i(TAG,"NO BT");
+    			}
     			break;	
     			
     	}
@@ -149,22 +232,7 @@ public class Frskydash extends TabActivity {
     }
     
     
-    protected void onActivityResult(
-            int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_ENABLE_BT) {
-        	Log.i(TAG,"Check for bt");
-            if (resultCode == RESULT_OK) {
-            	//if(server!=null)	server.createSpeaker();
-            	Log.i(TAG,"BT now enabled");
-                
-            	Intent intent = new Intent().setClass(getApplicationContext(), ActivityScanDevices.class);
-            	startActivity(intent);
-                //sayHello();
-            } else {
-            	Log.i(TAG,"BT NOT enabled");
-            }
-        }
-    }
+    
     
     void doBindService() {
     	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);

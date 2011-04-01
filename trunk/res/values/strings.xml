@@ -16,4 +16,7 @@
     
     <string name="connect_bluetooth_label">Connect...</string>
     <string name="connect_bluetooth_title">Connect to stored device</string>
+    
+        
+    
 </resources>

@@ -23,7 +23,7 @@
             <TextView android:text="0" android:id="@+id/sim_rssirxraw" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
         </LinearLayout>
         <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_rssirx" android:layout_width="match_parent" android:max="255"></SeekBar>
-        
+         
         <View
         	android:layout_height="2dip"
         	android:background="#FF909090" 

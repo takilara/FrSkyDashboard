@@ -9,7 +9,7 @@
 	
 	<item android:id="@+id/connect_bluetooth"
 		android:title="@string/connect_bluetooth_label" />
-	
+	  
 </menu>
     
     

@@ -7,6 +7,7 @@ public class Frame {
 	
 	public static final int FRAMETYPE_UNDEFINED=-1;
 	public static final int FRAMETYPE_ANALOG=0;
+	public static final int FRAMETYPE_INPUT_REQUEST_ALL=1;
 	public int frametype;
 	private int[] _frame;
 	
@@ -82,6 +83,14 @@ public class Frame {
 		//Log.i(TAG,"Constructor");
 	}
 	
+	public static Frame InputRequestAll()
+	{
+		int[] buf = new int[11];
+		buf[0] = 0x7e;
+		buf[1] = 0xf8;	// Request All
+		buf[10] = 0x7e;	// Request All
+		return new Frame(buf);
+	}
 	
 	public static Frame FrameFromAnalog(int ad1,int ad2,int rssirx,int rssitx)
 	{

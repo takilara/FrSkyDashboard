@@ -19,6 +19,8 @@ package biz.onomato.frskydash;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
@@ -169,7 +171,7 @@ public class BluetoothSerialService {
      * Stop all threads
      */
     public synchronized void stop() {
-        if (D) Log.d(TAG, "stop");
+        Log.d(TAG, "stop threads");
 
 
         if (mConnectThread != null) {
@@ -249,10 +251,33 @@ public class BluetoothSerialService {
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
-                tmp = device.createRfcommSocketToServiceRecord(SerialPortServiceClass_UUID);
-            } catch (IOException e) {
+            	//BluetoothDevice hxm = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(device.getAddress());
+            	BluetoothDevice hxm = device;
+            	Method m;
+            	m = hxm.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+            	tmp = (BluetoothSocket)m.invoke(hxm, Integer.valueOf(1)); 
+                //tmp = device.createRfcommSocketToServiceRecord(SerialPortServiceClass_UUID);
+            } catch (Exception e) {
                 Log.e(TAG, "create() failed", e);
-            }
+            } 
+            /*
+            catch (SecurityException e) {
+				// TODO Auto-generated catch block
+            	Log.e(TAG, "create() failed", e);
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				Log.e(TAG, "create() failed", e);
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				Log.e(TAG, "create() failed", e);
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				Log.e(TAG, "create() failed", e);
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				Log.e(TAG, "create() failed", e);
+			}
+			*/
             mmSocket = tmp;
         }
 
@@ -305,9 +330,9 @@ public class BluetoothSerialService {
      * It handles all incoming and outgoing transmissions.
      */
     private class ConnectedThread extends Thread {
-        private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
+        private BluetoothSocket mmSocket;
+        private InputStream mmInStream;
+        private OutputStream mmOutStream;
         
 
         public ConnectedThread(BluetoothSocket socket) {
@@ -326,6 +351,8 @@ public class BluetoothSerialService {
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
+            
+            
         }
 
         public void run() {
@@ -350,6 +377,9 @@ public class BluetoothSerialService {
                     connectionLost();
                     break;
                 }
+                catch (Exception e) {
+                	break;
+                }
             }
         }
 
@@ -370,11 +400,21 @@ public class BluetoothSerialService {
         }
 
         public void cancel() {
+        	  if(mmInStream!=null) {
+        		  try {mmInStream.close();} catch (Exception e) {}
+        		  mmInStream = null;
+        	  }
+        	  if(mmOutStream!=null) {
+        		  try {mmOutStream.close();} catch (Exception e) {}
+        		  mmOutStream = null;
+        	  }
+              
             try {
                 mmSocket.close();
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
             }
+            mmSocket = null;
         }
     }
 }

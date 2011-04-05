@@ -46,6 +46,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static final int CMD_START_SPEECH	=	 2;
 	public static final int CMD_STOP_SPEECH		=	 3;
 	
+	
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
@@ -63,6 +64,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int _speakDelay;
 	private Handler speakHandler;
     private Runnable runnableSpeaker;
+    private boolean _dying=false;
 	
 	private final IBinder mBinder = new MyBinder();
 	
@@ -189,6 +191,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 			};
 	}
 	
+	public void send(byte[] out) {
+    	mSerialService.write( out );
+    }
 	
 	public void reConnect()
 	{
@@ -279,6 +284,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	@Override
 	public void onDestroy()
 	{
+		_dying=true;
 		super.onDestroy();
 		Log.i(TAG,"onDestroy");
 		
@@ -446,34 +452,36 @@ private final Handler mHandlerBT = new Handler() {
                 break;
                 
             case MESSAGE_READ:
-                byte[] readBuf = (byte[]) msg.obj;              
-                //mEmulatorView.write(readBuf, msg.arg1);
-            	
-                Log.d(TAG,"BT reading");
-                //for(int n=0;n<readBuf.length;n++)
-                int[] i = new int[msg.arg1];
-                for(int n=0;n<msg.arg1;n++)
-                {
-                	//Log.d(TAG,n+": "+readBuf[n]);
-                	if(readBuf[n]<0)
-                	{
-                		i[n]=readBuf[n]+256;
-                	}
-                	else
-                	{
-                		i[n]=readBuf[n];
-                	}
-                }
-                
-                // NEEDS to be changed!!!
-                if(i.length<20)
-                {
-                	Frame f = new Frame(i);
-                	Log.i(TAG,f.toHuman());
-                	parseFrame(f);
-                }
-            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
-                
+            	if(!_dying)
+            	{
+	                byte[] readBuf = (byte[]) msg.obj;              
+	                //mEmulatorView.write(readBuf, msg.arg1);
+	            	
+	                Log.d(TAG,"BT reading");
+	                //for(int n=0;n<readBuf.length;n++)
+	                int[] i = new int[msg.arg1];
+	                for(int n=0;n<msg.arg1;n++)
+	                {
+	                	//Log.d(TAG,n+": "+readBuf[n]);
+	                	if(readBuf[n]<0)
+	                	{
+	                		i[n]=readBuf[n]+256;
+	                	}
+	                	else
+	                	{
+	                		i[n]=readBuf[n];
+	                	}
+	                }
+	                
+	                // NEEDS to be changed!!!
+	                if(i.length<20)
+	                {
+	                	Frame f = new Frame(i);
+	                	Log.i(TAG,f.toHuman());
+	                	parseFrame(f);
+	                }
+	            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
+            	}
                 break;
                 
             case MESSAGE_DEVICE_NAME:

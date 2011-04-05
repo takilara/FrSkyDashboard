@@ -16,7 +16,9 @@ import android.util.Log;
 import android.view.View;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +48,20 @@ public class Frskydash extends TabActivity {
     //Well known SPP UUID (will *probably* map to RFCOMM channel 1 (default) if not in use);
     //see comments in onResume().
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+	public static final int MESSAGE_STATE_CHANGE = 1;
+	public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+    
+    public static final String DEVICE_NAME = "device_name";
+    private String mConnectedDeviceName = null;
+    public static final String TOAST = "toast";
+    private static BluetoothSerialService mSerialService = null;
+    
+    private static final int REQUEST_CONNECT_DEVICE = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
+    
 
     private static String address = "00:21:86:CB:E7:46"; //<== hardcode your robot (server) MAC address here...
     //00:19:5D:EE:39:BA	-	FrSky1
@@ -116,6 +132,8 @@ public class Frskydash extends TabActivity {
         
         
         tabHost.setCurrentTab(0);
+        
+        //mSerialService = new BluetoothSerialService(this, mHandlerBT);  
         
         Log.i(TAG,"Check for BT");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -195,6 +213,102 @@ public class Frskydash extends TabActivity {
     }
     
     
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(D) Log.d(TAG, "onActivityResult " + resultCode);
+        switch (requestCode) {
+        
+        case REQUEST_CONNECT_DEVICE:
+
+            // When DeviceListActivity returns with a device to connect
+            if (resultCode == Activity.RESULT_OK) {
+                // Get the device MAC address
+                String address = data.getExtras()
+                                     .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                // Get the BLuetoothDevice object
+                BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+                // Attempt to connect to the device
+                //mSerialService.connect(device);         
+                
+                // pass responsibility to the server
+                server.connect(device);
+            }
+            break;
+
+        case REQUEST_ENABLE_BT:
+            // When the request to enable Bluetooth returns
+            if (resultCode == Activity.RESULT_OK) {
+                Log.d(TAG, "BT not enabled");
+                
+    //            finishDialogNoBluetooth();                
+            }
+        }
+    } 
+    
+    
+/*    
+private final Handler mHandlerBT = new Handler() {
+    	
+        @Override
+        public void handleMessage(Message msg) {        	
+            switch (msg.what) {
+            case MESSAGE_STATE_CHANGE:
+                if(D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                switch (msg.arg1) {
+                case BluetoothSerialService.STATE_CONNECTED:
+                	Log.d(TAG,"BT connected");
+                    break;
+                    
+                case BluetoothSerialService.STATE_CONNECTING:
+                	Log.d(TAG,"BT connecting");
+                    break;
+                    
+                case BluetoothSerialService.STATE_LISTEN:
+                case BluetoothSerialService.STATE_NONE:
+                    break;
+                }
+                break;
+            case MESSAGE_WRITE:
+            	Log.d(TAG,"BT writing");
+//            	if (mLocalEcho) {
+//            		byte[] writeBuf = (byte[]) msg.obj;
+//            		mEmulatorView.write(writeBuf, msg.arg1);
+//            	}
+                
+                break;
+                
+            case MESSAGE_READ:
+                byte[] readBuf = (byte[]) msg.obj;              
+                //mEmulatorView.write(readBuf, msg.arg1);
+            	
+                Log.d(TAG,"BT reading");
+                //for(int n=0;n<readBuf.length;n++)
+                for(int n=0;n<msg.arg1;n++)
+                {
+                	Log.d(TAG,n+": "+readBuf[n]);
+                }
+                
+            	
+            	
+            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
+                
+                break;
+                
+            case MESSAGE_DEVICE_NAME:
+                // save the connected device's name
+                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                Toast.makeText(getApplicationContext(), "Connected to "
+                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                Log.d(TAG,"BT connected to...");
+                break;
+            case MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                               Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    };     
+*/
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -212,6 +326,7 @@ public class Frskydash extends TabActivity {
     			Intent intent = new Intent().setClass(getApplicationContext(), ActivityScanDevices.class);
             	startActivity(intent);
     			break;
+    		/*
     		case R.id.connect_bluetooth:
     			Log.i(TAG,"User clicked on Connect");
     			//Toast.makeText(this, "User clicked on Connect", Toast.LENGTH_LONG).show();
@@ -225,6 +340,21 @@ public class Frskydash extends TabActivity {
     				Log.i(TAG,"NO BT");
     			}
     			break;	
+    			*/
+    		case R.id.connect_bluetooth:
+    			if (server.getConnectionState() == BluetoothSerialService.STATE_NONE) {
+            		// Launch the DeviceListActivity to see devices and do scan
+            		Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            		startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+            	}
+            	else
+                	if (server.getConnectionState() == BluetoothSerialService.STATE_CONNECTED) {
+                		// Connected, reconnect
+                		server.reconnectBt();
+                		//mSerialService.stop();
+    		    		//mSerialService.start();
+                	}
+                return true;
     			
     	}
     	return true;
@@ -232,7 +362,9 @@ public class Frskydash extends TabActivity {
     }
     
     
-    
+    //public int getConnectionState() {
+//		return mSerialService.getState();
+//	}
     
     void doBindService() {
     	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);

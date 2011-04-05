@@ -10,12 +10,14 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.speech.tts.TextToSpeech;
@@ -44,6 +46,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static final int CMD_START_SPEECH	=	 2;
 	public static final int CMD_STOP_SPEECH		=	 3;
 	
+	public static final int MESSAGE_STATE_CHANGE = 1;
+	public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+    public static final String DEVICE_NAME = "device_name";
+    private String mConnectedDeviceName = null;
+    public static final String TOAST = "toast";
+    private static BluetoothSerialService mSerialService = null;
+    private BluetoothDevice _device = null;
+    public boolean reconnectBt = true;
+    
+	
 	private TextToSpeech mTts;
 	private int _speakDelay;
 	private Handler speakHandler;
@@ -69,6 +84,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private String[] hLongUnit;
 	private int channels=0;
 	private Channel[] objs;
+	
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
@@ -140,6 +156,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 
 		 globals = ((MyApp)getApplicationContext());
 		 
+		 mSerialService = new BluetoothSerialService(this, mHandlerBT);
 		 
 		 sim = new Simulator(this);
 		 
@@ -173,8 +190,26 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 	
-	
+	public void reConnect()
+	{
+		//if(getConnectionState()==BluetoothSerialService.)
+		mSerialService.connect(_device);
+	}
 
+	public void connect(BluetoothDevice device)
+	{
+		_device = device;
+		mSerialService.connect(device);
+	}
+	public void reconnectBt()
+	{
+		mSerialService.stop();
+		mSerialService.start();
+	}
+	
+	public int getConnectionState() {
+			return mSerialService.getState();
+	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
@@ -254,6 +289,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		stopCyclicSpeaker();
 		mTts.shutdown();
+		mSerialService.stop();
 		
 		//AD1.setRaw(0);
 		//AD2.setRaw(0);
@@ -372,6 +408,88 @@ public class FrSkyServer extends Service implements OnInitListener {
 		t[10] = 0xfe;
 		return t;
 	}
+	
+private final Handler mHandlerBT = new Handler() {
+    	
+        @Override
+        public void handleMessage(Message msg) {        	
+            switch (msg.what) {
+            case MESSAGE_STATE_CHANGE:
+                Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                switch (msg.arg1) {
+                case BluetoothSerialService.STATE_CONNECTED:
+                	Log.d(TAG,"BT connected");
+                    break;
+                    
+                case BluetoothSerialService.STATE_CONNECTING:
+                	Log.d(TAG,"BT connecting");
+                    break;
+                    
+                case BluetoothSerialService.STATE_LISTEN:
+                	Log.d(TAG,"BT listening");
+                case BluetoothSerialService.STATE_NONE:
+                	Log.d(TAG,"BT state NONE");
+                	//if(reconnectBt)
+                	//{
+                	//	reConnect();
+                	//}
+                    break;
+                }
+                break;
+            case MESSAGE_WRITE:
+            	Log.d(TAG,"BT writing");
+//            	if (mLocalEcho) {
+//            		byte[] writeBuf = (byte[]) msg.obj;
+//            		mEmulatorView.write(writeBuf, msg.arg1);
+//            	}
+                
+                break;
+                
+            case MESSAGE_READ:
+                byte[] readBuf = (byte[]) msg.obj;              
+                //mEmulatorView.write(readBuf, msg.arg1);
+            	
+                Log.d(TAG,"BT reading");
+                //for(int n=0;n<readBuf.length;n++)
+                int[] i = new int[msg.arg1];
+                for(int n=0;n<msg.arg1;n++)
+                {
+                	//Log.d(TAG,n+": "+readBuf[n]);
+                	if(readBuf[n]<0)
+                	{
+                		i[n]=readBuf[n]+256;
+                	}
+                	else
+                	{
+                		i[n]=readBuf[n];
+                	}
+                }
+                
+                // NEEDS to be changed!!!
+                if(i.length<20)
+                {
+                	Frame f = new Frame(i);
+                	Log.i(TAG,f.toHuman());
+                	parseFrame(f);
+                }
+            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
+                
+                break;
+                
+            case MESSAGE_DEVICE_NAME:
+                // save the connected device's name
+                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                Toast.makeText(getApplicationContext(), "Connected to "
+                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                Log.d(TAG,"BT connected to...");
+                break;
+            case MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                               Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    };   
 	
 	public TextToSpeech createSpeaker()
 	{

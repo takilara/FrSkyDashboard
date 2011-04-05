@@ -194,6 +194,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public void send(byte[] out) {
     	mSerialService.write( out );
     }
+	public void send(int[] out) {
+    	mSerialService.write( out );
+    }
 	
 	public void reConnect()
 	{
@@ -425,21 +428,36 @@ private final Handler mHandlerBT = new Handler() {
                 switch (msg.arg1) {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Log.d(TAG,"BT connected");
+                	send(Frame.InputRequestAll().toInts());
+//                	if (mMenuItemConnect != null) {
+//                		mMenuItemConnect.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
+//                		mMenuItemConnect.setTitle(R.string.disconnect);
+//                	}
+//                	
+//                	mInputManager.showSoftInput(mEmulatorView, InputMethodManager.SHOW_IMPLICIT);
+//                	
+//                    mTitle.setText(R.string.title_connected_to);
+//                    mTitle.append(mConnectedDeviceName);
+                    
                     break;
                     
                 case BluetoothSerialService.STATE_CONNECTING:
                 	Log.d(TAG,"BT connecting");
+                	 //mTitle.setText(R.string.title_connecting);
                     break;
                     
                 case BluetoothSerialService.STATE_LISTEN:
                 	Log.d(TAG,"BT listening");
                 case BluetoothSerialService.STATE_NONE:
                 	Log.d(TAG,"BT state NONE");
-                	//if(reconnectBt)
-                	//{
-                	//	reConnect();
-                	//}
-                    break;
+//                	if (mMenuItemConnect != null) {
+//                		mMenuItemConnect.setIcon(android.R.drawable.ic_menu_search);
+//                		mMenuItemConnect.setTitle(R.string.connect);
+//                	}
+//
+//            		mInputManager.hideSoftInputFromWindow(mEmulatorView.getWindowToken(), 0);
+//                	
+//                    mTitle.setText(R.string.title_not_connected);                    break;
                 }
                 break;
             case MESSAGE_WRITE:

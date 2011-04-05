@@ -15,29 +15,37 @@ public class Frame {
 	
 	public Frame(int[] frame)
 	{
-		//Log.i(TAG,"Constructor");
-		
-		// fix bytestuffing
-		if(frame.length>11)
+		if((frame.length>10) && (frame.length<30))
 		{
-			frame = frameDecode(frame);
-		}
-		
-		_frame = frame;
-		
-		switch(frame[1])
-		{
-			// Analog values
-			case 0xfe:
-				frametype=FRAMETYPE_ANALOG;
-				ad1 = frame[2];
-				ad2 = frame[3];
-				rssirx = frame[4];
-				rssitx = (int) frame[5]/2;
-				break;
-			default:
-				frametype=FRAMETYPE_UNDEFINED;
-				break;
+			//Log.i(TAG,"Constructor");
+			
+			// fix bytestuffing
+			if(frame.length>11)
+			{
+				frame = frameDecode(frame);
+			}
+			
+			_frame = frame;
+			
+			switch(frame[1])
+			{
+				// Analog values
+				case 0xfe:
+					frametype=FRAMETYPE_ANALOG;
+					ad1 = frame[2];
+					ad2 = frame[3];
+					rssirx = frame[4];
+					rssitx = (int) frame[5]/2;
+					break;
+				case 0xf8:
+					frametype=FRAMETYPE_INPUT_REQUEST_ALL;
+					break;
+				default:
+					frametype=FRAMETYPE_UNDEFINED;
+					
+					Log.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
+					break;
+			}
 		}
 	}
 	

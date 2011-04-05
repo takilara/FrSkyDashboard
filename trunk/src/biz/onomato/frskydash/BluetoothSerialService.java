@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Queue;
 import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
@@ -367,6 +368,8 @@ public class BluetoothSerialService {
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
+            byte[] framebuffer = new byte[1024];
+            
             int bytes;
 
             // Keep listening to the InputStream while connected
@@ -374,9 +377,18 @@ public class BluetoothSerialService {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
+                    
+                    
 
                     //mEmulatorView.write(buffer, bytes);
                     // Send the obtained bytes to the UI Activity
+
+                    // Fix buffer to Frame here
+                    // for each byte in current buffer, copy to framebuffer.
+                    // if current byte==7e and framebuffer length>=11 then send framebuffer to server, 
+                    // 	reset framebuffer
+                    // 	continue loop
+                    
                     mHandler.obtainMessage(Frskydash.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
                     
                     String a = buffer.toString();

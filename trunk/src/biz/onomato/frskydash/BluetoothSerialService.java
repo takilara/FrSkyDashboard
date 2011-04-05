@@ -204,6 +204,15 @@ public class BluetoothSerialService {
         r.write(out);
     }
     
+    public void write(int[] out) {
+    	byte[] out2 = new byte[out.length];
+    	for(int n=0;n<out.length;n++)
+    	{
+    		out2[n] = (byte) out[n];
+    	}
+    	write(out2);
+    }
+    
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
      */
@@ -373,7 +382,7 @@ public class BluetoothSerialService {
                     String a = buffer.toString();
                     a = "";
                 } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
+                    //Log.e(TAG, "disconnected", e);
                     connectionLost();
                     break;
                 }

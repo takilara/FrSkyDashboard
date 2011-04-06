@@ -478,6 +478,7 @@ private final Handler mHandlerBT = new Handler() {
 	                Log.d(TAG,"BT reading");
 	                //for(int n=0;n<readBuf.length;n++)
 	                int[] i = new int[msg.arg1];
+	                
 	                for(int n=0;n<msg.arg1;n++)
 	                {
 	                	//Log.d(TAG,n+": "+readBuf[n]);

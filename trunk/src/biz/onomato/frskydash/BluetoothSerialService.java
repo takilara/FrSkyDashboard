@@ -369,6 +369,9 @@ public class BluetoothSerialService {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
             byte[] framebuffer = new byte[1024];
+            int ptr=0;
+            int endpos = 0;
+            int startpos = 0;
             
             int bytes;
 
@@ -385,11 +388,66 @@ public class BluetoothSerialService {
 
                     // Fix buffer to Frame here
                     // for each byte in current buffer, copy to framebuffer.
+                    for(int n=0;n<bytes;n++)
+                    {
+                    	framebuffer[ptr]=buffer[n];
+                    	ptr++;
+                    }
+                    if(ptr>=11)	// minimum frame size
+                    {
+                    	//scan added bytes for 7e
+                    	Log.i(TAG,"Possible frame");
+                    	for(int i=ptr-bytes;i<ptr;i++)
+                    	{
+                    		if(framebuffer[i]==0x7e)
+                    		{
+                    			endpos = i;
+                    			break;
+                    		}
+                    	}
+                    	if(endpos>0)
+                    	{
+                    		Log.i(TAG,"Complete frame");
+	                    	byte[] frame = new byte[endpos];
+	                    	int j = 0;
+	                    	for(int i=startpos;i<endpos;i++)
+	                    	{
+	                    		frame[j] = framebuffer[i];
+	                    		j++;
+	                    	}
+//	                    	Log.i(TAG,"Frame to transfer: ");
+//	                    	for(int i=0;i<frame.length;i++)
+//	                    	{
+//	                    		Log.i(TAG,i+":\t"+frame[i]);
+//	                    	}
+	                    	byte[] tbuf = new byte[ptr-endpos];
+	                    	for(int i=0;i<tbuf.length;i++)
+	                    	{
+	                    		tbuf[i]=framebuffer[endpos+i];
+	                    	}
+//	                    	String framebufferBefore = "";
+//	                    	for(int i=0;i<=ptr;i++)
+//	                    	{
+//	                    		framebufferBefore += (String) (framebuffer[i]);
+//	                    	}
+	                    	framebuffer = new byte[1024];
+	                    	for(int i=0;i<tbuf.length;i++)
+	                    	{
+	                    		framebuffer[i]=tbuf[i];
+	                    	}
+	                    	ptr=tbuf.length;
+	                    	endpos=0;
+	                    	
+	                    	mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
+                    	}
+                    	
+                    }
                     // if current byte==7e and framebuffer length>=11 then send framebuffer to server, 
                     // 	reset framebuffer
                     // 	continue loop
                     
-                    mHandler.obtainMessage(Frskydash.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                    //mHandler.obtainMessage(Frskydash.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                    
                     
                     String a = buffer.toString();
                     a = "";

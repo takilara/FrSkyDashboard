@@ -4,13 +4,15 @@
 		android:title="@string/settings_label"
 		android:alphabeticShortcut="@string/settings_shortcut" />
 	
-	<item android:id="@+id/scan_bluetooth"
-		android:title="@string/scan_bluetooth_label" />
-	
+
 	<item android:id="@+id/connect_bluetooth"
 		android:title="@string/connect_bluetooth_label" />
+		
+	<item android:id="@+id/disconnect_bluetooth"
+		android:visible="false" 
+		android:title="@string/disconnect_bluetooth_label" />
 	  
-</menu>
+</menu> 
     
     
     

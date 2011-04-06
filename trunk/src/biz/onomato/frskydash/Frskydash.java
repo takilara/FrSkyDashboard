@@ -62,6 +62,8 @@ public class Frskydash extends TabActivity {
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
     
+    private Menu _menu;
+    
 
     private static String address = "00:21:86:CB:E7:46"; //<== hardcode your robot (server) MAC address here...
     //00:19:5D:EE:39:BA	-	FrSky1
@@ -149,6 +151,11 @@ public class Frskydash extends TabActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
+        else
+        {
+        	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
+        	//tItem.setEnabled(true);
+        }
     }
     
     @Override
@@ -158,12 +165,46 @@ public class Frskydash extends TabActivity {
     	super.onCreateOptionsMenu(menu);
     	MenuInflater inflater = getMenuInflater();
     	inflater.inflate(R.menu.menu, menu);
+    	
     	return true;
     }
     
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+    	super.onPrepareOptionsMenu(menu);
+    	MenuItem tConItem = (MenuItem)  menu.findItem(R.id.connect_bluetooth);
+    	MenuItem tDisConItem = (MenuItem)  menu.findItem(R.id.disconnect_bluetooth);
+    	if (!mBluetoothAdapter.isEnabled()) {
+    		tConItem.setEnabled(false);
+    		tDisConItem.setEnabled(false);
+    	}
+    	else
+    	{
+    		tConItem.setEnabled(true);
+    		tDisConItem.setEnabled(true);
+    	}
+    	
+    	if(server.getConnectionState()==BluetoothSerialService.STATE_NONE)
+    	{
+    		tConItem.setVisible(true);
+    		tDisConItem.setVisible(false);
+    	}
+    	else
+    	{
+    		tConItem.setVisible(false);
+    		tDisConItem.setVisible(true);
+    	}
+    		
+    	
+		return true;
+    }
+	
     public void notifyBtNotEnabled()
     {
     	Toast.makeText(this, "Bluetooth not enabled, only simulations are available", Toast.LENGTH_LONG).show();
+    	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
+    	//tItem.setEnabled(false);
     }
     
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -191,6 +232,8 @@ public class Frskydash extends TabActivity {
             // When the request to enable Bluetooth returns
             if (resultCode == Activity.RESULT_OK) {
                 Log.d(TAG, "BT now enabled");
+                //MenuItem tItem = (MenuItem)  findViewById(R.id.connect_bluetooth);
+                
     //            finishDialogNoBluetooth();                
             }
             else
@@ -216,28 +259,7 @@ public class Frskydash extends TabActivity {
     			Log.i(TAG,"User clicked on Settings");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			break;
-    		case R.id.scan_bluetooth:
-    			Log.i(TAG,"User clicked on Scan");
-    			//Toast.makeText(this, "User clicked on Scan", Toast.LENGTH_LONG).show();
-    			
-    			Intent intent = new Intent().setClass(getApplicationContext(), ActivityScanDevices.class);
-            	startActivity(intent);
-    			break;
-    		/*
-    		case R.id.connect_bluetooth:
-    			Log.i(TAG,"User clicked on Connect");
-    			//Toast.makeText(this, "User clicked on Connect", Toast.LENGTH_LONG).show();
-    			if (mBluetoothAdapter != null)
-    			{
-    				connBt();
-    				
-    			}
-    			else
-    			{
-    				Log.i(TAG,"NO BT");
-    			}
-    			break;	
-    			*/
+    		
     		case R.id.connect_bluetooth:
     			if (server.getConnectionState() == BluetoothSerialService.STATE_NONE) {
             		// Launch the DeviceListActivity to see devices and do scan
@@ -252,6 +274,10 @@ public class Frskydash extends TabActivity {
     		    		//mSerialService.start();
                 	}
                 return true;
+    		case R.id.disconnect_bluetooth:
+    			server.disconnect();
+    			break;
+             
     			
     	}
     	return true;

@@ -156,6 +156,7 @@ public class Frame {
 	public static String frameToHuman(int[] frame)
 	{
 		StringBuffer buf = new StringBuffer();
+		//Log.i(TAG,"Create human raedable string with "+frame.length+" bytes");
 
 		for(int n=0;n<frame.length;n++)
 		{
@@ -169,6 +170,7 @@ public class Frame {
 			buf.append(' ');
 		}
 		String out = buf.toString();
+		//Log.i(TAG,"String is then: "+out);
 		return out;
 	}
 	

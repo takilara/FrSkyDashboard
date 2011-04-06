@@ -209,6 +209,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_device = device;
 		mSerialService.connect(device);
 	}
+	
+	public void disconnect()
+	{
+		mSerialService.stop();
+	}
+	
 	public void reconnectBt()
 	{
 		mSerialService.stop();
@@ -281,6 +287,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		stopSelf();
 	}
 	
+
 
 
 	

@@ -133,13 +133,21 @@ public class Frskydash extends TabActivity {
         
         tabHost.setCurrentTab(0);
         
-        //mSerialService = new BluetoothSerialService(this, mHandlerBT);  
         
         Log.i(TAG,"Check for BT");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
         	Log.i(TAG,"Device does not support Bluetooth");
+        	// Disable all BT related menu items
+        	// Display message stating only sim is available
+        	notifyBtNotEnabled();
+        }
+        
+        // popup to enable BT if not enabled
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
     }
     
@@ -153,65 +161,10 @@ public class Frskydash extends TabActivity {
     	return true;
     }
     
-    public void connBt()
+    public void notifyBtNotEnabled()
     {
-    	//When this returns, it will 'know' about the server, via it's MAC address.
-    	BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-    	Log.i(TAG,"Trying to connect to the device");
-    	        //We need two things before we can successfully connect	(authentication issues
-    	        //aside): a MAC address, which we already have, and an RFCOMM channel.
-    	        //Because RFCOMM channels (aka ports) are limited in number, Android doesn't allow
-    	        //you to use them directly; instead you request a RFCOMM mapping based on a service
-    	        //ID. In our case, we will use the well-known SPP Service ID. This ID is in UUID
-    	        //(GUID to you Microsofties) format. Given the UUID, Android will handle the
-    	        //mapping for you. Generally, this will return RFCOMM 1, but not always; it
-    	        //depends what other BlueTooth services are in use on your Android device.
-    	        try {
-    	                   btSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
-    	        } catch (IOException e) {
-    	            Log.e(TAG, "ON RESUME: Socket creation failed.", e);
-    	        }
-
-    	        //Discovery may be going on, e.g., if you're running a 'scan for devices' search
-    	        //from your handset's Bluetooth settings, so we call cancelDiscovery(). It doesn't
-    	        //hurt to call it, but it might hurt not to... discovery is a heavyweight process;
-    	        //you don't want it in progress when a connection attempt is made.
-    	        mBluetoothAdapter.cancelDiscovery();
-
-    	        //Blocking connect, for a simple client nothing else can happen until a successful
-    	        //connection is made, so we don't care if it blocks.
-    	        Log.i(TAG,"Start connect method");
-    	        try {
-    	        	btSocket.connect();
-    	            Log.e(TAG, "ON RESUME: BT connection established, data transfer link open.");
-    	        } catch (IOException e) {
-    	            try {
-    	                btSocket.close();
-    	            } catch (IOException e2) {
-    	                Log.e(TAG, "ON RESUME: Unable to close socket during connection failure", e2);
-    	            }
-    	        }
-    	        Log.i(TAG,"End connect method");
-    	        
-
-    	        //Create a data stream so we can talk to server.
-    	        if(D)
-    	                   Log.e(TAG, "+ ABOUT TO SAY SOMETHING TO SERVER +");
-    	        try {
-    	            outStream = btSocket.getOutputStream();
-    	        } catch (IOException e) {
-    	            Log.e(TAG, "ON RESUME: Output stream creation failed.", e);
-    	        }
-
-    	        String message = "Hello message from client to server.";
-    	        byte[] msgBuffer = message.getBytes();
-    	        try {
-    	            outStream.write(msgBuffer);
-    	        } catch (IOException e) {
-    	            Log.e(TAG, "ON RESUME: Exception during write.", e);
-    	        }
+    	Toast.makeText(this, "Bluetooth not enabled, only simulations are available", Toast.LENGTH_LONG).show();
     }
-    
     
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(D) Log.d(TAG, "onActivityResult " + resultCode);
@@ -237,77 +190,21 @@ public class Frskydash extends TabActivity {
         case REQUEST_ENABLE_BT:
             // When the request to enable Bluetooth returns
             if (resultCode == Activity.RESULT_OK) {
-                Log.d(TAG, "BT not enabled");
-                
+                Log.d(TAG, "BT now enabled");
     //            finishDialogNoBluetooth();                
+            }
+            else
+            {
+            	Log.d(TAG,"BT not enabled");
+            	// Disable all BT related menu items
+            	// Display message stating only sim is available
+            	notifyBtNotEnabled();
             }
         }
     } 
     
     
-/*    
-private final Handler mHandlerBT = new Handler() {
-    	
-        @Override
-        public void handleMessage(Message msg) {        	
-            switch (msg.what) {
-            case MESSAGE_STATE_CHANGE:
-                if(D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                switch (msg.arg1) {
-                case BluetoothSerialService.STATE_CONNECTED:
-                	Log.d(TAG,"BT connected");
-                    break;
-                    
-                case BluetoothSerialService.STATE_CONNECTING:
-                	Log.d(TAG,"BT connecting");
-                    break;
-                    
-                case BluetoothSerialService.STATE_LISTEN:
-                case BluetoothSerialService.STATE_NONE:
-                    break;
-                }
-                break;
-            case MESSAGE_WRITE:
-            	Log.d(TAG,"BT writing");
-//            	if (mLocalEcho) {
-//            		byte[] writeBuf = (byte[]) msg.obj;
-//            		mEmulatorView.write(writeBuf, msg.arg1);
-//            	}
-                
-                break;
-                
-            case MESSAGE_READ:
-                byte[] readBuf = (byte[]) msg.obj;              
-                //mEmulatorView.write(readBuf, msg.arg1);
-            	
-                Log.d(TAG,"BT reading");
-                //for(int n=0;n<readBuf.length;n++)
-                for(int n=0;n<msg.arg1;n++)
-                {
-                	Log.d(TAG,n+": "+readBuf[n]);
-                }
-                
-            	
-            	
-            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
-                
-                break;
-                
-            case MESSAGE_DEVICE_NAME:
-                // save the connected device's name
-                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
-                Toast.makeText(getApplicationContext(), "Connected to "
-                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                Log.d(TAG,"BT connected to...");
-                break;
-            case MESSAGE_TOAST:
-                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
-                               Toast.LENGTH_SHORT).show();
-                break;
-            }
-        }
-    };     
-*/
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)

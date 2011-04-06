@@ -482,7 +482,7 @@ private final Handler mHandlerBT = new Handler() {
 	                byte[] readBuf = (byte[]) msg.obj;              
 	                //mEmulatorView.write(readBuf, msg.arg1);
 	            	
-	                Log.d(TAG,"BT reading");
+	                Log.d(TAG,"BT got frame, length: "+msg.arg1);
 	                //for(int n=0;n<readBuf.length;n++)
 	                int[] i = new int[msg.arg1];
 	                
@@ -616,6 +616,7 @@ private final Handler mHandlerBT = new Handler() {
 			
 			default:
 				Log.i(TAG,"Frametype currently not supported");
+				Log.i(TAG,"Frame: "+f.toHuman());
 				break;
 		}
 		return ok;

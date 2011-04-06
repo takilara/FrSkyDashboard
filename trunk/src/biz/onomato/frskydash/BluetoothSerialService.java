@@ -21,6 +21,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -369,6 +372,8 @@ public class BluetoothSerialService {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
             byte[] framebuffer = new byte[1024];
+            //List  b = new LinkedList();
+            ArrayList<Byte> b = new ArrayList<Byte>();
             int ptr=0;
             int endpos = 0;
             int startpos = 0;
@@ -381,7 +386,7 @@ public class BluetoothSerialService {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
                     
-                    
+                    Log.i(TAG,"Read "+bytes+" new bytes.");
 
                     //mEmulatorView.write(buffer, bytes);
                     // Send the obtained bytes to the UI Activity
@@ -390,58 +395,142 @@ public class BluetoothSerialService {
                     // for each byte in current buffer, copy to framebuffer.
                     for(int n=0;n<bytes;n++)
                     {
+                    	b.add((byte) buffer[n]);
                     	framebuffer[ptr]=buffer[n];
                     	ptr++;
                     }
-                    if(ptr>=11)	// minimum frame size
+                    Log.i(TAG,"b now at "+b.size()+" elements.");
+                    if(b.size()>=11)
                     {
-                    	//scan added bytes for 7e
-                    	Log.i(TAG,"Possible frame");
-                    	for(int i=ptr-bytes;i<ptr;i++)
+                    	boolean containsFullFrame = true;	// assume a frame is in there
+                    	while(containsFullFrame)
                     	{
-                    		if(framebuffer[i]==0x7e)
-                    		{
-                    			endpos = i;
-                    			break;
-                    		}
-                    	}
-                    	if(endpos>0)
-                    	{
-                    		Log.i(TAG,"Complete frame");
-	                    	byte[] frame = new byte[endpos];
-	                    	int j = 0;
-	                    	for(int i=startpos;i<endpos;i++)
+	                    	// find first 7e
+	                    	Log.i(TAG,"possible complete frame");
+	                    	startpos = b.indexOf((byte) 0x7e);
+	                    	Log.i(TAG,"Startpos: "+startpos);
+	                    	// find second 7e
+	                    	endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+1;
+	                    	Log.i(TAG,"Endpos: "+endpos);
+	                    	if((startpos!=-1) && (endpos!=-1) && (startpos!=endpos))
 	                    	{
-	                    		frame[j] = framebuffer[i];
-	                    		j++;
+	                    		
+	                    		Log.i(TAG,"We have complete frame:");
+	//                    		Byte[] frame = new Byte[endpos-startpos+1];
+	//                    		Log.i(TAG,"Made a Byte array");
+	//                    		frame = (Byte[]) b.subList(startpos, endpos).toArray();
+	                    		
+	                    		byte[] frame = new byte[endpos-startpos+1];
+	                    		//Log.i(TAG,"Made a byte array");
+	                    		int n=0;
+	                    		for (int i=startpos;i<=endpos;i++)
+	                    		{
+	                    			//Log.i(TAG,"Copying element "+i+" to position "+n);
+	                    			//Log.i(TAG,"With value: "+(byte) b.get(i));
+	                    			frame[n]=(byte) b.get(i);
+	                    			n++;
+	                    		}
+	                    		Log.i(TAG,"Removing items from b, old size:"+b.size());
+	                    		List c =  b.subList(endpos+1, b.size());
+	                    		b = new ArrayList<Byte>();
+	                    		//b = (ArrayList<Byte>) c;
+	                    		for (int i=0;i<c.size();i++)
+	                    		{
+	                    			b.add((Byte) c.get(i));
+	                    		}
+	                    		Log.i(TAG,"Items removed from b, new size:"+b.size());
+	                    		Log.i(TAG,"b now contains:");
+	                    		for (int i=0;i<b.size();i++)
+	                    		{
+	                    			Log.i(TAG,"\t"+b.get(i));
+	                    		}
+	                    		
+	                    		
+	//                    		Log.i(TAG,"Copied substring to byte array");
+	//                    		for(int i=0;i<frame.length;i++)
+	//                    		{
+	//                    			Log.i(TAG,"\t"+i+": "+frame[i]);
+	//                    		}
+	                    		mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
+	                    		
+	                    		Log.i(TAG,"recheck after transmission");
+	                    		startpos = b.indexOf((byte) 0x7e);
+		                    	Log.i(TAG,"Startpos: "+startpos);
+		                    	// find second 7e
+		                    	endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+1;
+		                    	Log.i(TAG,"Endpos: "+endpos);
+		                    	if((startpos!=-1) && (endpos!=-1) && (startpos!=endpos))
+		                    	{
+		                    		containsFullFrame=true;
+		                    		Log.i(TAG,"please repeat");
+		                    	}
+		                    	else
+		                    	{
+		                    		containsFullFrame=false;
+		                    	}
+	                    		
+	                    		
 	                    	}
+	                    	else
+	                    	{
+	                    		containsFullFrame=false;
+	                    		Log.i(TAG, "not yet a complete frame (start,end,size): ("+startpos+","+endpos+","+b.size()+")");
+	                    	}
+                    	}
+                    			
+                    	
+                    	
+                    }
+//                    if(ptr>=11)	// minimum frame size
+//                    {
+//                    	//scan added bytes for 7e
+//                    	Log.i(TAG,"Possible frame");
+//                    	
+//                    	for(int i=ptr-bytes;i<ptr;i++)
+//                    	{
+//                    		if(framebuffer[i]==0x7e)
+//                    		{
+//                    			endpos = i;
+//                    			break;
+//                    		}
+//                    	}
+//                    	if(endpos>0)
+//                    	{
+//                    		Log.i(TAG,"Complete frame");
+//	                    	byte[] frame = new byte[endpos+1];
+//	                    	int j = 0;
+//	                    	for(int i=startpos;i<=endpos;i++)
+//	                    	{
+//	                    		frame[j] = framebuffer[i];
+//	                    		j++;
+//	                    	}
 //	                    	Log.i(TAG,"Frame to transfer: ");
 //	                    	for(int i=0;i<frame.length;i++)
 //	                    	{
 //	                    		Log.i(TAG,i+":\t"+frame[i]);
 //	                    	}
-	                    	byte[] tbuf = new byte[ptr-endpos];
-	                    	for(int i=0;i<tbuf.length;i++)
-	                    	{
-	                    		tbuf[i]=framebuffer[endpos+i];
-	                    	}
-//	                    	String framebufferBefore = "";
-//	                    	for(int i=0;i<=ptr;i++)
+//	                    	byte[] tbuf = new byte[ptr-endpos];
+//	                    	for(int i=0;i<tbuf.length;i++)
 //	                    	{
-//	                    		framebufferBefore += (String) (framebuffer[i]);
+//	                    		tbuf[i]=framebuffer[endpos+i];
 //	                    	}
-	                    	framebuffer = new byte[1024];
-	                    	for(int i=0;i<tbuf.length;i++)
-	                    	{
-	                    		framebuffer[i]=tbuf[i];
-	                    	}
-	                    	ptr=tbuf.length;
-	                    	endpos=0;
-	                    	
-	                    	mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
-                    	}
-                    	
-                    }
+////	                    	String framebufferBefore = "";
+////	                    	for(int i=0;i<=ptr;i++)
+////	                    	{
+////	                    		framebufferBefore += (String) (framebuffer[i]);
+////	                    	}
+//	                    	framebuffer = new byte[1024];
+//	                    	for(int i=0;i<tbuf.length;i++)
+//	                    	{
+//	                    		framebuffer[i]=tbuf[i];
+//	                    	}
+//	                    	ptr=tbuf.length;
+//	                    	endpos=0;
+//	                    	
+//	                    	mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
+//                    	}
+//                    	
+//                    }
                     // if current byte==7e and framebuffer length>=11 then send framebuffer to server, 
                     // 	reset framebuffer
                     // 	continue loop
@@ -457,6 +546,7 @@ public class BluetoothSerialService {
                     break;
                 }
                 catch (Exception e) {
+                	Log.e(TAG,e.toString());
                 	break;
                 }
             }

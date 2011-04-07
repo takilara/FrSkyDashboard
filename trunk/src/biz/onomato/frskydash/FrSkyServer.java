@@ -381,19 +381,23 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		int tad1 = createChannel("AD1", "Main cell voltage", 0, (double) 0.1/6, "V","Volt");
 		AD1 = getChannelById(tad1);
+		AD1.setMovingAverage(8);
 		
 		int tad2 = createChannel("AD2", "Receiver cell voltage", 0, (double) 0.5, "V","Volt");
 		AD2 = getChannelById(tad2);
 		AD2.setPrecision(1);
+		AD2.setMovingAverage(8);
 		
 		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
 		RSSIrx = getChannelById(trssirx);
 		RSSIrx.setPrecision(0);
+		RSSIrx.setMovingAverage(-1);
 		RSSIrx.silent = true;
 		
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
+		RSSItx.setMovingAverage(-1);
 		RSSItx.silent = true;
 	}
 	
@@ -621,4 +625,8 @@ private final Handler mHandlerBT = new Handler() {
 		}
 		return ok;
 	}
+
+	
+
 }
+

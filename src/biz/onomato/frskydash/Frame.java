@@ -167,7 +167,10 @@ public class Frame {
 				buf.append('0');
 			}
 			buf.append(hex);
-			buf.append(' ');
+			if(n<frame.length-1)
+			{
+				buf.append(' ');
+			}
 		}
 		String out = buf.toString();
 		//Log.i(TAG,"String is then: "+out);

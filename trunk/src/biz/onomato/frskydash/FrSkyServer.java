@@ -60,6 +60,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     public boolean reconnectBt = true;
     public int fps=0;
     
+    private Logger logger;
 	
 	private TextToSpeech mTts;
 	private int _speakDelay;
@@ -144,6 +145,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		Log.i(TAG,"onCreate");
 		super.onCreate();
+		logger = new Logger(true,true,true);
 		
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
@@ -626,7 +628,7 @@ private final Handler mHandlerBT = new Handler() {
 	{
 		//int [] frame = f.toInts(); 
 		boolean ok=true;
-		
+		logger.log(f);
 		_framecount++;
 		switch(f.frametype)
 		{

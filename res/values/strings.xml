@@ -6,6 +6,7 @@
     <string name="rawUnits">Raw</string>
     <string name="RSSItx">RSSItx</string>
     <string name="RSSIrx">RSSIrx</string>
+    <string name="FPS">FPS</string>
     
     <string name="settings_label">Settings...</string>
     <string name="settings_title">Global Settings</string>

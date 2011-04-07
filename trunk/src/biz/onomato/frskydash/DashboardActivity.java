@@ -42,7 +42,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
     
     //MyApp globals;
     
-    private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val;
+    private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val,tv_fps_val;
     private ToggleButton btnTglSpeak;
     
     private IntentFilter mIntentFilter;
@@ -83,7 +83,9 @@ public class DashboardActivity extends Activity implements OnClickListener {
         tv_ad2_val = (TextView) findViewById(R.id.ad2Value);
         tv_rssitx_val = (TextView) findViewById(R.id.rssitxValue);
         tv_rssirx_val = (TextView) findViewById(R.id.rssirxValue);
-        
+        Log.d(TAG,"Looing for fpsValue");
+        tv_fps_val = (TextView) findViewById(R.id.fpsValue);
+        Log.d(TAG,"Found fpsValue: "+tv_fps_val.toString());
    
         
         // Setup Click Listeners
@@ -116,6 +118,10 @@ public class DashboardActivity extends Activity implements OnClickListener {
 		    	tv_ad2_val.setText(server.AD2.toString());
 		    	tv_rssitx_val.setText(server.RSSItx.toString());
 		    	tv_rssirx_val.setText(server.RSSIrx.toString());
+		    	if(server!=null)
+		    	{
+		    		tv_fps_val.setText(server.getFps());
+		    	}
 
 		    	tickHandler.postDelayed(this, 100);
 			}

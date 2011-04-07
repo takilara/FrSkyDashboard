@@ -58,12 +58,17 @@ public class FrSkyServer extends Service implements OnInitListener {
     private static BluetoothSerialService mSerialService = null;
     private BluetoothDevice _device = null;
     public boolean reconnectBt = true;
+    public int fps=0;
     
 	
 	private TextToSpeech mTts;
 	private int _speakDelay;
 	private Handler speakHandler;
     private Runnable runnableSpeaker;
+    
+	private Handler fpsHandler;
+    private Runnable runnableFps;
+    
     private boolean _dying=false;
 	
 	private final IBinder mBinder = new MyBinder();
@@ -76,6 +81,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
+	private int _framecount=0;
 	
 	private double[] hVal;
 	private String[] hName;
@@ -128,12 +134,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 
     	 
     	 // http://developer.android.com/guide/topics/ui/notifiers/notifications.html
-    	 PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-    			 notificationIntent, 0);
-    	notification.setLatestEventInfo(this, "FrSkyDash",
-    	      text, contentIntent);
+    	 PendingIntent contentIntent = PendingIntent.getActivity(this, 0,notificationIntent, 0);
+    	notification.setLatestEventInfo(this, "FrSkyDash",text, contentIntent);
     	startForeground(NOTIFICATION_ID,notification);
-    	    }
+    }
 	
 	@Override
 	public void onCreate()
@@ -189,6 +193,20 @@ public class FrSkyServer extends Service implements OnInitListener {
 			    	speakHandler.postDelayed(this, _speakDelay);
 				}
 			};
+			
+			fpsHandler = new Handler();
+			runnableFps = new Runnable () {
+				@Override
+				public void run()
+				{
+					fps = _framecount;
+					_framecount = 0;
+					//Log.i(TAG,"FPS: "+fps);
+					fpsHandler.removeCallbacks(runnableFps);
+					fpsHandler.postDelayed(this,1000);
+				}
+			};
+			fpsHandler.postDelayed(runnableFps,1000);
 	}
 	
 	public void send(byte[] out) {
@@ -297,6 +315,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_dying=true;
 		super.onDestroy();
 		Log.i(TAG,"onDestroy");
+		simStop();
+		sim.reset();
 		
 		Log.i(TAG,"Releasing Wakelock");
 		if(wl.isHeld())
@@ -307,14 +327,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 		mTts.shutdown();
 		mSerialService.stop();
 		
+		fpsHandler.removeCallbacks(runnableFps);
+		
 		//AD1.setRaw(0);
 		//AD2.setRaw(0);
 		//RSSIrx.setRaw(0);
 		//RSSItx.setRaw(0);
 		resetChannels();
 		
-		simStop();
-		sim.reset();
+		
 		
 		//stopCyclicSpeaker();
 		
@@ -606,7 +627,7 @@ private final Handler mHandlerBT = new Handler() {
 		//int [] frame = f.toInts(); 
 		boolean ok=true;
 		
-		
+		_framecount++;
 		switch(f.frametype)
 		{
 			// Analog values
@@ -624,6 +645,11 @@ private final Handler mHandlerBT = new Handler() {
 				break;
 		}
 		return ok;
+	}
+	
+	public String getFps()
+	{
+		return Integer.toString(fps);
 	}
 
 	

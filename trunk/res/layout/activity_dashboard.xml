@@ -27,7 +27,7 @@
         </TableRow>
         <View
         	android:layout_height="2dip"
-        	android:background="#FF909090" />
+        	android:background="#FF909090" /> 
         
         <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView 
@@ -75,7 +75,7 @@
         <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:text="0" android:id="@+id/rssitxValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
             <TextView android:text="0" android:id="@+id/rssirxValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
-            <TextView android:text="0" android:id="@+id/fpsValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
+            <TextView android:text="0"  android:id="@+id/fpsValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
         </TableRow>
     </TableLayout>
 </LinearLayout>

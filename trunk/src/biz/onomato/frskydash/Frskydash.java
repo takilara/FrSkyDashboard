@@ -147,14 +147,17 @@ public class Frskydash extends TabActivity {
         }
         
         // popup to enable BT if not enabled
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-        else
+        if (mBluetoothAdapter != null)
         {
-        	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
-        	//tItem.setEnabled(true);
+	        if (!mBluetoothAdapter.isEnabled()) {
+	            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+	            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+	        }
+	        else
+	        {
+	        	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
+	        	//tItem.setEnabled(true);
+	        }
         }
     }
     

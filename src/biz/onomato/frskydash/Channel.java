@@ -52,8 +52,8 @@ public class Channel {
 	{
 		_avg = _stack.push(raw);
 		
-		//Log.i(TAG,"STACK: "+_stack.toString());
-		//Log.i(TAG,"Avg: "+_avg);
+		Log.i(TAG,"STACK: "+_stack.toString());
+		Log.i(TAG,"Avg: "+_avg);
 		_raw = raw;
 		//_val = _raw * _factor+_offset;
 		_val = _avg * _factor+_offset;
@@ -68,7 +68,8 @@ public class Channel {
 	// Getters
 	public double getValue()
 	{
-		double tVal = Math.round(_avg*100f)/100f;
+		double tVal = Math.round(_val*100f)/100f;
+		//Log.i(TAG,"GetValue: "+tVal);
 		return tVal;
 	}
 	

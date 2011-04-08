@@ -315,7 +315,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public void onDestroy()
 	{
 		_dying=true;
-		super.onDestroy();
+		
 		Log.i(TAG,"onDestroy");
 		simStop();
 		sim.reset();
@@ -326,24 +326,68 @@ public class FrSkyServer extends Service implements OnInitListener {
 			wl.release();
 		}
 		stopCyclicSpeaker();
-		mTts.shutdown();
-		mSerialService.stop();
+		Log.i(TAG,"Shutdown mTts");
 		
+		try{
+			mTts.shutdown();
+		}
+		catch (Exception e) {}
+		
+		Log.i(TAG,"Stop BT service if neccessary");
+		if(mSerialService.getState()!=BluetoothSerialService.STATE_NONE)
+		{
+			try
+			{
+				mSerialService.stop();
+			}
+			catch (Exception e) {}
+		}
+		Log.i(TAG,"Stop FPS counter");
 		fpsHandler.removeCallbacks(runnableFps);
 		
 		//AD1.setRaw(0);
 		//AD2.setRaw(0);
 		//RSSIrx.setRaw(0);
 		//RSSItx.setRaw(0);
+		Log.i(TAG,"Reset channels");
 		resetChannels();
 		
-		logger.stop();
+		Log.i(TAG,"Stop Logger");
+		try{
+			logger.stop();
+		}
+		catch (Exception e)
+		{
+			
+		}
 		
 		//stopCyclicSpeaker();
 		
+		Log.i(TAG,"Remove from foreground");
+		try{
+			stopForeground(true);
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG,"Exeption during stopForeground");
+		}
 		
-		stopForeground(true);
-	    Toast.makeText(this, "Service destroyed at " + time.getTime(), Toast.LENGTH_LONG).show();
+		try
+		{
+			super.onDestroy();
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG,"Exeption during super.onDestroy");
+		}
+		try
+		{
+			Toast.makeText(this, "Service destroyed at " + time.getTime(), Toast.LENGTH_LONG).show();
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG,"Exeption during last toast");
+		}
 	}
 	
 	public void onInit(int status) {
@@ -576,8 +620,12 @@ private final Handler mHandlerBT = new Handler() {
 	public void stopCyclicSpeaker()
 	{
 		Log.i(TAG,"Stop Cyclic Speaker");
-		speakHandler.removeCallbacks(runnableSpeaker);
-		mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
+		try
+		{
+			speakHandler.removeCallbacks(runnableSpeaker);
+			mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
+		}
+		catch (Exception e) {}
 		_cyclicSpeechEnabled = false;
 	}
 

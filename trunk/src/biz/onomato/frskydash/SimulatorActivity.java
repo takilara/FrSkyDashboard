@@ -242,6 +242,7 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
     	Log.i(TAG,"Back pressed");
 		
     	Intent intent = new Intent(this, FrSkyServer.class);
+    	Log.i(TAG,"Calling destroy on server");
     	stopService(intent);
 
     	

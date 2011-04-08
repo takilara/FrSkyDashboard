@@ -114,6 +114,14 @@ public class Simulator {
 				buf[i]=0x7d;
 				buf[i+1]=0x5e;
 				i++;
+				Log.i(TAG,"Bytestuffing 7E to 7d 5e");
+			}
+			else if (inBuf[n]==0x7d)
+			{
+				buf[i]=0x7d;
+				buf[i+1]=0x5d;
+				i++;
+				Log.i(TAG,"Bytestuffing 7D to 7d 5d");
 			}
 			else
 			{

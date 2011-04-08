@@ -145,7 +145,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		Log.i(TAG,"onCreate");
 		super.onCreate();
-		logger = new Logger(true,true,true);
+		logger = new Logger(getApplicationContext(),true,true,true);
 		
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
@@ -337,7 +337,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//RSSItx.setRaw(0);
 		resetChannels();
 		
-		
+		logger.stop();
 		
 		//stopCyclicSpeaker();
 		

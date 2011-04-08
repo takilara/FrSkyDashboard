@@ -10,6 +10,7 @@ public class Frame {
 	public static final int FRAMETYPE_INPUT_REQUEST_ALL=1;
 	public int frametype;
 	private int[] _frame;
+	private int[] _frameRaw;
 	
 	public int ad1,ad2,rssirx,rssitx = 0;
 	
@@ -18,7 +19,7 @@ public class Frame {
 		if((frame.length>10) && (frame.length<30))
 		{
 			//Log.i(TAG,"Constructor");
-			
+			_frameRaw = frame;
 			// fix bytestuffing
 			if(frame.length>11)
 			{
@@ -124,6 +125,12 @@ public class Frame {
 				buf[i+1]=0x5e;
 				i++;
 			}
+			else if(inBuf[n]==0x7d)
+			{
+				buf[i]=0x7d;
+				buf[i+1]=0x5d;
+				i++;
+			}
 			else
 			{
 				buf[i] = inBuf[n];
@@ -157,20 +164,45 @@ public class Frame {
 	{
 		StringBuffer buf = new StringBuffer();
 		//Log.i(TAG,"Create human raedable string with "+frame.length+" bytes");
-
+		int xor = 0x00;
 		for(int n=0;n<frame.length;n++)
 		{
-			String hex = Integer.toHexString(frame[n]);
-			// Need to append in case it returns 0xf etc
-			if(hex.length()==1)
+			String hex ="";
+			if(
+					(frame[n]==0x7e) 		// delimiter
+					&& (n>1)				// not first or second byte
+					&& (n<frame.length-1) 	// not last byte
+				)
 			{
-				buf.append('0');
+				hex = "7d 5e";
 			}
+			else if(
+					(frame[n]==0x7d) 		// delimiter
+					&& (n>1)				// not first or second byte
+					&& (n<frame.length-1) 	// not last byte
+				)
+			{
+				hex = "7d 5d";
+			}
+			else
+			{
+				hex = Integer.toHexString(frame[n]);
+				if(hex.length()==1)
+				{
+					hex = "0"+hex;
+				}
+			}
+			// Need to append in case it returns 0xf etc
+			//if(hex.length()==1)
+			//{
+//				buf.append('0');
+			//}
 			buf.append(hex);
 			if(n<frame.length-1)
 			{
 				buf.append(' ');
 			}
+		
 		}
 		String out = buf.toString();
 		//Log.i(TAG,"String is then: "+out);
@@ -185,6 +217,21 @@ public class Frame {
 	public int[] toInts()
 	{
 		return _frame;
+	}
+	
+	public int[] toEncodedInts()
+	{
+		return _frameRaw;
+	}
+	
+	public byte[] toRawBytes()
+	{
+		byte[] buf = new byte[_frameRaw.length];
+		for(int n=0;n<_frameRaw.length;n++)
+		{
+			buf[n]=(byte) _frameRaw[n];
+		}
+		return buf;
 	}
 	
 }

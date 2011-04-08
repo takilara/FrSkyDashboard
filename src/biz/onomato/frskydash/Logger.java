@@ -42,7 +42,11 @@ public class Logger {
 		_logCsv = LogCsv;
 		_logHuman = LogHuman;
 		//_path = "/Android/data/biz.onomato.frskydash/files/log/";
-		_path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/biz.onomato.frskydash/files/log/";
+		//_path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/biz.onomato.frskydash/files/log/";
+		_path ="";
+		//_path = Environment.getExternalStorageDirectory().getAbsolutePath();
+		_context = Context;
+		//_path = _context.getExternalFilesDir(null); 
 		Log.i(TAG,"STorage dir: "+_path);
 		//_path = "";
 		Date myDate = new Date();
@@ -115,7 +119,7 @@ public class Logger {
 		String fName = filename+"."+extension;
 		Log.i(TAG,"Open "+fName+" for writing");
 		
-		_fileRaw = new File(_path, fName);
+		_fileRaw = new File(_context.getExternalFilesDir(null), fName);
 		if(!_fileRaw.exists())
 			try {
 				_fileRaw.createNewFile();
@@ -131,6 +135,7 @@ public class Logger {
 			// TODO Auto-generated catch block
 			Log.e(TAG,e.getMessage());
 		}
+		Log.i(TAG,"Open "+_fileRaw.getAbsolutePath()+" for writing");
 		
 		
 	}
@@ -138,7 +143,9 @@ public class Logger {
 	{
 		String extension = "ASC";
 		String fName = filename+"."+extension;
-		_fileHuman = new File(_path, fName);
+		//_fileHuman = new File(_path, fName);
+		_fileHuman = new File(_context.getExternalFilesDir(null), fName);
+		
 		
 		if(!_fileHuman.exists())
 			try {
@@ -155,7 +162,7 @@ public class Logger {
 			Log.e(TAG,e.getMessage());
 			
 		}
-		Log.i(TAG,"Open "+fName+" for writing");
+		Log.i(TAG,"Open "+_fileHuman.getAbsolutePath()+" for writing");
 	}
 	
 	public void log(Frame f)
@@ -174,36 +181,41 @@ public class Logger {
 	}
 	private void writeRaw(Frame f)
 	{
-		Log.i(TAG,"Log '"+f.toInts()+"' to file");
+		//Log.i(TAG,"Log '"+f.toInts()+"' to file");
+		if(_fileRaw!=null)
+		{
+			try 
+			{
+				_streamRaw.write(f.toRawBytes());
+			}
+			catch (IOException e)
+			{
+				Log.w(TAG, "failure to write");
+			}
+		}
 	}
 	private void writeHuman(Frame f)
 	{
-		Log.i(TAG,"Log '"+f.toHuman()+"' to file");
+		//Log.i(TAG,"Log '"+f.toHuman()+"' to file");
 		if(_fileHuman!=null)
 		{
-//			try 
-//			{
-//				_streamHuman.write(f.toHuman().getBytes());
-//			}
-//			catch (IOException e)
-//			{
-//				Log.w(TAG, "failure to write");
-//			}
+			//Log.i(TAG,"_fileHuman is not null");
+			try 
+			{
+				_streamHuman.write((f.toHuman()+"\n").getBytes());
+			}
+			catch (IOException e)
+			{
+				Log.w(TAG, "failure to write");
+			}
 		}
 	}
 	
 	public void stop()
 	{
-//		try
-//		{
-//			_streamHuman.close();
-//			_streamRaw.close();
-//			_streamCsv.close();
-//		}
-//		catch (IOException e)
-//		{
-//			Log.e(TAG,e.getMessage());
-//		}
+		try	{_streamHuman.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
+		try	{_streamRaw.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
+		try	{_streamCsv.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
 	}
 	
 }

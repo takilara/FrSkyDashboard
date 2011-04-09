@@ -553,7 +553,7 @@ private final Handler mHandlerBT = new Handler() {
 	                byte[] readBuf = (byte[]) msg.obj;              
 	                //mEmulatorView.write(readBuf, msg.arg1);
 	            	
-	                Log.d(TAG,"BT got frame, length: "+msg.arg1);
+	                //Log.d(TAG,"BT got frame, length: "+msg.arg1);
 	                //for(int n=0;n<readBuf.length;n++)
 	                int[] i = new int[msg.arg1];
 	                
@@ -574,7 +574,7 @@ private final Handler mHandlerBT = new Handler() {
 	                if(i.length<20)
 	                {
 	                	Frame f = new Frame(i);
-	                	Log.i(TAG,f.toHuman());
+	                	//Log.i(TAG,f.toHuman());
 	                	parseFrame(f);
 	                }
 	            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);

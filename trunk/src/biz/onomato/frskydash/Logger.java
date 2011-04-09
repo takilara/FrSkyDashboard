@@ -202,6 +202,7 @@ public class Logger {
 			//Log.i(TAG,"_fileHuman is not null");
 			try 
 			{
+				_streamHuman.write((System.currentTimeMillis()+"\t").getBytes());
 				_streamHuman.write((f.toHuman()+"\n").getBytes());
 			}
 			catch (IOException e)

@@ -393,10 +393,11 @@ public class BluetoothSerialService {
 
                     // Fix buffer to Frame here
                     // for each byte in current buffer, copy to framebuffer.
+                    //Log.i(TAG,"Writing bytes to framebuffer positions: "+ptr+"-"+(ptr+bytes));
                     for(int n=0;n<bytes;n++)
                     {
                     	b.add((byte) buffer[n]);
-                    	framebuffer[ptr]=buffer[n];
+                    	//framebuffer[ptr]=buffer[n];
                     	ptr++;
                     }
                     Log.i(TAG,"b now at "+b.size()+" elements.");
@@ -408,42 +409,59 @@ public class BluetoothSerialService {
 	                    	// find first 7e
 	                    	Log.i(TAG,"possible complete frame");
 	                    	startpos = b.indexOf((byte) 0x7e);
+	                    	// need to check if next byte also is 0x7e..
+	                    	if(b.size()>startpos)
+	                    	{
+		                    	if(b.get(startpos+1)==0x7e)
+		                    	{
+		                    		startpos++;
+		                    	}
+	                    	}
+	                    	
+	                    	
 	                    	Log.i(TAG,"Startpos: "+startpos);
 	                    	// find second 7e
-	                    	endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+1;
+	                    	List<Byte> d = new ArrayList<Byte>();
+	                    	d = b.subList(startpos+1, b.size());
+	                    	//Log.i(TAG,d.toString());
+	                    	endpos = d.indexOf((byte) 0x7e)+startpos+1;
+	                    	//endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+startpos;
 	                    	Log.i(TAG,"Endpos: "+endpos);
-	                    	if((startpos!=-1) && (endpos!=-1) && (startpos!=endpos))
+	                    	if((startpos!=-1) && (endpos!=-1) && (endpos>startpos))
 	                    	{
 	                    		
 	                    		Log.i(TAG,"We have complete frame:");
+	                    		List<Byte> e = new ArrayList<Byte>();
+		                    	e = b.subList(startpos, endpos+1);
+		                    	Log.i(TAG,e.toString());
+	                    		
 	//                    		Byte[] frame = new Byte[endpos-startpos+1];
 	//                    		Log.i(TAG,"Made a Byte array");
 	//                    		frame = (Byte[]) b.subList(startpos, endpos).toArray();
 	                    		
-	                    		byte[] frame = new byte[endpos-startpos+1];
+	                    		byte[] frame = new byte[e.size()];
 	                    		//Log.i(TAG,"Made a byte array");
-	                    		int n=0;
-	                    		for (int i=startpos;i<=endpos;i++)
+	                    		
+	                    		for (int n=0;n<frame.length;n++)
 	                    		{
-	                    			//Log.i(TAG,"Copying element "+i+" to position "+n);
-	                    			//Log.i(TAG,"With value: "+(byte) b.get(i));
-	                    			frame[n]=(byte) b.get(i);
-	                    			n++;
+	                    			frame[n]=(byte) e.get(n);
 	                    		}
 	                    		Log.i(TAG,"Removing items from b, old size:"+b.size());
-	                    		List c =  b.subList(endpos+1, b.size());
-	                    		b = new ArrayList<Byte>();
-	                    		//b = (ArrayList<Byte>) c;
-	                    		for (int i=0;i<c.size();i++)
-	                    		{
-	                    			b.add((Byte) c.get(i));
-	                    		}
+	                    		e.clear();
+	                    		
+//	                    		List c =  b.subList(endpos+1, b.size());
+//	                    		b = new ArrayList<Byte>();
+//	                    		//b = (ArrayList<Byte>) c;
+//	                    		for (int i=0;i<c.size();i++)
+//	                    		{
+//	                    			b.add((Byte) c.get(i));
+//	                    		}
 	                    		Log.i(TAG,"Items removed from b, new size:"+b.size());
-	                    		Log.i(TAG,"b now contains:");
-	                    		for (int i=0;i<b.size();i++)
-	                    		{
-	                    			Log.i(TAG,"\t"+b.get(i));
-	                    		}
+	                    		//Log.i(TAG,"b now contains:");
+//	                    		for (int i=0;i<b.size();i++)
+//	                    		{
+//	                    			Log.i(TAG,"\t"+b.get(i));
+//	                    		}
 	                    		
 	                    		
 	//                    		Log.i(TAG,"Copied substring to byte array");
@@ -459,7 +477,7 @@ public class BluetoothSerialService {
 		                    	// find second 7e
 		                    	endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+1;
 		                    	Log.i(TAG,"Endpos: "+endpos);
-		                    	if((startpos!=-1) && (endpos!=-1) && (startpos!=endpos))
+		                    	if((startpos!=-1) && (endpos!=-1) && (startpos!=endpos) && (b.size()>=11))
 		                    	{
 		                    		containsFullFrame=true;
 		                    		Log.i(TAG,"please repeat");

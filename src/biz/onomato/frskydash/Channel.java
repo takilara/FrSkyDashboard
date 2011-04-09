@@ -52,8 +52,8 @@ public class Channel {
 	{
 		_avg = _stack.push(raw);
 		
-		Log.i(TAG,"STACK: "+_stack.toString());
-		Log.i(TAG,"Avg: "+_avg);
+		//Log.i(TAG,"STACK: "+_stack.toString());
+		//Log.i(TAG,"Avg: "+_avg);
 		_raw = raw;
 		//_val = _raw * _factor+_offset;
 		_val = _avg * _factor+_offset;

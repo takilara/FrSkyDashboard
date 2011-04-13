@@ -1,5 +1,6 @@
 package biz.onomato.frskydash;
 
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.text.format.DateFormat;
 import android.text.format.Time;
@@ -27,6 +28,10 @@ public class Logger {
 	private File _fileCsv = null;
 	private File _fileHuman = null;
 	private File _fileRaw = null;
+	
+	WriteRaw rawTask;
+	WriteCsv csvTask;
+	WriteHuman humanTask;
 	
 	private OutputStream _streamCsv = null;
 	private OutputStream _streamRaw = null;
@@ -169,54 +174,106 @@ public class Logger {
 	{
 		if(mExternalStorageWriteable)
 		{
-			if(_logCsv)	writeCsv(f);
-			if(_logRaw)	writeRaw(f);
-			if(_logHuman) writeHuman(f);
+			if(_logCsv){
+				csvTask = new WriteCsv();
+				csvTask.execute(f);
+			}
+			if(_logRaw){ 
+				rawTask = new WriteRaw();
+				rawTask.execute(f);
+			}
+			if(_logHuman){
+				humanTask = new WriteHuman();
+				humanTask.execute(f);
+			}
 		}	
 	}
 	
-	private void writeCsv(Frame f)
-	{
-		
-	}
-	private void writeRaw(Frame f)
-	{
-		//Log.i(TAG,"Log '"+f.toInts()+"' to file");
-		if(_fileRaw!=null)
-		{
-			try 
-			{
-				_streamRaw.write(f.toRawBytes());
-			}
-			catch (IOException e)
-			{
-				Log.w(TAG, "failure to write");
-			}
-		}
-	}
-	private void writeHuman(Frame f)
-	{
-		//Log.i(TAG,"Log '"+f.toHuman()+"' to file");
-		if(_fileHuman!=null)
-		{
-			//Log.i(TAG,"_fileHuman is not null");
-			try 
-			{
-				_streamHuman.write((System.currentTimeMillis()+"\t").getBytes());
-				_streamHuman.write((f.toHuman()+"\n").getBytes());
-			}
-			catch (IOException e)
-			{
-				Log.w(TAG, "failure to write");
-			}
-		}
-	}
 	
 	public void stop()
 	{
+		rawTask.cancel(false);
+		humanTask.cancel(false);
+		csvTask.cancel(false);
+		
+//		boolean rd,hd,cd=true;
+		
+//		if(_fileRaw!=null) rd = rawTask.done;
+//		if(_fileHuman!=null) rd = humanTask.done;
+//		if(_fileCsv!=null) rd = csvTask.done;
+//		
+//		Log.i(TAG,"rawTask done: "+rawTask.done);
+//		Log.i(TAG,"humanTask done: "+humanTask.done);
+//		Log.i(TAG,"csvTask done: "+csvTask.done);
 		try	{_streamHuman.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
 		try	{_streamRaw.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
 		try	{_streamCsv.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
 	}
 	
+	
+	private class WriteRaw extends AsyncTask<Frame, Void, Integer> {
+		public boolean done=false;
+		protected Integer doInBackground(Frame... frames) {
+			int bytes = 0;
+			if(_fileRaw!=null)
+			{
+				int count = frames.length;
+				for(int n=0;n<count;n++)
+				{
+					Frame f = frames[n];
+					try 
+					{
+						_streamRaw.write(f.toRawBytes());
+						bytes += f.toRawBytes().length;
+					}
+					catch (IOException e)
+					{
+						Log.w(TAG, "failure to write");
+					}
+				}
+			}
+			done = true;
+			return bytes;
+		}
+
+
+	     protected void onPostExecute(Integer result) {
+	         //Log.i(TAG,"Written "+result+" bytes to file");
+	     }
+	 }
+	
+	private class WriteHuman extends AsyncTask<Frame, Void, Void> {
+		public boolean done=false;
+		protected Void doInBackground(Frame... frames) {
+			if(_fileHuman!=null)
+			{
+				int count = frames.length;
+				for(int n=0;n<count;n++)
+				{
+					Frame f = frames[n];
+					try 
+					{
+						_streamHuman.write((System.currentTimeMillis()+"\t").getBytes());
+						_streamHuman.write((f.toHuman()+"\n").getBytes());
+					}
+					catch (IOException e)
+					{
+						Log.w(TAG, "failure to write");
+					}
+				}
+			}
+			done = true;
+			return null;
+		}
+	 }
+	
+	private class WriteCsv extends AsyncTask<Frame, Void, Void> {
+		public boolean done=false;
+		protected Void doInBackground(Frame... frames) {
+			// not yet implemented
+			done = true;
+			return null;
+		}
+	 }
+
 }

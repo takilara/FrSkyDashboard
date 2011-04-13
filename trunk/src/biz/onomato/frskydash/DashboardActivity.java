@@ -289,6 +289,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
     	
     	Intent intent = new Intent(this, FrSkyServer.class);
     	stopService(intent);
+//    	server.die();
     	
     	//globals.die();
     	super.onBackPressed();

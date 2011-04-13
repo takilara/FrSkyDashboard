@@ -243,7 +243,8 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		
     	Intent intent = new Intent(this, FrSkyServer.class);
     	Log.i(TAG,"Calling destroy on server");
-    	stopService(intent);
+    	//stopService(intent);
+    	server.die();
 
     	
 		//globals.die();

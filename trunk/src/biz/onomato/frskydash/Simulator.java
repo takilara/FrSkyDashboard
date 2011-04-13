@@ -78,7 +78,14 @@ public class Simulator {
 	
 	public void stop(){
 		Log.i(TAG,"Stopping sim thread");
-		simHandler.removeCallbacks(runnableSimulator);
+		try
+		{
+			simHandler.removeCallbacks(runnableSimulator);
+		}
+		catch (Exception e)
+		{
+			
+		}
 		running = false;
 	}
 

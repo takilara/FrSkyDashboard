@@ -318,7 +318,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		Log.i(TAG,"onDestroy");
 		simStop();
-		sim.reset();
+		//sim.reset();
 		
 		Log.i(TAG,"Releasing Wakelock");
 		if(wl.isHeld())
@@ -656,7 +656,7 @@ private final Handler mHandlerBT = new Handler() {
 	public void simStop()
 	{
 		Log.i(TAG,"Sim Stop");
-		sim.stop();
+		sim.reset();
 	}
 	
 	public void setSimStarted(boolean state)

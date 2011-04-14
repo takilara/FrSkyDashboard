@@ -72,21 +72,12 @@ public class Logger {
 		    //  to know is we can neither read nor write
 		    mExternalStorageAvailable = mExternalStorageWriteable = false;
 		}
-		
-//		if(mExternalStorageWriteable)
-//		{
-//			openFiles();
-//		}
-//		else
-//		{
-//			Log.e(TAG, "SD card not available or writeable");
-//		}
 	}
 	
 	public String makePrefix()
 	{
 		Date myDate = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmm");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
 		return formatter.format(myDate);  
 	}
 	
@@ -130,7 +121,8 @@ public class Logger {
 	
 	private void openCsvFile(String filename)
 	{
-		if(_streamCsv!=null) closeStream(_streamCsv);
+		closeStream(_streamCsv);
+		_fileCsv = null;
 		if(mExternalStorageWriteable)
 		{
 			
@@ -151,7 +143,8 @@ public class Logger {
 	
 	private void openRawFile(String filename)
 	{
-		if(_streamRaw!=null) closeStream(_streamRaw);
+		closeStream(_streamRaw);
+		_fileRaw = null;
 		
 		if(mExternalStorageWriteable)
 		{
@@ -172,8 +165,8 @@ public class Logger {
 	
 	private void openHumanFile(String filename)
 	{
-		if(_streamHuman!=null) closeStream(_streamHuman);
-		
+		closeStream(_streamHuman);
+		_fileHuman = null;
 		if(mExternalStorageWriteable)
 		{
 			if(_logHuman)
@@ -213,6 +206,7 @@ public class Logger {
 	
 	public void stop()
 	{
+		Log.i(TAG,"Stopping any running loggers");
 		// Cancel (wait for) any pending writes
 		try {rawTask.cancel(false);} catch (Exception e){}
 		try {humanTask.cancel(false);} catch (Exception e){}
@@ -222,6 +216,10 @@ public class Logger {
 		closeStream(_streamRaw);
 		closeStream(_streamHuman);
 		closeStream(_streamCsv);
+		
+		_fileRaw = null;
+		_fileHuman = null;
+		_fileCsv = null;
 	}
 	
 	

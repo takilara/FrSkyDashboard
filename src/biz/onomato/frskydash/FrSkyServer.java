@@ -230,6 +230,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public void connect(BluetoothDevice device)
 	{
+		logger.stop();
 		_device = device;
 		mSerialService.connect(device);
 	}
@@ -532,6 +533,8 @@ private final Handler mHandlerBT = new Handler() {
                 	Log.d(TAG,"BT listening");
                 case BluetoothSerialService.STATE_NONE:
                 	Log.d(TAG,"BT state NONE");
+                	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+                	logger.stop();
 //                	if (mMenuItemConnect != null) {
 //                		mMenuItemConnect.setIcon(android.R.drawable.ic_menu_search);
 //                		mMenuItemConnect.setTitle(R.string.connect);
@@ -708,7 +711,6 @@ private final Handler mHandlerBT = new Handler() {
 
 	public void deleteAllLogFiles()
 	{
-
 		Log.i(TAG,"Really delete all log files");
 		// Make logger stop logging, and close files
 		logger.stop();
@@ -723,15 +725,6 @@ private final Handler mHandlerBT = new Handler() {
 			f.delete();
 		}
 		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
-		// delete all ASC files
-		
-		// get list of all CSV files
-		// delete all CSV files
-		
-		// get list of all RAW files
-		// delete all RAW files
 	}
-	
-
 }
 

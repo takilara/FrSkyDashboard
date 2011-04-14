@@ -119,11 +119,11 @@ public class Frskydash extends TabActivity {
         tabHost.addTab(spec);
 
         // Application settings
-        intent = new Intent().setClass(this, ModuleSettingsActivity.class);
-        spec = tabHost.newTabSpec("applicationsettings").setIndicator("Application Settings",
-                          res.getDrawable(R.drawable.icon))
-                      .setContent(intent);
-        tabHost.addTab(spec);
+//        intent = new Intent().setClass(this, ApplicationSettingsActivity.class);
+//        spec = tabHost.newTabSpec("applicationsettings").setIndicator("Application Settings",
+//                          res.getDrawable(R.drawable.icon))
+//                      .setContent(intent);
+//        tabHost.addTab(spec);
         
         // Simulator
         intent = new Intent().setClass(this, SimulatorActivity.class);
@@ -178,16 +178,25 @@ public class Frskydash extends TabActivity {
     	super.onPrepareOptionsMenu(menu);
     	MenuItem tConItem = (MenuItem)  menu.findItem(R.id.connect_bluetooth);
     	MenuItem tDisConItem = (MenuItem)  menu.findItem(R.id.disconnect_bluetooth);
-    	if (!mBluetoothAdapter.isEnabled()) {
-    		tConItem.setEnabled(false);
-    		tDisConItem.setEnabled(false);
+    	//if(mBluetoothAdapter).
+    	if (mBluetoothAdapter != null)
+    	{
+	    	if (!mBluetoothAdapter.isEnabled()) {
+	    		tConItem.setEnabled(false);
+	    		tDisConItem.setEnabled(false);
+	    	}
+	    	else
+	    	{
+	    		tConItem.setEnabled(true);
+	    		tDisConItem.setEnabled(true);
+	    	}
     	}
     	else
     	{
-    		tConItem.setEnabled(true);
-    		tDisConItem.setEnabled(true);
+    		tConItem.setEnabled(false);
+    		tDisConItem.setEnabled(false);
     	}
-    	
+	    	
     	if(server.getConnectionState()==BluetoothSerialService.STATE_NONE)
     	{
     		tConItem.setVisible(true);
@@ -198,6 +207,7 @@ public class Frskydash extends TabActivity {
     		tConItem.setVisible(false);
     		tDisConItem.setVisible(true);
     	}
+	
     		
     	
 		return true;
@@ -261,6 +271,8 @@ public class Frskydash extends TabActivity {
     		case R.id.settings:
     			Log.i(TAG,"User clicked on Settings");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
+    			Intent intent = new Intent(this,ApplicationSettingsActivity.class);
+    			startActivity(intent);
     			break;
     		
     		case R.id.connect_bluetooth:

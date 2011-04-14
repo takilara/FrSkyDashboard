@@ -10,7 +10,7 @@
 		
 	<item android:id="@+id/disconnect_bluetooth"
 		android:visible="false" 
-		android:title="@string/disconnect_bluetooth_label" />
+		android:title="@string/disconnect_bluetooth_label"  />
 	  
 </menu> 
     

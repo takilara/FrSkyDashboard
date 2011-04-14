@@ -722,6 +722,7 @@ private final Handler mHandlerBT = new Handler() {
 			Log.i(TAG,"Delete: "+f.getAbsolutePath());
 			f.delete();
 		}
+		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
 		// delete all ASC files
 		
 		// get list of all CSV files

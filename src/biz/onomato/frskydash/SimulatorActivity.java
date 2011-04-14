@@ -89,7 +89,6 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 		
 		// Code to update GUI cyclic
         tickHandler = new Handler();
-		
 		runnableTick = new Runnable() {
 			@Override
 			public void run()
@@ -101,14 +100,11 @@ public class SimulatorActivity extends Activity implements OnSeekBarChangeListen
 					sb_ad2.setProgress(server.sim._ad2);
 					sb_rssirx.setProgress(server.sim._rssirx);
 					sb_rssitx.setProgress(server.sim._rssitx);
-			    	
-			    	
 				}
 				tickHandler.postDelayed(this, 100);
 			}
 		};
 		tickHandler.postDelayed(runnableTick, 100);
-		
 		doBindService();
 	}
 	

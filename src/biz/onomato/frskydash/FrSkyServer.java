@@ -1,10 +1,12 @@
 package biz.onomato.frskydash;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.AlertDialog;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,6 +14,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -109,6 +112,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return mBinder;
 		//return null;
 	}
+	
 	
 
 	
@@ -702,6 +706,30 @@ private final Handler mHandlerBT = new Handler() {
 		return Integer.toString(fps);
 	}
 
+	public void deleteAllLogFiles()
+	{
+
+		Log.i(TAG,"Really delete all log files");
+		// Make logger stop logging, and close files
+		logger.stop();
+		
+		// get list of all ASC files
+		File path = getExternalFilesDir(null);
+		String[] files = path.list();
+		for(int i=0;i<files.length;i++)
+		{
+			File f = new File(getExternalFilesDir(null), files[i]);
+			Log.i(TAG,"Delete: "+f.getAbsolutePath());
+			f.delete();
+		}
+		// delete all ASC files
+		
+		// get list of all CSV files
+		// delete all CSV files
+		
+		// get list of all RAW files
+		// delete all RAW files
+	}
 	
 
 }

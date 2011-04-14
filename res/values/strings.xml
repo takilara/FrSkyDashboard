@@ -23,6 +23,8 @@
     
     <string name="btnDeleteLogs">Delete all logfiles</string>
     
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
         
         
         <!--  DeviceListActivity -->

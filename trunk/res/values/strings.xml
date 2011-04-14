@@ -21,6 +21,8 @@
     <string name="disconnect_bluetooth_label">Disconnect...</string>
     <string name="disconnect_bluetooth_title">Disconnect</string>
     
+    <string name="btnDeleteLogs">Delete all logfiles</string>
+    
         
         
         <!--  DeviceListActivity -->

@@ -192,9 +192,9 @@ public class Logger {
 	
 	public void stop()
 	{
-		rawTask.cancel(false);
-		humanTask.cancel(false);
-		csvTask.cancel(false);
+		try {rawTask.cancel(false);} catch (Exception e){}
+		try {humanTask.cancel(false);} catch (Exception e){}
+		try {csvTask.cancel(false);} catch (Exception e){}
 		
 //		boolean rd,hd,cd=true;
 		
@@ -205,9 +205,9 @@ public class Logger {
 //		Log.i(TAG,"rawTask done: "+rawTask.done);
 //		Log.i(TAG,"humanTask done: "+humanTask.done);
 //		Log.i(TAG,"csvTask done: "+csvTask.done);
-		try	{_streamHuman.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
-		try	{_streamRaw.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
-		try	{_streamCsv.close();} catch (Exception e) {Log.e(TAG,e.getMessage());}
+		if(_fileHuman!=null) try	{_streamHuman.close();} catch (Exception e) {}
+		if(_fileHuman!=null) try	{_streamRaw.close();} catch (Exception e) {}
+		if(_fileHuman!=null) try	{_streamCsv.close();} catch (Exception e) {}
 	}
 	
 	

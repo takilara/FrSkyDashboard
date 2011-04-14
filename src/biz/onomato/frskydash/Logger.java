@@ -46,18 +46,14 @@ public class Logger {
 		_logRaw = LogRaw;
 		_logCsv = LogCsv;
 		_logHuman = LogHuman;
-		//_path = "/Android/data/biz.onomato.frskydash/files/log/";
-		//_path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/biz.onomato.frskydash/files/log/";
-		_path ="";
-		//_path = Environment.getExternalStorageDirectory().getAbsolutePath();
 		_context = Context;
 		//_path = _context.getExternalFilesDir(null); 
 		Log.i(TAG,"STorage dir: "+_path);
 		//_path = "";
-		Date myDate = new Date();
-		Time myTime = new Time();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmm");
-		_prefix = formatter.format(myDate);  
+//		Date myDate = new Date();
+//		Time myTime = new Time();
+//		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmm");
+		_prefix = makePrefix();  
 
 		_logCsv = false; // not yet implemented
 		
@@ -77,14 +73,21 @@ public class Logger {
 		    mExternalStorageAvailable = mExternalStorageWriteable = false;
 		}
 		
-		if(mExternalStorageWriteable)
-		{
-			openFiles();
-		}
-		else
-		{
-			Log.e(TAG, "SD card not available or writeable");
-		}
+//		if(mExternalStorageWriteable)
+//		{
+//			openFiles();
+//		}
+//		else
+//		{
+//			Log.e(TAG, "SD card not available or writeable");
+//		}
+	}
+	
+	public String makePrefix()
+	{
+		Date myDate = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmm");
+		return formatter.format(myDate);  
 	}
 	
 	public void setPrefix(String Prefix)
@@ -94,80 +97,98 @@ public class Logger {
 
 	private void openFiles()
 	{
-		if(mExternalStorageWriteable)
+		String prefix = makePrefix();
+		openRawFile(prefix);
+		openHumanFile(prefix);
+		openCsvFile(prefix);
+	}
+	
+	private void closeStream(OutputStream stream)
+	{
+		try 
 		{
-			if(_logCsv)	openCsvFile(_path+_prefix);
-			if(_logRaw)	openRawFile(_path+_prefix);
-			if(_logHuman) openHumanFile(_path+_prefix);
+			stream.close();
+			//stream=null;
+		} 
+		catch (Exception e)	{}
+		stream=null;
+	}
+	
+	private FileOutputStream openStream(File filename)
+	{
+		FileOutputStream tFile;
+		try {
+			tFile = new FileOutputStream(filename);
+			return tFile;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			Log.e(TAG,e.getMessage());
+			return null;
 		}
 	}
 	
+	
 	private void openCsvFile(String filename)
 	{
-		String extension = "CSV";
-		String fName = filename+"."+extension;
-		Log.i(TAG,"Open "+fName+" for writing");
-		//String path = _context.getExternalFilesDir(null).getAbsolutePath();
-		//Log.i(TAG,"using path: "+path);
-		//_fileCsv = new File(_context.getExternalFilesDir(null), fName);
-		
-		try {
-			_streamCsv = new FileOutputStream(_fileCsv);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			Log.e(TAG,e.getMessage());
-		}
+		if(_streamCsv!=null) closeStream(_streamCsv);
+		if(mExternalStorageWriteable)
+		{
+			
+			if(_logCsv)
+			{
+				_fileCsv = new File(_context.getExternalFilesDir(null), filename+".csv");
+				if(!_fileCsv.exists())
+					try {
+						_fileCsv.createNewFile();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						Log.e(TAG,e1.getMessage());
+					}
+				_streamCsv = openStream(_fileCsv);
+			}
+		}	
 	}
+	
 	private void openRawFile(String filename)
 	{
-		String extension = "RAW";
-		String fName = filename+"."+extension;
-		Log.i(TAG,"Open "+fName+" for writing");
+		if(_streamRaw!=null) closeStream(_streamRaw);
 		
-		_fileRaw = new File(_context.getExternalFilesDir(null), fName);
-		if(!_fileRaw.exists())
-			try {
-				_fileRaw.createNewFile();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				Log.e(TAG,e1.getMessage());
+		if(mExternalStorageWriteable)
+		{
+			if(_logRaw)
+			{
+				_fileRaw = new File(_context.getExternalFilesDir(null), filename+".raw");
+				if(!_fileRaw.exists())
+					try {
+						_fileRaw.createNewFile();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						Log.e(TAG,e1.getMessage());
+					}
+				_streamRaw = openStream(_fileRaw);
 			}
-		Log.i(TAG,"Raw opened");
-		
-		try {
-			_streamRaw = new FileOutputStream(_fileRaw);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			Log.e(TAG,e.getMessage());
 		}
-		Log.i(TAG,"Open "+_fileRaw.getAbsolutePath()+" for writing");
-		
-		
 	}
+	
 	private void openHumanFile(String filename)
 	{
-		String extension = "ASC";
-		String fName = filename+"."+extension;
-		//_fileHuman = new File(_path, fName);
-		_fileHuman = new File(_context.getExternalFilesDir(null), fName);
+		if(_streamHuman!=null) closeStream(_streamHuman);
 		
-		
-		if(!_fileHuman.exists())
-			try {
-				_fileHuman.createNewFile();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				Log.e(TAG,e1.getMessage());
+		if(mExternalStorageWriteable)
+		{
+			if(_logHuman)
+			{
+				_fileHuman = new File(_context.getExternalFilesDir(null), filename+".asc");
+				if(!_fileHuman.exists())
+					try {
+						_fileHuman.createNewFile();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						Log.e(TAG,e1.getMessage());
+					}
+				_streamHuman = openStream(_fileHuman);
 			}
-		
-		try {
-			_streamHuman = new FileOutputStream(_fileHuman);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			Log.e(TAG,e.getMessage());
-			
 		}
-		Log.i(TAG,"Open "+_fileHuman.getAbsolutePath()+" for writing");
 	}
 	
 	public void log(Frame f)
@@ -192,22 +213,15 @@ public class Logger {
 	
 	public void stop()
 	{
+		// Cancel (wait for) any pending writes
 		try {rawTask.cancel(false);} catch (Exception e){}
 		try {humanTask.cancel(false);} catch (Exception e){}
 		try {csvTask.cancel(false);} catch (Exception e){}
 		
-//		boolean rd,hd,cd=true;
-		
-//		if(_fileRaw!=null) rd = rawTask.done;
-//		if(_fileHuman!=null) rd = humanTask.done;
-//		if(_fileCsv!=null) rd = csvTask.done;
-//		
-//		Log.i(TAG,"rawTask done: "+rawTask.done);
-//		Log.i(TAG,"humanTask done: "+humanTask.done);
-//		Log.i(TAG,"csvTask done: "+csvTask.done);
-		if(_fileHuman!=null) try	{_streamHuman.close();} catch (Exception e) {}
-		if(_fileHuman!=null) try	{_streamRaw.close();} catch (Exception e) {}
-		if(_fileHuman!=null) try	{_streamCsv.close();} catch (Exception e) {}
+		// close any open streams
+		closeStream(_streamRaw);
+		closeStream(_streamHuman);
+		closeStream(_streamCsv);
 	}
 	
 	
@@ -215,8 +229,13 @@ public class Logger {
 		public boolean done=false;
 		protected Integer doInBackground(Frame... frames) {
 			int bytes = 0;
-			if(_fileRaw!=null)
+			if(_logRaw)
 			{
+				if(_fileRaw==null || !_fileRaw.canWrite())
+				{
+						Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+						openRawFile(makePrefix());
+				}
 				int count = frames.length;
 				for(int n=0;n<count;n++)
 				{
@@ -245,8 +264,13 @@ public class Logger {
 	private class WriteHuman extends AsyncTask<Frame, Void, Void> {
 		public boolean done=false;
 		protected Void doInBackground(Frame... frames) {
-			if(_fileHuman!=null)
+			if(_logHuman)
 			{
+				if(_fileHuman==null || !_fileHuman.canWrite())
+				{
+						Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+						openHumanFile(makePrefix());
+				}
 				int count = frames.length;
 				for(int n=0;n<count;n++)
 				{
@@ -261,6 +285,7 @@ public class Logger {
 						Log.w(TAG, "failure to write");
 					}
 				}
+			
 			}
 			done = true;
 			return null;

@@ -386,7 +386,7 @@ public class BluetoothSerialService {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
                     
-                    Log.i(TAG,"Read "+bytes+" new bytes.");
+                    //Log.i(TAG,"Read "+bytes+" new bytes.");
 
                     //mEmulatorView.write(buffer, bytes);
                     // Send the obtained bytes to the UI Activity
@@ -400,14 +400,14 @@ public class BluetoothSerialService {
                     	//framebuffer[ptr]=buffer[n];
                     	ptr++;
                     }
-                    Log.i(TAG,"b now at "+b.size()+" elements.");
+                    //Log.i(TAG,"b now at "+b.size()+" elements.");
                     if(b.size()>=11)
                     {
                     	boolean containsFullFrame = true;	// assume a frame is in there
                     	while(containsFullFrame)
                     	{
 	                    	// find first 7e
-	                    	Log.i(TAG,"possible complete frame");
+	                    	//Log.i(TAG,"possible complete frame");
 	                    	startpos = b.indexOf((byte) 0x7e);
 	                    	// need to check if next byte also is 0x7e..
 	                    	if(b.size()>startpos)
@@ -419,21 +419,21 @@ public class BluetoothSerialService {
 	                    	}
 	                    	
 	                    	
-	                    	Log.i(TAG,"Startpos: "+startpos);
+	                    	//Log.i(TAG,"Startpos: "+startpos);
 	                    	// find second 7e
 	                    	List<Byte> d = new ArrayList<Byte>();
 	                    	d = b.subList(startpos+1, b.size());
 	                    	//Log.i(TAG,d.toString());
 	                    	endpos = d.indexOf((byte) 0x7e)+startpos+1;
 	                    	//endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+startpos;
-	                    	Log.i(TAG,"Endpos: "+endpos);
+	                    	//Log.i(TAG,"Endpos: "+endpos);
 	                    	if((startpos!=-1) && (endpos!=-1) && (endpos>startpos))
 	                    	{
 	                    		
-	                    		Log.i(TAG,"We have complete frame:");
+	                    		//Log.i(TAG,"We have complete frame:");
 	                    		List<Byte> e = new ArrayList<Byte>();
 		                    	e = b.subList(startpos, endpos+1);
-		                    	Log.i(TAG,e.toString());
+		                    	//Log.i(TAG,e.toString());
 	                    		
 	//                    		Byte[] frame = new Byte[endpos-startpos+1];
 	//                    		Log.i(TAG,"Made a Byte array");
@@ -446,7 +446,7 @@ public class BluetoothSerialService {
 	                    		{
 	                    			frame[n]=(byte) e.get(n);
 	                    		}
-	                    		Log.i(TAG,"Removing items from b, old size:"+b.size());
+	                    		//Log.i(TAG,"Removing items from b, old size:"+b.size());
 	                    		e.clear();
 	                    		
 //	                    		List c =  b.subList(endpos+1, b.size());
@@ -456,7 +456,7 @@ public class BluetoothSerialService {
 //	                    		{
 //	                    			b.add((Byte) c.get(i));
 //	                    		}
-	                    		Log.i(TAG,"Items removed from b, new size:"+b.size());
+	                    		//Log.i(TAG,"Items removed from b, new size:"+b.size());
 	                    		//Log.i(TAG,"b now contains:");
 //	                    		for (int i=0;i<b.size();i++)
 //	                    		{
@@ -471,16 +471,16 @@ public class BluetoothSerialService {
 	//                    		}
 	                    		mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
 	                    		
-	                    		Log.i(TAG,"recheck after transmission");
+	                    		//Log.i(TAG,"recheck after transmission");
 	                    		startpos = b.indexOf((byte) 0x7e);
-		                    	Log.i(TAG,"Startpos: "+startpos);
+		                    	//Log.i(TAG,"Startpos: "+startpos);
 		                    	// find second 7e
 		                    	endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+1;
-		                    	Log.i(TAG,"Endpos: "+endpos);
+		                    	//Log.i(TAG,"Endpos: "+endpos);
 		                    	if((startpos!=-1) && (endpos!=-1) && (startpos!=endpos) && (b.size()>=11))
 		                    	{
 		                    		containsFullFrame=true;
-		                    		Log.i(TAG,"please repeat");
+		                    		//Log.i(TAG,"please repeat");
 		                    	}
 		                    	else
 		                    	{
@@ -492,7 +492,7 @@ public class BluetoothSerialService {
 	                    	else
 	                    	{
 	                    		containsFullFrame=false;
-	                    		Log.i(TAG, "not yet a complete frame (start,end,size): ("+startpos+","+endpos+","+b.size()+")");
+	                    		//Log.i(TAG, "not yet a complete frame (start,end,size): ("+startpos+","+endpos+","+b.size()+")");
 	                    	}
                     	}
                     			

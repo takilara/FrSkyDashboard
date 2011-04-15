@@ -16,6 +16,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private static final int NOTIFICATION_ID=56;
 	
     private int MY_DATA_CHECK_CODE;
+    private SharedPreferences _settings=null;
 	
 	private Long counter = 0L; 
 	private NotificationManager nm;
@@ -97,6 +99,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int channels=0;
 	private Channel[] objs;
 	
+
+	
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
@@ -147,6 +151,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	@Override
 	public void onCreate()
 	{
+
+        
+		
+		
 		Log.i(TAG,"onCreate");
 		super.onCreate();
 		logger = new Logger(getApplicationContext(),true,true,true);
@@ -174,45 +182,46 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 
 		 _cyclicSpeechEnabled = false;
 		 _speakDelay = 30000;
-	        speakHandler = new Handler();
-			runnableSpeaker = new Runnable() {
-				@Override
-				public void run()
+		 
+        speakHandler = new Handler();
+		runnableSpeaker = new Runnable() {
+			@Override
+			public void run()
+			{
+				Log.i(TAG,"Cyclic Speak stuff");
+				//mTts.speak(globals.AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				//mTts.speak(globals.AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				//mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				//mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				
+				for(int n=0;n<MAX_CHANNELS;n++)
 				{
-					Log.i(TAG,"Cyclic Speak stuff");
-					//mTts.speak(globals.AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					//mTts.speak(globals.AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					//mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					//mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					
-					for(int n=0;n<MAX_CHANNELS;n++)
-					{
-						if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					}
-					
-					//mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					//mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					//mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					//mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					
-					speakHandler.removeCallbacks(runnableSpeaker);
-			    	speakHandler.postDelayed(this, _speakDelay);
+					if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 				}
-			};
-			
-			fpsHandler = new Handler();
-			runnableFps = new Runnable () {
-				@Override
-				public void run()
-				{
-					fps = _framecount;
-					_framecount = 0;
-					//Log.i(TAG,"FPS: "+fps);
-					fpsHandler.removeCallbacks(runnableFps);
-					fpsHandler.postDelayed(this,1000);
-				}
-			};
-			fpsHandler.postDelayed(runnableFps,1000);
+				
+				//mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				//mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				//mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				//mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+				
+				speakHandler.removeCallbacks(runnableSpeaker);
+		    	speakHandler.postDelayed(this, _speakDelay);
+			}
+		};
+		
+		fpsHandler = new Handler();
+		runnableFps = new Runnable () {
+			@Override
+			public void run()
+			{
+				fps = _framecount;
+				_framecount = 0;
+				//Log.i(TAG,"FPS: "+fps);
+				fpsHandler.removeCallbacks(runnableFps);
+				fpsHandler.postDelayed(this,1000);
+			}
+		};
+		fpsHandler.postDelayed(runnableFps,1000);
 	}
 	
 	public void send(byte[] out) {
@@ -414,6 +423,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     	// Greet the user.
     		String myGreeting = "Application has enabled Text to Speech";
         	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
+        	
+        	//setCyclicSpeech(_settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
     	}
     	} else {
     	// Initialization failed.
@@ -643,6 +654,7 @@ private final Handler mHandlerBT = new Handler() {
 	
 	public void setCyclicSpeech(boolean state)
 	{
+		Log.i(TAG,"Setting Cyclic speech to: "+state);
 		_cyclicSpeechEnabled = state;
 		if(_cyclicSpeechEnabled)
 		{
@@ -725,6 +737,38 @@ private final Handler mHandlerBT = new Handler() {
 			f.delete();
 		}
 		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
+	}
+	
+	public void setLogToRaw(boolean logToRaw)
+	{
+		Log.i(TAG,"Log to Raw:"+logToRaw);
+		logger.setLogToRaw(logToRaw);
+	}
+	
+	public void setLogToHuman(boolean logToHuman)
+	{
+		Log.i(TAG,"Log to Human:"+logToHuman);
+		logger.setLogToHuman(logToHuman);
+	}
+	
+	public void setLogToCsv(boolean logToCsv)
+	{
+		Log.i(TAG,"Log to Csv:"+logToCsv);
+		logger.setLogToCsv(logToCsv);
+	}
+	
+	public void setSettings(SharedPreferences settings)
+	{
+		_settings = settings;
+//		setCyclicSpeech(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
+		setLogToRaw(settings.getBoolean("logToRaw",false));
+		setLogToHuman(settings.getBoolean("logToHuman",false));
+		setLogToCsv(settings.getBoolean("logToCsv",false));
+	}
+	
+	public SharedPreferences getSettings()
+	{
+		return _settings;
 	}
 }
 

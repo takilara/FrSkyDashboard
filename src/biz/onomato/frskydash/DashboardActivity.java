@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -44,16 +45,26 @@ public class DashboardActivity extends Activity implements OnClickListener {
     
     private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val,tv_fps_val;
     private ToggleButton btnTglSpeak;
+    private TextToSpeech mTts;
     
     private IntentFilter mIntentFilter;
     // service stuff
-    private FrSkyServer server;
+    private FrSkyServer server=null;
+    
+    
+	private SharedPreferences settings;
+    
     
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG,"onCreate");
+        
+        
+		Log.i(TAG,"Try to load settings");
+        settings = getPreferences(MODE_PRIVATE);
+        
         setContentView(R.layout.activity_dashboard);
         
         //Activity parent = getParent();
@@ -173,9 +184,22 @@ public class DashboardActivity extends Activity implements OnClickListener {
     private ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			server = ((FrSkyServer.MyBinder) binder).getService();
-			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
 			Log.i(TAG,"Bound to Service");
+			server = ((FrSkyServer.MyBinder) binder).getService();
+			
+			Log.i(TAG,"Setting up server from settings");
+//			chkCyclicSpeakerEnabled.setChecked(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
+//	        chkLogToRaw.setChecked(settings.getBoolean("logToRaw",false));
+//	        chkLogToHuman.setChecked(settings.getBoolean("logToHuman",false));
+//	        chkLogToCsv.setChecked(settings.getBoolean("logToCsv",false));
+			server.setSettings(settings);
+			
+			//server.setLogToRaw(settings.getBoolean("logToRaw",false));
+			//server.setLogToHuman(settings.getBoolean("logToHuman",false));
+			//server.setLogToCsv(settings.getBoolean("logToCsv",false));
+			
+			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+			
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -189,6 +213,10 @@ public class DashboardActivity extends Activity implements OnClickListener {
     	
     	// enable updates
     	Log.i(TAG,"onResume");
+//    	if(server != null)
+//    	{
+//    		btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+//    	}
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
 
@@ -267,9 +295,10 @@ public class DashboardActivity extends Activity implements OnClickListener {
         	Log.i(TAG,"Check for TTS complete");
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 // success, create the TTS instance
-                //mTts = new TextToSpeech(globals, this);
+                //mTts = new TextToSpeech(getApplicationContext(), this);
                 
                 //mTts = globals.createSpeaker();
+            	Log.i(TAG,"speech capabilities ok");
             	if(server!=null)	server.createSpeaker();
                 
                 //sayHello();

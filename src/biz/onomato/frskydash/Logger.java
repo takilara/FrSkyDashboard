@@ -298,5 +298,20 @@ public class Logger {
 			return null;
 		}
 	 }
+	
+	public void setLogToRaw(boolean logToRaw)
+	{
+		_logRaw = logToRaw;
+	}
+	
+	public void setLogToHuman(boolean logToHuman)
+	{
+		_logHuman = logToHuman;
+	}
+	
+	public void setLogToCsv(boolean logToCsv)
+	{
+		_logCsv = logToCsv;
+	}
 
 }

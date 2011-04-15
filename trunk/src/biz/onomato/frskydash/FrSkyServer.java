@@ -226,6 +226,23 @@ public class FrSkyServer extends Service implements OnInitListener {
 		fpsHandler.postDelayed(runnableFps,1000);
 	}
 	
+	/**
+	 * Set time between reads
+	 * @param interval seconds between reads
+	 */
+	public void setCyclicSpeachInterval(int interval)
+	{
+		Log.i(TAG,"Set new interval to "+interval+" seconds");
+		if(interval>0)
+		{
+			_speakDelay = interval*1000;
+			if(getCyclicSpeechEnabled())
+			{
+				// Restart speaker if running
+				startCyclicSpeaker();
+			}
+		}
+	}
 	public void send(byte[] out) {
     	mSerialService.write( out );
     }
@@ -773,6 +790,7 @@ private final Handler mHandlerBT = new Handler() {
 		setLogToRaw(settings.getBoolean("logToRaw",false));
 		setLogToHuman(settings.getBoolean("logToHuman",false));
 		setLogToCsv(settings.getBoolean("logToCsv",false));
+		setCyclicSpeachInterval(settings.getInt("cyclicSpeakerInterval",30));
 	}
 	
 	public SharedPreferences getSettings()

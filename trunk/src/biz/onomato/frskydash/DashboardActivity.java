@@ -51,7 +51,7 @@ public class DashboardActivity extends Activity implements OnClickListener {
     // service stuff
     private FrSkyServer server=null;
     
-    
+    private boolean createSpeakerLater=false;
 	private SharedPreferences settings;
     
     
@@ -125,13 +125,13 @@ public class DashboardActivity extends Activity implements OnClickListener {
 			public void run()
 			{
 				//Log.i(TAG,"Update GUI");
-		    	tv_ad1_val.setText(server.AD1.toString());
-		    	tv_ad2_val.setText(server.AD2.toString());
-		    	tv_rssitx_val.setText(server.RSSItx.toString());
-		    	tv_rssirx_val.setText(server.RSSIrx.toString());
-		    	if(server!=null)
-		    	{
-		    		tv_fps_val.setText(server.getFps());
+				if(server!=null)
+				{
+			    	tv_ad1_val.setText(server.AD1.toString());
+			    	tv_ad2_val.setText(server.AD2.toString());
+			    	tv_rssitx_val.setText(server.RSSItx.toString());
+			    	tv_rssirx_val.setText(server.RSSIrx.toString());
+			    	tv_fps_val.setText(server.getFps());
 		    	}
 
 		    	tickHandler.postDelayed(this, 100);
@@ -140,21 +140,31 @@ public class DashboardActivity extends Activity implements OnClickListener {
 
 	    mIntentFilter = new IntentFilter();
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_STARTED);
+	    mIntentFilter.addAction(FrSkyServer.MESSAGE_SPEAKERCHANGE);
 
 		// Service stuff
 		doBindService();
     }
     
- // Can be used to detect broadcasts from Service
+    // Can be used to detect broadcasts from Service
+    // Remember to add the message to the intentfilter (mIntentFilter) above
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
           //do something
         	String msg = intent.getAction();
         	Log.i(TAG,"Received Broadcast: '"+msg+"'");
-        	//Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_STARTED+"'");
-        	Log.i(TAG,"I have received BroadCast that the server has started");
+        	Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
+        	if(msg.equals(FrSkyServer.MESSAGE_STARTED))
+        		Log.i(TAG,"I have received BroadCast that the server has started");
+        	if(msg.equals(FrSkyServer.MESSAGE_SPEAKERCHANGE))
+        	{
+        		Log.i(TAG,"I have received BroadCast that cyclic speaker has toggled");
+        		if(server!=null)
+        			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+        	}
         	
+        		
         	// It is currently not doing anything
         	//doBindService();
         }
@@ -186,13 +196,18 @@ public class DashboardActivity extends Activity implements OnClickListener {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.i(TAG,"Bound to Service");
 			server = ((FrSkyServer.MyBinder) binder).getService();
+			server.setSettings(settings);	// Make sure server has settings available
 			
+			if(createSpeakerLater)	// server was not ready when TTS check finished
+			{
+				server.createSpeaker();
+			}
 			Log.i(TAG,"Setting up server from settings");
 //			chkCyclicSpeakerEnabled.setChecked(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
 //	        chkLogToRaw.setChecked(settings.getBoolean("logToRaw",false));
 //	        chkLogToHuman.setChecked(settings.getBoolean("logToHuman",false));
 //	        chkLogToCsv.setChecked(settings.getBoolean("logToCsv",false));
-			server.setSettings(settings);
+			
 			
 			//server.setLogToRaw(settings.getBoolean("logToRaw",false));
 			//server.setLogToHuman(settings.getBoolean("logToHuman",false));
@@ -213,10 +228,10 @@ public class DashboardActivity extends Activity implements OnClickListener {
     	
     	// enable updates
     	Log.i(TAG,"onResume");
-//    	if(server != null)
-//    	{
-//    		btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
-//    	}
+    	if(server != null)
+    	{
+    		btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+    	}
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
 
@@ -299,7 +314,15 @@ public class DashboardActivity extends Activity implements OnClickListener {
                 
                 //mTts = globals.createSpeaker();
             	Log.i(TAG,"speech capabilities ok");
-            	if(server!=null)	server.createSpeaker();
+            	if(server!=null)
+            	{
+            		server.createSpeaker();
+            	}
+            	else
+            	{
+            		Log.i(TAG,"Server not ready yet, postpone");
+            		createSpeakerLater= true;
+            	}
                 
                 //sayHello();
             } else {

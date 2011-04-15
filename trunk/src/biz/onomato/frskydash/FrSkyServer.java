@@ -57,6 +57,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_TOAST = 5;
+    
     public static final String DEVICE_NAME = "device_name";
     private String mConnectedDeviceName = null;
     public static final String TOAST = "toast";
@@ -107,6 +108,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
+	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
 	
 	
 	@Override
@@ -424,7 +426,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     		String myGreeting = "Application has enabled Text to Speech";
         	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
         	
-        	//setCyclicSpeech(_settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
+        	setCyclicSpeech(_settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
     	}
     	} else {
     	// Initialization failed.
@@ -634,6 +636,10 @@ private final Handler mHandlerBT = new Handler() {
 		speakHandler.removeCallbacks(runnableSpeaker);
 		speakHandler.post(runnableSpeaker);
 		_cyclicSpeechEnabled = true;
+		
+		Intent i = new Intent();
+		i.setAction(MESSAGE_SPEAKERCHANGE);
+		sendBroadcast(i);
 	}
 	public void stopCyclicSpeaker()
 	{
@@ -645,6 +651,9 @@ private final Handler mHandlerBT = new Handler() {
 		}
 		catch (Exception e) {}
 		_cyclicSpeechEnabled = false;
+		Intent i = new Intent();
+		i.setAction(MESSAGE_SPEAKERCHANGE);
+		sendBroadcast(i);
 	}
 
 	public boolean getCyclicSpeechEnabled()

@@ -3,20 +3,29 @@ package biz.onomato.frskydash;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
-public class ApplicationSettingsActivity extends Activity implements OnClickListener {
+public class ApplicationSettingsActivity extends Activity implements OnClickListener, OnEditorActionListener {
 
 	private static final String TAG = "Application-Settings";
 	private FrSkyServer server;
@@ -28,6 +37,8 @@ public class ApplicationSettingsActivity extends Activity implements OnClickList
 	private CheckBox chkLogToRaw; 
 	private CheckBox chkLogToCsv; 
 	private CheckBox chkLogToHuman;
+	private EditText edCyclicInterval;
+	private Button btnSave;
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -36,18 +47,27 @@ public class ApplicationSettingsActivity extends Activity implements OnClickList
 		setContentView(R.layout.activity_applicationsettings);
 
 		// Setup components from screen
+		Log.i(TAG,"Setup widgets");
 		btnDeleteLogs = findViewById(R.id.btnDeleteLogs);
 		chkCyclicSpeakerEnabled = (CheckBox) findViewById(R.id.chkCyclicSpeakerEnabled);
 		chkLogToRaw = (CheckBox) findViewById(R.id.chkLogToRaw); 
 		chkLogToCsv = (CheckBox) findViewById(R.id.chkLogToCsv); 
 		chkLogToHuman = (CheckBox) findViewById(R.id.chkLogToHuman); 
+		edCyclicInterval = (EditText) findViewById(R.id.edCyclicSpeakerInterval);
+		edCyclicInterval.setOnEditorActionListener(this);
+		//edCyclicInterval.setImeOptions(EditorInfo.IME_ACTION_DONE|EditorInfo.IME_ACTION_UNSPECIFIED);
+		btnSave = (Button) findViewById(R.id.btnSave);
 		
 		// Add listeners
+		Log.i(TAG,"Add Listeners");
 		btnDeleteLogs.setOnClickListener(this);
 		chkCyclicSpeakerEnabled.setOnClickListener(this);
 		chkLogToRaw.setOnClickListener(this);
 		chkLogToCsv.setOnClickListener(this);
 		chkLogToHuman.setOnClickListener(this);
+		btnSave.setOnClickListener(this);
+		//edCyclicSpeakerInterval.addTextChangedListener(this);
+		
 		
 		// Load settings
         //settings = getPreferences(MODE_PRIVATE);
@@ -97,7 +117,37 @@ public class ApplicationSettingsActivity extends Activity implements OnClickList
 				editor.commit();
 				server.setLogToHuman(((CheckBox) v).isChecked());
 				break;
+			case R.id.btnSave:
+				Log.i(TAG,"Store new interval");
+				save();
 				
+				
+				break;
+
+				
+		}
+	}
+	
+	private void save()
+	{
+		Log.i(TAG,"Save current settings");
+		try
+		{
+			editor.putBoolean("cyclicSpeakerEnabledAtStartup", chkCyclicSpeakerEnabled.isChecked());
+			editor.putBoolean("logToCsv", chkLogToCsv.isChecked());
+			editor.putBoolean("logToRaw", chkLogToRaw.isChecked());
+			editor.putBoolean("logToHuman", chkLogToHuman.isChecked());
+			editor.putInt("cyclicSpeakerInterval", Integer.parseInt(edCyclicInterval.getText().toString()));
+			editor.commit();
+			server.setCyclicSpeachInterval(Integer.parseInt(edCyclicInterval.getText().toString()));
+			
+			getApplicationContext();
+			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(edCyclicInterval.getWindowToken(), 0);
+		}
+		catch (Exception e)
+		{
+			
 		}
 	}
 	
@@ -164,7 +214,11 @@ public class ApplicationSettingsActivity extends Activity implements OnClickList
 			
 			settings = server.getSettings();
 	        editor = settings.edit();
-	        
+	        int interval = settings.getInt("cyclicSpeakerInterval",30);
+	        Log.i(TAG,"Set interval to +"+interval);
+	        Log.i(TAG,"Edit field currently at +"+edCyclicInterval.getText().toString());
+	        edCyclicInterval.setText(String.valueOf(interval));
+	        //edCyclicInterval.setText(interval);
 	        chkCyclicSpeakerEnabled.setChecked(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
 	        chkLogToRaw.setChecked(settings.getBoolean("logToRaw",false));
 	        chkLogToHuman.setChecked(settings.getBoolean("logToHuman",false));
@@ -184,6 +238,37 @@ public class ApplicationSettingsActivity extends Activity implements OnClickList
 			server = null;
 		}
 	};
+
+	@Override
+	public boolean onEditorAction(TextView editView, int actionId, KeyEvent event) {
+		// Detect "ENTER"
+		if(actionId == EditorInfo.IME_NULL)
+		{
+			save();
+		}
+		return true;
+	}
+
+//	@Override
+//	public void afterTextChanged(Editable arg0) {
+//		// TODO Auto-generated method stub
+//		Log.i(TAG,"User fixed interval to: "+arg0.toString());
+//		
+//	}
+//
+//	@Override
+//	public void beforeTextChanged(CharSequence s, int start, int count,
+//			int after) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void onTextChanged(CharSequence s, int start, int before, int count) {
+//		// TODO Auto-generated method stub
+//		Log.i(TAG,"Interval changed to: "+s);
+//		
+//	}
 	
 	
 }

@@ -35,7 +35,7 @@
     <string name="title_paired_devices">Paired Devices</string>
     <string name="title_other_devices">Other Available Devices</string>
     <string name="button_scan">Scan for devices</string>
-    <string name="intervalForCyclicSpeak">Interval for cyclic speaker (seconds)</string>
+    <string name="intervalForCyclicSpeak">Speaker Interval (sec)</string>
     <string name="defaults">Default</string>
     <string name="commands">Commands</string>
     <string name="save">Save</string>

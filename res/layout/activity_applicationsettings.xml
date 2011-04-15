@@ -5,8 +5,8 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout4">
                 <TextView android:id="@+id/textView1" android:layout_width="wrap_content" android:text="@string/intervalForCyclicSpeak" android:layout_height="match_parent" android:layout_gravity="center_vertical" android:gravity="center_vertical"></TextView>
                 <LinearLayout android:id="@+id/linearLayout5" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="right" android:gravity="right">
-                    <EditText android:layout_width="wrap_content" android:id="@+id/edCyclicSpeakerInterval" android:layout_height="wrap_content" android:inputType="number" android:text="30" android:layout_marginRight="10dip"></EditText>
-                </LinearLayout>
+                    <EditText android:imeOptions="actionDone" android:maxLength="3" android:ems="2" android:layout_width="wrap_content" android:id="@+id/edCyclicSpeakerInterval" android:layout_height="wrap_content" android:inputType="number" android:text="30" android:layout_marginRight="10dip"></EditText>
+                </LinearLayout> 
             </LinearLayout>
             <CheckBox android:id="@+id/chkCyclicSpeakerEnabled" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/cyclicSpeakerEnabledAtStartup"></CheckBox>
             <TextView android:background="#333333" android:id="@+id/textView3" android:layout_height="wrap_content" android:text="@string/loggerSettings" android:layout_width="match_parent" android:gravity="center"></TextView>
@@ -15,8 +15,8 @@
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToCsv" android:layout_height="wrap_content" android:text="@string/logToCsv" android:enabled="false"></CheckBox>
         </LinearLayout>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout1">
+            <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:id="@+id/btnSave"></Button>
             <Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/button1" android:text="@string/defaults"></Button>
-            <Button android:text="@string/save" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/button2"></Button>
         </LinearLayout>
         <LinearLayout android:layout_width="match_parent" android:id="@+id/linearLayout2" android:orientation="vertical" android:layout_gravity="bottom" android:layout_height="match_parent" android:gravity="bottom">
             <TextView android:background="#333333" android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/commands" android:layout_width="match_parent" android:gravity="center"></TextView>

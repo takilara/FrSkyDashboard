@@ -489,6 +489,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		AD2 = getChannelById(tad2);
 		AD2.setPrecision(1);
 		AD2.setMovingAverage(8);
+		AD2.silent = true;
 		
 		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
 		RSSIrx = getChannelById(trssirx);

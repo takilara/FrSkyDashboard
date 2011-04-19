@@ -189,14 +189,27 @@ public class Logger {
 		if(mExternalStorageWriteable)
 		{
 			if(_logCsv){
+				
 				csvTask = new WriteCsv();
 				csvTask.execute(f);
 			}
 			if(_logRaw){ 
+				// Make sure file is there before spawning any writer threads
+				if(_fileRaw==null || !_fileRaw.canWrite())
+				{
+						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (RAW)");
+						openRawFile(makePrefix());
+				}
 				rawTask = new WriteRaw();
 				rawTask.execute(f);
 			}
 			if(_logHuman){
+				// Make sure file is there before spawning any writer threads
+				if(_fileHuman==null || !_fileHuman.canWrite())
+				{
+						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (ASC)");
+						openHumanFile(makePrefix());
+				}
 				humanTask = new WriteHuman();
 				humanTask.execute(f);
 			}
@@ -229,11 +242,7 @@ public class Logger {
 			int bytes = 0;
 			if(_logRaw)
 			{
-				if(_fileRaw==null || !_fileRaw.canWrite())
-				{
-						Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
-						openRawFile(makePrefix());
-				}
+
 				int count = frames.length;
 				for(int n=0;n<count;n++)
 				{
@@ -264,11 +273,7 @@ public class Logger {
 		protected Void doInBackground(Frame... frames) {
 			if(_logHuman)
 			{
-				if(_fileHuman==null || !_fileHuman.canWrite())
-				{
-						Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
-						openHumanFile(makePrefix());
-				}
+				
 				int count = frames.length;
 				for(int n=0;n<count;n++)
 				{

@@ -94,7 +94,7 @@ public class Frskydash extends TabActivity {
         Intent intent;  // Reusable Intent for each tab
 
         // Create an Intent to launch an Activity for the tab (to be reused)
-        intent = new Intent().setClass(this, DashboardActivity.class);
+        intent = new Intent().setClass(this, ActivityDashboard.class);
 
         // Initialize a TabSpec for each tab and add it to the TabHost
         spec = tabHost.newTabSpec("dashboard").setIndicator("Dashboard",
@@ -104,7 +104,7 @@ public class Frskydash extends TabActivity {
         tabHost.addTab(spec);
 
         // ModuleSettings
-        intent = new Intent().setClass(this, ModuleSettingsActivity.class);
+        intent = new Intent().setClass(this, ActivityModuleSettings.class);
         spec = tabHost.newTabSpec("modulesettings").setIndicator("Module Settings",
                           res.getDrawable(R.drawable.icon))
                       .setContent(intent);
@@ -112,11 +112,11 @@ public class Frskydash extends TabActivity {
 
         // Channel config
         
-        intent = new Intent().setClass(this, ChannelConfigActivity.class);
-        spec = tabHost.newTabSpec("channelconfig").setIndicator("Channel Config",
-                          res.getDrawable(R.drawable.icon))
-                      .setContent(intent);
-        tabHost.addTab(spec);
+//        intent = new Intent().setClass(this, ChannelConfigActivity.class);
+//        spec = tabHost.newTabSpec("channelconfig").setIndicator("Channel Config",
+//                          res.getDrawable(R.drawable.icon))
+//                      .setContent(intent);
+//        tabHost.addTab(spec);
 
         // Application settings
 //        intent = new Intent().setClass(this, ApplicationSettingsActivity.class);
@@ -126,7 +126,7 @@ public class Frskydash extends TabActivity {
 //        tabHost.addTab(spec);
         
         // Simulator
-        intent = new Intent().setClass(this, SimulatorActivity.class);
+        intent = new Intent().setClass(this, ActivitySimulator.class);
         spec = tabHost.newTabSpec("simulator").setIndicator("Simulator",
                           res.getDrawable(R.drawable.icon))
                       .setContent(intent);
@@ -230,7 +230,7 @@ public class Frskydash extends TabActivity {
             if (resultCode == Activity.RESULT_OK) {
                 // Get the device MAC address
                 String address = data.getExtras()
-                                     .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                                     .getString(ActivityDeviceList.EXTRA_DEVICE_ADDRESS);
                 // Get the BLuetoothDevice object
                 BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
                 // Attempt to connect to the device
@@ -271,14 +271,14 @@ public class Frskydash extends TabActivity {
     		case R.id.settings:
     			Log.i(TAG,"User clicked on Settings");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
-    			Intent intent = new Intent(this,ApplicationSettingsActivity.class);
+    			Intent intent = new Intent(this,ActivityApplicationSettings.class);
     			startActivity(intent);
     			break;
     		
     		case R.id.connect_bluetooth:
     			if (server.getConnectionState() == BluetoothSerialService.STATE_NONE) {
             		// Launch the DeviceListActivity to see devices and do scan
-            		Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            		Intent serverIntent = new Intent(this, ActivityDeviceList.class);
             		startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
             	}
             	else

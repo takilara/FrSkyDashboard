@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class ActivityChannelConfig extends Activity {
@@ -15,6 +16,8 @@ public class ActivityChannelConfig extends Activity {
 	private FrSkyServer server;
 	private Channel channel;
 	private TextView tvName;
+	private EditText edDesc,edUnit;
+	//chConf_edVoice
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,12 @@ public class ActivityChannelConfig extends Activity {
 		setContentView(R.layout.activity_channelconfig);
 		tvName = (TextView) findViewById(R.id.chConf_tvName);
 		tvName.setText("");
+		
+		edDesc = (EditText) findViewById(R.id.chConf_edDescription);
+		edDesc.setText("");
+		
+		edUnit = (EditText) findViewById(R.id.chConf_edUnit);
+		edUnit.setText("");
 		
 	}
 	
@@ -66,6 +75,9 @@ public class ActivityChannelConfig extends Activity {
 			{
 				channel = server.getChannelById(_channelId);
 				tvName.setText(channel.getName());
+				
+				edDesc.setText(channel.getDescription());
+				edUnit.setText(channel.getLongUnit());
 			}
 		}
 

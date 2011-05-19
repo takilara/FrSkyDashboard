@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
     <LinearLayout android:id="@+id/linearLayout1" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
-        <TextView android:layout_height="wrap_content" android:id="@+id/chConf_tvName" android:text="" android:layout_width="wrap_content"></TextView>
+        <TextView android:id="@+id/chConf_tvName"  android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_name"></TextView>
         <EditText android:text="EditText" android:id="@+id/editText1" android:layout_height="wrap_content" android:layout_width="match_parent"></EditText>
         <Spinner android:layout_height="wrap_content" android:id="@+id/spinner1" android:layout_width="match_parent"></Spinner>
         <TableLayout android:layout_height="wrap_content" android:id="@+id/tableLayout1" android:layout_width="match_parent">

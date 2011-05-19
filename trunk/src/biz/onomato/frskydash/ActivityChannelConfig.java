@@ -28,7 +28,9 @@ public class ActivityChannelConfig extends Activity {
 		Log.d(TAG, "Channel Id is: "+_channelId);
 		
 		setContentView(R.layout.activity_channelconfig);
-		tvName.findViewById(R.id.chConf_tvName);
+		tvName = (TextView) findViewById(R.id.chConf_tvName);
+		tvName.setText("");
+		
 	}
 	
 	
@@ -63,7 +65,7 @@ public class ActivityChannelConfig extends Activity {
 			if(_channelId>-1)
 			{
 				channel = server.getChannelById(_channelId);
-//				tvName.setText(channel.getName());
+				tvName.setText(channel.getName());
 			}
 		}
 

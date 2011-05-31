@@ -87,10 +87,21 @@ public class Channel {
 	{
 		return _description;
 	}
+	
+	public void setDescription(String d)
+	{
+		_description = d;
+	}
+	
 	public String getName()
 	{
 		return _name;
 	}
+	public void setName(String n)
+	{
+		_name = n;
+	}
+	
 	public String getLongUnit()
 	{
 		return _longUnit;

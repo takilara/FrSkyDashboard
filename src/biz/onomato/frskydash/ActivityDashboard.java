@@ -44,6 +44,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     //MyApp globals;
     
     private TextView tv_ad1_val,tv_ad2_val,tv_rssitx_val,tv_rssirx_val,tv_fps_val;
+    private TextView tv_dash_ch0NameDesc,tv_dash_ch1NameDesc;
     private ToggleButton btnTglSpeak;
     private TextToSpeech mTts;
     
@@ -98,6 +99,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         tv_fps_val = (TextView) findViewById(R.id.fpsValue);
         Log.d(TAG,"Found fpsValue: "+tv_fps_val.toString());
    
+        tv_dash_ch0NameDesc = (TextView) findViewById(R.id.dash_ch0NameDesc);
+        tv_dash_ch1NameDesc = (TextView) findViewById(R.id.dash_ch1NameDesc);
         
         // Setup Click Listeners
         View btnTest1 = findViewById(R.id.btnTest1);
@@ -220,6 +223,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			//server.setLogToCsv(settings.getBoolean("logToCsv",false));
 			
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+    		tv_dash_ch0NameDesc.setText(server.AD1.getName()+": "+server.AD1.getDescription());
+    		tv_dash_ch1NameDesc.setText(server.AD2.getName()+": "+server.AD2.getDescription());
 			
 		}
 
@@ -237,11 +242,17 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	if(server != null)
     	{
     		btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+    		
+    		tv_dash_ch0NameDesc.setText(server.AD1.getName()+": "+server.AD1.getDescription());
+    		tv_dash_ch1NameDesc.setText(server.AD2.getName()+": "+server.AD2.getDescription());
     	}
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
 
     	registerReceiver(mIntentReceiver, mIntentFilter);
+    	
+    	// Update text in case change
+    	//dash_ch0NameDesc
 
     	//globals.showIcon();
     	//speakHandler.postDelayed(runnableSpeaker, 20000);

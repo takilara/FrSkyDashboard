@@ -5,6 +5,7 @@
 
     
     <TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center" android:stretchColumns="1" android:id="@+id/tableLayout1">
+        <TextView android:text="TextView" android:layout_width="wrap_content" android:id="@+id/dash_ch0NameDesc" android:layout_height="wrap_content"></TextView>
         <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:baselineAligned="true" android:layout_height="50dp">
             <Button 
             	android:layout_width="40dp"
@@ -40,7 +41,8 @@
         </TableRow>
         <View
         	android:layout_height="2dip"
-        	android:background="#FF909090" /> 
+        	android:background="#FF909090" />
+        <TextView android:text="TextView" android:layout_width="wrap_content" android:id="@+id/dash_ch1NameDesc" android:layout_height="wrap_content"></TextView> 
         
         <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <Button 

@@ -1,25 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
     <LinearLayout android:id="@+id/linearLayout1" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
         <TextView android:id="@+id/chConf_tvName"  android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_name"></TextView>
-        <EditText android:text="Description" android:id="@+id/chConf_edDescription" android:layout_height="wrap_content" android:layout_width="match_parent"></EditText>
-        <EditText android:text="Unit" 		 android:id="@+id/chConf_edUnit" android:layout_height="wrap_content" android:layout_width="match_parent"></EditText>
-        <Spinner android:layout_height="wrap_content" android:id="@+id/spinner1" android:layout_width="match_parent"></Spinner>
-        <TableLayout android:layout_height="wrap_content" android:id="@+id/tableLayout1" android:layout_width="match_parent">
-            <TableRow android:id="@+id/tableRow1" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_weight="1">
-                <TextView android:layout_height="wrap_content" android:id="@+id/textView2" android:text="TextView" android:layout_width="wrap_content" android:layout_weight="1" android:layout_gravity="center"></TextView>
-                <TextView android:layout_height="wrap_content" android:id="@+id/textView3" android:text="" android:layout_width="wrap_content" android:layout_weight="1" android:layout_gravity="center"></TextView>
-                <TextView android:layout_height="wrap_content" android:id="@+id/textView4" android:text="TextView" android:layout_width="wrap_content" android:layout_weight="1" android:layout_gravity="center"></TextView>
-            </TableRow>
-            <TableRow android:layout_height="wrap_content" android:id="@+id/tableRow2" android:layout_width="match_parent" android:layout_weight="1">
-                <EditText android:layout_height="wrap_content" android:text="0" android:id="@+id/editText2" android:layout_width="match_parent" android:numeric="integer"></EditText>
-                <TextView android:text="Min" android:id="@+id/textView5" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-                <EditText android:layout_height="wrap_content" android:text="0.0" android:id="@+id/editText3" android:layout_width="match_parent" android:numeric="decimal"></EditText>
-            </TableRow>
-            <TableRow android:layout_height="wrap_content" android:id="@+id/tableRow2" android:layout_width="match_parent" android:layout_weight="1">
-                <EditText android:text="255" android:id="@+id/editText2" android:layout_height="wrap_content" android:layout_width="match_parent" android:numeric="integer"></EditText>
-                <TextView android:text="Max" android:id="@+id/textView5" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-                <EditText android:layout_height="wrap_content" android:text="20.4" android:id="@+id/editText3" android:layout_width="match_parent" android:numeric="decimal"></EditText>
-            </TableRow>
-        </TableLayout>
-        <Button android:text="Save" android:id="@+id/button1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/textView2"></TextView>
+        <EditText android:id="@+id/chConf_edDescription" android:layout_height="wrap_content" android:layout_width="match_parent" android:text="@string/chConf_Description"></EditText>
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/textView3" android:text="@string/chConf_Unit"></TextView>
+        <EditText android:id="@+id/chConf_edUnit" android:layout_height="wrap_content" android:layout_width="match_parent"></EditText>
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/textView1" android:text="@string/chConf_Offset"></TextView>
+        <EditText android:id="@+id/chConf_edOffset" android:layout_height="wrap_content" android:layout_width="match_parent"></EditText>
+        <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/textView4" android:text="@string/chConf_Factor"></TextView>
+        <EditText android:id="@+id/chConf_edFactor" android:layout_height="wrap_content" android:layout_width="match_parent"></EditText>
+        <TextView android:layout_width="wrap_content" android:id="@+id/textView5" android:text="@string/chConf_Precision" android:layout_height="wrap_content"></TextView>
+        <EditText android:id="@+id/chConf_edPrecision" android:layout_width="match_parent" android:layout_height="wrap_content"></EditText>
+        <TextView android:layout_width="wrap_content" android:id="@+id/textView6" android:text="@string/chConf_MovingAverage" android:layout_height="wrap_content"></TextView>
+        <EditText android:id="@+id/chConf_edMovingAverage" android:layout_width="match_parent" android:layout_height="wrap_content"></EditText>
+        <CheckBox android:layout_width="wrap_content" android:id="@+id/chConf_chkSpeechEnabled" android:text="@string/chConf_SpeechEnabled" android:layout_height="wrap_content"></CheckBox>
+        <Button android:id="@+id/chConf_btnSave" android:layout_height="wrap_content" android:layout_width="match_parent" android:text="@string/save"></Button>
     </LinearLayout>

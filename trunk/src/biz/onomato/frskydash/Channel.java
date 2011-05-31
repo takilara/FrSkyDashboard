@@ -17,9 +17,12 @@ public class Channel {
 	 
 	private String _unit;
 	private String _longUnit;
+	private int _movingAverage;
 	private MathContext _mc;
 	public boolean silent;
+	
 	private MyStack _stack;
+	
 	
 	public Channel(String name,String description,double offset,double factor,String unit,String longUnit)
 	{
@@ -36,6 +39,7 @@ public class Channel {
 		_mc = new MathContext(2);
 		_precision = 2;
 		_stack = new MyStack(10);
+		 
 		
 	}
 	
@@ -46,6 +50,7 @@ public class Channel {
 			Size = 1;
 		}
 		_stack = new MyStack(Size);
+		_movingAverage = Size;
 	}
 	
 	public double setRaw(int raw)
@@ -94,6 +99,31 @@ public class Channel {
 	public String toVoiceString()
 	{
 		return getDescription()+": "+toString()+" "+getLongUnit();
+	}
+	
+	public double getOffset()
+	{
+		return _offset;
+	}
+	
+	public double getFactor()
+	{
+		return _factor;
+	}	
+	
+	public int getPrecision()
+	{
+		return _precision;
+	}
+	
+	public int getMovingAverage()
+	{
+		return _movingAverage;
+	}
+	
+	public boolean getSpeechEnabled()
+	{
+		return !silent;
 	}
 
 }

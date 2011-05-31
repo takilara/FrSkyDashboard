@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -16,7 +17,8 @@ public class ActivityChannelConfig extends Activity {
 	private FrSkyServer server;
 	private Channel channel;
 	private TextView tvName;
-	private EditText edDesc,edUnit;
+	private EditText edDesc,edUnit,edOffset,edFactor,edPrecision,edMovingAverage;
+	private CheckBox chkSpeechEnabled;
 	//chConf_edVoice
     
 	@Override
@@ -24,21 +26,23 @@ public class ActivityChannelConfig extends Activity {
 		super.onCreate(savedInstanceState);
 		doBindService();
 		
-
-		
 		Intent launcherIntent = getIntent();
 		_channelId = launcherIntent.getIntExtra("channelId", -1);
 		Log.d(TAG, "Channel Id is: "+_channelId);
 		
+		// Show the form
 		setContentView(R.layout.activity_channelconfig);
-		tvName = (TextView) findViewById(R.id.chConf_tvName);
-		tvName.setText("");
+
+		// Find all form elements
+		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
+		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
+		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
+		edOffset 			= (EditText) findViewById(R.id.chConf_edOffset);
+		edFactor 			= (EditText) findViewById(R.id.chConf_edFactor);
+		edPrecision 		= (EditText) findViewById(R.id.chConf_edPrecision);
+		edMovingAverage 	= (EditText) findViewById(R.id.chConf_edMovingAverage);
+		chkSpeechEnabled 	= (CheckBox) findViewById(R.id.chConf_chkSpeechEnabled);
 		
-		edDesc = (EditText) findViewById(R.id.chConf_edDescription);
-		edDesc.setText("");
-		
-		edUnit = (EditText) findViewById(R.id.chConf_edUnit);
-		edUnit.setText("");
 		
 	}
 	
@@ -71,13 +75,21 @@ public class ActivityChannelConfig extends Activity {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			Log.i(TAG,"Fetch channel "+_channelId+" from Server");
+			// Show a particular channel
 			if(_channelId>-1)
 			{
+				// Get the Channel instance
 				channel = server.getChannelById(_channelId);
-				tvName.setText(channel.getName());
 				
+				// Update the form with the channel values
+				tvName.setText(channel.getName());
 				edDesc.setText(channel.getDescription());
 				edUnit.setText(channel.getLongUnit());
+				edOffset.setText(Double.toString(channel.getOffset()));
+				edFactor.setText(Double.toString(channel.getFactor()));
+				edPrecision.setText(Integer.toString(channel.getPrecision()));
+				edMovingAverage.setText(Integer.toString(channel.getMovingAverage()));
+				chkSpeechEnabled.setChecked(channel.getSpeechEnabled());
 			}
 		}
 

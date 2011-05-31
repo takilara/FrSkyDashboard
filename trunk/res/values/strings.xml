@@ -45,6 +45,13 @@
     <string name="logToHuman">Log frames to Human readable file (for debug use)</string>
     <string name="logToCsv">Log frames to CSV file</string>
     <string name="speakerSettings">Speaker Settings</string>
+    <string name="chConf_Description">Description</string>
+    <string name="chConf_Unit">Unit</string>
+    <string name="chConf_Offset">Offset</string>
+    <string name="chConf_Factor">Factor</string>
+    <string name="chConf_Precision">Precision</string>
+    <string name="chConf_MovingAverage">Moving Average (samples)</string>
+    <string name="chConf_SpeechEnabled">Spoken Cyclic</string>
             
     
 </resources>

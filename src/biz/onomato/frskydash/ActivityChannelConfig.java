@@ -6,12 +6,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class ActivityChannelConfig extends Activity {
+public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ChannelConfig";
 	private int _channelId = -1;
 	private FrSkyServer server;
@@ -19,6 +22,7 @@ public class ActivityChannelConfig extends Activity {
 	private TextView tvName;
 	private EditText edDesc,edUnit,edOffset,edFactor,edPrecision,edMovingAverage;
 	private CheckBox chkSpeechEnabled;
+	private Button btnSave,btnDefaults;
 	//chConf_edVoice
     
 	@Override
@@ -43,7 +47,11 @@ public class ActivityChannelConfig extends Activity {
 		edMovingAverage 	= (EditText) findViewById(R.id.chConf_edMovingAverage);
 		chkSpeechEnabled 	= (CheckBox) findViewById(R.id.chConf_chkSpeechEnabled);
 		
+		btnSave				= (Button) findViewById(R.id.chConf_btnSave);
+		btnDefaults				= (Button) findViewById(R.id.chConf_btnDefaults);
 		
+		btnSave.setOnClickListener(this);
+		btnDefaults.setOnClickListener(this);
 	}
 	
 	
@@ -97,4 +105,24 @@ public class ActivityChannelConfig extends Activity {
 			server = null;
 		}
 	};
+
+	@Override
+	public void onClick(View v) {
+		switch(v.getId()){
+			case R.id.chConf_btnSave:
+				Log.i(TAG,"Apply settings to channel: "+_channelId);
+				Log.i(TAG,"Store settings to database for channel: "+_channelId);
+				break;
+			case R.id.chConf_btnDefaults:
+				Log.i(TAG,"Reset to default channel: "+_channelId);
+				Log.i(TAG,"Store settings to database for channel: "+_channelId);
+				break;
+		}
+	}
+	
+	private void applyChannel()
+	{
+		int ma = Integer.parseInt(edMovingAverage.getText().toString());
+		channel.setMovingAverage(ma);
+	}
 }

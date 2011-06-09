@@ -40,6 +40,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	// Used for Cyclic speak
 
     private int MY_DATA_CHECK_CODE;
+    private static final int CHANNEL_CONFIG_RETURN = 1;
     
     //MyApp globals;
     
@@ -331,13 +332,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     		Log.i(TAG,"Edit channel 0");
     		Intent i = new Intent(this, ActivityChannelConfig.class);
     		i.putExtra("channelId", 0);
-    		startActivity(i);
+    		//startActivity(i);
+    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
     		break;
     	case R.id.dash_btnEditChannel1:
     		Log.i(TAG,"Edit channel 1");
     		Intent ii = new Intent(this, ActivityChannelConfig.class);
     		ii.putExtra("channelId", 1);
-    		startActivity(ii);
+    		startActivityForResult(ii,CHANNEL_CONFIG_RETURN);
     		break;
     	}
     }
@@ -372,6 +374,20 @@ public class ActivityDashboard extends Activity implements OnClickListener {
                 startActivity(installIntent);
             }
         }
+        else if(requestCode == CHANNEL_CONFIG_RETURN)
+        {
+        	switch(resultCode)
+        	{
+        		case RESULT_OK:
+        			Log.i(TAG,"User saved new settings");
+        			break;
+        		case RESULT_CANCELED:
+        			Log.i(TAG,"User cancelled with back");
+        			break;
+        	}
+        }
+        	
+        // --
     }
     
     @Override

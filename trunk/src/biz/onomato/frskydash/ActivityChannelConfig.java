@@ -117,6 +117,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				Log.i(TAG,"Store settings to database for channel: "+_channelId);
 				
 				Log.i(TAG,"Go back to dashboard");
+				this.setResult(RESULT_OK);
+				this.finish();
 				break;
 			case R.id.chConf_btnDefaults:
 				Log.i(TAG,"Reset to default channel: "+_channelId);

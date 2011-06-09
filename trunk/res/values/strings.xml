@@ -52,6 +52,7 @@
     <string name="chConf_Precision">Precision</string>
     <string name="chConf_MovingAverage">Moving Average (samples)</string>
     <string name="chConf_SpeechEnabled">Spoken Cyclic</string>
+    <string name="chConf_shortUnit">Short Unit</string>
             
     
 </resources>

@@ -20,7 +20,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private FrSkyServer server;
 	private Channel channel;
 	private TextView tvName;
-	private EditText edDesc,edUnit,edOffset,edFactor,edPrecision,edMovingAverage;
+	private EditText edDesc,edUnit,edShortUnit,edOffset,edFactor,edPrecision,edMovingAverage;
 	private CheckBox chkSpeechEnabled;
 	private Button btnSave,btnDefaults;
 	//chConf_edVoice
@@ -41,6 +41,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
 		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
 		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
+		edShortUnit			= (EditText) findViewById(R.id.chConf_edShortUnit);
 		edOffset 			= (EditText) findViewById(R.id.chConf_edOffset);
 		edFactor 			= (EditText) findViewById(R.id.chConf_edFactor);
 		edPrecision 		= (EditText) findViewById(R.id.chConf_edPrecision);
@@ -93,6 +94,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				tvName.setText(channel.getName());
 				edDesc.setText(channel.getDescription());
 				edUnit.setText(channel.getLongUnit());
+				edShortUnit.setText(channel.getShortUnit());
 				edOffset.setText(Double.toString(channel.getOffset()));
 				edFactor.setText(Double.toString(channel.getFactor()));
 				edPrecision.setText(Integer.toString(channel.getPrecision()));
@@ -111,7 +113,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		switch(v.getId()){
 			case R.id.chConf_btnSave:
 				Log.i(TAG,"Apply settings to channel: "+_channelId);
+				applyChannel();
 				Log.i(TAG,"Store settings to database for channel: "+_channelId);
+				
+				Log.i(TAG,"Go back to dashboard");
 				break;
 			case R.id.chConf_btnDefaults:
 				Log.i(TAG,"Reset to default channel: "+_channelId);
@@ -122,7 +127,28 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	
 	private void applyChannel()
 	{
+		Log.i(TAG,"Apply the settings");
+		
+		int prec = Integer.parseInt(edPrecision.getText().toString());
+		channel.setPrecision(prec);
+		
+		double fact = Double.parseDouble(edFactor.getText().toString());
+		channel.setFactor(fact);
+		
+		double offs = Double.parseDouble(edOffset.getText().toString());
+		channel.setOffset(offs);
+
+		channel.setLongUnit(edUnit.getText().toString());
+		channel.setShortUnit(edShortUnit.getText().toString());
+		
+		channel.setDescription(edDesc.getText().toString());
+		
+		channel.setSpeechEnabled(chkSpeechEnabled.isChecked());
+		
+		//needs to be done last to clean out "buffer"
 		int ma = Integer.parseInt(edMovingAverage.getText().toString());
 		channel.setMovingAverage(ma);
+		
+		
 	}
 }

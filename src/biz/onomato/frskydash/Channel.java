@@ -15,7 +15,7 @@ public class Channel {
 	private double _factor;
 	private int _precision;
 	 
-	private String _unit;
+	private String _shortUnit;
 	private String _longUnit;
 	private int _movingAverage;
 	private MathContext _mc;
@@ -34,7 +34,7 @@ public class Channel {
 		_description = description;
 		_offset = offset;
 		_factor = factor;
-		_unit = unit;
+		_shortUnit = unit;
 		_longUnit = longUnit;
 		_mc = new MathContext(2);
 		_precision = 2;
@@ -69,6 +69,7 @@ public class Channel {
 	{
 		_precision = precision;
 	}
+	
 	
 	// Getters
 	public double getValue()
@@ -107,6 +108,21 @@ public class Channel {
 		return _longUnit;
 	}
 	
+	public void setLongUnit(String unit)
+	{
+		_longUnit = unit;
+	}
+	
+	public String getShortUnit()
+	{
+		return _shortUnit;
+	}
+	
+	public void setShortUnit(String unit)
+	{
+		_shortUnit = unit;
+	}
+	
 	public String toVoiceString()
 	{
 		return getDescription()+": "+toString()+" "+getLongUnit();
@@ -116,10 +132,18 @@ public class Channel {
 	{
 		return _offset;
 	}
+	public void setOffset(double o)
+	{
+		_offset = o;
+	}	
 	
 	public double getFactor()
 	{
 		return _factor;
+	}	
+	public void setFactor(double f)
+	{
+		_factor = f;
 	}	
 	
 	public int getPrecision()
@@ -137,4 +161,8 @@ public class Channel {
 		return !silent;
 	}
 
+	public void setSpeechEnabled(boolean speech)
+	{
+		silent = !speech;
+	}
 }

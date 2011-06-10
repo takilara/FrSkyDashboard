@@ -1,0 +1,64 @@
+package biz.onomato.frskydash;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.util.Log;
+
+public class FrskyDatabase extends SQLiteOpenHelper {
+	static final String TAG="FrSkyDatabase";
+		
+	static final String DB_NAME="frsky";
+	static final String TBL_CHANNEL_CONFIG="channelconfig";
+	static final String COL_ID="channelId";
+	static final String COL_NAME="channelName";
+	static final String COL_DESCRIPTION="channelDescription";
+	
+	public FrskyDatabase(Context context) {
+		super(context, DB_NAME, null, 4);
+		Log.i(TAG,"Constructor");
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		// TODO Auto-generated method stub
+		Log.i(TAG,"Create the database File");
+		String q = "CREATE TABLE "+TBL_CHANNEL_CONFIG+" ("+COL_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+COL_NAME+" text,"+COL_DESCRIPTION+" text)";
+		db.execSQL(q);
+
+		// Add AD1 and AD2 entries
+		insertDefaults();
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// TODO Auto-generated method stub
+		Log.i(TAG,"Upgrade database");
+		
+		Log.i(TAG,"Drop Tables");
+		db.execSQL("DROP TABLE IF EXISTS "+TBL_CHANNEL_CONFIG);
+		
+		onCreate(db);
+	}		
+
+
+	public void insertDefaults()
+	{
+		Log.i(TAG,"Insert Default Values");
+		SQLiteDatabase db=this.getWritableDatabase();
+		ContentValues cv=new ContentValues();
+		cv.put(COL_ID, 0);
+		cv.put(COL_NAME, "AD1");
+		cv.put(COL_DESCRIPTION, "Analog channel one");
+		
+		cv.put(COL_ID, 1);
+		cv.put(COL_NAME, "AD2");
+		cv.put(COL_DESCRIPTION, "Analog channel two");
+		
+		db.insert(TBL_CHANNEL_CONFIG, COL_ID, cv);
+		db.close();
+	}
+}

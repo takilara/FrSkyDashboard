@@ -2,6 +2,7 @@ package biz.onomato.frskydash;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -17,7 +18,7 @@ public class FrskyDatabase extends SQLiteOpenHelper {
 	static final String COL_DESCRIPTION="channelDescription";
 	
 	public FrskyDatabase(Context context) {
-		super(context, DB_NAME, null, 4);
+		super(context, DB_NAME, null, 6);
 		Log.i(TAG,"Constructor");
 		// TODO Auto-generated constructor stub
 	}
@@ -30,7 +31,7 @@ public class FrskyDatabase extends SQLiteOpenHelper {
 		db.execSQL(q);
 
 		// Add AD1 and AD2 entries
-		insertDefaults();
+		insertDefaults(db);
 	}
 
 	@Override
@@ -44,11 +45,31 @@ public class FrskyDatabase extends SQLiteOpenHelper {
 		onCreate(db);
 	}		
 
-
-	public void insertDefaults()
+	//public Channel getChannel(int id)
+	public void getChannel(int id)
+	{
+		
+		SQLiteDatabase db=this.getReadableDatabase();
+		String [] columns=new String[]{COL_ID,COL_NAME,COL_DESCRIPTION};
+		Cursor c=db.query(TBL_CHANNEL_CONFIG, columns, COL_ID+"="+id,null,null,null,null );
+		c.moveToFirst();
+		
+		String name = c.getString(c.getColumnIndex(COL_NAME));
+		Log.i(TAG,"Fetched channel '"+name+"' from database");
+		
+		
+	}
+	
+//	public void createDatabase()
+//	{
+//		Log.i(TAG,"Try to create the database");
+//		this.getReadableDatabase();
+//	}
+	
+	public void insertDefaults(SQLiteDatabase db)
 	{
 		Log.i(TAG,"Insert Default Values");
-		SQLiteDatabase db=this.getWritableDatabase();
+		
 		ContentValues cv=new ContentValues();
 		cv.put(COL_ID, 0);
 		cv.put(COL_NAME, "AD1");

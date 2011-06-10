@@ -115,7 +115,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				Log.i(TAG,"Apply settings to channel: "+_channelId);
 				applyChannel();
 				Log.i(TAG,"Store settings to database for channel: "+_channelId);
-				
+				server.saveChannelConfig(channel);
 				Log.i(TAG,"Go back to dashboard");
 				this.setResult(RESULT_OK);
 				this.finish();

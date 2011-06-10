@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -65,6 +66,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     private BluetoothDevice _device = null;
     public boolean reconnectBt = true;
     public int fps=0;
+    
+    private FrskyDatabase channelDb;
     
     private Logger logger;
 	
@@ -167,6 +170,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		setupChannels();
 		
+		
+		
 		Log.i(TAG,"Broadcast that i've started");
 		Intent i = new Intent();
 		i.setAction(MESSAGE_STARTED);
@@ -177,6 +182,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 getWakeLock();
 		 
 		 globals = ((MyApp)getApplicationContext());
+		 
+		 FrskyDatabase database = new FrskyDatabase(globals);
+		 
 		 
 		 mSerialService = new BluetoothSerialService(this, mHandlerBT);
 		 
@@ -797,6 +805,18 @@ private final Handler mHandlerBT = new Handler() {
 	public SharedPreferences getSettings()
 	{
 		return _settings;
+	}
+	
+	public void saveChannelConfig(Channel channel)
+	{
+		Log.i(TAG,"Save channel '"+channel+"'");
+		
+		// Update channelconfig database
+	}
+	
+	public void createChannelConfigDatabase()
+	{
+		
 	}
 }
 

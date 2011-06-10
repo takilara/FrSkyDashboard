@@ -184,6 +184,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 globals = ((MyApp)getApplicationContext());
 		 
 		 FrskyDatabase database = new FrskyDatabase(globals);
+		 //database.getChannel(0);
+		 
 		 
 		 
 		 mSerialService = new BluetoothSerialService(this, mHandlerBT);

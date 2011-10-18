@@ -495,7 +495,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		AD1 = getChannelById(tad1);
 		AD1.setMovingAverage(8);
 		
-		int tad2 = createChannel("AD2", "Receiver cell voltage", 0, (double) 0.5, "V","Volt");
+		int tad2 = createChannel("AD2", "Main cell voltage", 0, (double) 0.0258, "V","Volt");
 		AD2 = getChannelById(tad2);
 		AD2.setPrecision(1);
 		AD2.setMovingAverage(8);

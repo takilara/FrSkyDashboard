@@ -158,6 +158,7 @@ public class Logger {
 						// TODO Auto-generated catch block
 						Log.e(TAG,e1.getMessage());
 					}
+				Log.i(TAG,_context.getExternalFilesDir(null)+ filename+".raw");	
 				_streamRaw = openStream(_fileRaw);
 			}
 		}
@@ -198,6 +199,7 @@ public class Logger {
 				if(_fileRaw==null || !_fileRaw.canWrite())
 				{
 						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (RAW)");
+						
 						openRawFile(makePrefix());
 				}
 				rawTask = new WriteRaw();

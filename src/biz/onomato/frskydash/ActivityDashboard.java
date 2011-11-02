@@ -107,15 +107,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         tv_ad2_unit = (TextView) findViewById(R.id.ad2Unit);
         
         // Setup Click Listeners
-        View btnTest1 = findViewById(R.id.btnTest1);
-        btnTest1.setOnClickListener(this);
-        
-        View btnTest2 = findViewById(R.id.btnTest2);
-        btnTest2.setOnClickListener(this);
-        
-        View btnSpeak = findViewById(R.id.btnSpeak);
-        btnSpeak.setOnClickListener(this);
-        
+                
         View btnEditChannel0 = findViewById(R.id.dash_btnEditChannel0);
         btnEditChannel0.setOnClickListener(this);
         
@@ -284,29 +276,29 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     public void onClick(View v) {
     	switch (v.getId()) {
-    	case R.id.btnTest1:
-    		Log.i(TAG,"Clicked Test");
-    		// Testing controlling the service useing bound methods
-    		if (server != null) {
-    			int[] cf = server.getCurrentFrame();
-    			
-    			Log.i(TAG,"Data from service:"+Frame.frameToHuman(cf));
-    		}
-    		else
-    		{
-    			Log.i(TAG,"Service not bound");
-    		}
-    		break;
-    	case R.id.btnTest2:
-    		Log.i(TAG,"Switch activity");
-    		Intent intent = new Intent(this, ActivityModuleSettings.class);
-    		startActivity(intent);
-    		break;
-    	case R.id.btnSpeak:
-    		Log.i(TAG,"SPEAK something");
-    		//globals.saySomething(globals.AD1.toVoiceString());
-    		if(server!=null) server.saySomething(server.AD1.toVoiceString());
-    		break;
+//    	case R.id.btnTest1:
+//    		Log.i(TAG,"Clicked Test");
+//    		// Testing controlling the service useing bound methods
+//    		if (server != null) {
+//    			int[] cf = server.getCurrentFrame();
+//    			
+//    			Log.i(TAG,"Data from service:"+Frame.frameToHuman(cf));
+//    		}
+//    		else
+//    		{
+//    			Log.i(TAG,"Service not bound");
+//    		}
+//    		break;
+//    	case R.id.btnTest2:
+//    		Log.i(TAG,"Switch activity");
+//    		Intent intent = new Intent(this, ActivityModuleSettings.class);
+//    		startActivity(intent);
+//    		break;
+//    	case R.id.btnSpeak:
+//    		Log.i(TAG,"SPEAK something");
+//    		//globals.saySomething(globals.AD1.toVoiceString());
+//    		if(server!=null) server.saySomething(server.AD1.toVoiceString());
+//    		break;
     	
     	case R.id.dash_tglSpeak:
     		

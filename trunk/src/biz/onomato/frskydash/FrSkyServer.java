@@ -103,6 +103,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int channels=0;
 	private Channel[] objs;
 	
+	SharedPreferences settings;
+	SharedPreferences.Editor editor;
+	
 
 	
 	
@@ -194,6 +197,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 
 		 _cyclicSpeechEnabled = false;
 		 _speakDelay = 30000;
+		
+		 
 		 
         speakHandler = new Handler();
 		runnableSpeaker = new Runnable() {
@@ -234,6 +239,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
 		};
 		fpsHandler.postDelayed(runnableFps,1000);
+		
 	}
 	
 	/**
@@ -462,7 +468,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     	}
     }
 	
-	public int createChannel(String name,String description,double offset,double factor,String unit,String longUnit)
+	public int createChannel(String name,String description,float offset,float factor,String unit,String longUnit)
 	{
 		Channel AD1 =  new Channel(name, description, offset, factor, unit, longUnit);
 		objs[channels] = AD1;
@@ -479,6 +485,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return channels-1;
 	}
 	
+
+	
 	private void setupChannels()
 	{
 		hRaw = new int[MAX_CHANNELS];
@@ -490,16 +498,29 @@ public class FrSkyServer extends Service implements OnInitListener {
 		hUnit = new String[MAX_CHANNELS];
 		hLongUnit = new String[MAX_CHANNELS];
 		objs = new Channel[MAX_CHANNELS];
-
-		int tad1 = createChannel("AD1", "Main cell voltage", 0, (double) 0.1/6, "V","Volt");
-		AD1 = getChannelById(tad1);
-		AD1.setMovingAverage(8);
 		
-		int tad2 = createChannel("AD2", "Main cell voltage", 0, (double) 0.0258, "V","Volt");
+		
+        
+		
+		// hardcoded
+		// should be set up empty, contents filled from config
+		int tad1 = createChannel("AD1", "Default description", 0, (float) 1, "V","Volt");
+		AD1 = getChannelById(tad1);
+		//AD1.setMovingAverage(8);
+
+        // From config
+//		int tad1 = createChannel(cName, cDescription, cOffset, (double) cFactor, cShortUnit,cLongUnit);
+//		AD1 = getChannelById(tad1);
+//		AD1.setMovingAverage(cMovingAverage);
+//		AD1.setPrecision(cPrecision);
+//		AD1.silent = cSilent;
+		
+		
+		int tad2 = createChannel("AD2", "Default description", 0, (float) 1, "V","Volt");
 		AD2 = getChannelById(tad2);
-		AD2.setPrecision(1);
-		AD2.setMovingAverage(8);
-		AD2.silent = true;
+		//AD2.setPrecision(1);
+		//AD2.setMovingAverage(8);
+		//AD2.silent = true;
 		
 		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
 		RSSIrx = getChannelById(trssirx);
@@ -794,14 +815,69 @@ private final Handler mHandlerBT = new Handler() {
 		logger.setLogToCsv(logToCsv);
 	}
 	
+	
+	public boolean setChannelConfiguration(SharedPreferences settings,Channel channel)
+	{
+		
+      
+		String cDescription,cLongUnit,cShortUnit,cName;
+		float cFactor,cOffset;
+		int cMovingAverage,cPrecision;
+		boolean cSilent;
+      
+		cName=channel.getName();
+		channel.setDescription(settings.getString(cName+"_"+"Description","Main cell voltage"));
+		channel.setLongUnit(cLongUnit = settings.getString(cName+"_"+"LongUnit","Volt"));
+		channel.setShortUnit(cShortUnit = settings.getString(cName+"_"+"ShortUnit","V"));
+		channel.setFactor(cFactor = settings.getFloat(cName+"_"+"Factor", (float) (0.1/6)));
+		channel.setOffset(settings.getFloat(cName+"_"+"Offset", (float) (0)));
+		channel.setMovingAverage(cMovingAverage = settings.getInt(cName+"_"+"MovingAverage", 8));
+		channel.setPrecision(settings.getInt(cName+"_"+"Precision", 2));
+		channel.silent = settings.getBoolean(cName+"_"+"Silent", false);
+		return true;
+	}
+	
 	public void setSettings(SharedPreferences settings)
 	{
 		_settings = settings;
 //		setCyclicSpeech(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-		setLogToRaw(settings.getBoolean("logToRaw",false));
+		setLogToRaw(settings.getBoolean("logToRaw",true));
 		setLogToHuman(settings.getBoolean("logToHuman",false));
 		setLogToCsv(settings.getBoolean("logToCsv",false));
 		setCyclicSpeachInterval(settings.getInt("cyclicSpeakerInterval",30));
+		
+		
+      String cDescription,cLongUnit,cShortUnit,cName;
+      float cFactor,cOffset;
+      int cMovingAverage,cPrecision;
+      boolean cSilent;
+      
+      AD1.loadFromConfig(settings);
+      AD2.loadFromConfig(settings);
+      //setChannelConfiguration(settings,AD1);
+      //setChannelConfiguration(settings,AD2);
+//      
+//      cName="AD1";
+//      cDescription = settings.getString(cName+"_"+"Description","Main cell voltage");
+//      cLongUnit = settings.getString(cName+"_"+"LongUnit","Volt");
+//      cShortUnit = settings.getString(cName+"_"+"ShortUnit","V");
+//      cFactor = settings.getFloat(cName+"_"+"Factor", (float) (0.1/6));
+//      cOffset = settings.getFloat(cName+"_"+"Offset", (float) (0));
+//      cMovingAverage = settings.getInt(cName+"_"+"MovingAverage", 8);
+//      cPrecision = settings.getInt(cName+"_"+"Precision", 2);
+//      cSilent = settings.getBoolean(cName+"_"+"Silent", false);
+//		
+////		int tad1 = createChannel(cName, cDescription, cOffset, (double) cFactor, cShortUnit,cLongUnit);
+//      //AD1 = getChannelById(tad1);
+//      AD1.setDescription(cDescription);
+//      AD1.setShortUnit(cShortUnit);
+//      AD1.setLongUnit(cLongUnit);
+//      AD1.setFactor(cFactor);
+//      AD1.setOffset(cOffset);
+//      AD1.setMovingAverage(cMovingAverage);
+//      AD1.setPrecision(cPrecision);
+//      AD1.silent = cSilent;
+		
 	}
 	
 	public SharedPreferences getSettings()

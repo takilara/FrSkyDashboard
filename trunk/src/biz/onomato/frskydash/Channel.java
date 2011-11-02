@@ -1,5 +1,6 @@
 package biz.onomato.frskydash;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 import java.math.MathContext;
 
@@ -11,8 +12,8 @@ public class Channel {
 	private int _avg;
 	private String _name;
 	private String _description;
-	private double _offset;
-	private double _factor;
+	private float _offset;
+	private float _factor;
 	private int _precision;
 	 
 	private String _shortUnit;
@@ -22,9 +23,13 @@ public class Channel {
 	public boolean silent;
 	
 	private MyStack _stack;
+	SharedPreferences _settings;
+	SharedPreferences.Editor editor;
+
 	
 	
-	public Channel(String name,String description,double offset,double factor,String unit,String longUnit)
+	
+	public Channel(String name,String description,float offset,float factor,String unit,String longUnit)
 	{
 		silent = false;
 		_raw=-1;
@@ -41,6 +46,39 @@ public class Channel {
 		_stack = new MyStack(10);
 		 
 		
+	}
+	
+	public boolean loadFromConfig(SharedPreferences settings)
+	{
+
+		setDescription(settings.getString(_name+"_"+"Description","Main cell voltage"));
+		setLongUnit(settings.getString(_name+"_"+"LongUnit","Volt"));
+		setShortUnit(settings.getString(_name+"_"+"ShortUnit","V"));
+		setFactor(settings.getFloat(_name+"_"+"Factor", (float)(0.1/6)));
+		setOffset(settings.getFloat(_name+"_"+"Offset", (0)));
+		setMovingAverage(settings.getInt(_name+"_"+"MovingAverage", 8));
+		setPrecision(settings.getInt(_name+"_"+"Precision", 2));
+		silent = settings.getBoolean(_name+"_"+"Silent", false);
+		
+		return true;
+	}
+	
+	public boolean saveToConfig(SharedPreferences settings)
+	{
+		editor = settings.edit();
+		
+		editor.putString(_name+"_"+"Description", getDescription());
+		editor.putString(_name+"_"+"LongUnit", getLongUnit());
+		editor.putString(_name+"_"+"ShortUnit", getShortUnit());
+		editor.putFloat (_name+"_"+"Factor", getFactor());
+		editor.putFloat (_name+"_"+"Offset", getOffset());
+		editor.putInt(_name+"_"+"MovingAverage", getMovingAverage());
+		editor.putInt(_name+"_"+"Precision", getPrecision());
+		editor.putBoolean(_name+"_"+"Silent", silent);
+		
+		editor.commit();
+		
+		return true;
 	}
 	
 	public void setMovingAverage(int Size)
@@ -128,20 +166,20 @@ public class Channel {
 		return getDescription()+": "+toString()+" "+getLongUnit();
 	}
 	
-	public double getOffset()
+	public float getOffset()
 	{
 		return _offset;
 	}
-	public void setOffset(double o)
+	public void setOffset(float o)
 	{
 		_offset = o;
 	}	
 	
-	public double getFactor()
+	public float getFactor()
 	{
 		return _factor;
 	}	
-	public void setFactor(double f)
+	public void setFactor(float f)
 	{
 		_factor = f;
 	}	

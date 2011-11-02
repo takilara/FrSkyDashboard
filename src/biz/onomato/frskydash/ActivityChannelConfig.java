@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -18,6 +19,9 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ChannelConfig";
 	private int _channelId = -1;
 	private FrSkyServer server;
+	SharedPreferences settings;
+	SharedPreferences.Editor editor;
+	
 	private Channel channel;
 	private TextView tvName;
 	private EditText edDesc,edUnit,edShortUnit,edOffset,edFactor,edPrecision,edMovingAverage;
@@ -84,22 +88,37 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			Log.i(TAG,"Fetch channel "+_channelId+" from Server");
+			
+			settings = server.getSettings();
+	        editor = settings.edit();
+	        
 			// Show a particular channel
 			if(_channelId>-1)
 			{
 				// Get the Channel instance
 				channel = server.getChannelById(_channelId);
 				
-				// Update the form with the channel values
+				// Get configuration from config store
+				String cShortUnit = settings.getString(channel.getName() + "_shortUnit","A");
+				
+
+				// Name is common from configstore and server
 				tvName.setText(channel.getName());
+				
+				// Use config from Server
 				edDesc.setText(channel.getDescription());
 				edUnit.setText(channel.getLongUnit());
 				edShortUnit.setText(channel.getShortUnit());
-				edOffset.setText(Double.toString(channel.getOffset()));
-				edFactor.setText(Double.toString(channel.getFactor()));
+				edOffset.setText(Float.toString(channel.getOffset()));
+				//edFactor.setText(Double.toString(channel.getFactor()));
+				edFactor.setText(Float.toString(channel.getFactor()));
 				edPrecision.setText(Integer.toString(channel.getPrecision()));
 				edMovingAverage.setText(Integer.toString(channel.getMovingAverage()));
 				chkSpeechEnabled.setChecked(channel.getSpeechEnabled());
+				
+				// Use config from config store
+				//edShortUnit.setText(cShortUnit);
+				
 			}
 		}
 
@@ -134,10 +153,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		int prec = Integer.parseInt(edPrecision.getText().toString());
 		channel.setPrecision(prec);
 		
-		double fact = Double.parseDouble(edFactor.getText().toString());
+		float fact = Float.valueOf(edFactor.getText().toString());
 		channel.setFactor(fact);
 		
-		double offs = Double.parseDouble(edOffset.getText().toString());
+		float offs = Float.valueOf(edOffset.getText().toString());
 		channel.setOffset(offs);
 
 		channel.setLongUnit(edUnit.getText().toString());
@@ -150,6 +169,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		//needs to be done last to clean out "buffer"
 		int ma = Integer.parseInt(edMovingAverage.getText().toString());
 		channel.setMovingAverage(ma);
+		
+		channel.saveToConfig(settings);
 		
 		
 	}

@@ -202,7 +202,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 
         speakHandler = new Handler();
 		runnableSpeaker = new Runnable() {
-			@Override
+			//@Override
 			public void run()
 			{
 				Log.i(TAG,"Cyclic Speak stuff");
@@ -228,7 +228,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		fpsHandler = new Handler();
 		runnableFps = new Runnable () {
-			@Override
+			//@Override
 			public void run()
 			{
 				fps = _framecount;

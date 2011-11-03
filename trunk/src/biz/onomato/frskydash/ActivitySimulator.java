@@ -98,10 +98,11 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
 				{
 					if(server.sim.running)
 					{
-						sb_ad1.setProgress(server.sim._ad1);
-						sb_ad2.setProgress(server.sim._ad2);
-						sb_rssirx.setProgress(server.sim._rssirx);
-						sb_rssitx.setProgress(server.sim._rssitx);
+//						sb_ad1.setProgress(server.sim._ad1);
+//						sb_ad2.setProgress(server.sim._ad2);
+//						sb_rssirx.setProgress(server.sim._rssirx);
+//						sb_rssitx.setProgress(server.sim._rssitx);
+						updateProgressBar();
 					}
 					tickHandler.postDelayed(this, 100);
 				}
@@ -153,6 +154,11 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
 			
 			
 			outFrame_tv.setText(_currentFrame.toHuman());
+			
+			
+	    	Log.d(TAG,"update progress bars");
+	    	updateProgressBar();
+			
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -160,6 +166,13 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
 		}
 	};
 	
+	private void updateProgressBar()
+	{
+		sb_ad1.setProgress(server.sim._ad1);
+		sb_ad2.setProgress(server.sim._ad2);
+		sb_rssirx.setProgress(server.sim._rssirx);
+		sb_rssitx.setProgress(server.sim._rssitx);
+	}
 	
 	public void onClick(View v) {
 		//Log.i(TAG,"Some button clicked");
@@ -237,19 +250,19 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
 	// task testing
 	
 
-    public void onBackPressed(){
-    	Log.i(TAG,"Back pressed");
-		
-    	Intent intent = new Intent(this, FrSkyServer.class);
-    	Log.i(TAG,"Calling destroy on server");
-    	//stopService(intent);
-    	server.die();
-
-    	
-		//globals.die();
-		super.onBackPressed();
-    	//this.finish();
-    }
+//    public void onBackPressed(){
+//    	Log.i(TAG,"Back pressed");
+//		
+//    	Intent intent = new Intent(this, FrSkyServer.class);
+//    	Log.i(TAG,"Calling destroy on server");
+//    	//stopService(intent);
+//    	server.die();
+//
+//    	
+//		//globals.die();
+//		super.onBackPressed();
+//    	//this.finish();
+//    }
 	
     public void onPause(){
     	
@@ -270,6 +283,7 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
     	tickHandler.post(runnableTick);
     	Log.i(TAG,"onResume");
     	//btnSimTgl.setChecked(server.sim.running);
+
     }
     
     public void onStop(){

@@ -36,7 +36,7 @@ public class Simulator {
 		simHandler = new Handler();
 		
 		runnableSimulator = new Runnable() {
-			@Override
+			//@Override
 			public void run()
 			{
 				_ad1 +=1;

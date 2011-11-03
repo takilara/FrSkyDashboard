@@ -102,37 +102,6 @@ public class Frskydash extends TabActivity {
         			   res.getDrawable(R.drawable.icon))
                       .setContent(intent);
         tabHost.addTab(spec);
-
-        // ModuleSettings
-        intent = new Intent().setClass(this, ActivityModuleSettings.class);
-        spec = tabHost.newTabSpec("modulesettings").setIndicator("Module Settings",
-                          res.getDrawable(R.drawable.icon))
-                      .setContent(intent);
-        tabHost.addTab(spec);
-
-        // Channel config
-        
-//        intent = new Intent().setClass(this, ChannelConfigActivity.class);
-//        spec = tabHost.newTabSpec("channelconfig").setIndicator("Channel Config",
-//                          res.getDrawable(R.drawable.icon))
-//                      .setContent(intent);
-//        tabHost.addTab(spec);
-
-        // Application settings
-//        intent = new Intent().setClass(this, ApplicationSettingsActivity.class);
-//        spec = tabHost.newTabSpec("applicationsettings").setIndicator("Application Settings",
-//                          res.getDrawable(R.drawable.icon))
-//                      .setContent(intent);
-//        tabHost.addTab(spec);
-        
-        // Simulator
-        intent = new Intent().setClass(this, ActivitySimulator.class);
-        spec = tabHost.newTabSpec("simulator").setIndicator("Simulator",
-                          res.getDrawable(R.drawable.icon))
-                      .setContent(intent);
-        tabHost.addTab(spec);
-        
-        
         tabHost.setCurrentTab(0);
         
         
@@ -273,6 +242,18 @@ public class Frskydash extends TabActivity {
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			Intent intent = new Intent(this,ActivityApplicationSettings.class);
     			startActivity(intent);
+    			break;
+    		case R.id.module_settings:
+    			Log.i(TAG,"User clicked on Module Settings");
+    			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
+    			Intent mIntent = new Intent(this,ActivityModuleSettings.class);
+    			startActivity(mIntent);
+    			break;
+    		case R.id.menu_choose_simulator:
+    			Log.i(TAG,"User clicked on Simulator");
+    			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
+    			Intent sIntent = new Intent(this,ActivitySimulator.class);
+    			startActivity(sIntent);
     			break;
     		
     		case R.id.connect_bluetooth:

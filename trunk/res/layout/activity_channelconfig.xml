@@ -8,7 +8,7 @@
                 <TextView android:text="@string/chConf_Unit" android:layout_width="wrap_content" android:id="@+id/textView3" android:layout_height="wrap_content"></TextView>
                 <EditText android:layout_width="match_parent" android:id="@+id/chConf_edUnit" android:text="EditText" android:layout_height="wrap_content"></EditText>
                 <TextView android:layout_width="wrap_content" android:id="@+id/textView3" android:layout_height="wrap_content" android:text="@string/chConf_shortUnit"></TextView>
-                <EditText android:layout_width="match_parent" android:text="EditText" android:layout_height="wrap_content" android:id="@+id/chConf_edShortUnit"></EditText>
+                <EditText android:layout_width="match_parent" android:id="@+id/chConf_edShortUnit"  android:layout_height="wrap_content" android:text="EditText"></EditText>
                 <TextView android:text="@string/chConf_Offset" android:layout_width="wrap_content" android:id="@+id/textView1" android:layout_height="wrap_content"></TextView>
                 <EditText android:layout_width="match_parent" android:inputType="numberDecimal" android:id="@+id/chConf_edOffset" android:text="EditText" android:layout_height="wrap_content"></EditText>
                 <TextView android:text="@string/chConf_Factor" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content"></TextView>

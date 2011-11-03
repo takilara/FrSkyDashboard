@@ -12,6 +12,11 @@
     <string name="settings_title">Global Settings</string>
     <string name="settings_shortcut">s</string>
     
+    <string name="module_settings_label">Module Settings...</string>
+    <string name="module_settings_title">Module Settings</string>
+    
+    <string name="menu_choose_simulator_label">Simulator...</string>
+    
     <string name="scan_bluetooth_label">BT scan</string>
     <string name="scan_bluetooth_title">Scan for new BT devices</string>
     

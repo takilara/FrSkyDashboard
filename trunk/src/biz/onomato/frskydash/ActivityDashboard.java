@@ -1,6 +1,9 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +12,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.speech.tts.TextToSpeech;
@@ -16,9 +22,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.Locale;
+import java.util.UUID;
+import java.io.OutputStream;
 import java.math.MathContext;
 
 
@@ -39,7 +48,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
 	// Used for Cyclic speak
 
-    private int MY_DATA_CHECK_CODE;
+    private static final int MY_DATA_CHECK_CODE = 7;
     private static final int CHANNEL_CONFIG_RETURN = 1;
     
     //MyApp globals;
@@ -56,6 +65,27 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private boolean createSpeakerLater=false;
 	private SharedPreferences settings;
     
+	
+	// Bluetooth stuff
+	private BluetoothAdapter mBluetoothAdapter = null;
+    private BluetoothSocket btSocket = null;
+    private OutputStream outStream = null;
+    //Well known SPP UUID (will *probably* map to RFCOMM channel 1 (default) if not in use);
+    //see comments in onResume().
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+	public static final int MESSAGE_STATE_CHANGE = 1;
+	public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+    
+    public static final String DEVICE_NAME = "device_name";
+    private String mConnectedDeviceName = null;
+    public static final String TOAST = "toast";
+    private static BluetoothSerialService mSerialService = null;
+    
+    private static final int REQUEST_CONNECT_DEVICE = 6;
+    private static final int REQUEST_ENABLE_BT = 2;
     
 	/** Called when the activity is first created. */
     @Override
@@ -63,6 +93,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         Log.i(TAG,"onCreate");
         
+        
+        // Service stuff
+        doBindService();
+     		
+        //Start the server service
+     	//this.startService(new Intent().setClass(this, FrSkyServer.class));
         
 		Log.i(TAG,"Try to load settings");
         settings = getPreferences(MODE_PRIVATE);
@@ -147,9 +183,44 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_SPEAKERCHANGE);
 
-		// Service stuff
-		doBindService();
+		
+		
+		// check for bt
+		checkForBt();
     }
+    
+    
+    
+    public void checkForBt()
+    {
+	    Log.i(TAG,"Check for BT");
+	    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	    if (mBluetoothAdapter == null) {
+	        // Device does not support Bluetooth
+	    	Log.i(TAG,"Device does not support Bluetooth");
+	    	// Disable all BT related menu items
+	    	// Display message stating only sim is available
+	    	notifyBtNotEnabled();
+	    }
+	    
+	    // popup to enable BT if not enabled
+	    if (mBluetoothAdapter != null)
+	    {
+	        if (!mBluetoothAdapter.isEnabled()) {
+	            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+	            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+	        }
+	        else
+	        {
+	        	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
+	        	//tItem.setEnabled(true);
+	        }
+	    }
+    }
+    
+    
+    
+    
     
     // Can be used to detect broadcasts from Service
     // Remember to add the message to the intentfilter (mIntentFilter) above
@@ -337,46 +408,80 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     }
     
     
-    protected void onActivityResult(
-            int requestCode, int resultCode, Intent data) {
-        if (requestCode == MY_DATA_CHECK_CODE) {
-        	Log.i(TAG,"Check for TTS complete");
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                // success, create the TTS instance
-                //mTts = new TextToSpeech(getApplicationContext(), this);
-                
-                //mTts = globals.createSpeaker();
-            	Log.i(TAG,"speech capabilities ok");
-            	if(server!=null)
-            	{
-            		server.createSpeaker();
-            	}
-            	else
-            	{
-            		Log.i(TAG,"Server not ready yet, postpone");
-            		createSpeakerLater= true;
-            	}
-                
-                //sayHello();
-            } else {
-                // missing data, install it
-                Intent installIntent = new Intent();
-                installIntent.setAction(
-                    TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(installIntent);
-            }
-        }
-        else if(requestCode == CHANNEL_CONFIG_RETURN)
-        {
-        	switch(resultCode)
-        	{
-        		case RESULT_OK:
-        			Log.i(TAG,"User saved new settings");
-        			break;
-        		case RESULT_CANCELED:
-        			Log.i(TAG,"User cancelled with back");
-        			break;
-        	}
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+    {
+    	switch (requestCode)
+    	{
+            case REQUEST_CONNECT_DEVICE:
+
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    // Get the device MAC address
+                    String address = data.getExtras()
+                                         .getString(ActivityDeviceList.EXTRA_DEVICE_ADDRESS);
+                    // Get the BLuetoothDevice object
+                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+                    // Attempt to connect to the device
+                    //mSerialService.connect(device);         
+                    
+                    // pass responsibility to the server
+                    server.connect(device);
+                }
+                break;
+
+            case REQUEST_ENABLE_BT:
+                // When the request to enable Bluetooth returns
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.d(TAG, "BT now enabled");
+                    //MenuItem tItem = (MenuItem)  findViewById(R.id.connect_bluetooth);
+                    
+        //            finishDialogNoBluetooth();                
+                }
+                else
+                {
+                	Log.d(TAG,"BT not enabled");
+                	// Disable all BT related menu items
+                	// Display message stating only sim is available
+                	notifyBtNotEnabled();
+                }
+                break;
+            case MY_DATA_CHECK_CODE:
+	        	Log.i(TAG,"Check for TTS complete");
+	            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) 
+	            {
+	            	Log.i(TAG,"speech capabilities ok");
+	            	if(server!=null)
+	            	{
+	            		server.createSpeaker();
+	            	}
+	            	else
+	            	{
+	            		Log.i(TAG,"Server not ready yet, postpone");
+	            		createSpeakerLater= true;
+	            	}
+	                
+	            
+	            } 
+	            else 
+	            {
+	                // missing data, install it
+	                Intent installIntent = new Intent();
+	                installIntent.setAction(
+	                    TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+	                startActivity(installIntent);
+	            }
+	            break;
+            case CHANNEL_CONFIG_RETURN:
+	        	switch(resultCode)
+	        	{
+	        		case RESULT_OK:
+	        			Log.i(TAG,"User saved new settings");
+	        			break;
+	        		case RESULT_CANCELED:
+	        			Log.i(TAG,"User cancelled with back");
+	        			break;
+	        	}
+	        	break;
         }
         	
         // --
@@ -413,6 +518,120 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	//mTts.stop();
     	Log.i(TAG,"onStop");
     }
+    
+    
+    // From tabhost
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+    	Log.i(TAG,"Create Menu");
+    	super.onCreateOptionsMenu(menu);
+    	MenuInflater inflater = getMenuInflater();
+    	inflater.inflate(R.menu.menu, menu);
+    	
+    	return true;
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+    	super.onPrepareOptionsMenu(menu);
+    	MenuItem tConItem = (MenuItem)  menu.findItem(R.id.connect_bluetooth);
+    	MenuItem tDisConItem = (MenuItem)  menu.findItem(R.id.disconnect_bluetooth);
+    	//if(mBluetoothAdapter).
+    	if (mBluetoothAdapter != null)
+    	{
+	    	if (!mBluetoothAdapter.isEnabled()) {
+	    		tConItem.setEnabled(false);
+	    		tDisConItem.setEnabled(false);
+	    	}
+	    	else
+	    	{
+	    		tConItem.setEnabled(true);
+	    		tDisConItem.setEnabled(true);
+	    	}
+    	}
+    	else
+    	{
+    		tConItem.setEnabled(false);
+    		tDisConItem.setEnabled(false);
+    	}
+	    	
+    	if(server.getConnectionState()==BluetoothSerialService.STATE_NONE)
+    	{
+    		tConItem.setVisible(true);
+    		tDisConItem.setVisible(false);
+    	}
+    	else
+    	{
+    		tConItem.setVisible(false);
+    		tDisConItem.setVisible(true);
+    	}
+	
+    		
+    	
+		return true;
+    }
+    
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+    	Log.i(TAG,"User has clicked something");
+    	switch(item.getItemId()) 
+    	{
+    		case R.id.settings:
+    			Log.i(TAG,"User clicked on Settings");
+    			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
+    			Intent intent = new Intent(this,ActivityApplicationSettings.class);
+    			startActivity(intent);
+    			break;
+    		case R.id.module_settings:
+    			Log.i(TAG,"User clicked on Module Settings");
+    			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
+    			Intent mIntent = new Intent(this,ActivityModuleSettings.class);
+    			startActivity(mIntent);
+    			break;
+    		case R.id.menu_choose_simulator:
+    			Log.i(TAG,"User clicked on Simulator");
+    			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
+    			Intent sIntent = new Intent(this,ActivitySimulator.class);
+    			startActivity(sIntent);
+    			break;
+    		
+    		case R.id.connect_bluetooth:
+    			if (server.getConnectionState() == BluetoothSerialService.STATE_NONE) {
+            		// Launch the DeviceListActivity to see devices and do scan
+            		Intent serverIntent = new Intent(this, ActivityDeviceList.class);
+            		startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+            	}
+            	else
+                	if (server.getConnectionState() == BluetoothSerialService.STATE_CONNECTED) {
+                		// Connected, reconnect
+                		server.reconnectBt();
+                		//mSerialService.stop();
+    		    		//mSerialService.start();
+                	}
+                return true;
+    		case R.id.disconnect_bluetooth:
+    			server.disconnect();
+    			break;
+             
+    			
+    	}
+    	return true;
+    	
+    }
+   
+    
+    
+    public void notifyBtNotEnabled()
+    {
+    	Toast.makeText(this, "Bluetooth not enabled, only simulations are available", Toast.LENGTH_LONG).show();
+    	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
+    	//tItem.setEnabled(false);
+    }
+    
     
 }
 

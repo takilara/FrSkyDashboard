@@ -145,7 +145,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     	 //notification.flags |= Notification.FLAG_FOREGROUND_SERVICE; 
     	 
     	 // The following intent makes sure that the application is "resumed" properly
-    	 Intent notificationIntent = new Intent(this,Frskydash.class);
+    	 //Intent notificationIntent = new Intent(this,Frskydash.class);
+    	 Intent notificationIntent = new Intent(this,ActivityDashboard.class);
     	 notificationIntent.setAction(Intent.ACTION_MAIN);
          notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 

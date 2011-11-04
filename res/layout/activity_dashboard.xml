@@ -87,7 +87,11 @@
     	android:layout_marginBottom="1dip" 
     	android:gravity="bottom" 
     	android:layout_gravity="bottom">
-<ToggleButton android:textOn="Cyclic Speaker On" android:textOff="Cyclic Speaker Off" android:id="@+id/dash_tglSpeak" android:layout_width="wrap_content" android:text="ToggleButton" android:layout_height="40dip"></ToggleButton>
+		<ToggleButton android:textOn="Cyclic Speaker On" android:textOff="Cyclic Speaker Off" android:id="@+id/dash_tglSpeak" 
+			android:layout_width="wrap_content" 
+			android:text="ToggleButton" 
+			android:layout_height="40dip">
+		</ToggleButton>
     	<View
         	android:layout_height="2dip"
         	android:background="#FF909090" />

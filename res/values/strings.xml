@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources> 
-    <string name="hello">Hello World, Frskydash!</string>
+    
+    <!--  Application  -->
     <string name="app_name">FrSky Dashboard</string>
+    
+    
+    <!--  Activities -->
+	<string name="activity_module_settings">FrSky Module Settings</string>
+	<string name="activity_application_settings">Application Settings</string>
+	<string name="activity_channel_settings">Channel Configuration</string>
+	<string name="activity_simulator">Simulator</string>
+	
+	    
+    
+    
+    
+    <string name="hello">Hello World, Frskydash!</string>
+    
     <string name="customUnits">Custom Units</string>
     <string name="rawUnits">Raw</string>
     <string name="RSSItx">RSSItx</string>

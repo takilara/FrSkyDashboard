@@ -86,7 +86,8 @@ public class BluetoothSerialService {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(Frskydash.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        //mHandler.obtainMessage(Frskydash.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(ActivityDashboard.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -162,9 +163,11 @@ public class BluetoothSerialService {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(Frskydash.MESSAGE_DEVICE_NAME);
+        //Message msg = mHandler.obtainMessage(Frskydash.MESSAGE_DEVICE_NAME);
+        Message msg = mHandler.obtainMessage(ActivityDashboard.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
-        bundle.putString(Frskydash.DEVICE_NAME, device.getName());
+        //bundle.putString(Frskydash.DEVICE_NAME, device.getName());
+        bundle.putString(ActivityDashboard.DEVICE_NAME, device.getName());
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -224,9 +227,12 @@ public class BluetoothSerialService {
         setState(STATE_NONE);
 
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(Frskydash.MESSAGE_TOAST);
+        //Message msg = mHandler.obtainMessage(Frskydash.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(ActivityDashboard.MESSAGE_TOAST);
+        
         Bundle bundle = new Bundle();
-        bundle.putString(Frskydash.TOAST, "Unable to connect device");
+        //bundle.putString(Frskydash.TOAST, "Unable to connect device");
+        bundle.putString(ActivityDashboard.TOAST, "Unable to connect device");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }
@@ -238,9 +244,11 @@ public class BluetoothSerialService {
         setState(STATE_NONE);
 
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(Frskydash.MESSAGE_TOAST);
+        //Message msg = mHandler.obtainMessage(Frskydash.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(ActivityDashboard.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(Frskydash.TOAST, "Device connection was lost");
+        //bundle.putString(Frskydash.TOAST, "Device connection was lost");
+        bundle.putString(ActivityDashboard.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
         
@@ -423,7 +431,8 @@ public class BluetoothSerialService {
 	                    		//Log.i(TAG,"Removing items from b, old size:"+b.size());
 	                    		e.clear();
 	            
-	                    		mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
+	                    		//mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
+	                    		mHandler.obtainMessage(ActivityDashboard.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
 	                    		
 	                    		//Log.i(TAG,"recheck after transmission");
 	                    		startpos = b.indexOf((byte) 0x7e);
@@ -477,8 +486,8 @@ public class BluetoothSerialService {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(Frskydash.MESSAGE_WRITE, buffer.length, -1, buffer)
-                        .sendToTarget();
+                //mHandler.obtainMessage(Frskydash.MESSAGE_WRITE, buffer.length, -1, buffer).sendToTarget();
+                mHandler.obtainMessage(ActivityDashboard.MESSAGE_WRITE, buffer.length, -1, buffer).sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }

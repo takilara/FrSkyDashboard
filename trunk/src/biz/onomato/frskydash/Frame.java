@@ -9,6 +9,8 @@ public class Frame {
 	public static final int FRAMETYPE_FRSKY_ALARM=1;
 	public static final int FRAMETYPE_ANALOG=0xfe;
 	public static final int FRAMETYPE_INPUT_REQUEST_ALL=0xf8;
+	public static final int FRAMETYPE_ALARM1_RSSI=0xf7;
+	public static final int FRAMETYPE_ALARM2_RSSI=0xf6;
 	public static final int FRAMETYPE_ALARM1_AD1=0xfc;
 	public static final int FRAMETYPE_ALARM2_AD1=0xfb;
 	public static final int FRAMETYPE_ALARM1_AD2=0xfa;
@@ -25,7 +27,7 @@ public class Frame {
 	private int[] _frame;
 	private int[] _frameRaw;
 	
-	public String alarmChannel;
+	public int alarmChannel;
 	public int alarmNumber;
 	public int alarmLevel;
 	public int alarmThreshold;
@@ -68,24 +70,34 @@ public class Frame {
 					break;
 				case FRAMETYPE_ALARM1_AD1:
 					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = "ad1";
-					alarmNumber = 1;
+					alarmChannel = Channel.CHANNELTYPE_AD1;
+					alarmNumber = 0;
 					
 					break;
 				case FRAMETYPE_ALARM2_AD1:
 					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = "ad1";
-					alarmNumber = 2;
+					alarmChannel = Channel.CHANNELTYPE_AD1;
+					alarmNumber = 1;
 					break;	
 				case FRAMETYPE_ALARM1_AD2:
 					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = "ad2";
-					alarmNumber = 1;
+					alarmChannel = Channel.CHANNELTYPE_AD2;
+					alarmNumber = 0;
 					break;
 				case FRAMETYPE_ALARM2_AD2:
 					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = "ad2";
-					alarmNumber = 2;
+					alarmChannel = Channel.CHANNELTYPE_AD2;
+					alarmNumber = 1;
+					break;
+				case FRAMETYPE_ALARM1_RSSI:
+					frametype=FRAMETYPE_FRSKY_ALARM;
+					alarmChannel = Channel.CHANNELTYPE_RSSI;
+					alarmNumber = 0;
+					break;
+				case FRAMETYPE_ALARM2_RSSI:
+					frametype=FRAMETYPE_FRSKY_ALARM;
+					alarmChannel = Channel.CHANNELTYPE_RSSI;
+					alarmNumber = 1;
 					break;
 				default:
 					frametype=FRAMETYPE_UNDEFINED;

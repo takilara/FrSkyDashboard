@@ -757,17 +757,24 @@ private final Handler mHandlerBT = new Handler() {
 				RSSIrx.setRaw(f.rssirx);
 				RSSItx.setRaw(f.rssitx);
 				break;
-			case Frame.FRAMETYPE_ALARM1_AD1:
-				Log.d(TAG,"handle inbound alarm1 on AD1");
-				break;
-			case Frame.FRAMETYPE_ALARM2_AD1:
-				Log.d(TAG,"handle inbound alarm2 on AD1");
-				break;
-			case Frame.FRAMETYPE_ALARM1_AD2:
-				Log.d(TAG,"handle inbound alarm1 on AD2");
-				break;
-			case Frame.FRAMETYPE_ALARM2_AD2:
-				Log.d(TAG,"handle inbound alarm2 on AD2");
+			case Frame.FRAMETYPE_FRSKY_ALARM:
+				Log.d(TAG,"handle inbound FrSky alarm");
+				switch(f.alarmChannel)
+				{
+				case Channel.CHANNELTYPE_AD1:
+					AD1.setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+					break;
+				case Channel.CHANNELTYPE_AD2:
+					AD2.setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+					break;
+				case Channel.CHANNELTYPE_RSSI:
+					RSSItx.setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+					break;
+				default:
+					Log.i(TAG,"Unsupported FrSky alarm?");
+					Log.i(TAG,"Frame: "+f.toHuman());
+				}
+				
 				break;
 			default:
 				Log.i(TAG,"Frametype currently not supported");

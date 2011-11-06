@@ -102,6 +102,18 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
+			Log.i(TAG,"Setup Alarms:");
+			try{
+			Log.i(TAG,"\tRSSI 1: "+server.RSSItx.alarms[0].toString());
+			Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
+			}
+			catch(Exception e)
+			{}
+			Log.i(TAG,"\tAD1 1: "+server.AD1.alarms[0].toString());
+			Log.i(TAG,"\tAD1 2: "+server.AD1.alarms[1].toString());
+			Log.i(TAG,"\tAD2 1: "+server.AD2.alarms[0].toString());
+			Log.i(TAG,"\tAD2 2: "+server.AD2.alarms[1].toString());
+			
 		}
 
 		public void onServiceDisconnected(ComponentName className) {

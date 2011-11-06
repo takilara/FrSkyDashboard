@@ -6,11 +6,32 @@ public class Frame {
 	private static final String TAG="Frame";
 	
 	public static final int FRAMETYPE_UNDEFINED=-1;
-	public static final int FRAMETYPE_ANALOG=0;
-	public static final int FRAMETYPE_INPUT_REQUEST_ALL=1;
+	public static final int FRAMETYPE_FRSKY_ALARM=1;
+	public static final int FRAMETYPE_ANALOG=0xfe;
+	public static final int FRAMETYPE_INPUT_REQUEST_ALL=0xf8;
+	public static final int FRAMETYPE_ALARM1_AD1=0xfc;
+	public static final int FRAMETYPE_ALARM2_AD1=0xfb;
+	public static final int FRAMETYPE_ALARM1_AD2=0xfa;
+	public static final int FRAMETYPE_ALARM2_AD2=0xf9;
+	
+	// these need to correspond real deal
+	public static final int ALARMLEVEL_OFF=0;
+	public static final int ALARMLEVEL_LOW=1;
+	public static final int ALARMLEVEL_MID=2;
+	public static final int ALARMLEVEL_HIGH=3;
+	
+	
 	public int frametype;
 	private int[] _frame;
 	private int[] _frameRaw;
+	
+	public String alarmChannel;
+	public int alarmNumber;
+	public int alarmLevel;
+	public int alarmThreshold;
+	public boolean alarmGreaterThan;
+	public String alarmGreaterThanString; 
+	
 	
 	public int ad1,ad2,rssirx,rssitx = 0;
 	
@@ -28,24 +49,75 @@ public class Frame {
 			
 			_frame = frame;
 			
+			int _threshold;
+			boolean _greaterthan;
+			int _level;
+			
 			switch(frame[1])
 			{
 				// Analog values
-				case 0xfe:
+				case FRAMETYPE_ANALOG:
 					frametype=FRAMETYPE_ANALOG;
 					ad1 = frame[2];
 					ad2 = frame[3];
 					rssirx = frame[4];
 					rssitx = (int) frame[5]/2;
 					break;
-				case 0xf8:
+				case FRAMETYPE_INPUT_REQUEST_ALL:
 					frametype=FRAMETYPE_INPUT_REQUEST_ALL;
+					break;
+				case FRAMETYPE_ALARM1_AD1:
+					frametype=FRAMETYPE_FRSKY_ALARM;
+					alarmChannel = "ad1";
+					alarmNumber = 1;
+					
+					break;
+				case FRAMETYPE_ALARM2_AD1:
+					frametype=FRAMETYPE_FRSKY_ALARM;
+					alarmChannel = "ad1";
+					alarmNumber = 2;
+					break;	
+				case FRAMETYPE_ALARM1_AD2:
+					frametype=FRAMETYPE_FRSKY_ALARM;
+					alarmChannel = "ad2";
+					alarmNumber = 1;
+					break;
+				case FRAMETYPE_ALARM2_AD2:
+					frametype=FRAMETYPE_FRSKY_ALARM;
+					alarmChannel = "ad2";
+					alarmNumber = 2;
 					break;
 				default:
 					frametype=FRAMETYPE_UNDEFINED;
 					
 					Log.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
 					break;
+			}
+			if(frametype==FRAMETYPE_FRSKY_ALARM)
+			{
+				// Value of <AlarmChannel> alarm <AlarmNumber> is <greater> than <alarmthreshold>, and is at level <alarmlevel>
+				_threshold = frame[2];
+				String _greaterthanhuman;
+				if(frame[3]==1)
+				{
+					_greaterthan = true;
+					_greaterthanhuman="greater";
+				}
+				else
+				{
+					_greaterthan = false;
+					_greaterthanhuman="lower";
+				}
+				
+				_level = frame[4];
+				
+				alarmLevel = _level;
+				alarmThreshold=_threshold;
+				alarmGreaterThan = _greaterthan;
+				alarmGreaterThanString = _greaterthanhuman;
+				Log.i(TAG,alarmChannel+" alarm "+alarmNumber+": Fires if value is "+_greaterthanhuman+" than "+_threshold+", and is at level "+_level);
+				
+				
 			}
 		}
 	}

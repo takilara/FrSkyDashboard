@@ -3,10 +3,16 @@ package biz.onomato.frskydash;
 import android.content.SharedPreferences;
 import android.util.Log;
 import java.math.MathContext;
+import java.util.List;
 
 
 public class Channel {
 	private static final String TAG = "Channel";
+	
+	public static final int CHANNELTYPE_AD1=0;
+	public static final int CHANNELTYPE_AD2=1;
+	public static final int CHANNELTYPE_RSSI=2;
+	
 	private int _raw;
 	private double _val;
 	private int _avg;
@@ -21,6 +27,9 @@ public class Channel {
 	private int _movingAverage;
 	private MathContext _mc;
 	public boolean silent;
+	
+	public Alarm[] alarms;
+	
 	
 	private MyStack _stack;
 	SharedPreferences _settings;
@@ -44,7 +53,11 @@ public class Channel {
 		_mc = new MathContext(2);
 		_precision = 2;
 		_stack = new MyStack(10);
-		 
+		
+		// FRSKY channels only for now
+		alarms = new Alarm[2];
+		
+		
 		
 	}
 	
@@ -202,5 +215,10 @@ public class Channel {
 	public void setSpeechEnabled(boolean speech)
 	{
 		silent = !speech;
+	}
+	
+	public void setFrSkyAlarm(int number,int threshold,boolean greaterthan,int level)
+	{
+		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
 	}
 }

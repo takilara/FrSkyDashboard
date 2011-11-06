@@ -1,7 +1,12 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -13,10 +18,13 @@ import android.widget.Toast;
 public class ActivityModuleSettings extends Activity implements OnItemSelectedListener {
 
 	private static final String TAG = "FrSky-Settings";
+	private FrSkyServer server;
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		doBindService();
+		
 		setContentView(R.layout.activity_modulesettings);
 		
 		//stringlist for values
@@ -65,6 +73,41 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	}
 	
 	
+
+	void doBindService() {
+		Log.i(TAG,"Start the server service if it is not already started");
+		startService(new Intent(this, FrSkyServer.class));
+		Log.i(TAG,"Try to bind to the service");
+		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
+    }
+    
+    void doUnbindService() {
+            if (server != null) {
+            // Detach our existing connection.
+	        	try {
+	        		unbindService(mConnection);
+	        	}
+	        	catch (Exception e)
+	        	{}
+        }
+    }
+    
+    
+    
+
+    
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+		public void onServiceConnected(ComponentName className, IBinder binder) {
+			server = ((FrSkyServer.MyBinder) binder).getService();
+			Log.i(TAG,"Bound to Service");
+			
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+			server = null;
+		}
+	};
 
 
 

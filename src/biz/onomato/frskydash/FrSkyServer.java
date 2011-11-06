@@ -207,20 +207,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 			public void run()
 			{
 				Log.i(TAG,"Cyclic Speak stuff");
-				//mTts.speak(globals.AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				//mTts.speak(globals.AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				//mTts.speak(globals.RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				//mTts.speak(globals.RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				
+			
 				for(int n=0;n<MAX_CHANNELS;n++)
 				{
 					if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 				}
-				
-				//mTts.speak(AD1.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				//mTts.speak(AD2.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				//mTts.speak(RSSItx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-				//mTts.speak(RSSIrx.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 				
 				speakHandler.removeCallbacks(runnableSpeaker);
 		    	speakHandler.postDelayed(this, _speakDelay);
@@ -766,7 +757,18 @@ private final Handler mHandlerBT = new Handler() {
 				RSSIrx.setRaw(f.rssirx);
 				RSSItx.setRaw(f.rssitx);
 				break;
-			
+			case Frame.FRAMETYPE_ALARM1_AD1:
+				Log.d(TAG,"handle inbound alarm1 on AD1");
+				break;
+			case Frame.FRAMETYPE_ALARM2_AD1:
+				Log.d(TAG,"handle inbound alarm2 on AD1");
+				break;
+			case Frame.FRAMETYPE_ALARM1_AD2:
+				Log.d(TAG,"handle inbound alarm1 on AD2");
+				break;
+			case Frame.FRAMETYPE_ALARM2_AD2:
+				Log.d(TAG,"handle inbound alarm2 on AD2");
+				break;
 			default:
 				Log.i(TAG,"Frametype currently not supported");
 				Log.i(TAG,"Frame: "+f.toHuman());

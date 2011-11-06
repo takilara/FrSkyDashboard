@@ -279,22 +279,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 				server.createSpeaker();
 			}
 			Log.i(TAG,"Setting up server from settings");
-//			chkCyclicSpeakerEnabled.setChecked(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-//	        chkLogToRaw.setChecked(settings.getBoolean("logToRaw",false));
-//	        chkLogToHuman.setChecked(settings.getBoolean("logToHuman",false));
-//	        chkLogToCsv.setChecked(settings.getBoolean("logToCsv",false));
-			
-			
-			//server.setLogToRaw(settings.getBoolean("logToRaw",false));
-			//server.setLogToHuman(settings.getBoolean("logToHuman",false));
-			//server.setLogToCsv(settings.getBoolean("logToCsv",false));
-			
+	
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
-//    		tv_dash_ch0NameDesc.setText(server.AD1.getName()+": "+server.AD1.getDescription());
-//    		tv_dash_ch1NameDesc.setText(server.AD2.getName()+": "+server.AD2.getDescription());
-//    		
-//    		tv_ad1_unit.setText(server.AD1.getShortUnit());
-//    		tv_ad2_unit.setText(server.AD2.getShortUnit());
+
 			onResume();
 			
 		}
@@ -324,12 +311,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
     	registerReceiver(mIntentReceiver, mIntentFilter);
     	
-    	// Update text in case change
-    	//dash_ch0NameDesc
-
-    	//globals.showIcon();
-    	//speakHandler.postDelayed(runnableSpeaker, 20000);
-    	
+   	
     }
     
     @Override
@@ -346,64 +328,41 @@ public class ActivityDashboard extends Activity implements OnClickListener {
    
     
     public void onClick(View v) {
-    	switch (v.getId()) {
-//    	case R.id.btnTest1:
-//    		Log.i(TAG,"Clicked Test");
-//    		// Testing controlling the service useing bound methods
-//    		if (server != null) {
-//    			int[] cf = server.getCurrentFrame();
-//    			
-//    			Log.i(TAG,"Data from service:"+Frame.frameToHuman(cf));
-//    		}
-//    		else
-//    		{
-//    			Log.i(TAG,"Service not bound");
-//    		}
-//    		break;
-//    	case R.id.btnTest2:
-//    		Log.i(TAG,"Switch activity");
-//    		Intent intent = new Intent(this, ActivityModuleSettings.class);
-//    		startActivity(intent);
-//    		break;
-//    	case R.id.btnSpeak:
-//    		Log.i(TAG,"SPEAK something");
-//    		//globals.saySomething(globals.AD1.toVoiceString());
-//    		if(server!=null) server.saySomething(server.AD1.toVoiceString());
-//    		break;
-    	
-    	case R.id.dash_tglSpeak:
-    		
-    		//globals.setCyclicSpeech(btnTglSpeak.isChecked());
-    		if(server!=null) {server.setCyclicSpeech(btnTglSpeak.isChecked());}
-    		
-    		
-    		
-    		// Testing controlling the service using intents
-    		Intent speechIntent = new Intent(this,FrSkyServer.class);
-    		if(btnTglSpeak.isChecked())
-    		{
-    			speechIntent.putExtra("command", FrSkyServer.CMD_START_SPEECH);
-    		}
-    		else
-    		{
-    			speechIntent.putExtra("command", FrSkyServer.CMD_STOP_SPEECH);
-    		}
-    		this.startService(speechIntent);
-			break;
-	    
-    	case R.id.dash_btnEditChannel0:
-    		Log.i(TAG,"Edit channel 0");
-    		Intent i = new Intent(this, ActivityChannelConfig.class);
-    		i.putExtra("channelId", 0);
-    		//startActivity(i);
-    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
-    		break;
-    	case R.id.dash_btnEditChannel1:
-    		Log.i(TAG,"Edit channel 1");
-    		Intent ii = new Intent(this, ActivityChannelConfig.class);
-    		ii.putExtra("channelId", 1);
-    		startActivityForResult(ii,CHANNEL_CONFIG_RETURN);
-    		break;
+    	switch (v.getId()) 
+    	{
+	    	case R.id.dash_tglSpeak:
+	    		
+	    		//globals.setCyclicSpeech(btnTglSpeak.isChecked());
+	    		if(server!=null) {server.setCyclicSpeech(btnTglSpeak.isChecked());}
+	    		
+	    		
+	    		
+	    		// Testing controlling the service using intents
+	    		Intent speechIntent = new Intent(this,FrSkyServer.class);
+	    		if(btnTglSpeak.isChecked())
+	    		{
+	    			speechIntent.putExtra("command", FrSkyServer.CMD_START_SPEECH);
+	    		}
+	    		else
+	    		{
+	    			speechIntent.putExtra("command", FrSkyServer.CMD_STOP_SPEECH);
+	    		}
+	    		this.startService(speechIntent);
+				break;
+		    
+	    	case R.id.dash_btnEditChannel0:
+	    		Log.i(TAG,"Edit channel 0");
+	    		Intent i = new Intent(this, ActivityChannelConfig.class);
+	    		i.putExtra("channelId", 0);
+	    		//startActivity(i);
+	    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
+	    		break;
+	    	case R.id.dash_btnEditChannel1:
+	    		Log.i(TAG,"Edit channel 1");
+	    		Intent ii = new Intent(this, ActivityChannelConfig.class);
+	    		ii.putExtra("channelId", 1);
+	    		startActivityForResult(ii,CHANNEL_CONFIG_RETURN);
+	    		break;
     	}
     }
     

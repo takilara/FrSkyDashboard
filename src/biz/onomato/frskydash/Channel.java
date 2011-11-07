@@ -29,6 +29,7 @@ public class Channel {
 	public boolean silent;
 	
 	public Alarm[] alarms;
+	public int alarmCount = 0;
 	
 	
 	private MyStack _stack;
@@ -217,8 +218,9 @@ public class Channel {
 		silent = !speech;
 	}
 	
-	public void setFrSkyAlarm(int number,int threshold,boolean greaterthan,int level)
+	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
 	{
 		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
+		alarmCount += 1;
 	}
 }

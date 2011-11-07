@@ -12,14 +12,16 @@ public class Alarm {
 	public static final int ALARMLEVEL_LOW=1;
 	public static final int ALARMLEVEL_MID=2;
 	public static final int ALARMLEVEL_HIGH=3;
+	public static final int GREATERTHAN=1;
+	public static final int LESSERTHAN=0;
 	
 	public int threshold;
 	public int type;
 	public int level;
-	public boolean greaterthan;
+	public int greaterthan;
 	
 	
-	public Alarm(int alarmtype,int alarmlevel,boolean alarmgreaterthan,int alarmthreshold)
+	public Alarm(int alarmtype,int alarmlevel,int alarmgreaterthan,int alarmthreshold)
 	{
 		type=alarmtype;
 		level = alarmlevel;

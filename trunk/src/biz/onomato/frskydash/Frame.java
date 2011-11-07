@@ -31,7 +31,7 @@ public class Frame {
 	public int alarmNumber;
 	public int alarmLevel;
 	public int alarmThreshold;
-	public boolean alarmGreaterThan;
+	public int alarmGreaterThan;
 	public String alarmGreaterThanString; 
 	
 	
@@ -52,7 +52,7 @@ public class Frame {
 			_frame = frame;
 			
 			int _threshold;
-			boolean _greaterthan;
+			int _greaterthan;
 			int _level;
 			
 			switch(frame[1])
@@ -109,15 +109,14 @@ public class Frame {
 			{
 				// Value of <AlarmChannel> alarm <AlarmNumber> is <greater> than <alarmthreshold>, and is at level <alarmlevel>
 				_threshold = frame[2];
+				_greaterthan = frame[3];
 				String _greaterthanhuman;
-				if(frame[3]==1)
+				if(_greaterthan==1)
 				{
-					_greaterthan = true;
 					_greaterthanhuman="greater";
 				}
 				else
 				{
-					_greaterthan = false;
 					_greaterthanhuman="lower";
 				}
 				
@@ -133,6 +132,8 @@ public class Frame {
 			}
 		}
 	}
+	
+	
 	
 	private int[] frameDecode(int[] frame)
 	{
@@ -182,6 +183,18 @@ public class Frame {
 		buf[0] = 0x7e;
 		buf[1] = 0xf8;	// Request All
 		buf[10] = 0x7e;	// Request All
+		return new Frame(buf);
+	}
+	
+	public static Frame AlarmFrame(int AlarmType,int AlarmLevel,int AlarmThreshold, int AlarmGreaterThan)
+	{
+		int[] buf = new int[11];
+		buf[0] = 0x7e;
+		buf[1] = AlarmType;
+		buf[2] = AlarmThreshold;
+		buf[3] = AlarmGreaterThan;
+		buf[4] = AlarmLevel;
+		buf[10] = 0x7e;
 		return new Frame(buf);
 	}
 	

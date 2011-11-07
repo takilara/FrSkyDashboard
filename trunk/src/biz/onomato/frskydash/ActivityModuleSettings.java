@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -15,15 +16,21 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ActivityModuleSettings extends Activity implements OnItemSelectedListener {
+public class ActivityModuleSettings extends Activity implements OnItemSelectedListener, OnClickListener {
 
 	private static final String TAG = "FrSky-Settings";
 	private FrSkyServer server;
     
+	Spinner RSSIalarm1LevelSpinner;
+	Spinner RSSIalarm1RelSpinner;
+	Spinner RSSIalarm1ValueSpinner;
+	
+	private View btnRSSISend;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		doBindService();
+		
 		
 		setContentView(R.layout.activity_modulesettings);
 		
@@ -40,7 +47,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		ArrayAdapter<CharSequence> RSSIalarm1LevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
 		RSSIalarm1LevelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
 			 
-		Spinner RSSIalarm1LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_spinner_level );
+		RSSIalarm1LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI_spinner_level );
 		RSSIalarm1LevelSpinner.setAdapter( RSSIalarm1LevelAdapter );
 		RSSIalarm1LevelSpinner.setOnItemSelectedListener(this);
 		
@@ -48,7 +55,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		ArrayAdapter<CharSequence> RSSIalarm1RelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_relative, android.R.layout.simple_spinner_item );
 		RSSIalarm1RelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
 			 
-		Spinner RSSIalarm1RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_spinner_relative );
+		RSSIalarm1RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI_spinner_relative );
 		RSSIalarm1RelSpinner.setAdapter( RSSIalarm1RelAdapter );
 		RSSIalarm1RelSpinner.setOnItemSelectedListener(this);
 		
@@ -58,10 +65,15 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		ArrayAdapter<String> RSSIalarm1ValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_dropdown_item,values );
 		//RSSIalarm1ValueAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
 			 
-		Spinner RSSIalarm1ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_spinner_value );
+		RSSIalarm1ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI_spinner_value );
 		RSSIalarm1ValueSpinner.setAdapter( RSSIalarm1ValueAdapter );
 		RSSIalarm1ValueSpinner.setOnItemSelectedListener(this);		
+		
+		
+		btnRSSISend = findViewById(R.id.FrSkySettings_RSSI_send);
+	    btnRSSISend.setOnClickListener(this);
 				
+		doBindService();
 				
 	}
 	
@@ -69,7 +81,9 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	public void onResume()
 	{
 		super.onResume();
+		Log.i(TAG,"onResume");
 		
+
 	}
 	
 	
@@ -102,17 +116,43 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
-			Log.i(TAG,"Setup Alarms:");
-			try{
-			Log.i(TAG,"\tRSSI 1: "+server.RSSItx.alarms[0].toString());
-			Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
+			// only enable send buttons if Bluetooth is connected
+			if(server.getConnectionState()==BluetoothSerialService.STATE_CONNECTED)
+			{
+				btnRSSISend.setEnabled(true);
 			}
-			catch(Exception e)
-			{}
-			Log.i(TAG,"\tAD1 1: "+server.AD1.alarms[0].toString());
-			Log.i(TAG,"\tAD1 2: "+server.AD1.alarms[1].toString());
-			Log.i(TAG,"\tAD2 1: "+server.AD2.alarms[0].toString());
-			Log.i(TAG,"\tAD2 2: "+server.AD2.alarms[1].toString());
+			else
+			{
+				btnRSSISend.setEnabled(false);
+			}
+			
+			Log.i(TAG,"Setup Alarms:");
+			RSSIalarm1LevelSpinner.setSelection(Alarm.ALARMLEVEL_OFF);
+			RSSIalarm1RelSpinner.setSelection(Alarm.GREATERTHAN);
+			RSSIalarm1ValueSpinner.setSelection(50);
+			if(server.RSSItx.alarmCount>0)
+			{
+				try
+				{
+					Log.i(TAG,"\tRSSI 1: "+server.RSSItx.alarms[0].toString());
+					Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
+					RSSIalarm1LevelSpinner.setSelection(server.RSSItx.alarms[0].level);
+					RSSIalarm1RelSpinner.setSelection(server.RSSItx.alarms[0].greaterthan);
+					RSSIalarm1ValueSpinner.setSelection(server.RSSItx.alarms[0].threshold);
+					}
+					catch(Exception e)
+					{}
+			}
+			if(server.AD1.alarmCount>0)
+			{
+				Log.i(TAG,"\tAD1 1: "+server.AD1.alarms[0].toString());
+				Log.i(TAG,"\tAD1 2: "+server.AD1.alarms[1].toString());
+			}
+			if(server.AD2.alarmCount>0)
+			{
+				Log.i(TAG,"\tAD2 1: "+server.AD2.alarms[0].toString());
+				Log.i(TAG,"\tAD2 2: "+server.AD2.alarms[1].toString());
+			}
 			
 		}
 
@@ -124,11 +164,8 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 
 
 	@Override
-	public void onItemSelected(AdapterView<?> parent, View view, int pos,
-			long id) {
-		// TODO Auto-generated method stub
-		Toast.makeText(parent.getContext(), "The planet is " +
-		          parent.getItemAtPosition(pos).toString(), Toast.LENGTH_LONG).show();
+	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+		// No point of doing anything here, put code in send button instead
 		
 	}
 
@@ -138,6 +175,23 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		
 	}
 	
+	@Override
+	public void onClick(View v) {
+		//Log.i(TAG,"Some button clicked");
+    	switch (v.getId()) {
+    		case R.id.FrSkySettings_RSSI_send:
+    			Log.i(TAG,"Send RSSI alarm to FrSky module");
+    			Frame f = Frame.AlarmFrame(
+    					Frame.FRAMETYPE_ALARM1_RSSI, 
+    					RSSIalarm1LevelSpinner.getSelectedItemPosition(), 
+    					Integer.parseInt(RSSIalarm1ValueSpinner.getSelectedItem().toString()), 
+    					RSSIalarm1RelSpinner.getSelectedItemPosition());
+    			Log.i(TAG,"Send this frame to FrSkyModule: "+f.toHuman());
+    			server.send(f);
+    			
+    			break;
+    	}
+	}
 }
 
 

@@ -257,6 +257,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public void send(int[] out) {
     	mSerialService.write( out );
     }
+	public void send(Frame f) {
+		send(f.toInts());
+	}
 	
 	public void reConnect()
 	{
@@ -283,7 +286,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 	public int getConnectionState() {
-			return mSerialService.getState();
+		return mSerialService.getState();
 	}
 	
 	@Override

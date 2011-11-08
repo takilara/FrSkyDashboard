@@ -31,9 +31,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class FrSkyServer extends Service implements OnInitListener {
-	
-
-    
+	    
 	private static final String TAG="FrSkyServerService";
 	private static final int NOTIFICATION_ID=56;
 	

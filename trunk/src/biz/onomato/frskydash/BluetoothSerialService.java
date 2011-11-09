@@ -262,6 +262,7 @@ public class BluetoothSerialService {
      * succeeds or fails.
      */
     private class ConnectThread extends Thread {
+    	
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
 
@@ -272,10 +273,14 @@ public class BluetoothSerialService {
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
-            	BluetoothDevice hxm = device;
-            	Method m;
-            	m = hxm.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-            	tmp = (BluetoothSocket)m.invoke(hxm, Integer.valueOf(1)); 
+//            	BluetoothDevice hxm = device;
+//            	Method m;
+//            	m = hxm.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+//            	tmp = (BluetoothSocket)m.invoke(hxm, Integer.valueOf(1));
+            	// MY_UUID is the app's UUID string, also used by the server code
+                tmp = device.createRfcommSocketToServiceRecord(SerialPortServiceClass_UUID);
+            	
+            	
             } catch (Exception e) {
                 Log.e(TAG, "create() failed", e);
             } 

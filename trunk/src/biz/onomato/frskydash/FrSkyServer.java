@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import android.app.AlertDialog;
 import android.app.IntentService;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 public class FrSkyServer extends Service implements OnInitListener {
 	    
 	private static final String TAG="FrSkyServerService";
+	private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
 	
     private int MY_DATA_CHECK_CODE;
@@ -526,6 +528,20 @@ public class FrSkyServer extends Service implements OnInitListener {
 		RSSItx.setPrecision(0);
 		RSSItx.setMovingAverage(-1);
 		RSSItx.silent = true;
+		
+		// Force alarm creation/initiation
+		Frame alarmframe1 = Frame.AlarmFrame(
+		Frame.FRAMETYPE_ALARM1_RSSI, 
+		Alarm.ALARMLEVEL_LOW, 
+		45, 
+		Alarm.LESSERTHAN);
+		Frame alarmframe2 = Frame.AlarmFrame(
+		Frame.FRAMETYPE_ALARM2_RSSI, 
+		Alarm.ALARMLEVEL_MID, 
+		42, 
+		Alarm.LESSERTHAN);
+		parseFrame(alarmframe1);
+		parseFrame(alarmframe2);
 	}
 	
 	private void resetChannels()

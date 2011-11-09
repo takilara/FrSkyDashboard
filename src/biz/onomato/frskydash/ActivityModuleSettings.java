@@ -123,7 +123,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			}
 			else
 			{
-				btnRSSISend.setEnabled(false);
+				btnRSSISend.setEnabled(true);
 			}
 			
 			Log.i(TAG,"Setup Alarms:");
@@ -139,15 +139,16 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				try
 				{
 					Log.i(TAG,"\tRSSI 1: "+server.RSSItx.alarms[0].toString());
-					//Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
+					Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
 					Log.i(TAG,"Load RSSI alarm 1 from server:");
 					Log.i(TAG,"Level: "+server.RSSItx.alarms[0].level+", greaterthan: "+server.RSSItx.alarms[0].greaterthan+", threshold: "+server.RSSItx.alarms[0].threshold);
 					RSSIalarm1LevelSpinner.setSelection(server.RSSItx.alarms[0].level);
 					RSSIalarm1RelSpinner.setSelection(server.RSSItx.alarms[0].greaterthan);
 					//need to be updated to reflect item with value 45, not index 45...
-					RSSIalarm1ValueSpinner.setSelection(server.RSSItx.alarms[0].threshold);
+					//RSSIalarm1ValueSpinner.setSelection(server.RSSItx.alarms[0].threshold);
+					ArrayAdapter myAdap = (ArrayAdapter) RSSIalarm1ValueSpinner.getAdapter(); //cast to an ArrayAdapter					
 					
-					
+					RSSIalarm1ValueSpinner.setSelection(myAdap.getPosition(""+server.RSSItx.alarms[0].threshold));
 
 					}
 					catch(Exception e)

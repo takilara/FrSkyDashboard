@@ -17,10 +17,10 @@ public class Frame {
 	public static final int FRAMETYPE_ALARM2_AD2=0xf9;
 	
 	// these need to correspond real deal
-	public static final int ALARMLEVEL_OFF=0;
-	public static final int ALARMLEVEL_LOW=1;
-	public static final int ALARMLEVEL_MID=2;
-	public static final int ALARMLEVEL_HIGH=3;
+	//public static final int ALARMLEVEL_OFF=0;
+	//public static final int ALARMLEVEL_LOW=1;
+	//public static final int ALARMLEVEL_MID=2;
+	//public static final int ALARMLEVEL_HIGH=3;
 	
 	
 	public int frametype;

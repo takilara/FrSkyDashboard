@@ -127,21 +127,33 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			}
 			
 			Log.i(TAG,"Setup Alarms:");
-			RSSIalarm1LevelSpinner.setSelection(Alarm.ALARMLEVEL_OFF);
-			RSSIalarm1RelSpinner.setSelection(Alarm.GREATERTHAN);
-			RSSIalarm1ValueSpinner.setSelection(50);
+			// RSSI alarms does not get written from module,
+			// Defaults need to come from FrSky, or
+			// from settings
+			RSSIalarm1LevelSpinner.setSelection(Alarm.ALARMLEVEL_MID);
+			RSSIalarm1RelSpinner.setSelection(Alarm.LESSERTHAN);
+			// need to be updated to reflect item with value 45, not index 45...
+			RSSIalarm1ValueSpinner.setSelection(45);
 			if(server.RSSItx.alarmCount>0)
 			{
 				try
 				{
 					Log.i(TAG,"\tRSSI 1: "+server.RSSItx.alarms[0].toString());
-					Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
+					//Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
+					Log.i(TAG,"Load RSSI alarm 1 from server:");
+					Log.i(TAG,"Level: "+server.RSSItx.alarms[0].level+", greaterthan: "+server.RSSItx.alarms[0].greaterthan+", threshold: "+server.RSSItx.alarms[0].threshold);
 					RSSIalarm1LevelSpinner.setSelection(server.RSSItx.alarms[0].level);
 					RSSIalarm1RelSpinner.setSelection(server.RSSItx.alarms[0].greaterthan);
+					//need to be updated to reflect item with value 45, not index 45...
 					RSSIalarm1ValueSpinner.setSelection(server.RSSItx.alarms[0].threshold);
+					
+					
+
 					}
 					catch(Exception e)
-					{}
+					{
+						Log.e(TAG,"Exception: "+e.getMessage());
+					}
 			}
 			if(server.AD1.alarmCount>0)
 			{
@@ -188,6 +200,10 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
     					RSSIalarm1RelSpinner.getSelectedItemPosition());
     			Log.i(TAG,"Send this frame to FrSkyModule: "+f.toHuman());
     			server.send(f);
+    			// RSSI alarms frames should also be parsed outgoing.
+    			Log.d(TAG,"Trying to send frame to server as well as output");
+    			Log.d(TAG,"Alarm Level:"+f.alarmLevel);
+    			server.parseFrame(f);
     			
     			break;
     	}

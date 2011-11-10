@@ -28,6 +28,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	Spinner RSSIalarm1ValueSpinner,RSSIalarm2ValueSpinner,AD1alarm1ValueSpinner,AD1alarm2ValueSpinner,AD2alarm1ValueSpinner,AD2alarm2ValueSpinner;
 	
 	private View btnRSSI1Send,btnRSSI2Send,btnAD1_1_Send,btnAD1_2_Send,btnAD2_1_Send,btnAD2_2_Send;
+	private TextView tvAD1_1_human;
 	
 	int minThresholdRSSI=20;
 	int maxThresholdRSSI=110;
@@ -92,6 +93,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		AD1alarm1LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_1_spinner_level );
 		AD1alarm1RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_1_spinner_relative );
 		AD1alarm1ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_1_spinner_value );
+		tvAD1_1_human = (TextView) findViewById(R.id.tvAD1_1_human);
 		btnAD1_1_Send = findViewById(R.id.FrSkySettings_AD1_1_send);
 		// AD1 - Alarm 2
 		AD1alarm2LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_2_spinner_level );
@@ -322,8 +324,11 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-		// No point of doing anything here, put code in send button instead
 		
+		String desc = server.AD1.getDescription();
+		String rel = AD1alarm1RelSpinner.getSelectedItem().toString();
+		float engVal = (server.AD1.getFactor()* Integer.parseInt(AD1alarm1ValueSpinner.getSelectedItem().toString()))+server.AD1.getOffset();
+		tvAD1_1_human.setText(desc+" "+rel+" "+engVal+" "+server.AD1.getLongUnit() );
 	}
 
 	@Override

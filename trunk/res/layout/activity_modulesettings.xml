@@ -1,19 +1,476 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <LinearLayout android:id="@+id/linearLayout1" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:orientation="vertical">
-        <LinearLayout android:id="@+id/linearLayout2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal">
-            <TextView android:text="@string/FrSkySettings_RSSI" android:background="#FF909090" 
-            android:textColor="#FFFFFFFF" 
-            android:id="@+id/textView2" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_width="fill_parent" android:gravity="center" android:textStyle="bold"></TextView>
+
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+	
+	<ScrollView 
+	    android:id="@+id/sdfghScrollView01"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+        
+        
+        <LinearLayout
+            android:id="@+id/LinearLayoutRSSI1Row1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FF909090"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/tv_FrSkySettings_RSSI"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_RSSI"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_FrSkySettings_Alarm_1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_Alarm_1"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
         </LinearLayout>
-        <LinearLayout android:id="@+id/linearLayout3" android:layout_width="fill_parent" android:layout_height="wrap_content">
-            <TextView android:text="@string/FrSkySettings_Alarm_1" android:layout_gravity="left" android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1.1"></TextView>
-            <Spinner android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/FrSkySettings_RSSI_spinner_level" android:layout_gravity="right" android:layout_weight="0.5"></Spinner>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutRSSI1Row2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_RSSI1_spinner_relative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="2" >
+			</Spinner>
+            <Spinner 
+                android:id="@+id/FrSkySettings_RSSI1_spinner_value"
+                android:layout_height="50dp" 
+                android:layout_width="wrap_content" 
+                android:layout_gravity="right" android:layout_weight="1">
+            </Spinner>
         </LinearLayout>
-        <LinearLayout android:id="@+id/linearLayout4" android:layout_width="match_parent" android:layout_height="wrap_content">
-            <TextView android:text="@string/FrSkySettings_Value" android:layout_width="wrap_content" android:id="@+id/textView3" android:layout_height="wrap_content" android:layout_gravity="left" android:layout_weight="1"></TextView>
-            <Spinner android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/FrSkySettings_RSSI_spinner_relative" android:layout_gravity="left" android:layout_weight="1"></Spinner>
-            <TextView android:text="@string/FrSkySettings_Than" android:layout_width="wrap_content" android:id="@+id/textView4" android:layout_height="wrap_content" android:layout_gravity="right" android:layout_weight="1"></TextView>
-            <Spinner android:layout_height="50dp" android:layout_width="wrap_content" android:id="@+id/FrSkySettings_RSSI_spinner_value" android:layout_gravity="right" android:layout_weight="1"></Spinner>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutRSSI1Row3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_RSSI1_spinner_level"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+
+            <Button
+                android:id="@+id/FrSkySettings_RSSI1_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/FrSkySettings_Send" />
+
         </LinearLayout>
-        <Button android:id="@+id/FrSkySettings_RSSI_send" android:text="@string/FrSkySettings_Send" android:layout_height="wrap_content" android:layout_width="fill_parent" android:enabled="false"></Button>
+
+      <LinearLayout
+            android:id="@+id/linearLayoutRSSI2Row1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FF909090"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/FrSkySettings_RSSI"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_RSSI"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_Alarm_2"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutRSSI2Row2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_RSSI2_spinner_relative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="2" >
+			</Spinner>
+            <Spinner 
+                android:id="@+id/FrSkySettings_RSSI2_spinner_value"
+                android:layout_height="50dp" 
+                android:layout_width="wrap_content" 
+                android:layout_gravity="right" android:layout_weight="1">
+            </Spinner>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutRSSI2Row3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_RSSI2_spinner_level"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+
+            <Button
+                android:id="@+id/FrSkySettings_RSSI2_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/FrSkySettings_Send" />
+
+        </LinearLayout>
+            
+            
+        <!--  AD1 - Alarm 1 -->
+        <LinearLayout
+            android:id="@+id/linearLayoutAD1_1_2Row1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FF909090"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/FrSkySettings_AD1_1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_AD1"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_Alarm_1"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutAD1_1_Row2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD1_1_spinner_relative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="2" >
+			</Spinner>
+            <Spinner 
+                android:id="@+id/FrSkySettings_AD1_1_spinner_value"
+                android:layout_height="50dp" 
+                android:layout_width="wrap_content" 
+                android:layout_gravity="right" android:layout_weight="1">
+            </Spinner>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutAD1_1_Row3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD1_1_spinner_level"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+
+            <Button
+                android:id="@+id/FrSkySettings_AD1_1_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/FrSkySettings_Send" />
+
+        </LinearLayout>
+            
+            
+        <!--  AD1 - Alarm 2 -->    
+        <LinearLayout
+            android:id="@+id/linearLayoutAD1_2_2Row1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FF909090"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/FrSkySettings_AD1_2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_AD1"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_Alarm_2"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutAD1_2_Row2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD1_2_spinner_relative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="2" >
+			</Spinner>
+            <Spinner 
+                android:id="@+id/FrSkySettings_AD1_2_spinner_value"
+                android:layout_height="50dp" 
+                android:layout_width="wrap_content" 
+                android:layout_gravity="right" android:layout_weight="1">
+            </Spinner>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutAD1_2_Row3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD1_2_spinner_level"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+
+            <Button
+                android:id="@+id/FrSkySettings_AD1_2_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/FrSkySettings_Send" />
+
+        </LinearLayout>    
+            
+        <!--  AD2 - Alarm 1 -->
+        <LinearLayout
+            android:id="@+id/linearLayoutAD2_1_2Row1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FF909090"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/FrSkySettings_AD2_1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_AD2"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_Alarm_1"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutAD2_1_Row2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD2_1_spinner_relative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="2" >
+			</Spinner>
+            <Spinner 
+                android:id="@+id/FrSkySettings_AD2_1_spinner_value"
+                android:layout_height="50dp" 
+                android:layout_width="wrap_content" 
+                android:layout_gravity="right" android:layout_weight="1">
+            </Spinner>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutAD2_1_Row3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD2_1_spinner_level"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+
+            <Button
+                android:id="@+id/FrSkySettings_AD2_1_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/FrSkySettings_Send" />
+
+        </LinearLayout>
+            
+            
+        <!--  AD1 - Alarm 2 -->    
+        <LinearLayout
+            android:id="@+id/linearLayoutAD2_2_2Row1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FF909090"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/FrSkySettings_AD2_2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_AD2"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/FrSkySettings_Alarm_2"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutAD2_2_Row2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD2_2_spinner_relative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="2" >
+			</Spinner>
+            <Spinner 
+                android:id="@+id/FrSkySettings_AD2_2_spinner_value"
+                android:layout_height="50dp" 
+                android:layout_width="wrap_content" 
+                android:layout_gravity="right" android:layout_weight="1">
+            </Spinner>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutAD2_2_Row3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false" >
+
+            <Spinner
+                android:id="@+id/FrSkySettings_AD2_2_spinner_level"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+
+            <Button
+                android:id="@+id/FrSkySettings_AD2_2_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/FrSkySettings_Send" />
+
+        </LinearLayout>        
+            
+            
+           
     </LinearLayout>
+    </ScrollView>
+</LinearLayout>

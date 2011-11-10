@@ -19,6 +19,13 @@
 	<item>Alarm: High</item>
 	</string-array>
 	
+    <string-array name="alarm_threshold">
+	<item>1</item>
+	<item>2</item>
+	<item>3</item>
+	<item>4</item>
+	</string-array>
+	
 	<string-array name="alarm_relative">
 		<item>Value lower than</item>
 		<item>Value greater than</item>

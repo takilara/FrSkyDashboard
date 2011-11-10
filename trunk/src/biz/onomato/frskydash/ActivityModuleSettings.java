@@ -69,8 +69,10 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		// Alarm relativity: Greater than, Lower than
 		ArrayAdapter<CharSequence> alarmRelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_relative, android.R.layout.simple_spinner_item );
 		// Alarm thresholds, 1-255 for ADx.x, 20-110 for RSSIx
-		ArrayAdapter<String> RSSIalarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_dropdown_item,valuesRSSI );
-		ArrayAdapter<String> ADalarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_dropdown_item,valuesADx );
+		ArrayAdapter<String> RSSIalarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item,valuesRSSI );
+		ArrayAdapter<String> ADalarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item,valuesADx );
+		
+		//ArrayAdapter<CharSequence> alarmValueAdapterTest = ArrayAdapter.createFromResource(this, R.array.alarm_threshold, android.R.layout.simple_spinner_item );
 		
 		
 		alarmRelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
@@ -126,6 +128,8 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		AD1alarm1LevelSpinner.setAdapter( alarmLevelAdapter );
 		AD1alarm1RelSpinner.setAdapter( alarmRelAdapter );
 		AD1alarm1ValueSpinner.setAdapter( ADalarmValueAdapter );
+		//AD1alarm1ValueSpinner.setAdapter( alarmValueAdapterTest );
+		
 		// AD1 - Alarm 2
 		AD1alarm2LevelSpinner.setAdapter( alarmLevelAdapter );
 		AD1alarm2RelSpinner.setAdapter( alarmRelAdapter );

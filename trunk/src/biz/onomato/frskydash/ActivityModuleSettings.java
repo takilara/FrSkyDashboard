@@ -20,12 +20,20 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 
 	private static final String TAG = "FrSky-Settings";
 	private FrSkyServer server;
+	
+	
     
 	Spinner RSSIalarm1LevelSpinner,RSSIalarm2LevelSpinner,AD1alarm1LevelSpinner,AD1alarm2LevelSpinner,AD2alarm1LevelSpinner,AD2alarm2LevelSpinner;
 	Spinner RSSIalarm1RelSpinner,RSSIalarm2RelSpinner,AD1alarm1RelSpinner,AD1alarm2RelSpinner,AD2alarm1RelSpinner,AD2alarm2RelSpinner;
 	Spinner RSSIalarm1ValueSpinner,RSSIalarm2ValueSpinner,AD1alarm1ValueSpinner,AD1alarm2ValueSpinner,AD2alarm1ValueSpinner,AD2alarm2ValueSpinner;
 	
 	private View btnRSSI1Send,btnRSSI2Send,btnAD1_1_Send,btnAD1_2_Send,btnAD2_1_Send,btnAD2_2_Send;
+	
+	int minThresholdRSSI=20;
+	int maxThresholdRSSI=110;
+	int minThresholdAD=1;
+	int maxThresholdAD=255;
+	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -37,20 +45,20 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		//stringlist for values
 		
 		// RSSI Alarm 1
-		int from = 20;
-		int to = 110;
-		String[] valuesRSSI = new String[to-from+1];
-		for(int i=from;i<=to;i++)
+		//minThresholdRSSI = 20;
+		//maxThresholdRSSI = 110;
+		String[] valuesRSSI = new String[maxThresholdRSSI-minThresholdRSSI+1];
+		for(int i=minThresholdRSSI;i<=maxThresholdRSSI;i++)
 		{
-			valuesRSSI[i-from]=Integer.toString(i);
+			valuesRSSI[i-minThresholdRSSI]=Integer.toString(i);
 		}
 		
-		from = 1;
-		to = 255;
-		String[] valuesADx = new String[to-from+1];
-		for(int i=from;i<=to;i++)
+		//minThresholdAD = 1;
+		//maxThresholdAD = 255;
+		String[] valuesADx = new String[maxThresholdAD-minThresholdAD+1];
+		for(int i=minThresholdAD;i<=maxThresholdAD;i++)
 		{
-			valuesADx[i-from]=Integer.toString(i);
+			valuesADx[i-minThresholdAD]=Integer.toString(i);
 		}
 		
 		
@@ -232,41 +240,75 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			// RSSI alarms does not get written from module,
 			// Defaults need to come from FrSky, or
 			// from settings
-			RSSIalarm1LevelSpinner.setSelection(Alarm.ALARMLEVEL_MID);
+			RSSIalarm1LevelSpinner.setSelection(Alarm.ALARMLEVEL_HIGH);
 			RSSIalarm1RelSpinner.setSelection(Alarm.LESSERTHAN);
-			// need to be updated to reflect item with value 45, not index 45...
-			RSSIalarm1ValueSpinner.setSelection(45);
+			// 45 is default for RSSI alarm 1
+			RSSIalarm1ValueSpinner.setSelection(45-minThresholdRSSI);
+			
+			RSSIalarm2LevelSpinner.setSelection(Alarm.ALARMLEVEL_HIGH);
+			RSSIalarm2RelSpinner.setSelection(Alarm.LESSERTHAN);
+			// 42 is default for RSSI alarm 2
+			RSSIalarm2ValueSpinner.setSelection(42-minThresholdRSSI);
+			
 			if(server.RSSItx.alarmCount>0)
 			{
+				// Alarm 1
 				try
 				{
-					Log.i(TAG,"\tRSSI 1: "+server.RSSItx.alarms[0].toString());
-					Log.i(TAG,"\tRSSI 2: "+server.RSSItx.alarms[1].toString());
-					Log.i(TAG,"Load RSSI alarm 1 from server:");
-					Log.i(TAG,"Level: "+server.RSSItx.alarms[0].level+", greaterthan: "+server.RSSItx.alarms[0].greaterthan+", threshold: "+server.RSSItx.alarms[0].threshold);
 					RSSIalarm1LevelSpinner.setSelection(server.RSSItx.alarms[0].level);
 					RSSIalarm1RelSpinner.setSelection(server.RSSItx.alarms[0].greaterthan);
-					//need to be updated to reflect item with value 45, not index 45...
-					//RSSIalarm1ValueSpinner.setSelection(server.RSSItx.alarms[0].threshold);
-					ArrayAdapter myAdap = (ArrayAdapter) RSSIalarm1ValueSpinner.getAdapter(); //cast to an ArrayAdapter					
+					//myAdap = (ArrayAdapter) RSSIalarm1ValueSpinner.getAdapter(); //cast to an ArrayAdapter					
+					//RSSIalarm1ValueSpinner.setSelection(myAdap.getPosition(""+server.RSSItx.alarms[0].threshold));
+					RSSIalarm1ValueSpinner.setSelection(server.RSSItx.alarms[0].threshold-minThresholdRSSI);
+				}
+				catch(Exception e){	}
+				// Alarm 2
+				try
+				{
+					RSSIalarm2LevelSpinner.setSelection(server.RSSItx.alarms[1].level);
+					RSSIalarm2RelSpinner.setSelection(server.RSSItx.alarms[1].greaterthan);
+					RSSIalarm2ValueSpinner.setSelection(server.RSSItx.alarms[1].threshold-minThresholdRSSI);
+				}
+				catch(Exception e){	}
 					
-					RSSIalarm1ValueSpinner.setSelection(myAdap.getPosition(""+server.RSSItx.alarms[0].threshold));
-
-					}
-					catch(Exception e)
-					{
-						Log.e(TAG,"Exception: "+e.getMessage());
-					}
 			}
 			if(server.AD1.alarmCount>0)
 			{
-				Log.i(TAG,"\tAD1 1: "+server.AD1.alarms[0].toString());
-				Log.i(TAG,"\tAD1 2: "+server.AD1.alarms[1].toString());
+				// Alarm 1
+				try
+				{
+					AD1alarm1LevelSpinner.setSelection(server.AD1.alarms[0].level);
+					AD1alarm1RelSpinner.setSelection(server.AD1.alarms[0].greaterthan);
+					AD1alarm1ValueSpinner.setSelection(server.AD1.alarms[0].threshold-minThresholdAD);
+				}
+				catch(Exception e){	}
+				// Alarm 2
+				try
+				{
+					AD1alarm2LevelSpinner.setSelection(server.AD1.alarms[1].level);
+					AD1alarm2RelSpinner.setSelection(server.AD1.alarms[1].greaterthan);
+					AD1alarm2ValueSpinner.setSelection(server.AD1.alarms[1].threshold-minThresholdAD);
+				}
+				catch(Exception e){	}
 			}
 			if(server.AD2.alarmCount>0)
 			{
-				Log.i(TAG,"\tAD2 1: "+server.AD2.alarms[0].toString());
-				Log.i(TAG,"\tAD2 2: "+server.AD2.alarms[1].toString());
+				// Alarm 1
+				try
+				{
+					AD2alarm1LevelSpinner.setSelection(server.AD2.alarms[0].level);
+					AD2alarm1RelSpinner.setSelection(server.AD2.alarms[0].greaterthan);
+					AD2alarm1ValueSpinner.setSelection(server.AD2.alarms[0].threshold-minThresholdAD);
+				}
+				catch(Exception e){	}
+				// Alarm 2
+				try
+				{
+					AD2alarm2LevelSpinner.setSelection(server.AD2.alarms[1].level);
+					AD2alarm2RelSpinner.setSelection(server.AD2.alarms[1].greaterthan);
+					AD2alarm2ValueSpinner.setSelection(server.AD2.alarms[1].threshold-minThresholdAD);
+				}
+				catch(Exception e){	}
 			}
 			
 		}

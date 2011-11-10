@@ -7,12 +7,12 @@
         android:orientation="vertical">
 	
 	<ScrollView 
-	    android:id="@+id/sdfghScrollView01"
+	    android:id="@+id/ScrollViewFrSkyModuleSettings"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent">
 		
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/linearLayout1"
+        android:id="@+id/linearLayoutFrSkyModuleSettings"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical">
@@ -199,6 +199,12 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tvAD1_1_human"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
+
         <LinearLayout
             android:id="@+id/linearLayoutAD1_1_Row2"
             android:layout_width="match_parent"
@@ -207,6 +213,7 @@
 
             <Spinner
                 android:id="@+id/FrSkySettings_AD1_1_spinner_relative"
+                android:prompt="@string/FrSkySettings_Value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"

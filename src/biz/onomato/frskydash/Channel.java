@@ -112,9 +112,15 @@ public class Channel {
 		//Log.i(TAG,"STACK: "+_stack.toString());
 		//Log.i(TAG,"Avg: "+_avg);
 		_raw = raw;
-		//_val = _raw * _factor+_offset;
-		_val = _avg * _factor+_offset;
+		//_val = (_avg * _factor)+_offset;
+		_val = convert(_avg);
 		return getValue();
+	}
+	
+	private double convert(int inputValue)
+	{
+		double o = (inputValue * _factor)+_offset;
+		return o;
 	}
 	
 	public void setPrecision(int precision)
@@ -127,14 +133,60 @@ public class Channel {
 	public double getValue()
 	{
 		double tVal = Math.round(_val*100f)/100f;
-		//Log.i(TAG,"GetValue: "+tVal);
+		
 		return tVal;
+		//return getValue(_avg);
 	}
+	
+	
 	
 	public String toString()
 	{
-		return String.format("%."+_precision+"f", getValue());
+		return String.format("%."+_precision+"f", _val);
 	}
+
+	public String toString(int inputValue)
+	{
+		return String.format("%."+_precision+"f", convert(inputValue));
+	}
+	
+	//return String.format("%."+_precision+"f",(inputValue*_factor)+_offset);
+	
+	public String toEng()
+	{
+		//return String.format("%s %s", getValue(),_shortUnit);
+		return toEng(_avg,false);
+	}
+	
+	public String toEng(boolean longUnit)
+	{
+		//return String.format("%s %s", getValue(),_shortUnit);
+		return toEng(_avg,longUnit);
+	}
+	
+
+	public String toEng(int inputValue)
+	{
+		//return String.format("%s %s", getValue(inputValue),_shortUnit);
+		return toEng(inputValue,false);
+	}
+	
+	public String toEng(int inputValue,boolean longUnit)
+	{
+		if(longUnit==true)
+		{
+			return String.format("%."+_precision+"f %s", convert(inputValue),getLongUnit());
+		}
+		else
+		{
+			return String.format("%."+_precision+"f %s", convert(inputValue),_shortUnit);
+		}
+	}
+
+	
+	
+	
+	
 	
 	public String getDescription()
 	{

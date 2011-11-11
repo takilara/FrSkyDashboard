@@ -11,6 +11,7 @@
     <string name="FrSkySettings_Alarm_1">Alarm 1</string>
     <string name="FrSkySettings_Alarm_2">Alarm 2</string>
     <string name="FrSkySettings_Alarm_Level">Alarm Level</string>
+    <string name="FrSkySettings_Alarm_meaning">Alarm meaning</string>
     
     <string-array name="alarm_level">
 	<item>Alarm: Off</item>

@@ -885,30 +885,7 @@ private final Handler mHandlerBT = new Handler() {
       
       AD1.loadFromConfig(settings);
       AD2.loadFromConfig(settings);
-      //setChannelConfiguration(settings,AD1);
-      //setChannelConfiguration(settings,AD2);
-//      
-//      cName="AD1";
-//      cDescription = settings.getString(cName+"_"+"Description","Main cell voltage");
-//      cLongUnit = settings.getString(cName+"_"+"LongUnit","Volt");
-//      cShortUnit = settings.getString(cName+"_"+"ShortUnit","V");
-//      cFactor = settings.getFloat(cName+"_"+"Factor", (float) (0.1/6));
-//      cOffset = settings.getFloat(cName+"_"+"Offset", (float) (0));
-//      cMovingAverage = settings.getInt(cName+"_"+"MovingAverage", 8);
-//      cPrecision = settings.getInt(cName+"_"+"Precision", 2);
-//      cSilent = settings.getBoolean(cName+"_"+"Silent", false);
-//		
-////		int tad1 = createChannel(cName, cDescription, cOffset, (double) cFactor, cShortUnit,cLongUnit);
-//      //AD1 = getChannelById(tad1);
-//      AD1.setDescription(cDescription);
-//      AD1.setShortUnit(cShortUnit);
-//      AD1.setLongUnit(cLongUnit);
-//      AD1.setFactor(cFactor);
-//      AD1.setOffset(cOffset);
-//      AD1.setMovingAverage(cMovingAverage);
-//      AD1.setPrecision(cPrecision);
-//      AD1.silent = cSilent;
-		
+     
 	}
 	
 	public SharedPreferences getSettings()

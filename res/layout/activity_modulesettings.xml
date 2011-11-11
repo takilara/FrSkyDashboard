@@ -49,6 +49,12 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+         <TextView
+             android:id="@+id/tvRSSI_1_human"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:text="@string/FrSkySettings_Alarm_meaning" />
+            
         <LinearLayout
             android:id="@+id/linearLayoutRSSI1Row2"
             android:layout_width="match_parent"
@@ -123,6 +129,11 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tvRSSI_2_human"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/FrSkySettings_Alarm_meaning" />
         <LinearLayout
             android:id="@+id/linearLayoutRSSI2Row2"
             android:layout_width="match_parent"
@@ -203,7 +214,7 @@
             android:id="@+id/tvAD1_1_human"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:text="@string/FrSkySettings_Alarm_meaning" />
 
         <LinearLayout
             android:id="@+id/linearLayoutAD1_1_Row2"
@@ -282,6 +293,12 @@
 
         </LinearLayout>
 
+         <TextView
+             android:id="@+id/tvAD1_2_human"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:text="@string/FrSkySettings_Alarm_meaning" />
+            
         <LinearLayout
             android:id="@+id/linearLayoutAD1_2_Row2"
             android:layout_width="match_parent"
@@ -357,6 +374,12 @@
 
         </LinearLayout>
 
+         <TextView
+             android:id="@+id/tvAD2_1_human"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:text="@string/FrSkySettings_Alarm_meaning" />
+            
         <LinearLayout
             android:id="@+id/linearLayoutAD2_1_Row2"
             android:layout_width="match_parent"
@@ -432,7 +455,13 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-
+		
+		<TextView
+		    android:id="@+id/tvAD2_2_human"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:text="@string/FrSkySettings_Alarm_meaning" />
+        
         <LinearLayout
             android:id="@+id/linearLayoutAD2_2_Row2"
             android:layout_width="match_parent"

@@ -521,12 +521,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 		RSSIrx = getChannelById(trssirx);
 		RSSIrx.setPrecision(0);
 		RSSIrx.setMovingAverage(-1);
+		RSSIrx.setLongUnit("dBm");
 		RSSIrx.silent = true;
 		
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
 		RSSItx.setMovingAverage(-1);
+		RSSItx.setLongUnit("dBm");
 		RSSItx.silent = true;
 		
 		// Force alarm creation/initiation

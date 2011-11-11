@@ -144,11 +144,11 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		// RSSI - Alarm 1
 		RSSIalarm1LevelSpinner.setAdapter( alarmLevelAdapter );
 		RSSIalarm1RelSpinner.setAdapter( alarmRelAdapter );
-		RSSIalarm1ValueSpinner.setAdapter( RSSIalarmValueAdapter );
+		//RSSIalarm1ValueSpinner.setAdapter( RSSIalarmValueAdapter );
 		// RSSI - Alarm 2 
 		RSSIalarm2LevelSpinner.setAdapter( alarmLevelAdapter );
 		RSSIalarm2RelSpinner.setAdapter( alarmRelAdapter );
-		RSSIalarm2ValueSpinner.setAdapter( RSSIalarmValueAdapter );
+		//RSSIalarm2ValueSpinner.setAdapter( RSSIalarmValueAdapter );
 		// AD1 - Alarm 1
 		AD1alarm1LevelSpinner.setAdapter( alarmLevelAdapter );
 		AD1alarm1RelSpinner.setAdapter( alarmRelAdapter );
@@ -158,15 +158,15 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		// AD1 - Alarm 2
 		AD1alarm2LevelSpinner.setAdapter( alarmLevelAdapter );
 		AD1alarm2RelSpinner.setAdapter( alarmRelAdapter );
-		AD1alarm2ValueSpinner.setAdapter( AD1alarmValueAdapter );
+		//AD1alarm2ValueSpinner.setAdapter( AD1alarmValueAdapter );
 		// AD2 - Alarm 1
 		AD2alarm1LevelSpinner.setAdapter( alarmLevelAdapter );
 		AD2alarm1RelSpinner.setAdapter( alarmRelAdapter );
-		AD2alarm1ValueSpinner.setAdapter( AD2alarmValueAdapter );
+		//AD2alarm1ValueSpinner.setAdapter( AD2alarmValueAdapter );
 		// AD2 - Alarm 2
 		AD2alarm2LevelSpinner.setAdapter( alarmLevelAdapter );
 		AD2alarm2RelSpinner.setAdapter( alarmRelAdapter );
-		AD2alarm2ValueSpinner.setAdapter( AD2alarmValueAdapter );
+		//AD2alarm2ValueSpinner.setAdapter( AD2alarmValueAdapter );
 		
 		
 		// Setup Click Listeners
@@ -285,9 +285,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				//valuesAD1[i-minThresholdAD]=String.format("%."+p+"f %s (%s)",vEng,u,i);
 				valuesRSSI[i-minThresholdRSSI] = String.format("%s (%s)",server.RSSItx.toEng(i),i);
 			}
-			ArrayAdapter<String> RSSIalarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesRSSI );
-			RSSIalarm1ValueSpinner.setAdapter(RSSIalarmValueAdapter);
-			RSSIalarm2ValueSpinner.setAdapter(RSSIalarmValueAdapter);
+			
 			
 			
 			
@@ -301,10 +299,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				//valuesAD1[i-minThresholdAD]=String.format("%."+p+"f %s (%s)",vEng,u,i);
 				valuesAD1[i-minThresholdAD] = String.format("%s (%s)",server.AD1.toEng(i),i);
 			}
-			ArrayAdapter<String> AD1alarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesAD1 );
-			AD1alarm1ValueSpinner.setAdapter(AD1alarmValueAdapter);
-			AD1alarm2ValueSpinner.setAdapter(AD1alarmValueAdapter);
-
+			
 			f = server.AD2.getFactor();
 			o = server.AD2.getOffset();
 			String[] valuesAD2 = new String[maxThresholdAD-minThresholdAD+1];
@@ -315,9 +310,31 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				//valuesAD1[i-minThresholdAD]=String.format("%."+p+"f %s (%s)",vEng,u,i);
 				valuesAD2[i-minThresholdAD] = String.format("%s (%s)",server.AD2.toEng(i),i);
 			}
+
+			ArrayAdapter<String> RSSIalarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesRSSI );
+			ArrayAdapter<String> AD1alarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesAD1 );
 			ArrayAdapter<String> AD2alarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesAD2 );
+			
+			
+			RSSIalarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			AD1alarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			AD2alarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			
+			
+			RSSIalarm1ValueSpinner.setAdapter(RSSIalarmValueAdapter);
+			RSSIalarm2ValueSpinner.setAdapter(RSSIalarmValueAdapter);
+			AD1alarm1ValueSpinner.setAdapter(AD1alarmValueAdapter);
+			AD1alarm2ValueSpinner.setAdapter(AD1alarmValueAdapter);
 			AD2alarm1ValueSpinner.setAdapter(AD2alarmValueAdapter);
 			AD2alarm2ValueSpinner.setAdapter(AD2alarmValueAdapter);
+			
+			
+			
+			
+			
+			
+			
+			
 			
 			
 			

@@ -607,8 +607,16 @@ private final Handler mHandlerBT = new Handler() {
                 case BluetoothSerialService.STATE_LISTEN:
                 	Log.d(TAG,"BT listening");
                 case BluetoothSerialService.STATE_NONE:
-                	Log.d(TAG,"BT state NONE");
+                	Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+                	
+                	// set all the channels to -1
+                	AD1.reset();
+                	AD2.reset();
+                	RSSItx.reset();
+                	RSSIrx.reset();
+                	
+                	
                 	logger.stop();
 //                	if (mMenuItemConnect != null) {
 //                		mMenuItemConnect.setIcon(android.R.drawable.ic_menu_search);

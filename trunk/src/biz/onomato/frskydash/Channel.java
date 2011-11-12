@@ -42,9 +42,8 @@ public class Channel {
 	public Channel(String name,String description,float offset,float factor,String unit,String longUnit)
 	{
 		silent = false;
-		_raw=-1;
-		_val=-1;
-		_avg=0;
+		_precision = 2;
+		
 		_name = name;
 		_description = description;
 		_offset = offset;
@@ -52,14 +51,25 @@ public class Channel {
 		_shortUnit = unit;
 		_longUnit = longUnit;
 		_mc = new MathContext(2);
-		_precision = 2;
-		_stack = new MyStack(10);
+
+//		_movingAverage = 10;
+//		_raw=-1;
+//		_val=-1;
+//		_avg=0;
+//		_stack = new MyStack(10);
+//		
+		reset();
 		
 		// FRSKY channels only for now
 		alarms = new Alarm[2];
-		
-		
-		
+	}
+	
+	public void reset()
+	{
+		_raw = -1;
+		_val = -1;
+		_avg = 0;
+		_stack = new MyStack(_movingAverage);
 	}
 	
 	public boolean loadFromConfig(SharedPreferences settings)

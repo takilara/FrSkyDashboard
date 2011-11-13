@@ -53,7 +53,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     //MyApp globals;
     
-    private TextView tv_ad1_val,tv_ad2_val,tv_ad1_unit,tv_ad2_unit,tv_rssitx_val,tv_rssirx_val,tv_fps_val;
+    private TextView tv_ad1_val,tv_ad2_val,tv_ad1_unit,tv_ad2_unit;
+    private TextView tv_statusBt,tv_statusRx,tv_statusTx;
+    private TextView tv_rssitx,tv_rssirx,tv_fps;
     private TextView tv_dash_ch0NameDesc,tv_dash_ch1NameDesc;
     private ToggleButton btnTglSpeak;
     private TextToSpeech mTts;
@@ -130,11 +132,25 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         // Setup the form items        
         tv_ad1_val = (TextView) findViewById(R.id.ad1Value);
         tv_ad2_val = (TextView) findViewById(R.id.ad2Value);
-        tv_rssitx_val = (TextView) findViewById(R.id.rssitxValue);
-        tv_rssirx_val = (TextView) findViewById(R.id.rssirxValue);
+
+        
+        tv_statusBt = (TextView) findViewById(R.id.dash_tvConnBt);
+        tv_statusRx = (TextView) findViewById(R.id.dash_tvConnRx);
+        tv_statusTx = (TextView) findViewById(R.id.dash_tvConnTx);
+        
+        tv_rssitx   = (TextView) findViewById(R.id.dash_tvRSSItx);
+        tv_rssirx   = (TextView) findViewById(R.id.dash_tvRSSIrx);
+        tv_fps      = (TextView) findViewById(R.id.dash_tvFps);
+        
+        
+        ///TODO: Remove when proper status for Tx
+        tv_statusTx.setBackgroundColor(0xff000000); // Temporary!
+        tv_statusTx.setTextColor(0xff333333); // Temporary!
+        
+        
         Log.d(TAG,"Looing for fpsValue");
-        tv_fps_val = (TextView) findViewById(R.id.fpsValue);
-        Log.d(TAG,"Found fpsValue: "+tv_fps_val.toString());
+        
+   
    
         tv_dash_ch0NameDesc = (TextView) findViewById(R.id.dash_ch0NameDesc);
         tv_dash_ch1NameDesc = (TextView) findViewById(R.id.dash_ch1NameDesc);
@@ -170,9 +186,46 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 				{
 			    	tv_ad1_val.setText(server.AD1.toString());
 			    	tv_ad2_val.setText(server.AD2.toString());
-			    	tv_rssitx_val.setText(server.RSSItx.toString());
-			    	tv_rssirx_val.setText(server.RSSIrx.toString());
-			    	tv_fps_val.setText(server.getFps());
+			    	tv_rssitx.setText("RSSItx: "+server.RSSItx.toString());
+			    	
+			    	tv_rssirx.setText("RSSIrx: "+server.RSSIrx.toString());
+			    	
+			    	tv_fps.setText("FPS: "+server.getFps());
+			    	
+			    	// set status lights
+			    	if(server.statusBt)
+			    	{
+			    		tv_statusBt.setBackgroundColor(0xff00aa00);
+			    		tv_statusBt.setText("Bt: UP");
+			    	}
+			    	else
+			    	{
+			    		tv_statusBt.setBackgroundColor(0xffff0000);
+			    		tv_statusBt.setText("Bt: DOWN");
+			    	}
+			    	
+			    	if(server.fps>0)
+			    	{
+			    		tv_statusRx.setBackgroundColor(0xff00aa00);
+			    		tv_statusRx.setText("Rx: UP");
+			    	}
+			    	else
+			    	{
+			    		tv_statusRx.setBackgroundColor(0xffff0000);
+			    		tv_statusRx.setText("Rx: DOWN");
+			    	}
+			    	
+			    	if(server.statusTx)
+			    	{
+			    		//tv_statusTx.setBackgroundColor(0xff00aa00);
+			    		tv_statusTx.setText("Tx: UP");
+			    	}
+			    	else
+			    	{
+			    		//tv_statusTx.setBackgroundColor(0xffff0000);
+			    		tv_statusTx.setText("Tx: DOWN");
+			    	}
+			    	
 		    	}
 
 		    	tickHandler.postDelayed(this, 100);

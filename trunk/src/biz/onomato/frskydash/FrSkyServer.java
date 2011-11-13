@@ -88,6 +88,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private MyApp globals;
 	
 	public Simulator sim;
+
+	public boolean statusBt=false;
+	public boolean statusTx=false;
+	public boolean statusRx=false;
 	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
@@ -544,8 +548,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Alarm.ALARMLEVEL_MID, 
 		42, 
 		Alarm.LESSERTHAN);
-		parseFrame(alarmframe1);
-		parseFrame(alarmframe2);
+		parseFrame(alarmframe1,false);	// don't count in fps
+		parseFrame(alarmframe2,false);	// don't count in fps
 	}
 	
 	private void resetChannels()
@@ -586,6 +590,7 @@ private final Handler mHandlerBT = new Handler() {
                 switch (msg.arg1) {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Log.d(TAG,"BT connected");
+                	statusBt = true;
                 	send(Frame.InputRequestAll().toInts());
 //                	if (mMenuItemConnect != null) {
 //                		mMenuItemConnect.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
@@ -609,7 +614,7 @@ private final Handler mHandlerBT = new Handler() {
                 case BluetoothSerialService.STATE_NONE:
                 	Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
-                	
+                	statusBt = false;
                 	// set all the channels to -1
                 	AD1.reset();
                 	AD2.reset();
@@ -770,12 +775,13 @@ private final Handler mHandlerBT = new Handler() {
 		}
 	}
 	
-	public boolean parseFrame(Frame f)
+	
+	public boolean parseFrame(Frame f,boolean inBound)
 	{
 		//int [] frame = f.toInts(); 
 		boolean ok=true;
 		logger.log(f);
-		_framecount++;
+		if(inBound)	_framecount++;
 		switch(f.frametype)
 		{
 			// Analog values
@@ -811,6 +817,11 @@ private final Handler mHandlerBT = new Handler() {
 				break;
 		}
 		return ok;
+		
+	}
+	public boolean parseFrame(Frame f)
+	{
+		return parseFrame(f,true);
 	}
 	
 	public String getFps()

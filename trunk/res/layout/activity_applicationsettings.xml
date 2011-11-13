@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/linearLayoutApplicationSettingsOuter" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
+<ScrollView 
+	    android:id="@+id/ScrollViewApplicationSettings"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
     <LinearLayout android:id="@+id/linearLayoutApplicationSettings" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:orientation="vertical">
             <TextView android:background="#333333" android:id="@+id/textView4" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="center" android:gravity="center" android:text="@string/speakerSettings"></TextView>
@@ -23,3 +28,5 @@
             <Button android:layout_width="fill_parent" android:text="@string/btnDeleteLogs" android:layout_height="wrap_content" android:id="@+id/btnDeleteLogs"></Button>
         </LinearLayout>
     </LinearLayout> 
+    </ScrollView>
+</LinearLayout>

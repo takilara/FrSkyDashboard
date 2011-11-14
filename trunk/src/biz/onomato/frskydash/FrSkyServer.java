@@ -689,7 +689,7 @@ private final Handler mHandlerBT = new Handler() {
                 	Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
                 	
-                	if(statusBt==true) wasDisconnected();	// Only do disconnect message if previously connected
+                	if((statusBt==true) && (!_dying)) wasDisconnected();	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1
                 	

@@ -66,6 +66,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     private static BluetoothSerialService mSerialService = null;
     private BluetoothDevice _device = null;
     public boolean reconnectBt = true;
+    private boolean _manualBtDisconnect = false;    
     public int fps,fpsRx,fpsTx=0;
     
     private FrskyDatabase channelDb;
@@ -332,6 +333,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public void disconnect()
 	{
+		_manualBtDisconnect = true;
 		mSerialService.stop();
 	}
 	
@@ -674,6 +676,7 @@ private final Handler mHandlerBT = new Handler() {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Log.d(TAG,"BT connected");
                 	statusBt = true;
+                	_manualBtDisconnect = false;
                 	send(Frame.InputRequestAll().toInts());
                     
                     break;
@@ -689,7 +692,7 @@ private final Handler mHandlerBT = new Handler() {
                 	Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
                 	
-                	if((statusBt==true) && (!_dying)) wasDisconnected();	// Only do disconnect message if previously connected
+                	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected();	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1
                 	

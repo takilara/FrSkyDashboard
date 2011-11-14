@@ -144,14 +144,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         
         
         ///TODO: Remove when proper status for Tx
-        tv_statusTx.setBackgroundColor(0xff000000); // Temporary!
-        tv_statusTx.setTextColor(0xff333333); // Temporary!
+        //tv_statusTx.setBackgroundColor(0xff000000); // Temporary!
+        //tv_statusTx.setTextColor(0xff333333); // Temporary!
         
         
-        Log.d(TAG,"Looing for fpsValue");
-        
-   
-   
         tv_dash_ch0NameDesc = (TextView) findViewById(R.id.dash_ch0NameDesc);
         tv_dash_ch1NameDesc = (TextView) findViewById(R.id.dash_ch1NameDesc);
         
@@ -204,7 +200,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			    		tv_statusBt.setText("Bt: DOWN");
 			    	}
 			    	
-			    	if(server.fps>0)
+			    	//if(server.fps>0)
+			    	if(server.statusRx)
 			    	{
 			    		tv_statusRx.setBackgroundColor(0xff00aa00);
 			    		tv_statusRx.setText("Rx: UP");
@@ -217,12 +214,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			    	
 			    	if(server.statusTx)
 			    	{
-			    		//tv_statusTx.setBackgroundColor(0xff00aa00);
+			    		tv_statusTx.setBackgroundColor(0xff00aa00);
 			    		tv_statusTx.setText("Tx: UP");
 			    	}
 			    	else
 			    	{
-			    		//tv_statusTx.setBackgroundColor(0xffff0000);
+			    		tv_statusTx.setBackgroundColor(0xffff0000);
 			    		tv_statusTx.setText("Tx: DOWN");
 			    	}
 			    	

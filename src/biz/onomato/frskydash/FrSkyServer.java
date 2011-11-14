@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
@@ -65,7 +66,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     private static BluetoothSerialService mSerialService = null;
     private BluetoothDevice _device = null;
     public boolean reconnectBt = true;
-    public int fps=0;
+    public int fps,fpsRx,fpsTx=0;
     
     private FrskyDatabase channelDb;
     
@@ -73,11 +74,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private TextToSpeech mTts;
 	private int _speakDelay;
-	private Handler speakHandler;
-    private Runnable runnableSpeaker;
     
-	private Handler fpsHandler;
-    private Runnable runnableFps;
+	private Handler fpsHandler, watchdogHandler, speakHandler;
+    private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
+    
+    
     
     private boolean _dying=false;
 	
@@ -96,6 +97,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
 	private int _framecount=0;
+	private int _framecountRx=0;
+	private int _framecountTx=0;
 	
 	private double[] hVal;
 	private String[] hName;
@@ -228,13 +231,62 @@ public class FrSkyServer extends Service implements OnInitListener {
 			public void run()
 			{
 				fps = _framecount;
+				fpsRx = _framecountRx;
+				fpsTx = _framecountTx;
+				
+				
+				if(fpsRx>0)	// receiving frames from Rx, means Tx comms is up as well 
+				{
+					statusRx = true;
+					statusTx = true;
+				}
+				else		// not receiving frames from Rx
+				{
+					// make sure user knows if state changed from ok to not ok
+					if(statusRx==true)
+					{
+						wasDisconnected();
+					}
+					statusRx = false;
+					
+					if(fpsTx>0) // need to check if Tx comms is up
+					{
+						statusTx = true;
+					}
+					else
+					{
+						statusTx = false;
+					}
+					
+				}
+				
+				
 				_framecount = 0;
+				_framecountRx = 0;
+				_framecountTx = 0;
 				//Log.i(TAG,"FPS: "+fps);
 				fpsHandler.removeCallbacks(runnableFps);
 				fpsHandler.postDelayed(this,1000);
 			}
 		};
 		fpsHandler.postDelayed(runnableFps,1000);
+		
+		
+		watchdogHandler = new Handler();
+		runnableWatchdog = new Runnable () {
+			//@Override
+			public void run()
+			{
+				// Send get all alarms frame to force frames from Tx
+				// only do this if not receiving anything from Rx side
+				if((statusRx==false) && (statusBt==true))	send(Frame.InputRequestAll().toInts());
+				
+				watchdogHandler.removeCallbacks(runnableWatchdog);
+				watchdogHandler.postDelayed(this,500);
+			}
+		};
+		watchdogHandler.postDelayed(runnableWatchdog,500);
+		
 		
 	}
 	
@@ -579,6 +631,37 @@ public class FrSkyServer extends Service implements OnInitListener {
 		t[10] = 0xfe;
 		return t;
 	}
+
+	public void wasDisconnected()
+	{
+		AD1.reset();
+    	AD2.reset();
+    	RSSItx.reset();
+    	RSSIrx.reset();
+    	
+    	// speak warning
+    	saySomething("Alarm! Alarm! Alarm! Connection Lost!");
+    	// Get instance of Vibrator from current Context
+    	try
+    	{
+    		Vibrator v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
+	
+			// Start immediately
+			// Vibrate for 200 milliseconds
+			// Sleep for 500 milliseconds
+			long[] pattern = { 0, 200, 500, 200, 500, 200, 500 };
+			v.vibrate(pattern,-1);
+    	}
+    	catch (Exception e)
+    	{
+    	 
+    	}
+    	
+    
+    	
+
+    	
+	}
 	
 private final Handler mHandlerBT = new Handler() {
     	
@@ -592,15 +675,6 @@ private final Handler mHandlerBT = new Handler() {
                 	Log.d(TAG,"BT connected");
                 	statusBt = true;
                 	send(Frame.InputRequestAll().toInts());
-//                	if (mMenuItemConnect != null) {
-//                		mMenuItemConnect.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
-//                		mMenuItemConnect.setTitle(R.string.disconnect);
-//                	}
-//                	
-//                	mInputManager.showSoftInput(mEmulatorView, InputMethodManager.SHOW_IMPLICIT);
-//                	
-//                    mTitle.setText(R.string.title_connected_to);
-//                    mTitle.append(mConnectedDeviceName);
                     
                     break;
                     
@@ -614,12 +688,10 @@ private final Handler mHandlerBT = new Handler() {
                 case BluetoothSerialService.STATE_NONE:
                 	Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+                	
+                	if(statusBt==true) wasDisconnected();	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1
-                	AD1.reset();
-                	AD2.reset();
-                	RSSItx.reset();
-                	RSSIrx.reset();
                 	
                 	
                 	logger.stop();
@@ -791,9 +863,11 @@ private final Handler mHandlerBT = new Handler() {
 				AD2.setRaw(f.ad2);
 				RSSIrx.setRaw(f.rssirx);
 				RSSItx.setRaw(f.rssitx);
+				if(inBound)	_framecountRx++;
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
 				Log.d(TAG,"handle inbound FrSky alarm");
+				if(inBound)	_framecountTx++;
 				switch(f.alarmChannel)
 				{
 				case Channel.CHANNELTYPE_AD1:
@@ -826,7 +900,7 @@ private final Handler mHandlerBT = new Handler() {
 	
 	public String getFps()
 	{
-		return Integer.toString(fps);
+		return Integer.toString(fpsRx);
 	}
 
 	public void deleteAllLogFiles()

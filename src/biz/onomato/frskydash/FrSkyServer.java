@@ -138,7 +138,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
     private void showNotification() {
     	 CharSequence text = "FrSkyServer Started";
-    	 Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
+    	 Notification notification = new Notification(R.drawable.ic_status, text, System.currentTimeMillis());
     	 //notification.defaults |= Notification.FLAG_ONGOING_EVENT;
     	 //notification.flags = Notification.DEFAULT_LIGHTS;
     	 notification.ledOffMS = 500;

@@ -26,7 +26,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private TextView tvName;
 	private EditText edDesc,edUnit,edShortUnit,edOffset,edFactor,edPrecision,edMovingAverage;
 	private CheckBox chkSpeechEnabled;
-	private Button btnSave,btnDefaults;
+	private Button btnSave;
 	//chConf_edVoice
     
 	@Override
@@ -56,7 +56,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		
 		
 		btnSave.setOnClickListener(this);
-		btnDefaults.setOnClickListener(this);
+	
 	}
 	
 	

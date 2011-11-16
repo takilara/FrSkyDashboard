@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -11,6 +12,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +43,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     //private int AD1;
     //private int AD2;
     //private Channel oAd1;
+    
+    private static final int DIALOG_ABOUT_ID=0;
+    private Dialog dlgAbout;
     
     // Used for GUI updates
     private Handler tickHandler;
@@ -94,6 +100,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG,"onCreate");
+        
+//        dlgAbout = new Dialog(getApplicationContext());
+//        dlgAbout.setContentView(R.layout.about_dialog);
+//        dlgAbout.setTitle("About");
+        //TextView tvAboutVersion = (TextView) dialog.findViewById(R.id.tvAboutVersion);
+        //tvAboutVersion.setText("Version: 1.0Rxxx");
+//        Log.d(TAG,"dialog creation finished");
+        
         
         
         // Service stuff
@@ -238,6 +252,45 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		// check for bt
 		checkForBt();
     }
+    
+    protected Dialog onCreateDialog(int id) {
+        Dialog dialog;
+        Log.i(TAG,"Make a dialog on context: "+this.getPackageName());
+        
+        switch(id) {
+        case DIALOG_ABOUT_ID:
+        	Log.i(TAG,"About dialog");
+        	dialog = new Dialog(this);
+            dialog.setContentView(R.layout.about_dialog);
+            dialog.setTitle("About "+getString(R.string.app_name));
+            TextView tvAboutVersion = (TextView) dialog.findViewById(R.id.tvAboutVersion);
+            TextView tvAboutAuthor = (TextView) dialog.findViewById(R.id.tvAboutAuthor);
+            
+            
+        	PackageManager pm = this.getPackageManager();
+        	try
+        	{
+        		PackageInfo pInfo = pm.getPackageInfo(this.getPackageName(), PackageManager.GET_META_DATA);
+        		tvAboutVersion.setText("Version: "+pInfo.versionName);
+        		tvAboutAuthor.setText("Author: "+getString(R.string.author));
+        		
+        		
+        	}
+        	catch (Exception e)
+        	{     		
+        	}
+        	
+            
+            
+            Log.d(TAG,"dialog creation finished");
+            break;
+        default:
+            dialog = null;
+        }
+        return dialog;
+    }
+    
+    
     
     
     
@@ -589,6 +642,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	Log.i(TAG,"User has clicked something");
     	switch(item.getItemId()) 
     	{
+    		case R.id.menu_about_dialog:
+    			Log.d(TAG,"Open About dialog");
+    			showDialog(DIALOG_ABOUT_ID);
+    			Log.d(TAG,"Dialog now showing");
+    			break;
     		case R.id.settings:
     			Log.i(TAG,"User clicked on Settings");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();

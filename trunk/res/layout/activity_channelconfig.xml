@@ -21,7 +21,7 @@
                  
                 
                 <Button android:text="@string/save" android:layout_width="match_parent" android:id="@+id/chConf_btnSave" android:layout_height="wrap_content"></Button>
-                <Button android:id="@+id/chConf_btnDefaults" android:layout_height="wrap_content" android:text="@string/defaults" android:layout_width="match_parent"></Button>
+                
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

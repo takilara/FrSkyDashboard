@@ -981,6 +981,9 @@ private final Handler mHandlerBT = new Handler() {
       
       AD1.loadFromConfig(settings);
       AD2.loadFromConfig(settings);
+      
+      logger.addChannel(AD1);
+      logger.addChannel(AD2);
      
 	}
 	

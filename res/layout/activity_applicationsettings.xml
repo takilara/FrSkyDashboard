@@ -17,7 +17,7 @@
             <TextView android:background="#333333" android:id="@+id/textView3" android:layout_height="wrap_content" android:text="@string/loggerSettings" android:layout_width="match_parent" android:gravity="center"></TextView>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToRaw" android:layout_height="wrap_content" android:text="@string/logToRaw"></CheckBox>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToHuman" android:layout_height="wrap_content" android:text="@string/logToHuman"></CheckBox>
-            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToCsv" android:layout_height="wrap_content" android:text="@string/logToCsv" android:enabled="false"></CheckBox>
+            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToCsv" android:layout_height="wrap_content" android:text="@string/logToCsv"></CheckBox>
         </LinearLayout>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout1">
             <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:id="@+id/btnSave"></Button>

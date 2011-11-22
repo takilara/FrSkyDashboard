@@ -12,6 +12,8 @@ public class Channel {
 	public static final int CHANNELTYPE_AD1=0;
 	public static final int CHANNELTYPE_AD2=1;
 	public static final int CHANNELTYPE_RSSI=2;
+	public static final String crlf="\r\n";
+	public static final String delim=";";
 	
 	private int _raw;
 	private double _val;
@@ -284,5 +286,17 @@ public class Channel {
 	{
 		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
 		alarmCount += 1;
+	}
+	
+	public String toCsv()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(_description+delim);
+		sb.append(_raw+delim);
+		sb.append(_avg+delim);
+		sb.append(String.format("%."+_precision+"f",convert(_raw))+delim);
+		sb.append(String.format("%."+_precision+"f",convert(_avg))+delim);
+		sb.append(_longUnit+delim);
+		return sb.toString();
 	}
 }

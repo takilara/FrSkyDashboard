@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,12 +38,15 @@ public class Logger {
 	private OutputStream _streamRaw = null;
 	private OutputStream _streamHuman = null;
 	
+	private ArrayList<Channel> _channelList;
+	
 	
 	private final Calendar time = Calendar.getInstance();
 	 
 	
 	public Logger(Context Context, boolean LogRaw,boolean LogCsv,boolean LogHuman)
 	{
+		_channelList = new ArrayList<Channel>();
 		_logRaw = LogRaw;
 		_logCsv = LogCsv;
 		_logHuman = LogHuman;
@@ -55,7 +59,7 @@ public class Logger {
 //		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmm");
 		_prefix = makePrefix();  
 
-		_logCsv = false; // not yet implemented
+		//_logCsv = false; // not yet implemented, override to false
 		
 
 		String state = Environment.getExternalStorageState();
@@ -72,6 +76,11 @@ public class Logger {
 		    //  to know is we can neither read nor write
 		    mExternalStorageAvailable = mExternalStorageWriteable = false;
 		}
+	}
+	
+	public void addChannel(Channel channel)
+	{
+		_channelList.add(channel);
 	}
 	
 	public String makePrefix()
@@ -137,6 +146,37 @@ public class Logger {
 						Log.e(TAG,e1.getMessage());
 					}
 				_streamCsv = openStream(_fileCsv);
+				///TODO: write header
+				//String[] headerA = new String[13];
+				
+				StringBuilder header = new StringBuilder();
+				String delim = ";";
+				
+				header.append("Timestamp"+delim); 
+				header.append("AD1 Description"+delim);
+				header.append("AD1 Raw"+delim);
+				header.append("AD1 Raw Average"+delim);
+				header.append("AD1 Engineering"+delim);
+				header.append("AD1 Engineering Average"+delim);
+				header.append("AD1 Unit"+delim);
+				
+				header.append("AD2 Description"+delim);
+				header.append("AD2 Raw"+delim);
+				header.append("AD2 Raw Average"+delim);
+				header.append("AD2 Engineering"+delim);
+				header.append("AD2 Engineering Average"+delim);
+				header.append("AD2 Unit"+delim);
+				
+				header.append("\r\n");
+				
+				
+				
+				try
+				{
+					_streamCsv.write(header.toString().getBytes());
+				}
+				catch (Exception e)
+				{}
 			}
 		}	
 	}
@@ -190,7 +230,12 @@ public class Logger {
 		if(mExternalStorageWriteable)
 		{
 			if(_logCsv){
-				
+				// Make sure file is there before spawning any writer threads
+				if(_fileCsv==null || !_fileCsv.canWrite())
+				{
+						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (CSV)");
+						openCsvFile(makePrefix());
+				}
 				csvTask = new WriteCsv();
 				csvTask.execute(f);
 			}
@@ -199,7 +244,6 @@ public class Logger {
 				if(_fileRaw==null || !_fileRaw.canWrite())
 				{
 						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (RAW)");
-						
 						openRawFile(makePrefix());
 				}
 				rawTask = new WriteRaw();
@@ -300,6 +344,23 @@ public class Logger {
 	private class WriteCsv extends AsyncTask<Frame, Void, Void> {
 		public boolean done=false;
 		protected Void doInBackground(Frame... frames) {
+			if(_logCsv)
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.append(System.currentTimeMillis());
+				for (Channel ch : _channelList)
+				{
+					sb.append(Channel.delim);
+					sb.append(ch.toCsv());
+				}
+				sb.append(Channel.crlf);
+				try {
+					_streamCsv.write(sb.toString().getBytes());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			// not yet implemented
 			done = true;
 			return null;

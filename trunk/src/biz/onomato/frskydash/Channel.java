@@ -15,7 +15,12 @@ public class Channel {
 	public static final String crlf="\r\n";
 	public static final String delim=";";
 	
+	public int raw,rawAvg;
+	public double eng,engAvg;
 	private int _raw;
+	
+	public double rounder;
+	
 	private double _val;
 	private int _avg;
 	private String _name;
@@ -71,6 +76,9 @@ public class Channel {
 		_raw = -1;
 		_val = -1;
 		_avg = 0;
+		raw = _raw;
+		rawAvg = _avg;
+		eng = _val;
 		_stack = new MyStack(_movingAverage);
 	}
 	
@@ -117,37 +125,71 @@ public class Channel {
 		_movingAverage = Size;
 	}
 	
-	public double setRaw(int raw)
+	public double setRaw(int value)
 	{
-		_avg = _stack.push(raw);
-		
+		_avg = _stack.push(value);
 		//Log.i(TAG,"STACK: "+_stack.toString());
 		//Log.i(TAG,"Avg: "+_avg);
-		_raw = raw;
+		_raw = value;
 		//_val = (_avg * _factor)+_offset;
 		_val = convert(_avg);
-		return getValue();
+		
+		return getValue(true);
 	}
 	
 	private double convert(int inputValue)
 	{
 		double o = (inputValue * _factor)+_offset;
-		return o;
+		return Math.round(o*rounder)/rounder;
 	}
 	
 	public void setPrecision(int precision)
 	{
 		_precision = precision;
+		rounder = 1;
+		for(int i=0;i<precision;i++)
+		{
+			rounder = rounder * 10;
+		}
 	}
 	
 	
 	// Getters
 	public double getValue()
 	{
-		double tVal = Math.round(_val*100f)/100f;
-		
-		return tVal;
+		return getValue(false);
+	}
+	
+	public double getValue(boolean average)
+	{
+		double tVal;
+		if(average)
+		{
+			//tVal = Math.round(_val*100f)/100f;
+			return convert(_avg);
+			
+		}
+		else
+		{
+			return convert(_raw);
+		}
 		//return getValue(_avg);
+	}
+	
+	public int getRaw()
+	{
+		return getRaw(false);
+	}
+	public int getRaw(boolean average)
+	{
+		if(average)
+		{
+			return _avg;
+		}
+		else
+		{
+			return _raw;
+		}
 	}
 	
 	

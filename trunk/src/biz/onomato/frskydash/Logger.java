@@ -23,6 +23,7 @@ public class Logger {
 	private boolean _logHuman;
 	private String _prefix;
 	private String _path;
+	private String _headerString;
 	private Context _context;
 	boolean mExternalStorageAvailable = false;
 	boolean mExternalStorageWriteable = false;
@@ -32,6 +33,9 @@ public class Logger {
 	
 	private String startDateS;
 	private Date startDate;
+	private StringBuilder csvBuffer;
+	private int csvBufferLen;
+	private static final int CSV_BUFFER_LENGTH=30;
 	
 	WriteRaw rawTask;
 	WriteCsv csvTask;
@@ -150,6 +154,8 @@ public class Logger {
 						// TODO Auto-generated catch block
 						Log.e(TAG,e1.getMessage());
 					}
+				csvBuffer = new StringBuilder();
+				csvBufferLen=0;
 				_streamCsv = openStream(_fileCsv);
 				///TODO: write header
 				//String[] headerA = new String[13];
@@ -160,12 +166,7 @@ public class Logger {
 				SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
 				sb.append(formatter.format(startDate));
 				sb.append(Channel.crlf);
-				sb.append("Time since Start (ms)");
-				for (Channel ch : _channelList)
-				{
-					sb.append(Channel.delim);
-					sb.append(ch.toCsvHeader());
-				}
+				sb.append(_headerString);
 				sb.append(Channel.crlf);
 				try {
 					_streamCsv.write(sb.toString().getBytes());				
@@ -220,7 +221,22 @@ public class Logger {
 		}
 	}
 	
-	public void log(Frame f)
+	public void setCsvHeader(Channel... channels)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Time since start (ms)"+Channel.delim);
+		for(Channel ch : channels)
+		{
+			
+			sb.append(ch.getName()+Channel.delim);
+			sb.append(ch.getName()+" (Avg)"+Channel.delim);
+			sb.append(ch.getDescription()+" ("+ch.getLongUnit()+")"+Channel.delim);
+			sb.append(ch.getDescription()+" ("+ch.getLongUnit()+") (Avg)"+Channel.delim);
+			
+		}
+		_headerString = sb.toString(); 
+	}
+	public void logCsv(Channel... channels)
 	{
 		if(mExternalStorageWriteable)
 		{
@@ -231,9 +247,52 @@ public class Logger {
 						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (CSV)");
 						openCsvFile(makePrefix());
 				}
-				csvTask = new WriteCsv();
-				csvTask.execute(f);
+				
+				StringBuilder sb = new StringBuilder();
+				Date nowDate = new Date();
+				
+				long timeElapsed;
+				timeElapsed = nowDate.getTime()-startDate.getTime();
+				sb.append(timeElapsed+Channel.delim);
+				
+				for(Channel channel : channels)
+				{
+					sb.append(channel.getRaw()+Channel.delim);
+					sb.append(channel.getRaw(true)+Channel.delim);
+					sb.append(channel.getValue()+Channel.delim);
+					sb.append(channel.getValue(true)+Channel.delim);
+				}
+				sb.append(Channel.crlf);
+				///TODO: Change this to insert into some buffer
+				csvBuffer.append(sb.toString());
+				csvBufferLen++;
+				if(csvBufferLen>=CSV_BUFFER_LENGTH)
+				{
+					csvBufferLen =0;
+					csvTask = new WriteCsv();
+					//csvTask.execute(sb.toString());
+					csvTask.execute(csvBuffer.toString());
+					csvBuffer = new StringBuilder();
+				}
+				
+				//csvTask.execute("test;test;test"+Channel.delim);
 			}
+		}
+	}
+	public void logFrame(Frame f)
+	{
+		if(mExternalStorageWriteable)
+		{
+//			if(_logCsv){
+//				// Make sure file is there before spawning any writer threads
+//				if(_fileCsv==null || !_fileCsv.canWrite())
+//				{
+//						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (CSV)");
+//						openCsvFile(makePrefix());
+//				}
+//				csvTask = new WriteCsv();
+//				csvTask.execute(f);
+//			}
 			if(_logRaw){ 
 				// Make sure file is there before spawning any writer threads
 				if(_fileRaw==null || !_fileRaw.canWrite())
@@ -336,29 +395,44 @@ public class Logger {
 		}
 	 }
 	
-	private class WriteCsv extends AsyncTask<Frame, Void, Void> {
+	private class WriteCsv extends AsyncTask<String, Void, Void> {
 		public boolean done=false;
-		protected Void doInBackground(Frame... frames) {
+		protected Void doInBackground(String... lines) {
 			if(_logCsv)
 			{
 				StringBuilder sb = new StringBuilder();
-				Date nowDate = new Date();
-				
-				long timeElapsed;
-				timeElapsed = nowDate.getTime()-startDate.getTime();
-				sb.append(timeElapsed);
-				for (Channel ch : _channelList)
+				for (String line : lines)
 				{
-					sb.append(Channel.delim);
-					sb.append(ch.toCsv());
+					sb.append(line);
 				}
-				sb.append(Channel.crlf);
+				
 				try {
 					_streamCsv.write(sb.toString().getBytes());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				
+				
+//				StringBuilder sb = new StringBuilder();
+//				Date nowDate = new Date();
+//				
+//				long timeElapsed;
+//				timeElapsed = nowDate.getTime()-startDate.getTime();
+//				sb.append(timeElapsed);
+//				for (Channel ch : _channelList)
+//				{
+//					sb.append(Channel.delim);
+//					sb.append(ch.toCsv());
+//				}
+//				sb.append(Channel.crlf);
+//				try {
+//					_streamCsv.write(sb.toString().getBytes());
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			}
 			// not yet implemented
 			done = true;

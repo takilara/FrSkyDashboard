@@ -858,7 +858,7 @@ private final Handler mHandlerBT = new Handler() {
 		boolean ok=true;
 		if(inBound) // only log inbound frames
 		{
-			logger.log(f);
+			logger.logFrame(f);
 		}
 		if(inBound)	_framecount++;
 		switch(f.frametype)
@@ -870,7 +870,14 @@ private final Handler mHandlerBT = new Handler() {
 				AD2.setRaw(f.ad2);
 				RSSIrx.setRaw(f.rssirx);
 				RSSItx.setRaw(f.rssitx);
-				if(inBound)	_framecountRx++;
+				if(inBound)	
+				{
+					_framecountRx++;
+
+					
+					//logger.logCsv(ad1Raw,ad1RawAvg,ad1Eng,ad1EngAvg,ad2Raw,ad2RawAvg,ad2Eng,ad2EngAvg);
+					logger.logCsv(AD1,AD2);
+				}
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
 				Log.d(TAG,"handle inbound FrSky alarm");
@@ -986,8 +993,9 @@ private final Handler mHandlerBT = new Handler() {
       AD1.loadFromConfig(settings);
       AD2.loadFromConfig(settings);
       
-      logger.addChannel(AD1);
-      logger.addChannel(AD2);
+
+      
+      logger.setCsvHeader(AD1,AD2);
      
 	}
 	

@@ -411,6 +411,7 @@ public class Logger {
 	     }
 	 }
 	
+	///TODO: Try to move f.toHuman out, and only write string here.. or move to writer thread...
 	private class WriteHuman extends AsyncTask<Frame, Void, Void> {
 		public boolean done=false;
 		protected Void doInBackground(Frame... frames) {

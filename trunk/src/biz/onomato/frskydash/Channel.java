@@ -290,13 +290,23 @@ public class Channel {
 	
 	public String toCsv()
 	{
+		
 		StringBuilder sb = new StringBuilder();
-		sb.append(_description+delim);
-		sb.append(_raw+delim);
-		sb.append(_avg+delim);
+		
+		//sb.append(_description+delim);
+		//sb.append(_raw+delim);
+		//sb.append(_avg+delim);
 		sb.append(String.format("%."+_precision+"f",convert(_raw))+delim);
 		sb.append(String.format("%."+_precision+"f",convert(_avg))+delim);
-		sb.append(_longUnit+delim);
+		//sb.append(_longUnit+delim);
+		return sb.toString();
+	}
+	public String toCsvHeader()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("%s (%s)",_description,_longUnit)+delim);
+		sb.append(String.format("%s (Averaged) (%s)",_description,_longUnit)+delim);
+		
 		return sb.toString();
 	}
 }

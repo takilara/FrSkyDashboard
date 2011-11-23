@@ -30,6 +30,9 @@ public class Logger {
 	private File _fileHuman = null;
 	private File _fileRaw = null;
 	
+	private String startDateS;
+	private Date startDate;
+	
 	WriteRaw rawTask;
 	WriteCsv csvTask;
 	WriteHuman humanTask;
@@ -87,7 +90,9 @@ public class Logger {
 	{
 		Date myDate = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
-		return formatter.format(myDate);  
+		startDate = myDate;
+		startDateS = formatter.format(startDate);
+		return startDateS;  
 	}
 	
 	public void setPrefix(String Prefix)
@@ -149,31 +154,21 @@ public class Logger {
 				///TODO: write header
 				//String[] headerA = new String[13];
 				
-				StringBuilder header = new StringBuilder();
-				String delim = ";";
-				
-				header.append("Timestamp"+delim); 
-				header.append("AD1 Description"+delim);
-				header.append("AD1 Raw"+delim);
-				header.append("AD1 Raw Average"+delim);
-				header.append("AD1 Engineering"+delim);
-				header.append("AD1 Engineering Average"+delim);
-				header.append("AD1 Unit"+delim);
-				
-				header.append("AD2 Description"+delim);
-				header.append("AD2 Raw"+delim);
-				header.append("AD2 Raw Average"+delim);
-				header.append("AD2 Engineering"+delim);
-				header.append("AD2 Engineering Average"+delim);
-				header.append("AD2 Unit"+delim);
-				
-				header.append("\r\n");
-				
-				
-				
-				try
+				StringBuilder sb = new StringBuilder();
+				// Comments
+				sb.append("// Log Started: ");
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+				sb.append(formatter.format(startDate));
+				sb.append(Channel.crlf);
+				sb.append("Time since Start (ms)");
+				for (Channel ch : _channelList)
 				{
-					_streamCsv.write(header.toString().getBytes());
+					sb.append(Channel.delim);
+					sb.append(ch.toCsvHeader());
+				}
+				sb.append(Channel.crlf);
+				try {
+					_streamCsv.write(sb.toString().getBytes());				
 				}
 				catch (Exception e)
 				{}
@@ -347,7 +342,11 @@ public class Logger {
 			if(_logCsv)
 			{
 				StringBuilder sb = new StringBuilder();
-				sb.append(System.currentTimeMillis());
+				Date nowDate = new Date();
+				
+				long timeElapsed;
+				timeElapsed = nowDate.getTime()-startDate.getTime();
+				sb.append(timeElapsed);
 				for (Channel ch : _channelList)
 				{
 					sb.append(Channel.delim);

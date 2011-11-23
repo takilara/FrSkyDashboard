@@ -289,6 +289,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		watchdogHandler.postDelayed(runnableWatchdog,500);
 		
 		
+		
 	}
 	
 	/**
@@ -855,7 +856,10 @@ private final Handler mHandlerBT = new Handler() {
 	{
 		//int [] frame = f.toInts(); 
 		boolean ok=true;
-		logger.log(f);
+		if(inBound) // only log inbound frames
+		{
+			logger.log(f);
+		}
 		if(inBound)	_framecount++;
 		switch(f.frametype)
 		{

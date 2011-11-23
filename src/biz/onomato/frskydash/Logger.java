@@ -2,6 +2,7 @@ package biz.onomato.frskydash;
 
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
@@ -25,6 +26,10 @@ public class Logger {
 	private String _path;
 	private String _headerString;
 	private Context _context;
+
+	private Handler writerHandler;
+    private Runnable runnableWriter;
+	
 	boolean mExternalStorageAvailable = false;
 	boolean mExternalStorageWriteable = false;
 	private File _fileCsv = null;
@@ -83,6 +88,44 @@ public class Logger {
 		    //  to know is we can neither read nor write
 		    mExternalStorageAvailable = mExternalStorageWriteable = false;
 		}
+		
+		
+		writerHandler = new Handler();
+		runnableWriter = new Runnable () {
+			//@Override
+			public void run()
+			{
+				// Send get all alarms frame to force frames from Tx
+				// only do this if not receiving anything from Rx side
+				while(true)
+				{
+					Log.i(TAG,"Write to buffer to RAW");
+					Log.i(TAG,"Write to buffer to ASC");
+					if(_logCsv && _fileCsv!=null && _fileCsv.canWrite())
+					{
+						Log.i(TAG,"Write to buffer to CSV");
+						try {
+							_streamCsv.write(csvBuffer.toString().getBytes());
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						csvBuffer = new StringBuilder();
+					}
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				//writerHandler.removeCallbacks(runnableWriter);
+				//writerHandler.postDelayed(this,1000);
+			}
+		};
+		//writerHandler.postDelayed(runnableWriter,1000);
+		new Thread(runnableWriter).start();
+		
 	}
 	
 	public void addChannel(Channel channel)
@@ -266,15 +309,15 @@ public class Logger {
 				///TODO: Change this to insert into some buffer
 				csvBuffer.append(sb.toString());
 				csvBufferLen++;
-				if(csvBufferLen>=CSV_BUFFER_LENGTH)
-				{
-					csvBufferLen =0;
-					csvTask = new WriteCsv();
-					//csvTask.execute(sb.toString());
-					csvTask.execute(csvBuffer.toString());
-					csvBuffer = new StringBuilder();
-				}
-				
+//				if(csvBufferLen>=CSV_BUFFER_LENGTH)
+//				{
+//					csvBufferLen =0;
+//					csvTask = new WriteCsv();
+//					//csvTask.execute(sb.toString());
+//					csvTask.execute(csvBuffer.toString());
+//					csvBuffer = new StringBuilder();
+//				}
+//				
 				//csvTask.execute("test;test;test"+Channel.delim);
 			}
 		}

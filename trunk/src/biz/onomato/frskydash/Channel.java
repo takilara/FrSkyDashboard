@@ -3,6 +3,7 @@ package biz.onomato.frskydash;
 import android.content.SharedPreferences;
 import android.util.Log;
 import java.math.MathContext;
+import java.util.Date;
 import java.util.List;
 
 
@@ -12,7 +13,7 @@ public class Channel {
 	public static final int CHANNELTYPE_AD1=0;
 	public static final int CHANNELTYPE_AD2=1;
 	public static final int CHANNELTYPE_RSSI=2;
-	public static final String crlf="\r\n";
+	//public static final String crlf="\r\n";
 	public static final String delim=";";
 	
 	public int raw,rawAvg;
@@ -34,6 +35,7 @@ public class Channel {
 	private int _movingAverage;
 	private MathContext _mc;
 	public boolean silent;
+	public Date timestamp;
 	
 	public Alarm[] alarms;
 	public int alarmCount = 0;
@@ -127,6 +129,7 @@ public class Channel {
 	
 	public double setRaw(int value)
 	{
+		timestamp = new Date();
 		_avg = _stack.push(value);
 		//Log.i(TAG,"STACK: "+_stack.toString());
 		//Log.i(TAG,"Avg: "+_avg);

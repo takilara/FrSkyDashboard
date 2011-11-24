@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Logger {
 	private static final String TAG="Logger";
@@ -41,14 +43,21 @@ public class Logger {
 	private StringBuilder csvBuffer;
 	private int csvBufferLen;
 	private static final int CSV_BUFFER_LENGTH=30;
+	public static final String crlf="\r\n";
 	
-	WriteRaw rawTask;
+	private BlockingQueue<Frame> frameBuffer;
+	private BlockingQueue<Frame> frameBufferAsc;
+	private BlockingQueue<Frame> frameBufferRaw;
+	private BlockingQueue<String> channelCsvBuffer;
+	
+	//WriteRaw rawTask;
 	WriteCsv csvTask;
-	WriteHuman humanTask;
+	//WriteHuman humanTask;
 	
 	private OutputStream _streamCsv = null;
 	private OutputStream _streamRaw = null;
 	private OutputStream _streamHuman = null;
+	
 	
 	private ArrayList<Channel> _channelList;
 	
@@ -65,6 +74,8 @@ public class Logger {
 		_context = Context;
 		//_path = _context.getExternalFilesDir(null); 
 		Log.i(TAG,"STorage dir: "+_path);
+		
+		frameBuffer = new LinkedBlockingQueue <Frame>();
 		//_path = "";
 //		Date myDate = new Date();
 //		Time myTime = new Time();
@@ -99,8 +110,7 @@ public class Logger {
 				// only do this if not receiving anything from Rx side
 				while(true)
 				{
-					Log.i(TAG,"Write to buffer to RAW");
-					Log.i(TAG,"Write to buffer to ASC");
+					Log.i(TAG,"Write buffer to CSV");
 					if(_logCsv && _fileCsv!=null && _fileCsv.canWrite())
 					{
 						Log.i(TAG,"Write to buffer to CSV");
@@ -126,6 +136,27 @@ public class Logger {
 		//writerHandler.postDelayed(runnableWriter,1000);
 		new Thread(runnableWriter).start();
 		
+		
+		
+		frameBufferAsc = new LinkedBlockingQueue <Frame>();
+		frameBufferRaw = new LinkedBlockingQueue <Frame>();
+		channelCsvBuffer = new LinkedBlockingQueue <String>();
+	     //Producer p = new Producer(q);
+	     //Consumer c1 = new Consumer(q);
+	     //Consumer c2 = new Consumer(q);
+		HumanLogger humanLogger = new HumanLogger(frameBufferAsc);
+		new Thread(humanLogger).start();
+		
+		RawLogger rawLogger = new RawLogger(frameBufferRaw);
+		new Thread(rawLogger).start();
+		
+		CsvLogger csvLogger = new CsvLogger(channelCsvBuffer);
+		new Thread(csvLogger).start();
+//	     new Thread(p).start();
+//	     new Thread(c1).start();
+//	     new Thread(c2).start();
+		
+		
 	}
 	
 	public void addChannel(Channel channel)
@@ -150,8 +181,8 @@ public class Logger {
 	private void openFiles()
 	{
 		String prefix = makePrefix();
-		openRawFile(prefix);
-		openHumanFile(prefix);
+//		openRawFile(prefix);
+//		openHumanFile(prefix);
 		openCsvFile(prefix);
 	}
 	
@@ -208,9 +239,9 @@ public class Logger {
 				sb.append("// Log Started: ");
 				SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
 				sb.append(formatter.format(startDate));
-				sb.append(Channel.crlf);
+				sb.append(crlf);
 				sb.append(_headerString);
-				sb.append(Channel.crlf);
+				sb.append(crlf);
 				try {
 					_streamCsv.write(sb.toString().getBytes());				
 				}
@@ -220,49 +251,49 @@ public class Logger {
 		}	
 	}
 	
-	private void openRawFile(String filename)
-	{
-		closeStream(_streamRaw);
-		_fileRaw = null;
-		
-		if(mExternalStorageWriteable)
-		{
-			if(_logRaw)
-			{
-				_fileRaw = new File(_context.getExternalFilesDir(null), filename+".raw");
-				if(!_fileRaw.exists())
-					try {
-						_fileRaw.createNewFile();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						Log.e(TAG,e1.getMessage());
-					}
-				Log.i(TAG,_context.getExternalFilesDir(null)+ filename+".raw");	
-				_streamRaw = openStream(_fileRaw);
-			}
-		}
-	}
+//	private void openRawFile(String filename)
+//	{
+//		closeStream(_streamRaw);
+//		_fileRaw = null;
+//		
+//		if(mExternalStorageWriteable)
+//		{
+//			if(_logRaw)
+//			{
+//				_fileRaw = new File(_context.getExternalFilesDir(null), filename+".raw");
+//				if(!_fileRaw.exists())
+//					try {
+//						_fileRaw.createNewFile();
+//					} catch (IOException e1) {
+//						// TODO Auto-generated catch block
+//						Log.e(TAG,e1.getMessage());
+//					}
+//				Log.i(TAG,_context.getExternalFilesDir(null)+ filename+".raw");	
+//				_streamRaw = openStream(_fileRaw);
+//			}
+//		}
+//	}
 	
-	private void openHumanFile(String filename)
-	{
-		closeStream(_streamHuman);
-		_fileHuman = null;
-		if(mExternalStorageWriteable)
-		{
-			if(_logHuman)
-			{
-				_fileHuman = new File(_context.getExternalFilesDir(null), filename+".asc");
-				if(!_fileHuman.exists())
-					try {
-						_fileHuman.createNewFile();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						Log.e(TAG,e1.getMessage());
-					}
-				_streamHuman = openStream(_fileHuman);
-			}
-		}
-	}
+//	private void openHumanFile(String filename)
+//	{
+//		closeStream(_streamHuman);
+//		_fileHuman = null;
+//		if(mExternalStorageWriteable)
+//		{
+//			if(_logHuman)
+//			{
+//				_fileHuman = new File(_context.getExternalFilesDir(null), filename+".asc");
+//				if(!_fileHuman.exists())
+//					try {
+//						_fileHuman.createNewFile();
+//					} catch (IOException e1) {
+//						// TODO Auto-generated catch block
+//						Log.e(TAG,e1.getMessage());
+//					}
+//				_streamHuman = openStream(_fileHuman);
+//			}
+//		}
+//	}
 	
 	public void setCsvHeader(Channel... channels)
 	{
@@ -305,10 +336,14 @@ public class Logger {
 					sb.append(channel.getValue()+Channel.delim);
 					sb.append(channel.getValue(true)+Channel.delim);
 				}
-				sb.append(Channel.crlf);
+				sb.append(crlf);
 				///TODO: Change this to insert into some buffer
 				csvBuffer.append(sb.toString());
 				csvBufferLen++;
+				
+				
+				channelCsvBuffer.add(sb.toString());
+				
 //				if(csvBufferLen>=CSV_BUFFER_LENGTH)
 //				{
 //					csvBufferLen =0;
@@ -326,35 +361,15 @@ public class Logger {
 	{
 		if(mExternalStorageWriteable)
 		{
-//			if(_logCsv){
-//				// Make sure file is there before spawning any writer threads
-//				if(_fileCsv==null || !_fileCsv.canWrite())
-//				{
-//						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (CSV)");
-//						openCsvFile(makePrefix());
-//				}
-//				csvTask = new WriteCsv();
-//				csvTask.execute(f);
-//			}
+			// Add frame to buffer
+			//frameBuffer.add(f);			
+			
+			
 			if(_logRaw){ 
-				// Make sure file is there before spawning any writer threads
-				if(_fileRaw==null || !_fileRaw.canWrite())
-				{
-						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (RAW)");
-						openRawFile(makePrefix());
-				}
-				rawTask = new WriteRaw();
-				rawTask.execute(f);
+				frameBufferRaw.add(f);
 			}
 			if(_logHuman){
-				// Make sure file is there before spawning any writer threads
-				if(_fileHuman==null || !_fileHuman.canWrite())
-				{
-						Log.d(TAG,"NOT Allowed to write to file, make new file/stream (ASC)");
-						openHumanFile(makePrefix());
-				}
-				humanTask = new WriteHuman();
-				humanTask.execute(f);
+				frameBufferAsc.add(f);
 			}
 		}	
 	}
@@ -364,8 +379,8 @@ public class Logger {
 	{
 		Log.i(TAG,"Stopping any running loggers");
 		// Cancel (wait for) any pending writes
-		try {rawTask.cancel(false);} catch (Exception e){}
-		try {humanTask.cancel(false);} catch (Exception e){}
+//		try {rawTask.cancel(false);} catch (Exception e){}
+//		try {humanTask.cancel(false);} catch (Exception e){}
 		try {csvTask.cancel(false);} catch (Exception e){}
 		
 		// close any open streams
@@ -379,65 +394,9 @@ public class Logger {
 	}
 	
 	
-	private class WriteRaw extends AsyncTask<Frame, Void, Integer> {
-		public boolean done=false;
-		protected Integer doInBackground(Frame... frames) {
-			int bytes = 0;
-			if(_logRaw)
-			{
 
-				int count = frames.length;
-				for(int n=0;n<count;n++)
-				{
-					Frame f = frames[n];
-					try 
-					{
-						_streamRaw.write(f.toRawBytes());
-						bytes += f.toRawBytes().length;
-					}
-					catch (IOException e)
-					{
-						Log.w(TAG, "failure to write");
-					}
-				}
-			}
-			done = true;
-			return bytes;
-		}
-
-
-	     protected void onPostExecute(Integer result) {
-	         //Log.i(TAG,"Written "+result+" bytes to file");
-	     }
-	 }
 	
-	///TODO: Try to move f.toHuman out, and only write string here.. or move to writer thread...
-	private class WriteHuman extends AsyncTask<Frame, Void, Void> {
-		public boolean done=false;
-		protected Void doInBackground(Frame... frames) {
-			if(_logHuman)
-			{
-				
-				int count = frames.length;
-				for(int n=0;n<count;n++)
-				{
-					Frame f = frames[n];
-					try 
-					{
-						_streamHuman.write((System.currentTimeMillis()+"\t").getBytes());
-						_streamHuman.write((f.toHuman()+"\n").getBytes());
-					}
-					catch (IOException e)
-					{
-						Log.w(TAG, "failure to write");
-					}
-				}
-			
-			}
-			done = true;
-			return null;
-		}
-	 }
+
 	
 	private class WriteCsv extends AsyncTask<String, Void, Void> {
 		public boolean done=false;
@@ -458,25 +417,6 @@ public class Logger {
 				}
 				
 				
-				
-//				StringBuilder sb = new StringBuilder();
-//				Date nowDate = new Date();
-//				
-//				long timeElapsed;
-//				timeElapsed = nowDate.getTime()-startDate.getTime();
-//				sb.append(timeElapsed);
-//				for (Channel ch : _channelList)
-//				{
-//					sb.append(Channel.delim);
-//					sb.append(ch.toCsv());
-//				}
-//				sb.append(Channel.crlf);
-//				try {
-//					_streamCsv.write(sb.toString().getBytes());
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
 			}
 			// not yet implemented
 			done = true;
@@ -499,4 +439,179 @@ public class Logger {
 		_logCsv = logToCsv;
 	}
 
+	
+	class HumanLogger implements Runnable 
+	{
+		private final BlockingQueue queue;
+		private static final String TAG="HumanLogger";
+		
+		HumanLogger(BlockingQueue q) { queue = q; }
+		public void run() 
+		{
+			try 
+			{
+				while (true) { consume((Frame) queue.take()); }
+			} 
+			catch (InterruptedException ex) 
+			{
+			}
+		}
+		   
+		private void openFile(String filename)
+		{
+			closeStream(_streamHuman);
+			_fileHuman = null;
+			if(mExternalStorageWriteable)
+			{
+				if(_logHuman)
+				{
+					_fileHuman = new File(_context.getExternalFilesDir(null), filename+".asc");
+					if(!_fileHuman.exists())
+						try {_fileHuman.createNewFile();} catch (IOException e1) {Log.e(TAG,e1.getMessage());}
+					_streamHuman = openStream(_fileHuman);
+				}
+			}
+		}
+		   
+		void consume(Frame f) {
+			if(_fileHuman==null || !_fileHuman.canWrite())
+			{
+				Log.d(TAG,"NOT Allowed to write to file, make new file/stream (ASC)");
+				openFile(makePrefix());
+			}
+		   
+			if(_fileHuman!=null && _fileHuman.canWrite())
+			{
+				long timeElapsed = f.timestamp.getTime()-startDate.getTime();
+				try 
+				{
+					_streamHuman.write((timeElapsed+"\t").getBytes());
+					//_streamHuman.write((f.toHuman()+crlf).getBytes());
+					_streamHuman.write((f.humanFrame+crlf).getBytes());
+				}
+				catch (IOException e)
+				{
+					Log.w(TAG, "failure to write");
+				}
+			}
+		}
+	}
+	
+	class RawLogger implements Runnable 
+	{
+		private final BlockingQueue queue;
+		private static final String TAG="RawLogger";
+		
+		RawLogger(BlockingQueue q) { queue = q; }
+		public void run() 
+		{
+			try 
+			{
+				while (true) { consume((Frame) queue.take()); }
+			} 
+			catch (InterruptedException ex) 
+			{
+			}
+		}
+		   
+		private void openFile(String filename)
+		{
+			closeStream(_streamRaw);
+			_fileRaw = null;
+			if(mExternalStorageWriteable)
+			{
+				if(_logRaw)
+				{
+					_fileRaw = new File(_context.getExternalFilesDir(null), filename+".raw");
+					if(!_fileRaw.exists())
+						try {_fileRaw.createNewFile();} catch (IOException e1) {Log.e(TAG,e1.getMessage());}
+					_streamRaw = openStream(_fileRaw);
+				}
+			}
+		}
+		   
+		void consume(Frame f) {
+			if(_fileRaw==null || !_fileRaw.canWrite())
+			{
+				Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+				openFile(makePrefix());
+			}
+		   
+			if(_fileRaw!=null && _fileRaw.canWrite())
+			{
+				try 
+				{
+					_streamRaw.write(f.toRawBytes());
+				}
+				catch (IOException e)
+				{
+					Log.w(TAG, "failure to write");
+				}
+			}
+		}
+	}
+	
+	
+	class CsvLogger implements Runnable 
+	{
+		private final BlockingQueue queue;
+		private static final String TAG="CsvLogger";
+		
+		CsvLogger(BlockingQueue q) { queue = q; }
+		public void run() 
+		{
+			try 
+			{
+				while (true) { consume((String) queue.take()); }
+			} 
+			catch (InterruptedException ex) 
+			{
+			}
+		}
+		   
+		private void openFile(String filename)
+		{
+			closeStream(_streamCsv);
+			_fileCsv = null;
+			if(mExternalStorageWriteable)
+			{
+				if(_logCsv)
+				{
+					
+					_fileCsv = new File(_context.getExternalFilesDir(null), filename+".csv");
+					if(!_fileCsv.exists())
+						try {_fileCsv.createNewFile();} catch (IOException e1) {Log.e(TAG,e1.getMessage());}
+					_streamCsv = openStream(_fileCsv);
+					
+					
+					///TODO: Add metadata
+					
+					///TODO: Add header
+				}
+			}
+		}
+		   
+		void consume(String line) {
+			if(_fileCsv==null || !_fileCsv.canWrite())
+			{
+				Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+				openFile(makePrefix());
+			}
+		   
+			if(_fileCsv!=null && _fileCsv.canWrite())
+			{
+				try 
+				{
+					/// TODO: validate this..
+					_streamCsv.write(line.getBytes());
+				}
+				catch (IOException e)
+				{
+					Log.w(TAG, "failure to write");
+				}
+			}
+		}
+	}
+	
+	
 }

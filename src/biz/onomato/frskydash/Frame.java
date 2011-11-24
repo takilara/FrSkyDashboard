@@ -1,5 +1,7 @@
 package biz.onomato.frskydash;
 
+import java.util.Date;
+
 import android.util.Log;
 
 public class Frame {
@@ -15,6 +17,7 @@ public class Frame {
 	public static final int FRAMETYPE_ALARM2_AD1=0xfb;
 	public static final int FRAMETYPE_ALARM1_AD2=0xfa;
 	public static final int FRAMETYPE_ALARM2_AD2=0xf9;
+	
 	
 	// these need to correspond real deal
 	//public static final int ALARMLEVEL_OFF=0;
@@ -32,7 +35,9 @@ public class Frame {
 	public int alarmLevel;
 	public int alarmThreshold;
 	public int alarmGreaterThan;
-	public String alarmGreaterThanString; 
+	public String alarmGreaterThanString;
+	public String humanFrame;
+	public Date timestamp;
 	
 	
 	public int ad1,ad2,rssirx,rssitx = 0;
@@ -41,6 +46,7 @@ public class Frame {
 	{
 		if((frame.length>10) && (frame.length<30))
 		{
+			timestamp = new Date();
 			//Log.i(TAG,"Constructor");
 			_frameRaw = frame;
 			// fix bytestuffing
@@ -50,6 +56,8 @@ public class Frame {
 			}
 			
 			_frame = frame;
+			
+			humanFrame = Frame.frameToHuman(frame);
 			
 			int _threshold;
 			int _greaterthan;
@@ -259,7 +267,9 @@ public class Frame {
 	
 	public static String frameToHuman(int[] frame)
 	{
+		//Date startTime = new Date();
 		StringBuffer buf = new StringBuffer();
+		
 		//Log.i(TAG,"Create human raedable string with "+frame.length+" bytes");
 		int xor = 0x00;
 		for(int n=0;n<frame.length;n++)
@@ -301,14 +311,18 @@ public class Frame {
 			}
 		
 		}
-		String out = buf.toString();
+
 		//Log.i(TAG,"String is then: "+out);
-		return out;
+		
+		//Date endTime = new Date();
+		//long duration = endTime.getTime()-startTime.getTime();
+		//Log.d(TAG,"Constructing human frame took: "+duration+" ms");
+		return buf.toString();
 	}
 	
 	public String toHuman()
 	{
-		return Frame.frameToHuman(_frame);
+		return frameToHuman(_frame);
 	}
 	
 	public int[] toInts()

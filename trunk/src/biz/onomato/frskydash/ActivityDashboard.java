@@ -52,6 +52,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private Handler tickHandler;
     private Runnable runnableTick;
     
+    private boolean bluetoothEnabledAtStart;
+    
     
 	// Used for Cyclic speak
 
@@ -102,6 +104,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         Log.i(TAG,"onCreate");
+        
+        bluetoothEnabledAtStart = false;
         
 //        dlgAbout = new Dialog(getApplicationContext());
 //        dlgAbout.setContentView(R.layout.about_dialog);
@@ -312,11 +316,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    if (mBluetoothAdapter != null)
 	    {
 	        if (!mBluetoothAdapter.isEnabled()) {
+	        	bluetoothEnabledAtStart = false;
 	            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 	            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 	        }
 	        else
 	        {
+	        	bluetoothEnabledAtStart = true;
 	        	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
 	        	//tItem.setEnabled(true);
 	        }
@@ -558,6 +564,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	Intent intent = new Intent(this, FrSkyServer.class);
     	stopService(intent);
 //    	server.die();
+    	
+    	// stop bt
+    	///TODO: Only do below if state was disabled before..
+    	if(!bluetoothEnabledAtStart)
+    	{
+    		mBluetoothAdapter.disable();
+    	}
     	
     	//globals.die();
     	super.onBackPressed();

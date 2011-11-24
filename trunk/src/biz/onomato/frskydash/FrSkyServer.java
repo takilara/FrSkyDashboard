@@ -445,6 +445,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
 			catch (Exception e) {}
 		}
+		
+		// Disable BT
+		
+		
 		Log.i(TAG,"Stop FPS counter");
 		fpsHandler.removeCallbacks(runnableFps);
 		

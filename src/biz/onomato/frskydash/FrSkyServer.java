@@ -100,6 +100,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int _framecount=0;
 	private int _framecountRx=0;
 	private int _framecountTx=0;
+	private boolean _btAutoEnable;
 	
 	private double[] hVal;
 	private String[] hName;
@@ -957,6 +958,15 @@ private final Handler mHandlerBT = new Handler() {
 		logger.setLogToCsv(logToCsv);
 	}
 	
+	public void setBtAutoEnable(boolean btAutoEnable)
+	{
+		_btAutoEnable = btAutoEnable;
+	}
+	
+	public boolean getBtAutoEnable()
+	{
+		return _btAutoEnable;
+	}
 	
 	public boolean setChannelConfiguration(SharedPreferences settings,Channel channel)
 	{
@@ -986,6 +996,7 @@ private final Handler mHandlerBT = new Handler() {
 		setLogToRaw(settings.getBoolean("logToRaw",false));
 		setLogToHuman(settings.getBoolean("logToHuman",false));
 		setLogToCsv(settings.getBoolean("logToCsv",false));
+		setBtAutoEnable(settings.getBoolean("btAutoEnable",false));
 		setCyclicSpeachInterval(settings.getInt("cyclicSpeakerInterval",30));
 		
 		

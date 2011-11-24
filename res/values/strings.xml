@@ -43,6 +43,12 @@
     <string name="disconnect_bluetooth_label">Disconnect...</string>
     <string name="disconnect_bluetooth_title">Disconnect</string>
     
+    <!-- Application settings  -->
+    <string name="loggerSettings">Logger Settings</string>
+    <string name="btSettings">Bluetooth Settings</string>
+    <string name="btAutoEnable">Auto-enable Bluetooth</string>
+        
+        
     <string name="btnDeleteLogs">Delete all logfiles</string>
     
     <string name="yes">Yes</string>
@@ -62,7 +68,8 @@
     <string name="commands">Commands</string>
     <string name="save">Save</string>
     <string name="cyclicSpeakerEnabledAtStartup">Cyclic speaker enabled at startup</string>
-    <string name="loggerSettings">Logger Settings</string>
+    
+        
     <string name="logToRaw">Log frames to Binary file</string>
     <string name="logToHuman">Log frames to Human readable file (for debug use)</string>
     <string name="logToCsv">Log frames to CSV file</string>

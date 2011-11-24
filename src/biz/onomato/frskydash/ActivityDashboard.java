@@ -256,7 +256,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		
 		
 		// check for bt
-		checkForBt();
+		//checkForBt();
     }
     
     protected Dialog onCreateDialog(int id) {
@@ -317,8 +317,17 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    {
 	        if (!mBluetoothAdapter.isEnabled()) {
 	        	bluetoothEnabledAtStart = false;
-	            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+	        	
+	        	if(server.getBtAutoEnable())
+	        	{
+	        		mBluetoothAdapter.enable();
+	        		Toast.makeText(this, "Bluetooth autoenabled", Toast.LENGTH_LONG).show();
+	        	}
+	        	else
+	        	{
+	        		Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+	        		startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+	        	}
 	        }
 	        else
 	        {
@@ -393,6 +402,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
 
+			// check for bt
+			checkForBt();
+			
 			onResume();
 			
 		}

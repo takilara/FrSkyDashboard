@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.speech.tts.TextToSpeech;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -99,6 +100,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         Log.i(TAG,"onCreate");
         
 //        dlgAbout = new Dialog(getApplicationContext());

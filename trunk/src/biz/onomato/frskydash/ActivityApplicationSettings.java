@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Editable;
@@ -43,7 +44,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		setContentView(R.layout.activity_applicationsettings);
 
 		// Setup components from screen

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -46,6 +47,7 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		Log.i(TAG,"onCreate");
 		setContentView(R.layout.activity_simulator);
 		

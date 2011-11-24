@@ -14,17 +14,19 @@
                 </LinearLayout> 
             </LinearLayout>
             <CheckBox android:id="@+id/chkCyclicSpeakerEnabled" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/cyclicSpeakerEnabledAtStartup"></CheckBox>
+            
             <TextView android:background="#333333" android:id="@+id/textView3" android:layout_height="wrap_content" android:text="@string/loggerSettings" android:layout_width="match_parent" android:gravity="center"></TextView>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToRaw" android:layout_height="wrap_content" android:text="@string/logToRaw"></CheckBox>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToHuman" android:layout_height="wrap_content" android:text="@string/logToHuman"></CheckBox>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToCsv" android:layout_height="wrap_content" android:text="@string/logToCsv"></CheckBox>
-        </LinearLayout>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout1">
-            <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:id="@+id/btnSave"></Button>
-            <Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/button1" android:text="@string/defaults"></Button>
-        </LinearLayout>
-        <LinearLayout android:layout_width="match_parent" android:id="@+id/linearLayout2" android:orientation="vertical" android:layout_gravity="bottom" android:layout_height="match_parent" android:gravity="bottom">
+        
+            <TextView android:background="#333333" android:id="@+id/tv_Bt_Settings" android:layout_height="wrap_content" android:text="@string/btSettings" android:layout_width="match_parent" android:gravity="center"></TextView>
+            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoEnable" android:layout_height="wrap_content" android:text="@string/btAutoEnable"></CheckBox>
+                
             <TextView android:background="#333333" android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/commands" android:layout_width="match_parent" android:gravity="center"></TextView>
+            <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="fill_parent" android:id="@+id/btnSave"></Button>
+            <!-- <Button android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/button1" android:text="@string/defaults"></Button> -->
+            
             <Button android:layout_width="fill_parent" android:text="@string/btnDeleteLogs" android:layout_height="wrap_content" android:id="@+id/btnDeleteLogs"></Button>
         </LinearLayout>
     </LinearLayout> 

@@ -38,6 +38,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	private CheckBox chkLogToRaw; 
 	private CheckBox chkLogToCsv; 
 	private CheckBox chkLogToHuman;
+	private CheckBox chkBtAutoEnable;
 	private EditText edCyclicInterval;
 	private Button btnSave;
     
@@ -54,6 +55,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkLogToRaw = (CheckBox) findViewById(R.id.chkLogToRaw); 
 		chkLogToCsv = (CheckBox) findViewById(R.id.chkLogToCsv); 
 		chkLogToHuman = (CheckBox) findViewById(R.id.chkLogToHuman); 
+		chkBtAutoEnable = (CheckBox) findViewById(R.id.chkBtAutoEnable);
 		edCyclicInterval = (EditText) findViewById(R.id.edCyclicSpeakerInterval);
 		edCyclicInterval.setOnEditorActionListener(this);
 		//edCyclicInterval.setImeOptions(EditorInfo.IME_ACTION_DONE|EditorInfo.IME_ACTION_UNSPECIFIED);
@@ -66,6 +68,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkLogToRaw.setOnClickListener(this);
 		chkLogToCsv.setOnClickListener(this);
 		chkLogToHuman.setOnClickListener(this);
+		chkBtAutoEnable.setOnClickListener(this);
 		btnSave.setOnClickListener(this);
 		//edCyclicSpeakerInterval.addTextChangedListener(this);
 		
@@ -118,6 +121,11 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				editor.commit();
 				server.setLogToHuman(((CheckBox) v).isChecked());
 				break;
+			case R.id.chkBtAutoEnable:
+				editor.putBoolean("btAutoEnable", ((CheckBox) v).isChecked());
+				editor.commit();
+				server.setBtAutoEnable(((CheckBox) v).isChecked());
+				break;
 			case R.id.btnSave:
 				Log.i(TAG,"Store new interval");
 				save();
@@ -138,6 +146,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 			editor.putBoolean("logToCsv", chkLogToCsv.isChecked());
 			editor.putBoolean("logToRaw", chkLogToRaw.isChecked());
 			editor.putBoolean("logToHuman", chkLogToHuman.isChecked());
+			editor.putBoolean("btAutoEnable", chkBtAutoEnable.isChecked());
 			editor.putInt("cyclicSpeakerInterval", Integer.parseInt(edCyclicInterval.getText().toString()));
 			editor.commit();
 			server.setCyclicSpeachInterval(Integer.parseInt(edCyclicInterval.getText().toString()));
@@ -224,6 +233,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	        chkLogToRaw.setChecked(settings.getBoolean("logToRaw",false));
 	        chkLogToHuman.setChecked(settings.getBoolean("logToHuman",false));
 	        chkLogToCsv.setChecked(settings.getBoolean("logToCsv",false));
+	        chkBtAutoEnable.setChecked(settings.getBoolean("btAutoEnable", false));
 	        
 			//simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
 			 

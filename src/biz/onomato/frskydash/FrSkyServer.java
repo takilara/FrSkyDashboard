@@ -983,7 +983,7 @@ private final Handler mHandlerBT = new Handler() {
 	{
 		_settings = settings;
 //		setCyclicSpeech(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-		setLogToRaw(settings.getBoolean("logToRaw",true));
+		setLogToRaw(settings.getBoolean("logToRaw",false));
 		setLogToHuman(settings.getBoolean("logToHuman",false));
 		setLogToCsv(settings.getBoolean("logToCsv",false));
 		setCyclicSpeachInterval(settings.getInt("cyclicSpeakerInterval",30));

@@ -13,10 +13,13 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
@@ -38,8 +41,18 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
 	
+	
+	// Things for Bluetooth
+	private static final int REQUEST_ENABLE_BT = 2;
+	private IntentFilter mIntentFilterBt;
+	private boolean bluetoothEnabledAtStart;
+    private BluetoothAdapter mBluetoothAdapter = null;
+	
     private int MY_DATA_CHECK_CODE;
     private SharedPreferences _settings=null;
+	//SharedPreferences settings;
+	private SharedPreferences.Editor _editor;
+
 	
 	private Long counter = 0L; 
 	private NotificationManager nm;
@@ -88,6 +101,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private WakeLock wl;
 	private boolean _cyclicSpeechEnabled;
 	private MyApp globals;
+	private Context context;
 	
 	public Simulator sim;
 
@@ -115,8 +129,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private String _btLastConnectedToAddress;
 	
-	SharedPreferences settings;
-	SharedPreferences.Editor editor;
 	
 
 	
@@ -178,14 +190,36 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		Log.i(TAG,"onCreate");
 		super.onCreate();
+		context = getApplicationContext();
+		
 		logger = new Logger(getApplicationContext(),true,true,true);
+		
+		
 		
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
+		
+		Log.i(TAG,"Try to load settings");
+        _settings = context.getSharedPreferences("FrSkyDash",MODE_PRIVATE);
+        _editor = _settings.edit();
+        
+        // Apply settings from settingsfile
+        setSettings();
+        
 		showNotification();		
 		
+		///TODO: in setupChannels, if settings exist, use that for setup
 		setupChannels();
+
+		AD1.loadFromConfig(_settings);
+		AD2.loadFromConfig(_settings);
+		logger.setCsvHeader(AD1,AD2);
+
 		
+		
+		mIntentFilterBt = new IntentFilter();
+		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
 		
 		
 		Log.i(TAG,"Broadcast that i've started");
@@ -335,6 +369,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_device = device;
 		mSerialService.connect(device);
 	}
+	
+	 public void connect()	// connect to previous device
+	 {
+    	if(mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
+        {
+	       	if(_btLastConnectedToAddress!="")
+	       	{
+	       		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(_btLastConnectedToAddress);
+	            connect(device);
+	       	}
+	    }
+    }
+	    
 	
 	public void disconnect()
 	{
@@ -522,6 +569,7 @@ public class FrSkyServer extends Service implements OnInitListener {
         	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
         	
         	setCyclicSpeech(_settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
+        	
     	}
     	} else {
     	// Initialization failed.
@@ -765,8 +813,8 @@ private final Handler mHandlerBT = new Handler() {
                 // save the connected device's name
                 mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
                 _btLastConnectedToAddress = _device.getAddress();
-                editor.putString("btLastConnectedToAddress", _btLastConnectedToAddress);
-                editor.commit();
+                _editor.putString("btLastConnectedToAddress", _btLastConnectedToAddress);
+                _editor.commit();
                 Toast.makeText(getApplicationContext(), "Connected to "
                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                 Log.d(TAG,"BT connected to...");
@@ -1006,31 +1054,28 @@ private final Handler mHandlerBT = new Handler() {
 		return true;
 	}
 	
-	public void setSettings(SharedPreferences settings)
+	//public void setSettings(SharedPreferences settings)
+	public void setSettings()
 	{
-		_settings = settings;
-		editor = _settings.edit();
+//		_settings = settings;
+//		editor = _settings.edit();
 //		setCyclicSpeech(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-		setLogToRaw(settings.getBoolean("logToRaw",false));
-		setLogToHuman(settings.getBoolean("logToHuman",false));
-		setLogToCsv(settings.getBoolean("logToCsv",false));
-		setBtAutoEnable(settings.getBoolean("btAutoEnable",false));
-		setBtAutoConnect(settings.getBoolean("btAutoConnect", false));
-		setCyclicSpeachInterval(settings.getInt("cyclicSpeakerInterval",30));
-		_btLastConnectedToAddress = settings.getString("btLastConnectedToAddress","");
+		setLogToRaw(_settings.getBoolean("logToRaw",false));
+		setLogToHuman(_settings.getBoolean("logToHuman",false));
+		setLogToCsv(_settings.getBoolean("logToCsv",false));
+		setBtAutoEnable(_settings.getBoolean("btAutoEnable",false));
+		setBtAutoConnect(_settings.getBoolean("btAutoConnect", false));
+		setCyclicSpeachInterval(_settings.getInt("cyclicSpeakerInterval",30));
+		_btLastConnectedToAddress = _settings.getString("btLastConnectedToAddress","");
 		
 		
-      String cDescription,cLongUnit,cShortUnit,cName;
-      float cFactor,cOffset;
-      int cMovingAverage,cPrecision;
-      boolean cSilent;
       
-      AD1.loadFromConfig(settings);
-      AD2.loadFromConfig(settings);
-      
-
-      
-      logger.setCsvHeader(AD1,AD2);
+//      AD1.loadFromConfig(settings);
+//      AD2.loadFromConfig(settings);
+//      
+//
+//      
+//      logger.setCsvHeader(AD1,AD2);
      
 	}
 	
@@ -1050,5 +1095,81 @@ private final Handler mHandlerBT = new Handler() {
 	{
 		
 	}
+	
+	// Can be used to detect broadcasts from Bluetooth
+    // Remember to add the message to the intentfilter (mIntentFilterBt) above
+    private BroadcastReceiver mIntentReceiverBt = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	String msg = intent.getAction();
+
+        	// does not work?
+    		int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
+    		Log.i(TAG,"CMD: "+cmd);
+    		switch(cmd) {
+    			case BluetoothAdapter.STATE_ON:
+    				Log.d(TAG,"Bluetooth state changed to ON");
+    				
+    				if(getBtAutoConnect()) 
+    		    	{
+    					Log.d(TAG,"Autoconnect requested");
+    					connect();
+    		    	}
+    				break;
+    			case BluetoothAdapter.STATE_OFF:
+    				Log.d(TAG,"Blueotooth state changed to OFF");
+    				break;
+    			default:
+    				Log.d(TAG,"No information about "+msg);
+    		
+    		}
+        }
+    };
+    
+    
+    public BluetoothAdapter getBluetoothAdapter()
+    {
+	    Log.i(TAG,"Check for BT");
+	    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	    if (mBluetoothAdapter == null) {
+	        // Device does not support Bluetooth
+	    	Log.i(TAG,"Device does not support Bluetooth");
+	    	// Disable all BT related menu items
+	    }
+	    
+	    // popup to enable BT if not enabled
+	    if (mBluetoothAdapter != null)
+	    {
+	        if (!mBluetoothAdapter.isEnabled()) {
+	        	bluetoothEnabledAtStart = false;
+	        	Log.d(TAG,"BT NOT enabled at start");
+	        	if(getBtAutoEnable())
+	        	{
+	        		mBluetoothAdapter.enable();
+	        		Toast.makeText(this, "Bluetooth autoenabled", Toast.LENGTH_LONG).show();
+	        	}
+	        	else
+	        	{
+	        		Log.i(TAG,"Request user to enable bt");
+	        		
+	        	}
+	        }
+	        else
+	        {
+	        	bluetoothEnabledAtStart = true;
+	        	Log.d(TAG,"BT enabled at start");
+
+		        //autoconnect here if autoconnect
+	        	if(getBtAutoConnect()) 
+		    	{
+	        		connect();
+		    	}
+	        }
+	    }
+	    return mBluetoothAdapter;
+    }
+    
+   
+	
 }
 

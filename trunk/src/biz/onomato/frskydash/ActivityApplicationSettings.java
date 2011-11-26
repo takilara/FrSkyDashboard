@@ -154,6 +154,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 			editor.putBoolean("logToRaw", chkLogToRaw.isChecked());
 			editor.putBoolean("logToHuman", chkLogToHuman.isChecked());
 			editor.putBoolean("btAutoEnable", chkBtAutoEnable.isChecked());
+			editor.putBoolean("btAutoConnect", chkBtAutoConnect.isChecked());
 			editor.putInt("cyclicSpeakerInterval", Integer.parseInt(edCyclicInterval.getText().toString()));
 			editor.commit();
 			server.setCyclicSpeachInterval(Integer.parseInt(edCyclicInterval.getText().toString()));
@@ -241,15 +242,8 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	        chkLogToHuman.setChecked(settings.getBoolean("logToHuman",false));
 	        chkLogToCsv.setChecked(settings.getBoolean("logToCsv",false));
 	        chkBtAutoEnable.setChecked(settings.getBoolean("btAutoEnable", false));
+	        chkBtAutoConnect.setChecked(settings.getBoolean("btAutoConnect", false));
 	        
-			//simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
-			 
-			
-			//Frame f = new Frame(simFrame);
-			//Frame f = Frame.FrameFromAnalog(ad1_raw,ad2_raw,rssirx_raw, rssitx_raw);
-			//Log.i(TAG,"FC (class ): "+Frame.frameToHuman(simFrame));
-			
-			
 		}
 
 		public void onServiceDisconnected(ComponentName className) {

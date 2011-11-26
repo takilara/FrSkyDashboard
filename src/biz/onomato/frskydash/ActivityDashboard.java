@@ -55,6 +55,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private boolean bluetoothEnabledAtStart;
     
     
+    
 	// Used for Cyclic speak
 
     private static final int MY_DATA_CHECK_CODE = 7;
@@ -75,16 +76,16 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private FrSkyServer server=null;
     
     private boolean createSpeakerLater=false;
-	private SharedPreferences settings;
+	//private SharedPreferences settings;
     
 	
 	// Bluetooth stuff
 	private BluetoothAdapter mBluetoothAdapter = null;
-    private BluetoothSocket btSocket = null;
-    private OutputStream outStream = null;
+    //private BluetoothSocket btSocket = null;
+    //private OutputStream outStream = null;
     //Well known SPP UUID (will *probably* map to RFCOMM channel 1 (default) if not in use);
     //see comments in onResume().
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    //private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
@@ -92,9 +93,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     public static final int MESSAGE_TOAST = 5;
     
     public static final String DEVICE_NAME = "device_name";
-    private String mConnectedDeviceName = null;
+    //private String mConnectedDeviceName = null;
     public static final String TOAST = "toast";
-    private static BluetoothSerialService mSerialService = null;
+    //private static BluetoothSerialService mSerialService = null;
     
     private static final int REQUEST_CONNECT_DEVICE = 6;
     private static final int REQUEST_ENABLE_BT = 2;
@@ -106,32 +107,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         Log.i(TAG,"onCreate");
         
-        bluetoothEnabledAtStart = false;
-        
-//        dlgAbout = new Dialog(getApplicationContext());
-//        dlgAbout.setContentView(R.layout.about_dialog);
-//        dlgAbout.setTitle("About");
-        //TextView tvAboutVersion = (TextView) dialog.findViewById(R.id.tvAboutVersion);
-        //tvAboutVersion.setText("Version: 1.0Rxxx");
-//        Log.d(TAG,"dialog creation finished");
-        
-        
+        //bluetoothEnabledAtStart = false;
         
         // Service stuff
         doBindService();
      		
-        //Start the server service
-     	//this.startService(new Intent().setClass(this, FrSkyServer.class));
-        
-		Log.i(TAG,"Try to load settings");
-        settings = getPreferences(MODE_PRIVATE);
-        
         setContentView(R.layout.activity_dashboard);
-        
-        //Activity parent = getParent();
-        //Context context = (parent == null ? this : parent);
-        
-		
         
         // Check for TTS
         Log.i(TAG,"Checking for TTS");
@@ -140,16 +121,6 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         startActivityForResult(checkSpeakIntent, MY_DATA_CHECK_CODE);
         
         
-        
-        
-        
-        // Fetch globals:
-        //globals = ((MyApp)getApplicationContext());
-
-        //oAd1 = globals.getChannelById(AD1);
-        //oAd1 = globals.getChannelById(0);
-        
-       
         // Setup the form items        
         tv_ad1_val = (TextView) findViewById(R.id.ad1Value);
         tv_ad2_val = (TextView) findViewById(R.id.ad2Value);
@@ -164,33 +135,23 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         tv_fps      = (TextView) findViewById(R.id.dash_tvFps);
         
         
-        ///TODO: Remove when proper status for Tx
-        //tv_statusTx.setBackgroundColor(0xff000000); // Temporary!
-        //tv_statusTx.setTextColor(0xff333333); // Temporary!
-        
-        
         tv_dash_ch0NameDesc = (TextView) findViewById(R.id.dash_ch0NameDesc);
         tv_dash_ch1NameDesc = (TextView) findViewById(R.id.dash_ch1NameDesc);
         
         tv_ad1_unit = (TextView) findViewById(R.id.ad1Unit);
         tv_ad2_unit = (TextView) findViewById(R.id.ad2Unit);
         
-        // Setup Click Listeners
-                
         View btnEditChannel0 = findViewById(R.id.dash_btnEditChannel0);
-        btnEditChannel0.setOnClickListener(this);
-        
         View btnEditChannel1 = findViewById(R.id.dash_btnEditChannel1);
-        btnEditChannel1.setOnClickListener(this);
-        
         btnTglSpeak = (ToggleButton) findViewById(R.id.dash_tglSpeak);
+
+        
+        // Setup Click Listeners
+        btnEditChannel0.setOnClickListener(this);
+        btnEditChannel1.setOnClickListener(this);
         btnTglSpeak.setOnClickListener(this);
-        //btnTglSpeak.setChecked(globals.getCyclicSpeechEnabled());
         
-        
-        //globals.getWakeLock();
-        
-        
+
         // Code to update GUI cyclic
         tickHandler = new Handler();
 		tickHandler.postDelayed(runnableTick, 100);
@@ -250,18 +211,19 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			}
 		};
 
-	    mIntentFilter = new IntentFilter();
+		// Intentfilters for broadcast listeners
+		// Listen for server intents
+		mIntentFilter = new IntentFilter();
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_SPEAKERCHANGE);
-	    //mIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 
+	    // Listen for BT events (not used yet)
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-		
-		// check for bt
-		//checkForBt();
     }
     
+    
+    // About dialog
     protected Dialog onCreateDialog(int id) {
         Dialog dialog;
         Log.i(TAG,"Make a dialog on context: "+this.getPackageName());
@@ -275,23 +237,16 @@ public class ActivityDashboard extends Activity implements OnClickListener {
             TextView tvAboutVersion = (TextView) dialog.findViewById(R.id.tvAboutVersion);
             TextView tvAboutAuthor = (TextView) dialog.findViewById(R.id.tvAboutAuthor);
             
-            
         	PackageManager pm = this.getPackageManager();
         	try
         	{
         		PackageInfo pInfo = pm.getPackageInfo(this.getPackageName(), PackageManager.GET_META_DATA);
         		tvAboutVersion.setText("Version: "+pInfo.versionName);
         		tvAboutAuthor.setText("Author: "+getString(R.string.author));
-        		
-        		
         	}
         	catch (Exception e)
         	{     		
         	}
-        	
-            
-            
-            Log.d(TAG,"dialog creation finished");
             break;
         default:
             dialog = null;
@@ -302,11 +257,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     
     
-    
+    // Check for bluetooth capabilities, request if no capabilities
     public void checkForBt()
     {
-	    Log.i(TAG,"Check for BT");
-	    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	    Log.i(TAG,"Check for BT capabilities");
+	    mBluetoothAdapter = server.getBluetoothAdapter();
 	    if (mBluetoothAdapter == null) {
 	        // Device does not support Bluetooth
 	    	Log.i(TAG,"Device does not support Bluetooth");
@@ -318,54 +273,22 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    // popup to enable BT if not enabled
 	    if (mBluetoothAdapter != null)
 	    {
-	        if (!mBluetoothAdapter.isEnabled()) {
-	        	bluetoothEnabledAtStart = false;
-	        	Log.d(TAG,"BT NOT enabled at start");
-	        	if(server.getBtAutoEnable())
-	        	{
-	        		mBluetoothAdapter.enable();
-	        		Toast.makeText(this, "Bluetooth autoenabled", Toast.LENGTH_LONG).show();
-	        		
-	        	}
-	        	else
-	        	{
-	        		Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	        		startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-	        	}
+	        if (!mBluetoothAdapter.isEnabled() && !server.getBtAutoEnable()) {
+	        	//bluetoothEnabledAtStart = false;
+	        	Log.d(TAG,"Request BT enabling as BT not enabled and autoenable not set");
+        		Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        		startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 	        }
-	        else
-	        {
-	        	bluetoothEnabledAtStart = true;
-	        	Log.d(TAG,"BT enabled at start");
-
-		        // autoconnect here if possible
-	        	btAutoConnect();
-		        
-	        	
-	        }
-	        
-
-	        
 	    }
     }
     
     
-    
-    
-    
+    // Broadcast Listeners
     // Can be used to detect broadcasts from Service
     // Remember to add the message to the intentfilter (mIntentFilter) above
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-          //do something
-        	// check for bt statechange?
-        	//if(intent. == BluetoothAdapter.ACTION_STATE_CHANGED)
-        	//{
-        		
-        	//}
-        	
-        	
         	String msg = intent.getAction();
         	Bundle extras = intent.getExtras();
         	Log.i(TAG,"Received Broadcast: '"+msg+"'");
@@ -378,16 +301,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         		if(server!=null)
         			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
         	}
-        	
-        		
-        	// It is currently not doing anything
-        	//doBindService();
+
         }
     };
     
     
     // Can be used to detect broadcasts from Bluetooth
     // Remember to add the message to the intentfilter (mIntentFilterBt) above
+    //TODO: Might not be neccessary, but leave in place if needed for "connecting" blinking
     private BroadcastReceiver mIntentReceiverBt = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -399,45 +320,17 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     		switch(cmd) {
     			case BluetoothAdapter.STATE_ON:
     				Log.d(TAG,"Bluetooth state changed to ON - try to autoconnect");
-    				btAutoConnect();
+    				//btAutoConnect();
     				break;
     			case BluetoothAdapter.STATE_OFF:
     				Log.d(TAG,"Blueotooth state changed to OFF");
     				break;
     			default:
     				Log.d(TAG,"No information about "+msg);
-    		
     		}
-          //do something
-        	// check for bt statechange?
-        	//if(intent. == BluetoothAdapter.ACTION_STATE_CHANGED)
-        	//{
-        		
-        	//}
-        	
-        	
-        	
         }
     };
     
-    public void btAutoConnect()
-    {
-    	if(mBluetoothAdapter.isEnabled())
-        {
-	        
-        
-	    	if(server.getBtAutoConnect()) ///TODO: Only do this if settings say it is ok
-	    	{
-	        	String address = settings.getString("btLastConnectedToAddress","");
-	        	Log.d(TAG,"Previous BT address: "+address);
-	        	if(address!="")
-	        	{
-	        		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-	                server.connect(device);
-	        	}
-	    	}
-        }
-    }
     
     void doBindService() {
     	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
@@ -460,11 +353,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
     
     private ServiceConnection mConnection = new ServiceConnection() {
-
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			Log.i(TAG,"Bound to Service");
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			server.setSettings(settings);	// Make sure server has settings available
+			//server.setSettings(settings);	// Make sure server has settings available
 			
 			if(createSpeakerLater)	// server was not ready when TTS check finished
 			{
@@ -589,10 +481,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
                     Log.d(TAG, "BT now enabled");
-                    //MenuItem tItem = (MenuItem)  findViewById(R.id.connect_bluetooth);
-                    
-        //            finishDialogNoBluetooth();                
-                }
+                 }
                 else
                 {
                 	Log.d(TAG,"BT not enabled");
@@ -615,8 +504,6 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	            		Log.i(TAG,"Server not ready yet, postpone");
 	            		createSpeakerLater= true;
 	            	}
-	                
-	            
 	            } 
 	            else 
 	            {
@@ -777,18 +664,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
                 	if (server.getConnectionState() == BluetoothSerialService.STATE_CONNECTED) {
                 		// Connected, reconnect
                 		server.reconnectBt();
-                		//mSerialService.stop();
-    		    		//mSerialService.start();
                 	}
                 return true;
     		case R.id.disconnect_bluetooth:
     			server.disconnect();
     			break;
-             
-    			
     	}
     	return true;
-    	
     }
    
     
@@ -796,8 +678,6 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     public void notifyBtNotEnabled()
     {
     	Toast.makeText(this, "Bluetooth not enabled, only simulations are available", Toast.LENGTH_LONG).show();
-    	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
-    	//tItem.setEnabled(false);
     }
     
     

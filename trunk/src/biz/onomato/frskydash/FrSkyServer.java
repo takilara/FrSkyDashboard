@@ -100,7 +100,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private WakeLock wl;
 	private boolean _cyclicSpeechEnabled;
-	private MyApp globals;
+	//private MyApp globals;
 	private Context context;
 	
 	public Simulator sim;
@@ -231,9 +231,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
 		 getWakeLock();
 		 
-		 globals = ((MyApp)getApplicationContext());
+		 //globals = ((MyApp)getApplicationContext());
 		 
-		 FrskyDatabase database = new FrskyDatabase(globals);
+		 //FrskyDatabase database = new FrskyDatabase(globals);
 		 //database.getChannel(0);
 		 
 		 

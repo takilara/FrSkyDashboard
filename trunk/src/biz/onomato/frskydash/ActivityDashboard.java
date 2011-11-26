@@ -70,6 +70,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private TextToSpeech mTts;
     
     private IntentFilter mIntentFilter;
+    private IntentFilter mIntentFilterBt;
     // service stuff
     private FrSkyServer server=null;
     
@@ -252,8 +253,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    mIntentFilter = new IntentFilter();
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_SPEAKERCHANGE);
+	    //mIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 
-		
+		mIntentFilterBt = new IntentFilter();
+		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 		
 		// check for bt
 		//checkForBt();
@@ -317,11 +320,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    {
 	        if (!mBluetoothAdapter.isEnabled()) {
 	        	bluetoothEnabledAtStart = false;
-	        	
+	        	Log.d(TAG,"BT NOT enabled at start");
 	        	if(server.getBtAutoEnable())
 	        	{
 	        		mBluetoothAdapter.enable();
 	        		Toast.makeText(this, "Bluetooth autoenabled", Toast.LENGTH_LONG).show();
+	        		
 	        	}
 	        	else
 	        	{
@@ -332,9 +336,16 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        else
 	        {
 	        	bluetoothEnabledAtStart = true;
-	        	//MenuItem tItem = (MenuItem)  _menu.findItem(R.id.connect_bluetooth);
-	        	//tItem.setEnabled(true);
+	        	Log.d(TAG,"BT enabled at start");
+
+		        // autoconnect here if possible
+	        	btAutoConnect();
+		        
+	        	
 	        }
+	        
+
+	        
 	    }
     }
     
@@ -348,7 +359,15 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         @Override
         public void onReceive(Context context, Intent intent) {
           //do something
+        	// check for bt statechange?
+        	//if(intent. == BluetoothAdapter.ACTION_STATE_CHANGED)
+        	//{
+        		
+        	//}
+        	
+        	
         	String msg = intent.getAction();
+        	Bundle extras = intent.getExtras();
         	Log.i(TAG,"Received Broadcast: '"+msg+"'");
         	Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
         	if(msg.equals(FrSkyServer.MESSAGE_STARTED))
@@ -366,6 +385,59 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         }
     };
     
+    
+    // Can be used to detect broadcasts from Bluetooth
+    // Remember to add the message to the intentfilter (mIntentFilterBt) above
+    private BroadcastReceiver mIntentReceiverBt = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	String msg = intent.getAction();
+
+        	// does not work?
+    		int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
+    		Log.i(TAG,"CMD: "+cmd);
+    		switch(cmd) {
+    			case BluetoothAdapter.STATE_ON:
+    				Log.d(TAG,"Bluetooth state changed to ON - try to autoconnect");
+    				btAutoConnect();
+    				break;
+    			case BluetoothAdapter.STATE_OFF:
+    				Log.d(TAG,"Blueotooth state changed to OFF");
+    				break;
+    			default:
+    				Log.d(TAG,"No information about "+msg);
+    		
+    		}
+          //do something
+        	// check for bt statechange?
+        	//if(intent. == BluetoothAdapter.ACTION_STATE_CHANGED)
+        	//{
+        		
+        	//}
+        	
+        	
+        	
+        }
+    };
+    
+    public void btAutoConnect()
+    {
+    	if(mBluetoothAdapter.isEnabled())
+        {
+	        
+        
+	    	if(server.getBtAutoConnect()) ///TODO: Only do this if settings say it is ok
+	    	{
+	        	String address = settings.getString("btLastConnectedToAddress","");
+	        	Log.d(TAG,"Previous BT address: "+address);
+	        	if(address!="")
+	        	{
+	        		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+	                server.connect(device);
+	        	}
+	    	}
+        }
+    }
     
     void doBindService() {
     	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
@@ -432,7 +504,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
 
-    	registerReceiver(mIntentReceiver, mIntentFilter);
+    	registerReceiver(mIntentReceiver, mIntentFilter);	  // Used to receive messages from Server
+    	registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
     	
    	
     }
@@ -442,6 +515,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	super.onPause();
     	Log.i(TAG,"onPause");
     	unregisterReceiver(mIntentReceiver);
+    	unregisterReceiver(mIntentReceiverBt);
 
     	tickHandler.removeCallbacks(runnableTick);
     	//speakHandler.removeCallbacks(runnableSpeaker);

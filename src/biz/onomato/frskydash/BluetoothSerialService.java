@@ -56,6 +56,7 @@ public class BluetoothSerialService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
+    private String _deviceName;
     
     //private EmulatorView mEmulatorView;
 
@@ -123,7 +124,7 @@ public class BluetoothSerialService {
      */
     public synchronized void connect(BluetoothDevice device) {
         if (D) Log.d(TAG, "connect to: " + device);
-
+        _deviceName = device.getName();
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
             if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
@@ -232,7 +233,7 @@ public class BluetoothSerialService {
         
         Bundle bundle = new Bundle();
         //bundle.putString(Frskydash.TOAST, "Unable to connect device");
-        bundle.putString(ActivityDashboard.TOAST, "Unable to connect device");
+        bundle.putString(ActivityDashboard.TOAST, "Unable to connect to "+_deviceName);
         msg.setData(bundle);
         mHandler.sendMessage(msg);
     }

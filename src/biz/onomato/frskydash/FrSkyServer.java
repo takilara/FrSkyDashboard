@@ -101,6 +101,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int _framecountRx=0;
 	private int _framecountTx=0;
 	private boolean _btAutoEnable;
+	private boolean _btAutoConnect;
 	
 	private double[] hVal;
 	private String[] hName;
@@ -111,6 +112,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private String[] hLongUnit;
 	private int channels=0;
 	private Channel[] objs;
+	
+	private String _btLastConnectedToAddress;
 	
 	SharedPreferences settings;
 	SharedPreferences.Editor editor;
@@ -682,6 +685,7 @@ private final Handler mHandlerBT = new Handler() {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Log.d(TAG,"BT connected");
                 	statusBt = true;
+                	
                 	_manualBtDisconnect = false;
                 	send(Frame.InputRequestAll().toInts());
                     
@@ -760,6 +764,9 @@ private final Handler mHandlerBT = new Handler() {
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                 mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                _btLastConnectedToAddress = _device.getAddress();
+                editor.putString("btLastConnectedToAddress", _btLastConnectedToAddress);
+                editor.commit();
                 Toast.makeText(getApplicationContext(), "Connected to "
                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                 Log.d(TAG,"BT connected to...");
@@ -968,6 +975,16 @@ private final Handler mHandlerBT = new Handler() {
 		return _btAutoEnable;
 	}
 	
+	public void setBtAutoConnect(boolean btAutoConnect)
+	{
+		_btAutoConnect = btAutoConnect;
+	}
+	
+	public boolean getBtAutoConnect()
+	{
+		return _btAutoConnect;
+	}
+	
 	public boolean setChannelConfiguration(SharedPreferences settings,Channel channel)
 	{
 		
@@ -992,12 +1009,15 @@ private final Handler mHandlerBT = new Handler() {
 	public void setSettings(SharedPreferences settings)
 	{
 		_settings = settings;
+		editor = _settings.edit();
 //		setCyclicSpeech(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
 		setLogToRaw(settings.getBoolean("logToRaw",false));
 		setLogToHuman(settings.getBoolean("logToHuman",false));
 		setLogToCsv(settings.getBoolean("logToCsv",false));
 		setBtAutoEnable(settings.getBoolean("btAutoEnable",false));
+		setBtAutoConnect(settings.getBoolean("btAutoConnect", false));
 		setCyclicSpeachInterval(settings.getInt("cyclicSpeakerInterval",30));
+		_btLastConnectedToAddress = settings.getString("btLastConnectedToAddress","");
 		
 		
       String cDescription,cLongUnit,cShortUnit,cName;

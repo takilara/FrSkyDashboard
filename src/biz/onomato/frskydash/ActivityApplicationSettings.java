@@ -39,6 +39,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	private CheckBox chkLogToCsv; 
 	private CheckBox chkLogToHuman;
 	private CheckBox chkBtAutoEnable;
+	private CheckBox chkBtAutoConnect;
 	private EditText edCyclicInterval;
 	private Button btnSave;
     
@@ -56,6 +57,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkLogToCsv = (CheckBox) findViewById(R.id.chkLogToCsv); 
 		chkLogToHuman = (CheckBox) findViewById(R.id.chkLogToHuman); 
 		chkBtAutoEnable = (CheckBox) findViewById(R.id.chkBtAutoEnable);
+		chkBtAutoConnect = (CheckBox) findViewById(R.id.chkBtAutoConnect);
 		edCyclicInterval = (EditText) findViewById(R.id.edCyclicSpeakerInterval);
 		edCyclicInterval.setOnEditorActionListener(this);
 		//edCyclicInterval.setImeOptions(EditorInfo.IME_ACTION_DONE|EditorInfo.IME_ACTION_UNSPECIFIED);
@@ -69,6 +71,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkLogToCsv.setOnClickListener(this);
 		chkLogToHuman.setOnClickListener(this);
 		chkBtAutoEnable.setOnClickListener(this);
+		chkBtAutoConnect.setOnClickListener(this);
 		btnSave.setOnClickListener(this);
 		//edCyclicSpeakerInterval.addTextChangedListener(this);
 		
@@ -126,6 +129,10 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				editor.commit();
 				server.setBtAutoEnable(((CheckBox) v).isChecked());
 				break;
+			case R.id.chkBtAutoConnect:
+				editor.putBoolean("btAutoConnect", ((CheckBox) v).isChecked());
+				editor.commit();
+				server.setBtAutoConnect(((CheckBox) v).isChecked());
 			case R.id.btnSave:
 				Log.i(TAG,"Store new interval");
 				save();

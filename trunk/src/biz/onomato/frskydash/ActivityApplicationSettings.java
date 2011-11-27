@@ -25,6 +25,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
 public class ActivityApplicationSettings extends Activity implements OnClickListener, OnEditorActionListener {
@@ -174,6 +175,8 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 			//getApplicationContext();
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(edCyclicInterval.getWindowToken(), 0);
+			
+			Toast.makeText(this, "Saved...", Toast.LENGTH_LONG).show();
 		}
 		catch (Exception e)
 		{

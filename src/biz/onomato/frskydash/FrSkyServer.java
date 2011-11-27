@@ -129,7 +129,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int channels=0;
 	private Channel[] objs;
 	
-	private String _btLastConnectedToAddress;
+	
 	
 	
 
@@ -216,6 +216,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		AD1.loadFromConfig(_settings);
 		AD2.loadFromConfig(_settings);
 		logger.setCsvHeader(AD1,AD2);
+		logger.setLogToRaw(getLogToRaw());
+		logger.setLogToCsv(getLogToCsv());
+		logger.setLogToHuman(getLogToHuman());
 
 		
 		
@@ -336,9 +339,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * Set time between reads
 	 * @param interval seconds between reads
 	 */
-	public void setCyclicSpeachInterval(int interval)
+	public void setCyclicSpeechInterval(int interval)
 	{
 		Log.i(TAG,"Set new interval to "+interval+" seconds");
+		_editor.putInt("cyclicSpeakerInterval",interval);
+		_editor.commit();
 		if(interval>0)
 		{
 			_speakDelay = interval*1000;
@@ -349,6 +354,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
 		}
 	}
+	public int getCyclicSpeechInterval()
+	{
+		return _settings.getInt("cyclicSpeakerInterval", 30);
+	}
+	
 	public void send(byte[] out) {
     	mSerialService.write( out );
     }
@@ -376,9 +386,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 {
     	if(mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
         {
-	       	if(_btLastConnectedToAddress!="")
+	       	if(getBtLastConnectedToAddress()!="")
 	       	{
-	       		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(_btLastConnectedToAddress);
+	       		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(getBtLastConnectedToAddress());
 	            connect(device);
 	       	}
 	    }
@@ -570,8 +580,15 @@ public class FrSkyServer extends Service implements OnInitListener {
     		String myGreeting = "Application has enabled Text to Speech";
         	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
         	
-        	setCyclicSpeech(_settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-        	
+        	//getCyclicSpeechEnabled();
+        	if(getCyclicSpeechEnabled())
+    		{
+    			startCyclicSpeaker();
+    		}
+    		else
+    		{
+    			stopCyclicSpeaker();
+    		}
     	}
     	} else {
     	// Initialization failed.
@@ -814,9 +831,9 @@ private final Handler mHandlerBT = new Handler() {
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                 mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
-                _btLastConnectedToAddress = _device.getAddress();
-                _editor.putString("btLastConnectedToAddress", _btLastConnectedToAddress);
-                _editor.commit();
+                setBtLastConnectedToAddress(_device.getAddress());
+                //_editor.putString("btLastConnectedToAddress", _btLastConnectedToAddress);
+                //_editor.commit();
                 Toast.makeText(getApplicationContext(), "Connected to "
                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                 Log.d(TAG,"BT connected to...");
@@ -871,21 +888,17 @@ private final Handler mHandlerBT = new Handler() {
 
 	public boolean getCyclicSpeechEnabled()
 	{
-		return _cyclicSpeechEnabled;
+		//return _cyclicSpeechEnabled;
+		return _settings.getBoolean("cyclicSpeakerEnabledAtStartup", false);
 	}
 	
-	public void setCyclicSpeech(boolean state)
+	public void setCyclicSpeechEnabled(boolean state)
 	{
 		Log.i(TAG,"Setting Cyclic speech to: "+state);
+		_editor.putBoolean("cyclicSpeakerEnabledAtStartup", state);
+		_editor.commit();
 		_cyclicSpeechEnabled = state;
-		if(_cyclicSpeechEnabled)
-		{
-			startCyclicSpeaker();
-		}
-		else
-		{
-			stopCyclicSpeaker();
-		}
+		
 	}
 	
 	public void simStart()
@@ -997,27 +1010,61 @@ private final Handler mHandlerBT = new Handler() {
 		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
 	}
 	
+	
+	
+	
+	
+	
+	// Settings setters and getters
+	///TODO: Have setters and getters work with settings store
+	
+	public void setBtLastConnectedToAddress(String lastConnectedToAddress)
+	{
+		_editor.putString("btLastConnectedToAddress", lastConnectedToAddress);
+	    _editor.commit();
+	}
+	
+	public String getBtLastConnectedToAddress()
+	{
+		return _settings.getString("btLastConnectedToAddress","");
+	}
+	
+	public boolean getLogToRaw()
+	{
+		return _settings.getBoolean("logToRaw", false);
+	}
+	
+	public boolean getLogToCsv()
+	{
+		return _settings.getBoolean("logToCsv", false);
+	}
+	
+	public boolean getLogToHuman()
+	{
+		return _settings.getBoolean("logToHuman", false);
+	}
+	
 	public void setLogToRaw(boolean logToRaw)
 	{
-		Log.i(TAG,"Log to Raw:"+logToRaw);
+		_editor.putBoolean("logToRaw", logToRaw);
+		_editor.commit();
 		logger.setLogToRaw(logToRaw);
 	}
 	
 	public void setLogToHuman(boolean logToHuman)
 	{
-		Log.i(TAG,"Log to Human:"+logToHuman);
+		_editor.putBoolean("logToHuman", logToHuman);
+		_editor.commit();
 		logger.setLogToHuman(logToHuman);
 	}
 	
 	public void setLogToCsv(boolean logToCsv)
 	{
-		Log.i(TAG,"Log to Csv:"+logToCsv);
+		_editor.putBoolean("logToCsv", logToCsv);
+		_editor.commit();
 		logger.setLogToCsv(logToCsv);
 	}
 	
-	
-	// Settings setters and getters
-	///TODO: Have setters and getters work with settings store
 	public void setBtAutoEnable(boolean btAutoEnable)
 	{
 		_btAutoEnable = btAutoEnable;
@@ -1093,11 +1140,11 @@ private final Handler mHandlerBT = new Handler() {
 //		_settings = settings;
 //		editor = _settings.edit();
 //		setCyclicSpeech(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-		setLogToRaw(_settings.getBoolean("logToRaw",false));
-		setLogToHuman(_settings.getBoolean("logToHuman",false));
-		setLogToCsv(_settings.getBoolean("logToCsv",false));
-		setCyclicSpeachInterval(_settings.getInt("cyclicSpeakerInterval",30));
-		_btLastConnectedToAddress = _settings.getString("btLastConnectedToAddress","");
+//		setLogToRaw(_settings.getBoolean("logToRaw",false));
+//		setLogToHuman(_settings.getBoolean("logToHuman",false));
+//		setLogToCsv(_settings.getBoolean("logToCsv",false));
+//		setCyclicSpeechInterval(_settings.getInt("cyclicSpeakerInterval",30));
+//		_btLastConnectedToAddress = _settings.getString("btLastConnectedToAddress","");
 		
 		
       

@@ -31,8 +31,8 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 
 	private static final String TAG = "Application-Settings";
 	private FrSkyServer server;
-	SharedPreferences settings;
-	SharedPreferences.Editor editor;
+	//SharedPreferences settings;
+	//SharedPreferences.Editor editor;
 	
 	private View btnDeleteLogs;
 	private CheckBox chkCyclicSpeakerEnabled;
@@ -107,38 +107,38 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				break;
 			case R.id.chkCyclicSpeakerEnabled:
 				//Log.i(TAG,"Store cyclic speaker: ");
-				CheckBox chkCyclicSpeakerEnabled = (CheckBox) v;
-				editor.putBoolean("cyclicSpeakerEnabledAtStartup", chkCyclicSpeakerEnabled.isChecked());
-				editor.commit();
-				server.setCyclicSpeech(chkCyclicSpeakerEnabled.isChecked());
+				//CheckBox chkCyclicSpeakerEnabled = (CheckBox) v;
+				//editor.putBoolean("cyclicSpeakerEnabledAtStartup", chkCyclicSpeakerEnabled.isChecked());
+				//editor.commit();
+				server.setCyclicSpeechEnabled(((CheckBox) v).isChecked());
 				
 				break;
 			case R.id.chkLogToCsv:
 				//Log.i(TAG,"Store Log to Csv ");
-				editor.putBoolean("logToCsv", ((CheckBox) v).isChecked());
-				editor.commit();
+				//editor.putBoolean("logToCsv", ((CheckBox) v).isChecked());
+				//editor.commit();
 				server.setLogToCsv(((CheckBox) v).isChecked());
 				break;
 			case R.id.chkLogToRaw:
 				//Log.i(TAG,"Store Log to Raw ");
-				editor.putBoolean("logToRaw", ((CheckBox) v).isChecked());
-				editor.commit();
+				//editor.putBoolean("logToRaw", ((CheckBox) v).isChecked());
+				//editor.commit();
 				server.setLogToRaw(((CheckBox) v).isChecked());
 				break;
 			case R.id.chkLogToHuman:
 				//Log.i(TAG,"Store Log to Human");
-				editor.putBoolean("logToHuman", ((CheckBox) v).isChecked());
-				editor.commit();
+				//editor.putBoolean("logToHuman", ((CheckBox) v).isChecked());
+				//editor.commit();
 				server.setLogToHuman(((CheckBox) v).isChecked());
 				break;
 			case R.id.chkBtAutoEnable:
-				editor.putBoolean("btAutoEnable", ((CheckBox) v).isChecked());
-				editor.commit();
+				//editor.putBoolean("btAutoEnable", ((CheckBox) v).isChecked());
+				//editor.commit();
 				server.setBtAutoEnable(((CheckBox) v).isChecked());
 				break;
 			case R.id.chkBtAutoConnect:
-				editor.putBoolean("btAutoConnect", ((CheckBox) v).isChecked());
-				editor.commit();
+				//editor.putBoolean("btAutoConnect", ((CheckBox) v).isChecked());
+				//editor.commit();
 				server.setBtAutoConnect(((CheckBox) v).isChecked());
 			case R.id.chkAutoSetVolume:
 				//editor.putBoolean("autoSetVolume", ((CheckBox) v).isChecked());
@@ -161,23 +161,17 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		Log.i(TAG,"Save current settings");
 		try
 		{
-			///TODO: Replace with server setters
-			editor.putBoolean("cyclicSpeakerEnabledAtStartup", chkCyclicSpeakerEnabled.isChecked());
-			editor.putBoolean("logToCsv", chkLogToCsv.isChecked());
-			editor.putBoolean("logToRaw", chkLogToRaw.isChecked());
-			editor.putBoolean("logToHuman", chkLogToHuman.isChecked());
-			editor.putBoolean("btAutoEnable", chkBtAutoEnable.isChecked());
-			editor.putBoolean("btAutoConnect", chkBtAutoConnect.isChecked());
-			//editor.putBoolean("autoSetVolume", chkAutoSetVolume.isChecked());
-			
-			editor.putInt("cyclicSpeakerInterval", Integer.parseInt(edCyclicInterval.getText().toString()));
-			editor.commit();
-			
+			server.setCyclicSpeechEnabled(chkCyclicSpeakerEnabled.isChecked());
+			server.setBtAutoEnable(chkBtAutoEnable.isChecked());
+			server.setBtAutoConnect(chkBtAutoConnect.isChecked());
+			server.setLogToCsv(chkLogToCsv.isChecked());
+			server.setLogToRaw(chkLogToRaw.isChecked());
+			server.setLogToHuman(chkLogToHuman.isChecked());
 			server.setAutoSetVolume(chkAutoSetVolume.isChecked());
 			server.setMinimumVolume(sbInitialMinimumVolume.getProgress());
-			server.setCyclicSpeachInterval(Integer.parseInt(edCyclicInterval.getText().toString()));
+			server.setCyclicSpeechInterval(Integer.parseInt(edCyclicInterval.getText().toString()));
 			
-			getApplicationContext();
+			//getApplicationContext();
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(edCyclicInterval.getWindowToken(), 0);
 		}
@@ -219,12 +213,10 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	}
 	
 	void doBindService() {
-    	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
 		Log.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
 		Log.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
-		//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
     }
     
     void doUnbindService() {
@@ -248,20 +240,17 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
-			///TODO: Replace with server getters
-			settings = server.getSettings();
-	        editor = settings.edit();
-	        int interval = settings.getInt("cyclicSpeakerInterval",30);
+	        int interval = server.getCyclicSpeechInterval();
 	        Log.i(TAG,"Set interval to +"+interval);
 	        Log.i(TAG,"Edit field currently at +"+edCyclicInterval.getText().toString());
 	        edCyclicInterval.setText(String.valueOf(interval));
 	        //edCyclicInterval.setText(interval);
-	        chkCyclicSpeakerEnabled.setChecked(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-	        chkLogToRaw.setChecked(settings.getBoolean("logToRaw",false));
-	        chkLogToHuman.setChecked(settings.getBoolean("logToHuman",false));
-	        chkLogToCsv.setChecked(settings.getBoolean("logToCsv",false));
-	        chkBtAutoEnable.setChecked(settings.getBoolean("btAutoEnable", false));
-	        chkBtAutoConnect.setChecked(settings.getBoolean("btAutoConnect", false));
+	        chkCyclicSpeakerEnabled.setChecked(server.getCyclicSpeechEnabled());
+	        chkLogToRaw.setChecked(server.getLogToRaw());
+	        chkLogToHuman.setChecked(server.getLogToHuman());
+	        chkLogToCsv.setChecked(server.getLogToCsv());
+	        chkBtAutoEnable.setChecked(server.getBtAutoEnable());
+	        chkBtAutoConnect.setChecked(server.getBtAutoConnect());
 	        //chkAutoSetVolume.setChecked(settings.getBoolean("autoSetVolume", false));
 	        
 	        chkAutoSetVolume.setChecked(server.getAutoSetVolume());
@@ -284,27 +273,5 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		}
 		return true;
 	}
-
-//	@Override
-//	public void afterTextChanged(Editable arg0) {
-//		// TODO Auto-generated method stub
-//		Log.i(TAG,"User fixed interval to: "+arg0.toString());
-//		
-//	}
-//
-//	@Override
-//	public void beforeTextChanged(CharSequence s, int start, int count,
-//			int after) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onTextChanged(CharSequence s, int start, int before, int count) {
-//		// TODO Auto-generated method stub
-//		Log.i(TAG,"Interval changed to: "+s);
-//		
-//	}
-	
 	
 }

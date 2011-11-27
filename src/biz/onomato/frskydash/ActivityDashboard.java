@@ -443,7 +443,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    	case R.id.dash_tglSpeak:
 	    		
 	    		//globals.setCyclicSpeech(btnTglSpeak.isChecked());
-	    		if(server!=null) {server.setCyclicSpeech(btnTglSpeak.isChecked());}
+	    		if(server!=null) {server.setCyclicSpeechEnabled(btnTglSpeak.isChecked());}
 	    		
 	    		
 	    		

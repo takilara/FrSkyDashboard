@@ -205,9 +205,6 @@ public class FrSkyServer extends Service implements OnInitListener {
         _settings = context.getSharedPreferences("FrSkyDash",MODE_PRIVATE);
         _editor = _settings.edit();
         
-        // Apply settings from settingsfile
-        setSettings();
-        
 		showNotification();		
 		
 		///TODO: in setupChannels, if settings exist, use that for setup
@@ -635,21 +632,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// should be set up empty, contents filled from config
 		int tad1 = createChannel("AD1", "Default description", 0, (float) 1, "V","Volt");
 		AD1 = getChannelById(tad1);
-		//AD1.setMovingAverage(8);
-
-        // From config
-//		int tad1 = createChannel(cName, cDescription, cOffset, (double) cFactor, cShortUnit,cLongUnit);
-//		AD1 = getChannelById(tad1);
-//		AD1.setMovingAverage(cMovingAverage);
-//		AD1.setPrecision(cPrecision);
-//		AD1.silent = cSilent;
-		
 		
 		int tad2 = createChannel("AD2", "Default description", 0, (float) 1, "V","Volt");
 		AD2 = getChannelById(tad2);
-		//AD2.setPrecision(1);
-		//AD2.setMovingAverage(8);
-		//AD2.silent = true;
 		
 		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
 		RSSIrx = getChannelById(trssirx);
@@ -775,33 +760,16 @@ private final Handler mHandlerBT = new Handler() {
                 	
                 	
                 	logger.stop();
-//                	if (mMenuItemConnect != null) {
-//                		mMenuItemConnect.setIcon(android.R.drawable.ic_menu_search);
-//                		mMenuItemConnect.setTitle(R.string.connect);
-//                	}
-//
-//            		mInputManager.hideSoftInputFromWindow(mEmulatorView.getWindowToken(), 0);
-//                	
-//                    mTitle.setText(R.string.title_not_connected);                    break;
                 }
                 break;
             case MESSAGE_WRITE:
             	Log.d(TAG,"BT writing");
-//            	if (mLocalEcho) {
-//            		byte[] writeBuf = (byte[]) msg.obj;
-//            		mEmulatorView.write(writeBuf, msg.arg1);
-//            	}
-                
                 break;
                 
             case MESSAGE_READ:
             	if(!_dying)
             	{
 	                byte[] readBuf = (byte[]) msg.obj;              
-	                //mEmulatorView.write(readBuf, msg.arg1);
-	            	
-	                //Log.d(TAG,"BT got frame, length: "+msg.arg1);
-	                //for(int n=0;n<readBuf.length;n++)
 	                int[] i = new int[msg.arg1];
 	                
 	                for(int n=0;n<msg.arg1;n++)
@@ -832,8 +800,6 @@ private final Handler mHandlerBT = new Handler() {
                 // save the connected device's name
                 mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
                 setBtLastConnectedToAddress(_device.getAddress());
-                //_editor.putString("btLastConnectedToAddress", _btLastConnectedToAddress);
-                //_editor.commit();
                 Toast.makeText(getApplicationContext(), "Connected to "
                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                 Log.d(TAG,"BT connected to...");
@@ -888,7 +854,6 @@ private final Handler mHandlerBT = new Handler() {
 
 	public boolean getCyclicSpeechEnabled()
 	{
-		//return _cyclicSpeechEnabled;
 		return _settings.getBoolean("cyclicSpeakerEnabledAtStartup", false);
 	}
 	
@@ -948,9 +913,6 @@ private final Handler mHandlerBT = new Handler() {
 				if(inBound)	
 				{
 					_framecountRx++;
-
-					
-					//logger.logCsv(ad1Raw,ad1RawAvg,ad1Eng,ad1EngAvg,ad2Raw,ad2RawAvg,ad2Eng,ad2EngAvg);
 					logger.logCsv(AD1,AD2);
 				}
 				break;
@@ -1097,7 +1059,6 @@ private final Handler mHandlerBT = new Handler() {
 	}
 	public int getMinimumVolume()
 	{
-		//return _minimumVolumeLevel;
 		return _settings.getInt("initialMinimumVolume", 70);
 	}
 	public void setAutoSetVolume(boolean autoSetVolume)
@@ -1132,30 +1093,6 @@ private final Handler mHandlerBT = new Handler() {
 		return true;
 	}
 	
-	//public void setSettings(SharedPreferences settings)
-	public void setSettings()
-	///TODO: remove entries here when setters/getters do this work
-	
-	{
-//		_settings = settings;
-//		editor = _settings.edit();
-//		setCyclicSpeech(settings.getBoolean("cyclicSpeakerEnabledAtStartup",false));
-//		setLogToRaw(_settings.getBoolean("logToRaw",false));
-//		setLogToHuman(_settings.getBoolean("logToHuman",false));
-//		setLogToCsv(_settings.getBoolean("logToCsv",false));
-//		setCyclicSpeechInterval(_settings.getInt("cyclicSpeakerInterval",30));
-//		_btLastConnectedToAddress = _settings.getString("btLastConnectedToAddress","");
-		
-		
-      
-//      AD1.loadFromConfig(settings);
-//      AD2.loadFromConfig(settings);
-//      
-//
-//      
-//      logger.setCsvHeader(AD1,AD2);
-     
-	}
 	
 	public SharedPreferences getSettings()
 	{

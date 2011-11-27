@@ -39,11 +39,6 @@ import java.math.MathContext;
 
 public class ActivityDashboard extends Activity implements OnClickListener {
     private static final String TAG = "Dashboard"; 
-    //private TextToSpeech mTts;
-    
-    //private int AD1;
-    //private int AD2;
-    //private Channel oAd1;
     
     private static final int DIALOG_ABOUT_ID=0;
     private Dialog dlgAbout;
@@ -81,11 +76,6 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	
 	// Bluetooth stuff
 	private BluetoothAdapter mBluetoothAdapter = null;
-    //private BluetoothSocket btSocket = null;
-    //private OutputStream outStream = null;
-    //Well known SPP UUID (will *probably* map to RFCOMM channel 1 (default) if not in use);
-    //see comments in onResume().
-    //private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;

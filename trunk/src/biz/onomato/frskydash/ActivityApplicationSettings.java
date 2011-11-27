@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -40,9 +41,11 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	private CheckBox chkLogToHuman;
 	private CheckBox chkBtAutoEnable;
 	private CheckBox chkBtAutoConnect;
+	private CheckBox chkAutoSetVolume;
 	private EditText edCyclicInterval;
 	private Button btnSave;
-    
+    private SeekBar sbInitialMinimumVolume;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,6 +61,8 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkLogToHuman = (CheckBox) findViewById(R.id.chkLogToHuman); 
 		chkBtAutoEnable = (CheckBox) findViewById(R.id.chkBtAutoEnable);
 		chkBtAutoConnect = (CheckBox) findViewById(R.id.chkBtAutoConnect);
+		chkAutoSetVolume = (CheckBox) findViewById(R.id.chkAutoSetVolume);
+		sbInitialMinimumVolume = (SeekBar) findViewById(R.id.sbInitialMinimumVolume);
 		edCyclicInterval = (EditText) findViewById(R.id.edCyclicSpeakerInterval);
 		edCyclicInterval.setOnEditorActionListener(this);
 		//edCyclicInterval.setImeOptions(EditorInfo.IME_ACTION_DONE|EditorInfo.IME_ACTION_UNSPECIFIED);
@@ -72,6 +77,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkLogToHuman.setOnClickListener(this);
 		chkBtAutoEnable.setOnClickListener(this);
 		chkBtAutoConnect.setOnClickListener(this);
+		chkAutoSetVolume.setOnClickListener(this);
 		btnSave.setOnClickListener(this);
 		//edCyclicSpeakerInterval.addTextChangedListener(this);
 		
@@ -95,6 +101,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	{
 		switch(v.getId())
 		{
+		///TODO: Replace with server setters
 			case R.id.btnDeleteLogs:
 				showDeleteDialog();
 				break;
@@ -133,6 +140,11 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				editor.putBoolean("btAutoConnect", ((CheckBox) v).isChecked());
 				editor.commit();
 				server.setBtAutoConnect(((CheckBox) v).isChecked());
+			case R.id.chkAutoSetVolume:
+				//editor.putBoolean("autoSetVolume", ((CheckBox) v).isChecked());
+				//editor.commit();
+				server.setAutoSetVolume(((CheckBox) v).isChecked());
+				sbInitialMinimumVolume.setEnabled(((CheckBox) v).isChecked());
 			case R.id.btnSave:
 				Log.i(TAG,"Store new interval");
 				save();
@@ -149,14 +161,20 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		Log.i(TAG,"Save current settings");
 		try
 		{
+			///TODO: Replace with server setters
 			editor.putBoolean("cyclicSpeakerEnabledAtStartup", chkCyclicSpeakerEnabled.isChecked());
 			editor.putBoolean("logToCsv", chkLogToCsv.isChecked());
 			editor.putBoolean("logToRaw", chkLogToRaw.isChecked());
 			editor.putBoolean("logToHuman", chkLogToHuman.isChecked());
 			editor.putBoolean("btAutoEnable", chkBtAutoEnable.isChecked());
 			editor.putBoolean("btAutoConnect", chkBtAutoConnect.isChecked());
+			//editor.putBoolean("autoSetVolume", chkAutoSetVolume.isChecked());
+			
 			editor.putInt("cyclicSpeakerInterval", Integer.parseInt(edCyclicInterval.getText().toString()));
 			editor.commit();
+			
+			server.setAutoSetVolume(chkAutoSetVolume.isChecked());
+			server.setMinimumVolume(sbInitialMinimumVolume.getProgress());
 			server.setCyclicSpeachInterval(Integer.parseInt(edCyclicInterval.getText().toString()));
 			
 			getApplicationContext();
@@ -230,6 +248,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
+			///TODO: Replace with server getters
 			settings = server.getSettings();
 	        editor = settings.edit();
 	        int interval = settings.getInt("cyclicSpeakerInterval",30);
@@ -243,6 +262,11 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	        chkLogToCsv.setChecked(settings.getBoolean("logToCsv",false));
 	        chkBtAutoEnable.setChecked(settings.getBoolean("btAutoEnable", false));
 	        chkBtAutoConnect.setChecked(settings.getBoolean("btAutoConnect", false));
+	        //chkAutoSetVolume.setChecked(settings.getBoolean("autoSetVolume", false));
+	        
+	        chkAutoSetVolume.setChecked(server.getAutoSetVolume());
+	        sbInitialMinimumVolume.setEnabled(chkAutoSetVolume.isChecked());
+	        sbInitialMinimumVolume.setProgress(server.getMinimumVolume());
 	        
 		}
 

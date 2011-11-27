@@ -104,8 +104,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         Log.i(TAG,"onCreate");
+
+        // Audio Setup
+        
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        
         
         //bluetoothEnabledAtStart = false;
         
@@ -366,6 +370,23 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
 
+			// Check volume
+			AudioManager audioManager = 
+	        	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+			
+	        int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+	        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+	        double volPrc = currentVolume*100/maxVolume;
+	        Log.d(TAG,String.format("Volume is [%s/%s] (%.2f %%)",currentVolume,maxVolume,volPrc));
+	        if(server.getAutoSetVolume())
+	        {
+		        if(volPrc<server.getMinimumVolume())
+		        {
+		        	audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int)Math.floor(server.getMinimumVolume()*maxVolume/100),AudioManager.FLAG_SHOW_UI);
+		        }
+	        }
+			
+			
 			// check for bt
 			checkForBt();
 			

@@ -1021,21 +1021,25 @@ private final Handler mHandlerBT = new Handler() {
 	public void setBtAutoEnable(boolean btAutoEnable)
 	{
 		_btAutoEnable = btAutoEnable;
+		_editor.putBoolean("btAutoEnable", btAutoEnable);
+		_editor.commit();
 	}
 	
 	public boolean getBtAutoEnable()
 	{
-		return _btAutoEnable;
+		return _settings.getBoolean("btAutoEnable",false);
 	}
 	
 	public void setBtAutoConnect(boolean btAutoConnect)
 	{
 		_btAutoConnect = btAutoConnect;
+		_editor.putBoolean("btAutoConnect", btAutoConnect);
+		_editor.commit();
 	}
 	
 	public boolean getBtAutoConnect()
 	{
-		return _btAutoConnect;
+		return _settings.getBoolean("btAutoConnect",false);
 	}
 	
 	public void setMinimumVolume(int minimumVolumePrc)
@@ -1092,8 +1096,6 @@ private final Handler mHandlerBT = new Handler() {
 		setLogToRaw(_settings.getBoolean("logToRaw",false));
 		setLogToHuman(_settings.getBoolean("logToHuman",false));
 		setLogToCsv(_settings.getBoolean("logToCsv",false));
-		setBtAutoEnable(_settings.getBoolean("btAutoEnable",false));
-		setBtAutoConnect(_settings.getBoolean("btAutoConnect", false));
 		setCyclicSpeachInterval(_settings.getInt("cyclicSpeakerInterval",30));
 		_btLastConnectedToAddress = _settings.getString("btLastConnectedToAddress","");
 		

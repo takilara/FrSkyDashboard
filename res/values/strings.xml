@@ -48,6 +48,11 @@
     <string name="btSettings">Bluetooth Settings</string>
     <string name="btAutoEnable">Auto-enable Bluetooth</string>
     <string name="btAutoConnect">Auto-connect to last device</string>
+    <string name="logToRaw">Log frames to Binary file</string>
+    <string name="logToHuman">Log frames to Human readable file (for debug use)</string>
+    <string name="logToCsv">Log frames to CSV file</string>
+    <string name="speakerSettings">Audio Settings</string>
+    <string name="chkAutoSetVolume">Set minimum volume upon startup</string>
         
         
     <string name="btnDeleteLogs">Delete all logfiles</string>
@@ -71,10 +76,6 @@
     <string name="cyclicSpeakerEnabledAtStartup">Cyclic speaker enabled at startup</string>
     
         
-    <string name="logToRaw">Log frames to Binary file</string>
-    <string name="logToHuman">Log frames to Human readable file (for debug use)</string>
-    <string name="logToCsv">Log frames to CSV file</string>
-    <string name="speakerSettings">Speaker Settings</string>
     <string name="chConf_Description">Description</string>
     <string name="chConf_Unit">Unit</string>
     <string name="chConf_Offset">Offset</string>

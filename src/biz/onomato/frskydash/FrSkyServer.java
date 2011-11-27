@@ -116,6 +116,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int _framecountTx=0;
 	private boolean _btAutoEnable;
 	private boolean _btAutoConnect;
+	private int _minimumVolumeLevel;
+	private boolean _autoSetVolume;
 	
 	private double[] hVal;
 	private String[] hName;
@@ -1013,6 +1015,9 @@ private final Handler mHandlerBT = new Handler() {
 		logger.setLogToCsv(logToCsv);
 	}
 	
+	
+	// Settings setters and getters
+	///TODO: Have setters and getters work with settings store
 	public void setBtAutoEnable(boolean btAutoEnable)
 	{
 		_btAutoEnable = btAutoEnable;
@@ -1031,6 +1036,28 @@ private final Handler mHandlerBT = new Handler() {
 	public boolean getBtAutoConnect()
 	{
 		return _btAutoConnect;
+	}
+	
+	public void setMinimumVolume(int minimumVolumePrc)
+	{
+		_minimumVolumeLevel=minimumVolumePrc;
+		_editor.putInt("initialMinimumVolume", minimumVolumePrc);
+		_editor.commit();
+	}
+	public int getMinimumVolume()
+	{
+		//return _minimumVolumeLevel;
+		return _settings.getInt("initialMinimumVolume", 70);
+	}
+	public void setAutoSetVolume(boolean autoSetVolume)
+	{
+		_autoSetVolume = autoSetVolume;
+		_editor.putBoolean("autoSetVolume", _autoSetVolume);
+		_editor.commit();
+	}
+	public boolean getAutoSetVolume()
+	{
+		return _settings.getBoolean("autoSetVolume", false);
 	}
 	
 	public boolean setChannelConfiguration(SharedPreferences settings,Channel channel)
@@ -1056,6 +1083,8 @@ private final Handler mHandlerBT = new Handler() {
 	
 	//public void setSettings(SharedPreferences settings)
 	public void setSettings()
+	///TODO: remove entries here when setters/getters do this work
+	
 	{
 //		_settings = settings;
 //		editor = _settings.edit();

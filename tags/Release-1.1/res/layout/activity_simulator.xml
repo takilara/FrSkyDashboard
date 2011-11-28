@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout android:id="@+id/linearLayout0" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
+    <ScrollView 
+	    android:id="@+id/ScrollViewSimulator"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+    <LinearLayout android:id="@+id/linearLayout1" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
+        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout2" android:layout_width="match_parent">
+            <TextView android:layout_height="wrap_content" android:id="@+id/textView1" android:text="AD1" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
+            <TextView android:layout_height="wrap_content" android:id="@+id/sim_ad1raw" android:text="0" android:layout_width="wrap_content"></TextView>
+        </LinearLayout>
+        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_ad1" android:layout_width="match_parent" android:max="255"></SeekBar>
+        
+        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:layout_width="match_parent">
+            <TextView android:layout_height="wrap_content" android:id="@+id/textView2" android:text="AD2" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
+            <TextView android:text="0" android:id="@+id/sim_ad2raw" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+        </LinearLayout>
+        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_ad2" android:layout_width="match_parent" android:max="255"></SeekBar>
+        
+        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout4" android:layout_width="match_parent">
+            <TextView android:layout_height="wrap_content" android:id="@+id/textView3" android:text="RSSItx" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
+            <TextView android:text="0" android:id="@+id/sim_rssitxraw" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+        </LinearLayout>
+        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_rssitx" android:layout_width="match_parent" android:max="255"></SeekBar>
+        
+        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout5" android:layout_width="match_parent">
+            <TextView android:layout_height="wrap_content" android:id="@+id/textView4" android:text="RSSIrx" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
+            <TextView android:text="0" android:id="@+id/sim_rssirxraw" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+        </LinearLayout>
+        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_rssirx" android:layout_width="match_parent" android:max="255"></SeekBar>
+         
+        <View
+        	android:layout_height="2dip"
+        	android:background="#FF909090" 
+        	android:layout_width="match_parent" />
+        <TextView android:layout_height="wrap_content" android:id="@+id/textView5" android:text="Frame:" android:layout_width="match_parent"></TextView>
+        <TextView android:layout_height="wrap_content" android:id="@+id/outFrame" android:text="" android:layout_width="match_parent"></TextView>
+        <View
+        	android:layout_height="2dip"
+        	android:background="#FF909090" 
+        	android:layout_width="match_parent" />
+        <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/sim_btnSend" android:text="Send"></Button>
+        <ToggleButton android:text="Continous" android:id="@+id/sim_tglBtn1" android:layout_width="match_parent" android:textOn="Cyclic Sim On" android:textOff="Cyclic Sim Off" android:layout_height="wrap_content"></ToggleButton>
+        
+    </LinearLayout>
+    </ScrollView>
+</LinearLayout>

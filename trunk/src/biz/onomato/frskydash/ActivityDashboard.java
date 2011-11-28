@@ -67,6 +67,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     private IntentFilter mIntentFilter;
     private IntentFilter mIntentFilterBt;
+    private int _flashCounter=0;
     // service stuff
     private FrSkyServer server=null;
     
@@ -169,11 +170,34 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			    	{
 			    		tv_statusBt.setBackgroundColor(0xff00aa00);
 			    		tv_statusBt.setText("Bt: UP");
+			    		tv_statusBt.setTextColor(0xff000000);
 			    	}
 			    	else
 			    	{
-			    		tv_statusBt.setBackgroundColor(0xffff0000);
-			    		tv_statusBt.setText("Bt: DOWN");
+			    		// if connecting, do something else..
+			    		if(server.getConnecting())
+			    		{
+			    			_flashCounter++;
+			    			if(_flashCounter>=8) _flashCounter=0;
+			    			if(_flashCounter<4)
+			    			{
+			    				tv_statusBt.setBackgroundColor(0xff00aa00);
+			    				tv_statusBt.setText("Bt: Connecting");
+			    				tv_statusBt.setTextColor(0xff000000);
+			    			}
+			    			else
+			    			{
+			    				tv_statusBt.setBackgroundColor(0xff000000);
+				    			tv_statusBt.setText("Bt: Connecting");
+				    			tv_statusBt.setTextColor(0xffaaaaaa);
+			    			}
+			    		}
+			    		else
+			    		{
+			    			tv_statusBt.setBackgroundColor(0xffff0000);
+			    			tv_statusBt.setText("Bt: DOWN");
+			    			tv_statusBt.setTextColor(0xff000000);
+			    		}
 			    	}
 			    	
 			    	//if(server.fps>0)

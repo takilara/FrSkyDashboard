@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources> 
+    
+    <!--  Application  -->
+    <string name="FrSkySettings_RSSI">Tx - RSSI</string>
+    <string name="FrSkySettings_AD1">Analog channel 1 (AD1)</string>
+    <string name="FrSkySettings_AD2">Analog channel 2 (AD2)</string>
+    <string name="FrSkySettings_Send">Send</string>
+    <string name="FrSkySettings_Value">Value</string>
+    <string name="FrSkySettings_Than">Than</string>
+    <string name="FrSkySettings_Alarm_1">Alarm 1</string>
+    <string name="FrSkySettings_Alarm_2">Alarm 2</string>
+    <string name="FrSkySettings_Alarm_Level">Alarm Level</string>
+    <string name="FrSkySettings_Alarm_meaning">Alarm meaning</string>
+    
+    <string-array name="alarm_level">
+	<item>Alarm: Off</item>
+	<item>Alarm: Low</item>
+	<item>Alarm: Mid</item>
+	<item>Alarm: High</item>
+	</string-array>
+	
+    <string-array name="alarm_threshold">
+	<item>1</item>
+	<item>2</item>
+	<item>3</item>
+	<item>4</item>
+	</string-array>
+	
+	<string-array name="alarm_relative">
+		<item>Value lower than</item>
+		<item>Value greater than</item>
+	</string-array>
+    
+</resources>

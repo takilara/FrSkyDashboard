@@ -382,7 +382,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			}
 			Log.i(TAG,"Setting up server from settings");
 	
-			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+			Log.d(TAG,"Cyclic speaker should be set to "+server.getCyclicSpeechEnabledAtStartup()+" at startup");
+			btnTglSpeak.setChecked(server.getCyclicSpeechEnabledAtStartup());
+			
+			//server.setCyclicSpeechEnabled(server.getCyclicSpeechEnabledAtStartup());
 
 			// Check volume
 			AudioManager audioManager = 
@@ -457,6 +460,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    	case R.id.dash_tglSpeak:
 	    		
 	    		//globals.setCyclicSpeech(btnTglSpeak.isChecked());
+	    		// This toggles the speaker
 	    		if(server!=null) {server.setCyclicSpeechEnabled(btnTglSpeak.isChecked());}
 	    		
 	    		

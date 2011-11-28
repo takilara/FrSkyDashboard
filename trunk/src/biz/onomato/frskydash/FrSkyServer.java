@@ -455,6 +455,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				break;
 			case CMD_START_SPEECH:
 				Log.i(TAG,"Start Speaker");
+				
 				break;
 			case CMD_STOP_SPEECH:
 				Log.i(TAG,"Stop Speaker");
@@ -590,15 +591,16 @@ public class FrSkyServer extends Service implements OnInitListener {
     		String myGreeting = "Application has enabled Text to Speech";
         	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
         	
+        	setCyclicSpeechEnabled(getCyclicSpeechEnabledAtStartup());
         	//getCyclicSpeechEnabled();
-        	if(getCyclicSpeechEnabled())
-    		{
-    			startCyclicSpeaker();
-    		}
-    		else
-    		{
-    			stopCyclicSpeaker();
-    		}
+//        	if(getCyclicSpeechEnabledAtStartup())
+//    		{
+//    			startCyclicSpeaker();
+//    		}
+//    		else
+//    		{
+//    			stopCyclicSpeaker();
+//    		}
     	}
     	} else {
     	// Initialization failed.
@@ -867,18 +869,38 @@ private final Handler mHandlerBT = new Handler() {
 		sendBroadcast(i);
 	}
 
-	public boolean getCyclicSpeechEnabled()
+	
+	// Related to startup default for cyclic speaker
+	public boolean getCyclicSpeechEnabledAtStartup()
 	{
 		return _settings.getBoolean("cyclicSpeakerEnabledAtStartup", false);
 	}
 	
-	public void setCyclicSpeechEnabled(boolean state)
+	public void setCyclicSpeechEnabledAtStartup(boolean state)
 	{
 		Log.i(TAG,"Setting Cyclic speech to: "+state);
 		_editor.putBoolean("cyclicSpeakerEnabledAtStartup", state);
 		_editor.commit();
-		_cyclicSpeechEnabled = state;
-		
+		//_cyclicSpeechEnabled = state;
+	}
+	
+	
+	// Current state of cyclic speaker
+	public boolean getCyclicSpeechEnabled()
+	{
+		return _cyclicSpeechEnabled;
+	}
+	public void setCyclicSpeechEnabled(boolean cyclicSpeakerEnabled)
+	{
+		_cyclicSpeechEnabled = cyclicSpeakerEnabled;
+		if(cyclicSpeakerEnabled) 
+		{
+			startCyclicSpeaker();
+		}
+		else
+		{
+			stopCyclicSpeaker();
+		}
 	}
 	
 	public void simStart()

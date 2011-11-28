@@ -111,7 +111,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				//CheckBox chkCyclicSpeakerEnabled = (CheckBox) v;
 				//editor.putBoolean("cyclicSpeakerEnabledAtStartup", chkCyclicSpeakerEnabled.isChecked());
 				//editor.commit();
-				server.setCyclicSpeechEnabled(((CheckBox) v).isChecked());
+				server.setCyclicSpeechEnabledAtStartup(((CheckBox) v).isChecked());
 				
 				break;
 			case R.id.chkLogToCsv:
@@ -160,7 +160,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		Log.i(TAG,"Save current settings");
 		try
 		{
-			server.setCyclicSpeechEnabled(chkCyclicSpeakerEnabled.isChecked());
+			server.setCyclicSpeechEnabledAtStartup(chkCyclicSpeakerEnabled.isChecked());
 			server.setBtAutoEnable(chkBtAutoEnable.isChecked());
 			server.setBtAutoConnect(chkBtAutoConnect.isChecked());
 			server.setLogToCsv(chkLogToCsv.isChecked());
@@ -246,7 +246,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	        Log.i(TAG,"Edit field currently at +"+edCyclicInterval.getText().toString());
 	        edCyclicInterval.setText(String.valueOf(interval));
 	        //edCyclicInterval.setText(interval);
-	        chkCyclicSpeakerEnabled.setChecked(server.getCyclicSpeechEnabled());
+	        chkCyclicSpeakerEnabled.setChecked(server.getCyclicSpeechEnabledAtStartup());
 	        chkLogToRaw.setChecked(server.getLogToRaw());
 	        chkLogToHuman.setChecked(server.getLogToHuman());
 	        chkLogToCsv.setChecked(server.getLogToCsv());

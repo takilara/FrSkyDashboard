@@ -46,6 +46,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private static final int REQUEST_ENABLE_BT = 2;
 	private IntentFilter mIntentFilterBt;
 	private boolean bluetoothEnabledAtStart;
+	private boolean _connecting=false;
     private BluetoothAdapter mBluetoothAdapter = null;
 	
     private int MY_DATA_CHECK_CODE;
@@ -372,8 +373,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 		mSerialService.connect(_device);
 	}
 
+	public void setConnecting(boolean connecting)
+	{
+		_connecting = connecting;
+	}
+	public boolean getConnecting()
+	{
+		return _connecting;
+	}
+	
 	public void connect(BluetoothDevice device)
 	{
+		setConnecting(true);
+		
 		logger.stop();
 		_device = device;
 		mSerialService.connect(device);
@@ -736,6 +748,7 @@ private final Handler mHandlerBT = new Handler() {
                 switch (msg.arg1) {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Log.d(TAG,"BT connected");
+                	setConnecting(false);
                 	statusBt = true;
                 	
                 	_manualBtDisconnect = false;
@@ -745,6 +758,7 @@ private final Handler mHandlerBT = new Handler() {
                     
                 case BluetoothSerialService.STATE_CONNECTING:
                 	Log.d(TAG,"BT connecting");
+                	setConnecting(true);
                 	 //mTitle.setText(R.string.title_connecting);
                     break;
                     
@@ -753,7 +767,7 @@ private final Handler mHandlerBT = new Handler() {
                 case BluetoothSerialService.STATE_NONE:
                 	Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
-                	
+                	setConnecting(false);
                 	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected();	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1

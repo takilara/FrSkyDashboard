@@ -493,6 +493,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		Log.i(TAG,"onDestroy");
 		simStop();
+		unregisterReceiver(mIntentReceiverBt);
 		//sim.reset();
 		
 		Log.i(TAG,"Releasing Wakelock");

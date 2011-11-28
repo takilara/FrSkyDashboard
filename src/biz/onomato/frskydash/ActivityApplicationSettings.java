@@ -141,16 +141,16 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				//editor.putBoolean("btAutoConnect", ((CheckBox) v).isChecked());
 				//editor.commit();
 				server.setBtAutoConnect(((CheckBox) v).isChecked());
+				break;
 			case R.id.chkAutoSetVolume:
 				//editor.putBoolean("autoSetVolume", ((CheckBox) v).isChecked());
 				//editor.commit();
 				server.setAutoSetVolume(((CheckBox) v).isChecked());
 				sbInitialMinimumVolume.setEnabled(((CheckBox) v).isChecked());
+				break;
 			case R.id.btnSave:
 				Log.i(TAG,"Store new interval");
 				save();
-				
-				
 				break;
 
 				

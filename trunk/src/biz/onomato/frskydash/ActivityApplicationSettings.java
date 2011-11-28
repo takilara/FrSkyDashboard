@@ -152,8 +152,6 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				Log.i(TAG,"Store new interval");
 				save();
 				break;
-
-				
 		}
 	}
 	

@@ -648,6 +648,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		int tad1 = createChannel("AD1", "Default description", 0, (float) 1, "V","Volt");
 		AD1 = getChannelById(tad1);
 		
+		// test to make a channel that uses values from AD1
+		//Channel testChannel1 =  new Channel("TestAD1_1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
+		//Channel testChannel2 =  new Channel("TestAD1_2", "channel that derives from AD1, multiplies by 100",0, 100, "V", "Volt");
+		//testChannel.setMovingAverage(10);
+		//AD1.addListener(testChannel1);
+		//AD1.addListener(testChannel2);
+		
 		int tad2 = createChannel("AD2", "Default description", 0, (float) 1, "V","Volt");
 		AD2 = getChannelById(tad2);
 		

@@ -86,6 +86,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     private FrskyDatabase channelDb;
     
     private Logger logger;
+    private Model _currentModel;
 	
 	private TextToSpeech mTts;
 	private int _speakDelay;
@@ -138,59 +139,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
+	public Model currentModel;
+	
 	
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
 	
 	
-	@Override
-	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		Log.i(TAG,"Something tries to bind to me");
-		return mBinder;
-		//return null;
-	}
 	
-	
-
-	
-    private void showNotification() {
-    	 CharSequence text = "FrSkyServer Started";
-    	 Notification notification = new Notification(R.drawable.ic_status, text, System.currentTimeMillis());
-    	 //notification.defaults |= Notification.FLAG_ONGOING_EVENT;
-    	 //notification.flags = Notification.DEFAULT_LIGHTS;
-    	 notification.ledOffMS = 500;
-    	 notification.ledOnMS = 500;
-    	 notification.ledARGB = 0xff00ff00;
-
-    	 notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-    	 notification.flags |= Notification.FLAG_ONGOING_EVENT;
-    	 notification.flags |= Notification.FLAG_NO_CLEAR;
-
-    	 
-    	 //notification.flags |= Notification.FLAG_FOREGROUND_SERVICE; 
-    	 
-    	 // The following intent makes sure that the application is "resumed" properly
-    	 //Intent notificationIntent = new Intent(this,Frskydash.class);
-    	 Intent notificationIntent = new Intent(this,ActivityDashboard.class);
-    	 notificationIntent.setAction(Intent.ACTION_MAIN);
-         notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-    	 
-    	 // http://developer.android.com/guide/topics/ui/notifiers/notifications.html
-    	 PendingIntent contentIntent = PendingIntent.getActivity(this, 0,notificationIntent, 0);
-    	notification.setLatestEventInfo(this, "FrSkyDash",text, contentIntent);
-    	startForeground(NOTIFICATION_ID,notification);
-    }
 	
 	@Override
 	public void onCreate()
 	{
-
-        
-		
-		
 		Log.i(TAG,"onCreate");
 		super.onCreate();
 		context = getApplicationContext();
@@ -208,6 +169,9 @@ public class FrSkyServer extends Service implements OnInitListener {
         
 		showNotification();		
 		
+		
+		
+		
 		///TODO: in setupChannels, if settings exist, use that for setup
 		setupChannels();
 
@@ -218,6 +182,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 		logger.setLogToCsv(getLogToCsv());
 		logger.setLogToHuman(getLogToHuman());
 
+		
+		String _prevModel = "FunCub 1";
+		_currentModel = Model.createFromSettings(_prevModel);
+		
+		Log.d(TAG,"The current model is: "+_currentModel.getName());
+		
+		Channel testChannel1 =  new Channel("TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
+		Channel testChannel2 =  new Channel("TestAD2", "channel that derives from AD2, multiplies by 100",0, 100, "V", "Volt");
+
+		AD1.addListener(testChannel1);
+		AD2.addListener(testChannel2);
+		_currentModel.addChannel(testChannel1);
+		_currentModel.addChannel(testChannel2);
 		
 		
 		mIntentFilterBt = new IntentFilter();
@@ -332,6 +309,49 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 	}
+	
+	
+	@Override
+	public IBinder onBind(Intent arg0) {
+		// TODO Auto-generated method stub
+		Log.i(TAG,"Something tries to bind to me");
+		return mBinder;
+		//return null;
+	}
+	
+	
+
+	
+    private void showNotification() {
+    	 CharSequence text = "FrSkyServer Started";
+    	 Notification notification = new Notification(R.drawable.ic_status, text, System.currentTimeMillis());
+    	 //notification.defaults |= Notification.FLAG_ONGOING_EVENT;
+    	 //notification.flags = Notification.DEFAULT_LIGHTS;
+    	 notification.ledOffMS = 500;
+    	 notification.ledOnMS = 500;
+    	 notification.ledARGB = 0xff00ff00;
+
+    	 notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+    	 notification.flags |= Notification.FLAG_ONGOING_EVENT;
+    	 notification.flags |= Notification.FLAG_NO_CLEAR;
+
+    	 
+    	 //notification.flags |= Notification.FLAG_FOREGROUND_SERVICE; 
+    	 
+    	 // The following intent makes sure that the application is "resumed" properly
+    	 //Intent notificationIntent = new Intent(this,Frskydash.class);
+    	 Intent notificationIntent = new Intent(this,ActivityDashboard.class);
+    	 notificationIntent.setAction(Intent.ACTION_MAIN);
+         notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+    	 
+    	 // http://developer.android.com/guide/topics/ui/notifiers/notifications.html
+    	 PendingIntent contentIntent = PendingIntent.getActivity(this, 0,notificationIntent, 0);
+    	notification.setLatestEventInfo(this, "FrSkyDash",text, contentIntent);
+    	startForeground(NOTIFICATION_ID,notification);
+    }
+	
+	
 	
 	/**
 	 * Set time between reads

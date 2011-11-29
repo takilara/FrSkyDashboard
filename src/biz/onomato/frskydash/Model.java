@@ -1,5 +1,9 @@
 package biz.onomato.frskydash;
 
+import java.util.ArrayList;
+
+import android.util.Log;
+
 public class Model {
 	
 	private static final String TAG="ModelClass";
@@ -11,6 +15,10 @@ public class Model {
 	public static final int MODEL_TYPE_MULTIROTOR=4;
 	public static final int MODEL_TYPE_UNKNOWN=-1;
 	
+	private static final boolean DEBUG=true;
+	
+	private ArrayList<Channel> _channels;
+	
 	private int _type;
 	private String _name;
 	
@@ -20,7 +28,9 @@ public class Model {
 	{
 		setName(modelName);
 		setType(modelType);
+		_channels = new ArrayList<Channel>();
 	}
+	
 	public Model(String modelName)
 	{
 		this(modelName,MODEL_TYPE_UNKNOWN);
@@ -57,13 +67,29 @@ public class Model {
 	// I need to be able to add channels to this model
 	public void addChannel(Channel channel)
 	{
-		
+		if(!_channels.contains(channel))
+		{
+			_channels.add(channel);
+		}
 	}
 	
 	// I need to be able to delete channels from this model
-	public void deleteChannel(Channel channel)
+	public boolean removeChannel(Channel channel)
 	{
-		
+		return _channels.remove(channel);
+	}
+	
+	// I need to be able to return list of channels from this model
+	public Channel[] getChannels()
+	{
+		Channel[] outChannels = new Channel[_channels.size()];
+		int i=0;
+		for(Channel ch:_channels)
+		{
+			outChannels[i]=ch;
+			i++;
+		}
+		return outChannels;
 	}
 	
 	// I need to be able to add alarms to this model
@@ -89,6 +115,24 @@ public class Model {
 	public void loadSettings()
 	{
 		
+	}
+	
+	public boolean loadFromSettings(String modelName)
+	{
+		// False if not found
+		
+		// True if found
+		return true;
+	}
+	
+	public static Model createFromSettings(String modelName)
+	{
+		if(DEBUG) Log.d(TAG,"Load settings for '"+modelName+"' from settingsstore");
+		Model m = new Model(modelName);
+		m.loadFromSettings(modelName);
+		
+		// if not found, create it before returning it
+		return m;
 	}
 
 }

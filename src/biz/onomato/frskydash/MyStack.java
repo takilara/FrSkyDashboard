@@ -2,10 +2,10 @@ package biz.onomato.frskydash;
 
 public class MyStack {
 	private int _size;
-	private int[] _stack;
+	private double[] _stack;
 	public MyStack(int Size)
 	{
-		_stack = new int[Size];
+		_stack = new double[Size];
 		_size=Size;
 		reset();
 	}
@@ -32,7 +32,7 @@ public class MyStack {
 		}
 	}
 	
-	public int push(int item)
+	public double push(double item)
 	{
 		for(int n=_size-2;n>=0;n--)
 		{
@@ -42,10 +42,10 @@ public class MyStack {
 		return average();
 	}
 	
-	public int average()
+	public double average()
 	{
 		int _cnt = 0;
-		int _sum = 0;
+		double _sum = 0;
 		for(int n=0;n<_stack.length;n++)
 		{
 			if(_stack[n]>=0)
@@ -54,7 +54,7 @@ public class MyStack {
 				_sum += _stack[n];
 			}
 		}
-		int _avg = _sum/_cnt;
+		double _avg = _sum/_cnt;
 		return _avg;
 	}
 }

@@ -3,11 +3,12 @@ package biz.onomato.frskydash;
 import android.content.SharedPreferences;
 import android.util.Log;
 import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class Channel {
+public class Channel implements OnChannelListener{
 	private static final String TAG = "Channel";
 	
 	public static final int CHANNELTYPE_AD1=0;
@@ -16,14 +17,14 @@ public class Channel {
 	//public static final String crlf="\r\n";
 	public static final String delim=";";
 	
-	public int raw,rawAvg;
+	public double raw,rawAvg;
 	public double eng,engAvg;
-	private int _raw;
+	private double _raw;
 	
 	public double rounder;
 	
 	private double _val;
-	private int _avg;
+	private double _avg;
 	private String _name;
 	private String _description;
 	private float _offset;
@@ -40,6 +41,7 @@ public class Channel {
 	public Alarm[] alarms;
 	public int alarmCount = 0;
 	
+	private ArrayList <OnChannelListener> _listeners;
 	
 	private MyStack _stack;
 	SharedPreferences _settings;
@@ -50,6 +52,10 @@ public class Channel {
 	
 	public Channel(String name,String description,float offset,float factor,String unit,String longUnit)
 	{
+		// instanciate listeners list
+		_listeners = new ArrayList<OnChannelListener> ();
+
+		rounder=1;
 		silent = false;
 		_precision = 2;
 		
@@ -60,6 +66,7 @@ public class Channel {
 		_shortUnit = unit;
 		_longUnit = longUnit;
 		_mc = new MathContext(2);
+		setMovingAverage(0);
 
 //		_movingAverage = 10;
 //		_raw=-1;
@@ -71,6 +78,11 @@ public class Channel {
 		
 		// FRSKY channels only for now
 		alarms = new Alarm[2];
+	}
+	
+	public void addListener(OnChannelListener channel)
+	{
+		_listeners.add(channel);
 	}
 	
 	public void reset()
@@ -129,20 +141,43 @@ public class Channel {
 	
 	public double setRaw(int value)
 	{
+		return setRaw((double) value);
+	}
+	
+	public double setRaw(double value)
+	{
 		timestamp = new Date();
 		_avg = _stack.push(value);
-		//Log.i(TAG,"STACK: "+_stack.toString());
-		//Log.i(TAG,"Avg: "+_avg);
+
+		
+		Log.d(TAG,_name+" setting new input value to "+value);
 		_raw = value;
 		//_val = (_avg * _factor)+_offset;
 		_val = convert(_avg);
+		double outVal =getValue(true);
+		Log.d(TAG,_name+" new outValue should now be "+outVal);
 		
-		return getValue(true);
+		// send new avg value to listeners
+		for(OnChannelListener ch : _listeners)
+		{
+			Log.d(TAG,"\t"+_name+" send to listener");
+			ch.onSourceUpdate(outVal);
+		}
+		
+		return outVal;
 	}
 	
-	private double convert(int inputValue)
+	public void onSourceUpdate(double sourceValue)
+	{
+		
+		double v = setRaw(sourceValue);
+		Log.d(TAG,_name+" updated by parent to "+sourceValue+" -> "+v+" "+_shortUnit);
+	}
+	
+	private double convert(double inputValue)
 	{
 		double o = (inputValue * _factor)+_offset;
+		Log.d(TAG,_name+" convert from inputvalue ("+inputValue+") to outputvalue ("+o+")");
 		return Math.round(o*rounder)/rounder;
 	}
 	
@@ -165,6 +200,7 @@ public class Channel {
 	
 	public double getValue(boolean average)
 	{
+		Log.i(TAG, _name+" Try to calculate new outValue");
 		double tVal;
 		if(average)
 		{
@@ -179,11 +215,11 @@ public class Channel {
 		//return getValue(_avg);
 	}
 	
-	public int getRaw()
+	public double getRaw()
 	{
 		return getRaw(false);
 	}
-	public int getRaw(boolean average)
+	public double getRaw(boolean average)
 	{
 		if(average)
 		{
@@ -222,13 +258,13 @@ public class Channel {
 	}
 	
 
-	public String toEng(int inputValue)
+	public String toEng(double inputValue)
 	{
 		//return String.format("%s %s", getValue(inputValue),_shortUnit);
 		return toEng(inputValue,false);
 	}
 	
-	public String toEng(int inputValue,boolean longUnit)
+	public String toEng(double inputValue,boolean longUnit)
 	{
 		if(longUnit==true)
 		{

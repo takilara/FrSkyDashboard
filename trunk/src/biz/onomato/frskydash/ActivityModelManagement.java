@@ -27,6 +27,7 @@ import android.widget.Toast;
 public class ActivityModelManagement extends Activity implements OnClickListener {
 	private static final String TAG = "Model Management";
 	private FrSkyServer server;
+	private static final int MODEL_CONFIG_RETURN=0;
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
 	private boolean DEBUG=true;
@@ -68,6 +69,9 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 				break;
 			case R.id.btnAddModel:
 				if(DEBUG) Log.d(TAG,"User Clicked Add Model");
+				Intent i = new Intent(this, ActivityModelConfig.class);
+	    		i.putExtra("modelId", -1);	// Should create new model
+	    		startActivityForResult(i,MODEL_CONFIG_RETURN);
 				break;
 		}
 	}
@@ -142,6 +146,21 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		}
 	};
 
-	
-	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+    {
+    	switch (requestCode)
+    	{
+    		case MODEL_CONFIG_RETURN:
+    			switch(resultCode)
+	        	{
+	        		case RESULT_OK:
+	        			if(DEBUG) Log.i(TAG,"User saved new settings");
+	        			break;
+	        		case RESULT_CANCELED:
+	        			if(DEBUG) Log.i(TAG,"User cancelled with back");
+	        			break;
+	        	}
+    			break;
+    	}
+    }
 }

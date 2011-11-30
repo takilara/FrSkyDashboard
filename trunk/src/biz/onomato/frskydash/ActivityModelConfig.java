@@ -18,7 +18,12 @@ import android.widget.TextView;
 
 public class ActivityModelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ModelConfig";
+	private static final boolean DEBUG=true;
 	private FrSkyServer server;
+	
+	private int _modelId;
+	
+	private Button btnSave,btnAddChannel; 
 	
     
 	@Override
@@ -29,14 +34,25 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	
 		
 		///TODO: Use intent to get initial Model object?
-//		Intent launcherIntent = getIntent();
-//		_channelId = launcherIntent.getIntExtra("channelId", -1);
+		Intent launcherIntent = getIntent();
+		_modelId = launcherIntent.getIntExtra("modelId", -1);
 //		Log.d(TAG, "Channel Id is: "+_channelId);
+		
+		if(_modelId==-1)
+		{
+			if(DEBUG) Log.d(TAG,"Configure new Model object");
+		}
+		else
+		{
+			if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+		}
 		
 		// Show the form
 		setContentView(R.layout.activity_modelconfig);
 
 		// Find all form elements
+		btnSave				= (Button) findViewById(R.id.modConf_btnSave);
+		btnAddChannel		= (Button) findViewById(R.id.modConf_btnAddChannel);
 //		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
 //		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
 //		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
@@ -49,8 +65,9 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 //		
 //		btnSave				= (Button) findViewById(R.id.chConf_btnSave);
 //		
-//		
-//		btnSave.setOnClickListener(this);
+		// Set Listeners
+		btnSave.setOnClickListener(this);
+		btnAddChannel.setOnClickListener(this);
 	
 	}
 	
@@ -119,13 +136,22 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch(v.getId()){
 			case R.id.modConf_btnSave:
-//				Log.i(TAG,"Apply settings to channel: "+_channelId);
+				if(DEBUG) Log.d(TAG,"Save this model");
 //				applyChannel();
 //				Log.i(TAG,"Store settings to database for channel: "+_channelId);
 //				server.saveChannelConfig(channel);
 //				Log.i(TAG,"Go back to dashboard");
-//				this.setResult(RESULT_OK);
+				
+				this.setResult(RESULT_OK);
 				this.finish();
+				break;
+			case R.id.modConf_btnAddChannel:
+				if(DEBUG) Log.d(TAG,"Add a channel");
+//				applyChannel();
+//				Log.i(TAG,"Store settings to database for channel: "+_channelId);
+//				server.saveChannelConfig(channel);
+//				Log.i(TAG,"Go back to dashboard");
+				
 				break;
 		}
 	}

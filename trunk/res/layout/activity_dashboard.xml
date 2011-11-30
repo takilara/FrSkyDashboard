@@ -170,6 +170,12 @@
         android:gravity="bottom"
         android:orientation="vertical" >
 
+        <Button
+            android:id="@+id/dash_btnConfigCurrentModel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dash_configCurrentModel" />
+
         <ToggleButton
             android:id="@+id/dash_tglSpeak"
             android:layout_width="match_parent"

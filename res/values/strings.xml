@@ -67,6 +67,9 @@
     
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    
+        <!--  Activity Dashboard -->
+    <string name="dash_configCurrentModel">Configure Current Model</string>
         
         
         <!--  DeviceListActivity -->
@@ -83,7 +86,7 @@
     <string name="save">Save</string>
     <string name="cyclicSpeakerEnabledAtStartup">Cyclic speaker enabled at startup</string>
     
-        
+	<!--  Channel configuration  -->       
     <string name="chConf_Description">Description</string>
     <string name="chConf_Unit">Unit</string>
     <string name="chConf_Offset">Offset</string>
@@ -97,5 +100,12 @@
     <string name="models">Models</string>
 	<string name="addModel">Add Model</string>        
         
+	    
+	<!--  Model configuration  -->    
+    <string name="modelConf_Description">Description</string>
+    <string name="modelConf_ModelType">Model Type</string>
+    <string name="modelConf_Channels">Channels</string>
+    <string name="modelConf_addChannel">Add Channel</string>
     
+        
 </resources>

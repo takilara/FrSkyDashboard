@@ -21,14 +21,17 @@ public class Model {
 	
 	private int _type;
 	private String _name;
+	private int _id;
 	
 
 	// Constructor
 	public Model(String modelName,int modelType)
 	{
+		
 		setName(modelName);
 		setType(modelType);
 		_channels = new ArrayList<Channel>();
+		setId(-1);
 	}
 	
 	public Model(String modelName)
@@ -53,6 +56,15 @@ public class Model {
 		this._type = modelType;
 	}
 
+	public void setId(int id)
+	{
+		_id = id;
+	}
+	
+	public int getId()
+	{
+		return _id;
+	}
 
 	public String getName() {
 		return _name;

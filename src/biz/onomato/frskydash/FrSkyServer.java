@@ -193,8 +193,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		AD1.addListener(testChannel1);
 		AD2.addListener(testChannel2);
+		_currentModel.setId(1);
 		_currentModel.addChannel(testChannel1);
 		_currentModel.addChannel(testChannel2);
+		
 		
 		
 		mIntentFilterBt = new IntentFilter();
@@ -1157,6 +1159,16 @@ private final Handler mHandlerBT = new Handler() {
 		return true;
 	}
 	
+	
+	public Model getCurrentModel()
+	{
+		return _currentModel;
+	}
+	
+	public void setCurrentModel(Model currentModel)
+	{
+		_currentModel = currentModel;
+	}
 	
 	public SharedPreferences getSettings()
 	{

@@ -25,6 +25,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -42,6 +43,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     private static final int DIALOG_ABOUT_ID=0;
     private Dialog dlgAbout;
+    private static final boolean DEBUG=true;
     
     // Used for GUI updates
     private Handler tickHandler;
@@ -55,6 +57,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
     private static final int MY_DATA_CHECK_CODE = 7;
     private static final int CHANNEL_CONFIG_RETURN = 1;
+    private static final int MODEL_CONFIG_RETURN = 8;
     
     //MyApp globals;
     
@@ -63,6 +66,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private TextView tv_rssitx,tv_rssirx,tv_fps;
     private TextView tv_dash_ch0NameDesc,tv_dash_ch1NameDesc;
     private ToggleButton btnTglSpeak;
+    private Button btnConfigCurrentModel;
     private TextToSpeech mTts;
     
     private IntentFilter mIntentFilter;
@@ -140,12 +144,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         View btnEditChannel1 = findViewById(R.id.dash_btnEditChannel1);
         btnTglSpeak = (ToggleButton) findViewById(R.id.dash_tglSpeak);
 
+        btnConfigCurrentModel = (Button) findViewById(R.id.dash_btnConfigCurrentModel);
+        
         
         // Setup Click Listeners
         btnEditChannel0.setOnClickListener(this);
         btnEditChannel1.setOnClickListener(this);
         btnTglSpeak.setOnClickListener(this);
-        
+        btnConfigCurrentModel.setOnClickListener(this);
 
         // Code to update GUI cyclic
         tickHandler = new Handler();
@@ -491,6 +497,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    		ii.putExtra("channelId", 1);
 	    		startActivityForResult(ii,CHANNEL_CONFIG_RETURN);
 	    		break;
+	    		
+	    	case R.id.dash_btnConfigCurrentModel:
+	    		if(DEBUG) Log.i(TAG,"Edit current model");
+	    		Intent iii = new Intent(this, ActivityModelConfig.class);
+	    		iii.putExtra("modelId", server.getCurrentModel().getId());
+	    		startActivityForResult(iii,MODEL_CONFIG_RETURN);
+	    		break;
     	}
     }
     
@@ -564,6 +577,17 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        			break;
 	        	}
 	        	break;
+            case MODEL_CONFIG_RETURN:
+	        	switch(resultCode)
+	        	{
+	        		case RESULT_OK:
+	        			Log.i(TAG,"User saved new settings for current model");
+	        			break;
+	        		case RESULT_CANCELED:
+	        			Log.i(TAG,"User cancelled with back");
+	        			break;
+	        	}
+	        	break;
         }
         	
         // --
@@ -579,7 +603,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	
     	// stop bt
     	///TODO: Only do below if state was disabled before..
-    	if(!bluetoothEnabledAtStart)
+    	if((!bluetoothEnabledAtStart) && (mBluetoothAdapter != null))
     	{
     		mBluetoothAdapter.disable();
     	}

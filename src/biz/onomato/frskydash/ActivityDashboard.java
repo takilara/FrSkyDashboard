@@ -686,6 +686,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     			Intent mIntent = new Intent(this,ActivityModuleSettings.class);
     			startActivity(mIntent);
     			break;
+    		case R.id.model_management:
+    			Log.i(TAG,"User clicked on Manage models");
+    			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
+    			//Intent mIntent = new Intent(this,ActivityModuleSettings.class);
+    			startActivity(new Intent(this,ActivityModelManagement.class));
+    			break;
     		case R.id.menu_choose_simulator:
     			Log.i(TAG,"User clicked on Simulator");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();

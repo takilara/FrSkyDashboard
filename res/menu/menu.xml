@@ -14,6 +14,9 @@
 		android:visible="false" 
 		android:title="@string/disconnect_bluetooth_label"  />
 	
+	<item android:id="@+id/model_management"
+		android:title="@string/menu_choose_model_management_label" />
+	
 	<item android:id="@+id/menu_choose_simulator"
 		android:title="@string/menu_choose_simulator_label" />
 	

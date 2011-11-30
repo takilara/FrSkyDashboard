@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" 
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/models" />
+
+            <LinearLayout
+                android:id="@+id/llModelsLayout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+		        <!--  Populate with models here.. -->
+                
+    		</LinearLayout>
+        
+        <Button
+            android:id="@+id/btnAddModel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/addModel" />
+
+    </LinearLayout>
+
+
+</ScrollView>

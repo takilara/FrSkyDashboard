@@ -10,6 +10,8 @@
 	<string name="activity_application_settings">Application Settings</string>
 	<string name="activity_channel_settings">Channel Configuration</string>
 	<string name="activity_simulator">Simulator</string>
+	<string name="activity_model_configuration">Module Configuration</string>
+	<string name="activity_model_management">Module Management</string>
 	
 	    
     
@@ -25,10 +27,16 @@
     <string name="RSSIrx">RSSIrx</string>
     <string name="FPS">FPS</string>
     
+    
+        
+    <!--  Menu items  -->
+    <string name="menu_choose_model_management_label">Models...</string>
+    
     <string name="settings_label">Settings...</string>
     <string name="settings_title">Global Settings</string>
     <string name="settings_shortcut">s</string>
-    
+        
+        
     <string name="module_settings_label">Module Settings...</string>
     <string name="module_settings_title">Module Settings</string>
     
@@ -84,6 +92,10 @@
     <string name="chConf_MovingAverage">Moving Average (samples)</string>
     <string name="chConf_SpeechEnabled">Spoken Cyclic</string>
     <string name="chConf_shortUnit">Short Unit</string>
-            
+
+    <!-- Model management  -->
+    <string name="models">Models</string>
+	<string name="addModel">Add Model</string>        
+        
     
 </resources>

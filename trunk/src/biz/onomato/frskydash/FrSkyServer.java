@@ -2,6 +2,7 @@ package biz.onomato.frskydash;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +42,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private static final String TAG="FrSkyServerService";
 	private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
-	
+	private AudioManager _audiomanager;
+	private boolean _scoConnected = false;
 	
 	// Things for Bluetooth
 	private static final int REQUEST_ENABLE_BT = 2;
@@ -158,6 +161,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		logger = new Logger(getApplicationContext(),true,true,true);
 		
+		_audiomanager = 
+        	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		
+		_audiomanager.startBluetoothSco();
+		
 		
 		
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
@@ -199,8 +207,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 		
+		
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+		mIntentFilterBt.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
+		mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
 		
 		
@@ -234,11 +245,23 @@ public class FrSkyServer extends Service implements OnInitListener {
 			//@Override
 			public void run()
 			{
+				HashMap<String, String> myAudibleStreamMap = new HashMap();
+				myAudibleStreamMap.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
+				        String.valueOf(AudioManager.STREAM_VOICE_CALL));
+				
 				Log.i(TAG,"Cyclic Speak stuff");
 			
 				for(int n=0;n<MAX_CHANNELS;n++)
 				{
-					if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					if(!_scoConnected)
+					{
+						if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					}
+					else
+					{
+						if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, myAudibleStreamMap);	
+					}
+
 				}
 				
 				speakHandler.removeCallbacks(runnableSpeaker);
@@ -515,10 +538,23 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_dying=true;
 		
 		Log.i(TAG,"onDestroy");
+		
+//		AudioManager audioManager = 
+//        	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		
+		_audiomanager.stopBluetoothSco();
+		
+		
 		simStop();
 		unregisterReceiver(mIntentReceiverBt);
 		//sim.reset();
 		
+		// disable bluetooth if it was disabled upon start:
+		
+    	if(!bluetoothEnabledAtStart)	// bluetooth was not enabled at start
+    	{
+    		if(mBluetoothAdapter!=null) mBluetoothAdapter.disable();	// only do this if bluetooth feature exists
+    	}
 		Log.i(TAG,"Releasing Wakelock");
 		if(wl.isHeld())
 		{
@@ -867,8 +903,11 @@ private final Handler mHandlerBT = new Handler() {
 	
 	public void saySomething(String myText)
 	{
+		
+		
 		Log.i(TAG,"Speak something");
 		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
+		//mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, myAudibleStreamMap);
 	}
 	
 	public void startCyclicSpeaker()
@@ -1193,29 +1232,73 @@ private final Handler mHandlerBT = new Handler() {
         @Override
         public void onReceive(Context context, Intent intent) {
         	String msg = intent.getAction();
-
-        	// does not work?
-    		int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
-    		Log.i(TAG,"CMD: "+cmd);
-    		switch(cmd) {
-    			case BluetoothAdapter.STATE_ON:
-    				Log.d(TAG,"Bluetooth state changed to ON");
-    				
-    				if(getBtAutoConnect()) 
-    		    	{
-    					Log.d(TAG,"Autoconnect requested");
-    					connect();
-    		    	}
-    				break;
-    			case BluetoothAdapter.STATE_OFF:
-    				Log.d(TAG,"Blueotooth state changed to OFF");
-    				break;
-    			default:
-    				Log.d(TAG,"No information about "+msg);
-    		
-    		}
+        	Log.d(TAG,"Received Broadcast: "+msg);
+        	if(msg.equals(BluetoothAdapter.ACTION_STATE_CHANGED))
+        	{
+	        	// does not work?
+	    		int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
+	    		Log.i(TAG,"CMD: "+cmd);
+	    		switch(cmd) {
+	    			case BluetoothAdapter.STATE_ON:
+	    				Log.d(TAG,"Bluetooth state changed to ON");
+	    				
+	    				if(getBtAutoConnect()) 
+	    		    	{
+	    					Log.d(TAG,"Autoconnect requested");
+	    					connect();
+	    		    	}
+	    				break;
+	    			case BluetoothAdapter.STATE_OFF:
+	    				Log.d(TAG,"Blueotooth state changed to OFF");
+	    				break;
+	    			default:
+	    				Log.d(TAG,"No information about "+msg);
+	    		
+	    		}
+        	}
+        	else if(msg.equals(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED))
+        	{
+        		Log.d(TAG,"SCO STATE CHANGED!!!"+msg);
+        		int scoState = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+        		switch(scoState) {
+        			case AudioManager.SCO_AUDIO_STATE_CONNECTED:
+        				Log.i(TAG,"SCO CONNECTED!!!!");
+        				_scoConnected = true;
+        				break;
+        			case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
+        				Log.i(TAG,"SCO DIS-CONNECTED!!!!");
+        				_scoConnected = false;
+        				break;
+        			default:
+        				Log.e(TAG,"Unhandled state");
+        				_scoConnected = false;
+        				break;
+        		}
+        		
+        	}
+        	else if(msg.equals("android.bluetooth.headset.action.STATE_CHANGED"))
+        	{
+        		//int headsetState
+        		// try to enable sco?
+        		try
+        		{
+        			_audiomanager.startBluetoothSco();
+        		}
+        		catch(Exception e)
+        		{
+        			
+        		}
+        		
+        	}
+        	else
+        	{
+        		Log.e(TAG,"Unhandled intent: "+msg);
+        		
+        	}
         }
     };
+    
+    
     
     
     public BluetoothAdapter getBluetoothAdapter()

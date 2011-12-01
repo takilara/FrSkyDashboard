@@ -397,6 +397,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			AudioManager audioManager = 
 	        	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 			
+			//audioManager.startBluetoothSco();
+			
 	        int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 	        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 	        double volPrc = currentVolume*100/maxVolume;
@@ -603,10 +605,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	
     	// stop bt
     	///TODO: Only do below if state was disabled before..
-    	if((!bluetoothEnabledAtStart) && (mBluetoothAdapter != null))
-    	{
-    		mBluetoothAdapter.disable();
-    	}
+    	// handled in server
+//    	if((bluetoothEnabledAtStart) && (mBluetoothAdapter != null))
+//    	{
+//    		mBluetoothAdapter.disable();
+//    	}
     	
     	//globals.die();
     	super.onBackPressed();

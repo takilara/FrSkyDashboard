@@ -135,7 +135,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private Channel[] objs;
 	
 	
-	
+	private HashMap<String, String> _myAudibleStreamMap;
 	
 
 	
@@ -164,7 +164,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_audiomanager = 
         	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		
-		_audiomanager.startBluetoothSco();
+//		_myAudibleStreamMap = new HashMap();
+//		_myAudibleStreamMap.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
+//		        String.valueOf(AudioManager.STREAM_VOICE_CALL));
+//		
+//		if(_audiomanager.isBluetoothScoAvailableOffCall())
+//		{
+//			_audiomanager.startBluetoothSco();
+//		}
 		
 		
 		
@@ -211,7 +218,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 		mIntentFilterBt.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
-		mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
+		//mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
 		
 		
@@ -245,22 +252,30 @@ public class FrSkyServer extends Service implements OnInitListener {
 			//@Override
 			public void run()
 			{
-				HashMap<String, String> myAudibleStreamMap = new HashMap();
-				myAudibleStreamMap.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
-				        String.valueOf(AudioManager.STREAM_VOICE_CALL));
+			
+				AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+				//Log.d(TAG,"SCO stuff");
+				//Log.d(TAG,"isBluetoothScoOn:"+am.isBluetoothScoOn());
+				
+//				Log.d(TAG,"isBluetoothScoAvailableOffCall:"+am.isBluetoothScoAvailableOffCall());  // <-- CAUSES CRASH
+				//Log.d(TAG,"getMode:"+am.getMode());
+				//Log.d(TAG,"isSpeakerphoneOn:"+am.isSpeakerphoneOn());
+				
 				
 				Log.i(TAG,"Cyclic Speak stuff");
 			
 				for(int n=0;n<MAX_CHANNELS;n++)
 				{
-					if(!_scoConnected)
-					{
+					//if(!_audiomanager.isBluetoothScoOn())
+					//{
+						//Log.d(TAG,"SCO is not enabled, speak to normal phone audio");
 						if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					}
-					else
-					{
-						if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, myAudibleStreamMap);	
-					}
+					//}
+					//else
+					//{
+					//	Log.d(TAG,"SCO is enabled, speak to headset");
+					//	if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, _myAudibleStreamMap);	
+					//}
 
 				}
 				
@@ -1263,33 +1278,44 @@ private final Handler mHandlerBT = new Handler() {
         		switch(scoState) {
         			case AudioManager.SCO_AUDIO_STATE_CONNECTED:
         				Log.i(TAG,"SCO CONNECTED!!!!");
-        				_scoConnected = true;
+        				//_scoConnected = true;
         				break;
         			case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
         				Log.i(TAG,"SCO DIS-CONNECTED!!!!");
-        				_scoConnected = false;
+        				//_scoConnected = false;
         				break;
         			default:
         				Log.e(TAG,"Unhandled state");
-        				_scoConnected = false;
+        				//_scoConnected = false;
         				break;
         		}
         		
         	}
-        	else if(msg.equals("android.bluetooth.headset.action.STATE_CHANGED"))
-        	{
-        		//int headsetState
-        		// try to enable sco?
-        		try
-        		{
-        			_audiomanager.startBluetoothSco();
-        		}
-        		catch(Exception e)
-        		{
-        			
-        		}
-        		
-        	}
+//        	else if(msg.equals("android.bluetooth.headset.action.STATE_CHANGED"))
+//        	{
+//        		int state = intent.getIntExtra("android.bluetooth.headset.action.extra.STATE",-1);
+//        		Bundle b = intent.getExtras();
+//        		//int headsetState
+//        		// try to enable sco?
+//        		Log.d(TAG,"Got a headset statechange, state :"+state);
+//        		Log.d(TAG,"Keys: "+b.keySet());
+//        		try
+//        		{
+//        			Log.d(TAG,"IS sco available?");
+////        			if(_audiomanager.isBluetoothScoAvailableOffCall())
+////        			{
+////        				Log.d(TAG,"yes, request start sco");
+////        				_audiomanager.setSpeakerphoneOn(true);
+////        				_audiomanager.startBluetoothSco();
+////        				_audiomanager.setBluetoothScoOn(true);
+////        			}
+//        		}
+//        		catch(Exception e)
+//        		{
+//        			
+//        		}
+//        		
+//        	}
         	else
         	{
         		Log.e(TAG,"Unhandled intent: "+msg);

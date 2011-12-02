@@ -269,20 +269,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 				
 				
 				Log.i(TAG,"Cyclic Speak stuff");
-			
-				for(int n=0;n<MAX_CHANNELS;n++)
+				if(statusRx)
 				{
-					//if(!_audiomanager.isBluetoothScoOn())
-					//{
-						//Log.d(TAG,"SCO is not enabled, speak to normal phone audio");
-						if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-					//}
-					//else
-					//{
-					//	Log.d(TAG,"SCO is enabled, speak to headset");
-					//	if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, _myAudibleStreamMap);	
-					//}
-
+					for(int n=0;n<MAX_CHANNELS;n++)
+					{
+							if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+					}
 				}
 				
 				speakHandler.removeCallbacks(runnableSpeaker);
@@ -317,6 +309,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 				
 				if(fpsRx>0)	// receiving frames from Rx, means Tx comms is up as well 
 				{
+					// check if we should restart the cyclic speaker
+					if((statusRx==false) && (getCyclicSpeechEnabled()))
+					{
+							// Restart speaker if running
+						startCyclicSpeaker();
+					}
 					statusRx = true;
 					statusTx = true;
 				}

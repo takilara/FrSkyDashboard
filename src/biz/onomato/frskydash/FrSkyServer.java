@@ -84,7 +84,13 @@ public class FrSkyServer extends Service implements OnInitListener {
     private BluetoothDevice _device = null;
     public boolean reconnectBt = true;
     private boolean _manualBtDisconnect = false;    
+    
+    // FPS
     public int fps,fpsRx,fpsTx=0;
+    private MyStack fpsStack;
+    private MyStack fpsRxStack;
+	private MyStack fpsTxStack;
+	private static final int FRAMES_FOR_FPS_CALC=2;
     
     private FrskyDatabase channelDb;
     
@@ -284,14 +290,29 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
 		};
 		
+		
+		fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		fpsRxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		fpsTxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		
 		fpsHandler = new Handler();
 		runnableFps = new Runnable () {
 			//@Override
 			public void run()
 			{
-				fps = _framecount;
-				fpsRx = _framecountRx;
-				fpsTx = _framecountTx;
+
+				
+				fpsStack.push(_framecount);
+				fpsRxStack.push(_framecountRx);
+				fpsTxStack.push(_framecountTx);
+				
+				//fps = _framecount;
+				//fpsRx = _framecountRx;
+				//fpsTx = _framecountTx;
+				
+				fps = (int) Math.floor(fpsStack.average());
+				fpsRx = (int) Math.floor(fpsRxStack.average());
+				fpsTx = (int) Math.floor(fpsTxStack.average());
 				
 				
 				if(fpsRx>0)	// receiving frames from Rx, means Tx comms is up as well 
@@ -304,7 +325,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 					// make sure user knows if state changed from ok to not ok
 					if(statusRx==true)
 					{
-						wasDisconnected();
+						wasDisconnected("Rx");
 					}
 					statusRx = false;
 					
@@ -790,7 +811,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return t;
 	}
 
-	public void wasDisconnected()
+	public void wasDisconnected(String source)
 	{
 		AD1.reset();
     	AD2.reset();
@@ -799,6 +820,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     	
     	// speak warning
     	saySomething("Alarm! Alarm! Alarm! Connection Lost!");
+    	Toast.makeText(getApplicationContext(), "Lost connection with "+source, Toast.LENGTH_SHORT).show();
     	// Get instance of Vibrator from current Context
     	try
     	{
@@ -851,7 +873,7 @@ private final Handler mHandlerBT = new Handler() {
                 	Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
                 	setConnecting(false);
-                	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected();	// Only do disconnect message if previously connected
+                	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1
                 	

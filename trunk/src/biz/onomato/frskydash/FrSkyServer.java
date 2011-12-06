@@ -204,19 +204,43 @@ public class FrSkyServer extends Service implements OnInitListener {
 		logger.setLogToHuman(getLogToHuman());
 
 		
-		String _prevModel = "FunCub 1";
-		_currentModel = Model.createFromSettings(_prevModel);
+		//String _prevModel = "FunCub 1";
+		long _prevModelId = _settings.getLong("prevModelId", -1);
 		
-		Log.d(TAG,"The current model is: "+_currentModel.getName());
+		_currentModel = new Model(getApplicationContext());
+		if(!_currentModel.loadFromSettings(_prevModelId))
+		{
+			Log.w(TAG,"The previous model does not exist");
+			Log.w(TAG,"Try to get the first model");
+			if(!_currentModel.getFirstModel())
+			{
+				// no models exist, 
+				// Set defaults
+				_currentModel.saveSettings();
+				// and save it
+			}
+		}
+		_prevModelId = _currentModel.getId();
+		_editor.putLong("prevModelId", _prevModelId);
+		_editor.commit();
+			
 		
-		Channel testChannel1 =  new Channel("TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
-		Channel testChannel2 =  new Channel("TestAD2", "channel that derives from AD2, multiplies by 100",0, 100, "V", "Volt");
+		
+		// Save this model incase it was new...
+		
+		Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
-		AD1.addListener(testChannel1);
-		AD2.addListener(testChannel2);
-		_currentModel.setId(1);
-		_currentModel.addChannel(testChannel1);
-		_currentModel.addChannel(testChannel2);
+		
+		
+		
+//		Channel testChannel1 =  new Channel("TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
+//		Channel testChannel2 =  new Channel("TestAD2", "channel that derives from AD2, multiplies by 100",0, 100, "V", "Volt");
+//
+//		AD1.addListener(testChannel1);
+//		AD2.addListener(testChannel2);
+//		//_currentModel.setId(1);
+//		_currentModel.addChannel(testChannel1);
+//		_currentModel.addChannel(testChannel2);
 		
 		
 		

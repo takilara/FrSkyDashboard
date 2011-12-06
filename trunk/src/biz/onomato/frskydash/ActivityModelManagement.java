@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -47,7 +49,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		if(DEBUG) Log.i(TAG,"Add Listeners");
 		btnAddModel.setOnClickListener(this);
 		
-       
+		populateModelList();
         doBindService();
 	}
 	
@@ -70,12 +72,68 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			case R.id.btnAddModel:
 				if(DEBUG) Log.d(TAG,"User Clicked Add Model");
 				Intent i = new Intent(this, ActivityModelConfig.class);
-	    		i.putExtra("modelId", -1);	// Should create new model
+	    		i.putExtra("modelId", (long) -1);	// Should create new model
 	    		startActivityForResult(i,MODEL_CONFIG_RETURN);
 				break;
 		}
 	}
 	
+	private void populateModelList()
+	{
+		// populate with models
+
+		//llModelsLayout
+		llModelsLayout.removeAllViews();
+		
+		DBAdapterModel db = new DBAdapterModel(getApplicationContext());
+		db.open();
+		Cursor c = db.getAllModels();
+		int n = 0;
+		while(n < c.getCount())
+		{
+			if(n==0)
+			{
+				c.moveToFirst();
+			}
+			else
+			{
+				c.moveToNext();
+				
+			}
+			n++;
+			if(DEBUG)Log.d(TAG,"Add Model (id,name): "+c.getLong(0)+", "+c.getString(1));
+			LinearLayout ll = new LinearLayout(getApplicationContext());
+			
+			
+			
+			
+			TextView tvName = new TextView(getApplicationContext());
+			tvName.setText(c.getString(1));
+			
+			
+			Button btnDelete = new Button(getApplicationContext());
+			btnDelete.setText("Delete");
+			
+			Button btnEdit = new Button(getApplicationContext());
+			btnEdit.setText("...");
+			
+			ll.addView(tvName);
+			ll.addView(btnDelete);
+			ll.addView(btnEdit);
+			
+			ll.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			//ll.setGravity();
+
+			
+			llModelsLayout.addView(ll);
+			
+//			LayoutParams params = ll.getLayoutParams();
+//			params.width = LayoutParams.FILL_PARENT;
+//			//params.height = LayoutParams.WRAP_CONTENT;
+			
+		}
+		db.close();
+	}
 	
 	
 	private void showDeleteDialog()
@@ -138,6 +196,8 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
+			
+			
 	        
 		}
 
@@ -162,5 +222,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	        	}
     			break;
     	}
+    	///TODO: update model list
+    	populateModelList();
     }
 }

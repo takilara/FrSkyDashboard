@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class DBAdapterModel {
+	private static final boolean DEBUG=true;
 	public static final String KEY_ROWID = "_id";
     public static final String KEY_NAME = "name";
 //    public static final String KEY_TYPE = "type";
@@ -47,12 +48,14 @@ public class DBAdapterModel {
         @Override
         public void onCreate(SQLiteDatabase db) 
         {
+        	if(DEBUG)Log.d(TAG,"Creating the database");
             db.execSQL(DATABASE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) 
         {
+        	if(DEBUG)Log.d(TAG,"Upgrade the database");
         	// Should perform alter table statements..
 //            Log.w(TAG, "Upgrading database from version " + oldVersion 
 //                    + " to "
@@ -65,6 +68,7 @@ public class DBAdapterModel {
     //---opens the database---
     public DBAdapterModel open() throws SQLException 
     {
+    	if(DEBUG)Log.d(TAG,"Open the database");
         db = DBHelper.getWritableDatabase();
         return this;
     }
@@ -72,12 +76,14 @@ public class DBAdapterModel {
     //---closes the database---    
     public void close() 
     {
+    	if(DEBUG)Log.d(TAG,"Close the database");
         DBHelper.close();
     }
     
     //---insert a title into the database---
-    public long insertTitle(String name, String title, String publisher) 
+    public long insertModel(String name) 
     {
+    	if(DEBUG)Log.d(TAG,"Insert into the database");
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_NAME, name);
         //initialValues.put(KEY_TITLE, title);
@@ -86,15 +92,17 @@ public class DBAdapterModel {
     }
 
     //---deletes a particular title---
-    public boolean deleteTitle(long rowId) 
+    public boolean deleteModel(long rowId) 
     {
+    	if(DEBUG)Log.d(TAG,"Deleting from the database");
         return db.delete(DATABASE_TABLE, KEY_ROWID + 
         		"=" + rowId, null) > 0;
     }
 
     //---retrieves all the titles---
-    public Cursor getAllTitles() 
+    public Cursor getAllModels() 
     {
+    	if(DEBUG)Log.d(TAG,"Getting all models from database");
         return db.query(DATABASE_TABLE, new String[] {
         		KEY_ROWID, 
         		KEY_NAME
@@ -109,6 +117,7 @@ public class DBAdapterModel {
     //---retrieves a particular model---
     public Cursor getModel(long rowId) throws SQLException 
     {
+    	if(DEBUG)Log.d(TAG,"Get one model from the database");
         Cursor mCursor =
                 db.query(true, DATABASE_TABLE, new String[] {
                 		KEY_ROWID,
@@ -121,6 +130,8 @@ public class DBAdapterModel {
                 		null, 
                 		null);
         if (mCursor != null) {
+//        	Log.d(TAG,"Found the model..");
+//        	Log.d(TAG,"Count: "+mCursor.getCount());
             mCursor.moveToFirst();
         }
         return mCursor;
@@ -129,6 +140,7 @@ public class DBAdapterModel {
     //---updates a title---
     public boolean updateModel(long rowId, String name) 
     {
+    	if(DEBUG)Log.d(TAG,"Update one model in the database");
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, name);
         return db.update(DATABASE_TABLE, args, 

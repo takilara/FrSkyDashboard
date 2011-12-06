@@ -21,9 +21,11 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	private static final boolean DEBUG=true;
 	private FrSkyServer server;
 	
-	private int _modelId;
+	private Model _model;
+	private long _modelId;
 	
-	private Button btnSave,btnAddChannel; 
+	private Button btnSave,btnAddChannel;
+	private EditText edName;
 	
     
 	@Override
@@ -35,16 +37,24 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		
 		///TODO: Use intent to get initial Model object?
 		Intent launcherIntent = getIntent();
-		_modelId = launcherIntent.getIntExtra("modelId", -1);
+		_modelId = launcherIntent.getLongExtra("modelId", -1);
+		if(DEBUG) Log.d(TAG,"Editing the model with id:"+_modelId);
 //		Log.d(TAG, "Channel Id is: "+_channelId);
 		
 		if(_modelId==-1)
 		{
 			if(DEBUG) Log.d(TAG,"Configure new Model object");
+			_model = new Model(getApplicationContext());
 		}
 		else
 		{
 			if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+			_model = new Model(getApplicationContext());
+			_model.loadFromSettings(_modelId);
+//			_model = new Model(getApplicationContext());
+//			_model.loadFromSettings(_modelId);
+			//_model = Model.createFromSettings(getApplicationContext(), _modelId);
+			
 		}
 		
 		// Show the form
@@ -53,6 +63,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		// Find all form elements
 		btnSave				= (Button) findViewById(R.id.modConf_btnSave);
 		btnAddChannel		= (Button) findViewById(R.id.modConf_btnAddChannel);
+		edName				= (EditText) findViewById(R.id.modConf_edName);
 //		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
 //		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
 //		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
@@ -69,6 +80,9 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		btnSave.setOnClickListener(this);
 		btnAddChannel.setOnClickListener(this);
 	
+		
+		
+		edName.setText(_model.getName());
 	}
 	
 	
@@ -100,6 +114,10 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			//Log.i(TAG,"Fetch Model "+_channelId+" from Server");
+			
+			//_model = server.getCurrentModel();
+			
+			
 			
 			// Show a particular channel
 //			if(_channelId>-1)
@@ -141,6 +159,13 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 //				Log.i(TAG,"Store settings to database for channel: "+_channelId);
 //				server.saveChannelConfig(channel);
 //				Log.i(TAG,"Go back to dashboard");
+				
+
+				// Save the model
+				_model.setName(edName.getText().toString());
+				_model.saveSettings();
+				
+				// Save the channels (using this models id)
 				
 				this.setResult(RESULT_OK);
 				this.finish();

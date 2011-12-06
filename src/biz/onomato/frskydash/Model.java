@@ -2,6 +2,9 @@ package biz.onomato.frskydash;
 
 import java.util.ArrayList;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.database.Cursor;
 import android.util.Log;
 
 public class Model {
@@ -21,26 +24,33 @@ public class Model {
 	
 	private int _type;
 	private String _name;
-	private int _id;
+	private long _id;
+	private Context _context;
+	
+	private DBAdapterModel db;
 	
 
 	// Constructor
-	public Model(String modelName,int modelType)
+	public Model(Context context, String modelName,int modelType)
 	{
+		_context = context;
+		// create if neccessary
+		db = new DBAdapterModel(context);
 		
+		_id = -1; 
 		setName(modelName);
 		setType(modelType);
 		_channels = new ArrayList<Channel>();
-		setId(-1);
+		//setId(-1);
 	}
 	
-	public Model(String modelName)
+	public Model(Context context,String modelName)
 	{
-		this(modelName,MODEL_TYPE_UNKNOWN);
+		this(context,modelName,MODEL_TYPE_UNKNOWN);
 	}
-	public Model()
+	public Model(Context context)
 	{
-		this("Model 1",MODEL_TYPE_UNKNOWN);
+		this(context,"Model 1",MODEL_TYPE_UNKNOWN);
 	}
 	
 
@@ -56,12 +66,13 @@ public class Model {
 		this._type = modelType;
 	}
 
-	public void setId(int id)
-	{
-		_id = id;
-	}
+	// Should never set it, should get it from database
+//	public void setId(int id)
+//	{
+//		_id = id;
+//	}
 	
-	public int getId()
+	public long getId()
 	{
 		return _id;
 	}
@@ -120,7 +131,38 @@ public class Model {
 	// I need to be able to save settings to file or config storage
 	public void saveSettings()
 	{
-		
+		if(_id==-1)
+		{
+			if(DEBUG) Log.d(TAG,"Saving, using insert");
+			db.open();
+			long id = db.insertModel(_name);
+			if(id==-1)
+			{
+				Log.e(TAG,"Insert Failed");
+			}
+			else
+			{
+				if(DEBUG) Log.d(TAG,"Insert ok, id:"+id);
+				_id = id;
+			}
+			db.close();
+			// Run insert
+		}
+		else
+		{
+			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_id+",name:"+_name+")");
+			db.open();
+			if(db.updateModel(_id, _name))
+			{
+				if(DEBUG)Log.d(TAG,"Update successful");
+			}
+			else
+			{
+				if(DEBUG)Log.e(TAG,"Update failed");
+			}
+			db.close();
+			// run update
+		}
 	}
 	
 	// I need to be able to load settings from file or config storage
@@ -129,22 +171,75 @@ public class Model {
 		
 	}
 	
-	public boolean loadFromSettings(String modelName)
+	public boolean loadFromSettings(long id)
 	{
 		// False if not found
+		db.open();
+		Cursor c = db.getModel(id);
 		
-		// True if found
-		return true;
+		if(c.getCount()==0)
+		{
+			if(DEBUG) Log.w(TAG,"Model id "+id+" does not exist.");	
+			_id= -1;
+			db.close();
+			return false;
+		}
+		else
+		{
+			if(DEBUG) Log.d(TAG,"Found the model");
+			if(DEBUG) Log.d(TAG,c.getString(1));
+			_id = c.getLong(0);
+			_name = c.getString(1);
+			db.close();
+			return true;
+		}
+		
 	}
 	
-	public static Model createFromSettings(String modelName)
+	public boolean getFirstModel()
 	{
-		if(DEBUG) Log.d(TAG,"Load settings for '"+modelName+"' from settingsstore");
-		Model m = new Model(modelName);
-		m.loadFromSettings(modelName);
+		db.open();
+		Cursor c = db.getAllModels();
+		if(c.getCount()>0)
+		{
+			c.moveToFirst();
+			loadFromSettings(c.getInt(0));
+			db.close();
+			return true;
+		}
+		else
+		{
+			db.close();
+			return false;
+		}
+	}
+	
+	
+	public static Model[] getAllModels(Context context)
+	{
+		if(DEBUG) Log.d(TAG,"Get all models");
+		// Needs to create the model if it does not exists
+		DBAdapterModel db = new DBAdapterModel(context);
+		db.open();
+		Cursor c = db.getAllModels();
+		Model[] modelA = new Model[c.getCount()];
+		if(c.getCount()>0)
+		{
+			
+			
+			for(int i=0;i<c.getCount();i++)
+			{
+				modelA[i] = new Model(context);
+				long id = c.getLong(0);
+				modelA[i].loadFromSettings(id);
+			}
+		}
+		
+		db.close();
+		//m.loadFromSettings(id);
 		
 		// if not found, create it before returning it
-		return m;
+		return modelA;
 	}
 
 }

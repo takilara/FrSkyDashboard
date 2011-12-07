@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +33,9 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	private static final int MODEL_CONFIG_RETURN=0;
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
+	private RadioButton rbCurrentModel;
 	private boolean DEBUG=true;
+	private long _deleteId=-1;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,18 +66,48 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	
 	public void onClick(View v)
 	{
-		switch(v.getId())
+		int id = v.getId();
+		if(id>10000)		// Select current Model
 		{
-		///TODO: replace with actions for models
-			case R.id.btnDeleteLogs:
-				showDeleteDialog();
-				break;
-			case R.id.btnAddModel:
-				if(DEBUG) Log.d(TAG,"User Clicked Add Model");
-				Intent i = new Intent(this, ActivityModelConfig.class);
-	    		i.putExtra("modelId", (long) -1);	// Should create new model
-	    		startActivityForResult(i,MODEL_CONFIG_RETURN);
-				break;
+			id = id -10000;
+			rbCurrentModel.setChecked(false);
+			rbCurrentModel = (RadioButton) findViewById(10000+id);
+			rbCurrentModel.setChecked(true);
+			Model m = new Model(getApplicationContext());
+			m.loadFromSettings(id);
+			if(server!=null)
+			{
+				server.setCurrentModel(m);
+			}
+		}
+		else if(id>1000)	// EDIT
+		{
+			id=id-1000;
+			Intent i = new Intent(this, ActivityModelConfig.class);
+    		i.putExtra("modelId", (long) id);	// Should edit existing model
+    		startActivityForResult(i,MODEL_CONFIG_RETURN);
+		}
+		else if(id>100) // DELETE
+		{
+			id=id-100;
+			if(DEBUG) Log.d(TAG,"Delete model with id:"+id);
+			showDeleteDialog(id);
+			
+		}
+		else
+		{
+			switch(v.getId())
+			{
+			///TODO: replace with actions for models
+				case R.id.btnAddModel:
+					if(DEBUG) Log.d(TAG,"User Clicked Add Model");
+					Intent i = new Intent(this, ActivityModelConfig.class);
+		    		i.putExtra("modelId", (long) -1);	// Should create new model
+		    		startActivityForResult(i,MODEL_CONFIG_RETURN);
+					break;
+				default:
+					if(DEBUG) Log.w(TAG,"Unknown button:"+v.getId());
+			}
 		}
 	}
 	
@@ -84,6 +117,16 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
 		//llModelsLayout
 		llModelsLayout.removeAllViews();
+
+		long currentModelId = -1;
+		if(server==null)
+		{
+			currentModelId=-1;
+		}
+		else
+		{
+			currentModelId=server.getCurrentModel().getId();
+		}
 		
 		DBAdapterModel db = new DBAdapterModel(getApplicationContext());
 		db.open();
@@ -100,23 +143,40 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 				c.moveToNext();
 				
 			}
-			n++;
+			
 			if(DEBUG)Log.d(TAG,"Add Model (id,name): "+c.getLong(0)+", "+c.getString(1));
 			LinearLayout ll = new LinearLayout(getApplicationContext());
 			
 			
-			
+			int id = (int) c.getLong(0);
 			
 			TextView tvName = new TextView(getApplicationContext());
 			tvName.setText(c.getString(1));
 			
+			RadioButton rdThisModel = new RadioButton(getApplicationContext());
+			rdThisModel.setId(10000+id);
+			rdThisModel.setOnClickListener(this);
+			if(id==currentModelId)
+			{
+				rdThisModel.setChecked(true);
+			}
+			else
+			{
+				rdThisModel.setChecked(false);
+			}
+			
 			
 			Button btnDelete = new Button(getApplicationContext());
 			btnDelete.setText("Delete");
+			btnDelete.setId(100+id); // ID for delete should be 100+channelId
+			btnDelete.setOnClickListener(this);
 			
 			Button btnEdit = new Button(getApplicationContext());
 			btnEdit.setText("...");
+			btnEdit.setId(1000+id);// ID for delete should be 100+channelId
+			btnEdit.setOnClickListener(this);
 			
+			ll.addView(rdThisModel);
 			ll.addView(tvName);
 			ll.addView(btnDelete);
 			ll.addView(btnEdit);
@@ -130,28 +190,36 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 //			LayoutParams params = ll.getLayoutParams();
 //			params.width = LayoutParams.FILL_PARENT;
 //			//params.height = LayoutParams.WRAP_CONTENT;
-			
+			n++;
 		}
 		db.close();
 	}
 	
 	
-	private void showDeleteDialog()
+	private void showDeleteDialog(int id)
 	{
 		///TODO: Modify for deletion of models
-		Log.i(TAG,"Delete all logs please");
+		Model m = new Model(getApplicationContext());
+		m.loadFromSettings(id);
+		Log.i(TAG,"Delete model with id:"+id);
+		_deleteId = id;
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
-		dialog.setTitle("Delete Logs");
+		dialog.setTitle("Delete "+m.getName()+"?");
 
-		dialog.setMessage("Do you really want to delete all logs?");
+		dialog.setMessage("Do you really want to delete the model '"+m.getName()+"'?");
 		
 		dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+            	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
+            	db.open();
+            	db.deleteModel(_deleteId);
+            	db.close();
+            	
+            	populateModelList();
                 //Stop the activity
-                server.deleteAllLogFiles();
+                //server.deleteAllLogFiles();
             }
 
         });
@@ -161,6 +229,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             public void onClick(DialogInterface dialog, int which) {
 
                 //Stop the activity
+            	_deleteId=-1;
                 Log.i(TAG,"Cancel Deletion");
             }
 
@@ -196,7 +265,8 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
-			
+			rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
+			rbCurrentModel.setChecked(true);
 			
 	        
 		}

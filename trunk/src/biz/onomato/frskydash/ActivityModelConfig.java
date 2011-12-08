@@ -10,10 +10,13 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class ActivityModelConfig extends Activity implements OnClickListener {
@@ -25,6 +28,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	private long _modelId;
 	
 	private Button btnSave,btnAddChannel;
+	private LinearLayout llChannelsLayout;
 	private EditText edName;
 	
     
@@ -64,6 +68,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		btnSave				= (Button) findViewById(R.id.modConf_btnSave);
 		btnAddChannel		= (Button) findViewById(R.id.modConf_btnAddChannel);
 		edName				= (EditText) findViewById(R.id.modConf_edName);
+		llChannelsLayout	= (LinearLayout) findViewById(R.id.llChannelsLayout);
 //		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
 //		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
 //		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
@@ -113,6 +118,9 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
+			
+			populateChannelList();
+			
 			//Log.i(TAG,"Fetch Model "+_channelId+" from Server");
 			
 			//_model = server.getCurrentModel();
@@ -166,18 +174,71 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				_model.saveSettings();
 				
 				// Save the channels (using this models id)
+				for(Channel c:_model.getChannels())
+				{
+					if(DEBUG) Log.i(TAG,"Save channel "+c.getName());
+					
+				}
 				
 				this.setResult(RESULT_OK);
 				this.finish();
 				break;
 			case R.id.modConf_btnAddChannel:
 				if(DEBUG) Log.d(TAG,"Add a channel");
+				Channel c = new Channel();
+				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
+				c.setDescription("Description"+(_model.getChannels().length+1));
+				_model.addChannel(c);
+				populateChannelList();
 //				applyChannel();
 //				Log.i(TAG,"Store settings to database for channel: "+_channelId);
 //				server.saveChannelConfig(channel);
 //				Log.i(TAG,"Go back to dashboard");
 				
 				break;
+		}
+	}
+	
+	private void populateChannelList()
+	{
+		if(DEBUG) Log.d(TAG,"Populate list of channels");
+		llChannelsLayout.removeAllViews();
+		for(Channel c:_model.getChannels())
+		{
+			if(DEBUG) Log.i(TAG,c.getName());
+			
+			LinearLayout ll = new LinearLayout(getApplicationContext());
+			
+			
+			TextView tvDesc = new TextView(getApplicationContext());
+			tvDesc.setText(c.getDescription());
+			tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
+			
+			Button btnDelete = new Button(getApplicationContext());
+			btnDelete.setText("Delete");
+			//btnDelete.setId(100+id); // ID for delete should be 100+channelId
+			btnDelete.setOnClickListener(this);
+			
+			Button btnEdit = new Button(getApplicationContext());
+			btnEdit.setText("...");
+//			btnEdit.setId(1000+id);// ID for delete should be 100+channelId
+			btnEdit.setOnClickListener(this);
+			
+			ll.addView(tvDesc);
+			ll.addView(btnEdit);
+			ll.addView(btnDelete);
+			
+			
+			ll.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			//ll.setGravity();
+
+			
+			llChannelsLayout.addView(ll);
+			
+			
+			
+			
+			
 		}
 	}
 	

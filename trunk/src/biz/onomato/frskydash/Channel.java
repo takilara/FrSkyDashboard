@@ -40,6 +40,7 @@ public class Channel implements OnChannelListener{
 	
 	public Alarm[] alarms;
 	public int alarmCount = 0;
+	private long _modelId = -1;
 	
 	private ArrayList <OnChannelListener> _listeners;
 	
@@ -47,7 +48,10 @@ public class Channel implements OnChannelListener{
 	SharedPreferences _settings;
 	SharedPreferences.Editor editor;
 
-	
+	public Channel()
+	{
+		this("derived","description",(float)0,(float)1,"Symbol","UnitName");
+	}
 	
 	
 	public Channel(String name,String description,float offset,float factor,String unit,String longUnit)
@@ -94,6 +98,20 @@ public class Channel implements OnChannelListener{
 		rawAvg = _avg;
 		eng = _val;
 		_stack = new MyStack(_movingAverage);
+	}
+	
+	public void setModelId(Model model)
+	{
+		_modelId = model.getId();
+	}
+	public void setModelId(long modelId)
+	{
+		_modelId = modelId;
+	}
+	
+	public long getModelId()
+	{
+		return _modelId;
 	}
 	
 	public boolean loadFromConfig(SharedPreferences settings)

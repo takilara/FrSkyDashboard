@@ -78,6 +78,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			if(server!=null)
 			{
 				server.setCurrentModel(m);
+				Toast.makeText(this, m.getName() + " set as the active model", Toast.LENGTH_LONG).show();
 			}
 		}
 		else if(id>1000)	// EDIT

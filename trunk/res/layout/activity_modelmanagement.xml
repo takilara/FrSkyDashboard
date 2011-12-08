@@ -15,16 +15,22 @@
             android:gravity="center"
             android:text="@string/models" />
 
-            <LinearLayout
-                android:id="@+id/llModelsLayout"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
+        <LinearLayout
+            android:id="@+id/llModelsLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
 
-		        <!--  Populate with models here.. -->
-                
-    		</LinearLayout>
-        
+      		<!--  Populate with models here.. -->
+      		
+      		
+		      		
+            
+		</LinearLayout>
+        
+            
+          
+            
         <Button
             android:id="@+id/btnAddModel"
             android:layout_width="fill_parent"

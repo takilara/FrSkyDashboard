@@ -152,6 +152,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			
 			TextView tvName = new TextView(getApplicationContext());
 			tvName.setText(c.getString(1));
+			tvName.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
 			
 			RadioButton rdThisModel = new RadioButton(getApplicationContext());
 			rdThisModel.setId(10000+id);
@@ -178,8 +179,9 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			
 			ll.addView(rdThisModel);
 			ll.addView(tvName);
-			ll.addView(btnDelete);
 			ll.addView(btnEdit);
+			ll.addView(btnDelete);
+			
 			
 			ll.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
 			//ll.setGravity();

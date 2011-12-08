@@ -37,7 +37,9 @@
         <activity android:name="ActivityDeviceList"
         	android:label="@string/app_name" />
         <activity android:name="ActivityModelConfig"
-        	android:label="@string/activity_model_configuration" />
+        	android:label="@string/activity_model_configuration"
+        	android:windowSoftInputMode="stateHidden" 
+        	/>
         <activity android:name="ActivityModelManagement"
         	android:label="@string/activity_model_management" />
         	

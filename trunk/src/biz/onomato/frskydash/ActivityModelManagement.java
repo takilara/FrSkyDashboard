@@ -50,7 +50,15 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		
 		// Add listeners
 		if(DEBUG) Log.i(TAG,"Add Listeners");
-		btnAddModel.setOnClickListener(this);
+		//btnAddModel.setOnClickListener(this);
+		btnAddModel.setOnClickListener(new OnClickListener() {
+			public void onClick(View v){
+				if(DEBUG) Log.d(TAG,"User Clicked Add Model");
+				Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
+	    		i.putExtra("modelId", (long) -1);	// Should create new model
+	    		startActivityForResult(i,MODEL_CONFIG_RETURN);
+			}
+		});
 		
 		populateModelList();
         doBindService();
@@ -69,12 +77,12 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		int id = v.getId();
 		if(id>10000)		// Select current Model
 		{
-			id = id -10000;
+			int ii = id -10000;
 			rbCurrentModel.setChecked(false);
-			rbCurrentModel = (RadioButton) findViewById(10000+id);
+			rbCurrentModel = (RadioButton) findViewById(id);
 			rbCurrentModel.setChecked(true);
 			Model m = new Model(getApplicationContext());
-			m.loadFromSettings(id);
+			m.loadFromSettings(ii);
 			if(server!=null)
 			{
 				server.setCurrentModel(m);
@@ -83,32 +91,32 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		}
 		else if(id>1000)	// EDIT
 		{
-			id=id-1000;
+			int ii=id-1000;
 			Intent i = new Intent(this, ActivityModelConfig.class);
-    		i.putExtra("modelId", (long) id);	// Should edit existing model
+    		i.putExtra("modelId", (long) ii);	// Should edit existing model
     		startActivityForResult(i,MODEL_CONFIG_RETURN);
 		}
 		else if(id>100) // DELETE
 		{
-			id=id-100;
-			if(DEBUG) Log.d(TAG,"Delete model with id:"+id);
-			showDeleteDialog(id);
+			int ii=id-100;
+			if(DEBUG) Log.d(TAG,"Delete model with id:"+ii);
+			showDeleteDialog(ii);
 			
 		}
 		else
 		{
-			switch(v.getId())
-			{
-			///TODO: replace with actions for models
-				case R.id.btnAddModel:
-					if(DEBUG) Log.d(TAG,"User Clicked Add Model");
-					Intent i = new Intent(this, ActivityModelConfig.class);
-		    		i.putExtra("modelId", (long) -1);	// Should create new model
-		    		startActivityForResult(i,MODEL_CONFIG_RETURN);
-					break;
-				default:
-					if(DEBUG) Log.w(TAG,"Unknown button:"+v.getId());
-			}
+//			switch(v.getId())
+//			{
+//			///TODO: replace with actions for models
+//				case R.id.btnAddModel:
+//					if(DEBUG) Log.d(TAG,"User Clicked Add Model");
+//					Intent i = new Intent(this, ActivityModelConfig.class);
+//		    		i.putExtra("modelId", (long) -1);	// Should create new model
+//		    		startActivityForResult(i,MODEL_CONFIG_RETURN);
+//					break;
+//				default:
+//					if(DEBUG) Log.w(TAG,"Unknown button:"+v.getId());
+//			}
 		}
 	}
 	

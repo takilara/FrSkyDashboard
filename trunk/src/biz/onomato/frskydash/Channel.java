@@ -1,6 +1,8 @@
 package biz.onomato.frskydash;
 
 import android.content.SharedPreferences;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import java.math.MathContext;
 import java.util.ArrayList;
@@ -8,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 
-public class Channel implements OnChannelListener{
+public class Channel implements OnChannelListener, Parcelable  {
 	private static final String TAG = "Channel";
 	
 	public static final int CHANNELTYPE_AD1=0;
@@ -51,6 +53,11 @@ public class Channel implements OnChannelListener{
 	public Channel()
 	{
 		this("derived","description",(float)0,(float)1,"Symbol","UnitName");
+	}
+	
+	public Channel(Parcel in)
+	{
+		readFromParcel(in);
 	}
 	
 	
@@ -408,4 +415,67 @@ public class Channel implements OnChannelListener{
 		
 		return sb.toString();
 	}
+	
+	// Parcelable
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+	
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+ 
+		// We just need to write each field into the
+		// parcel. When we read from parcel, they
+		// will come back in the same order
+		
+//		editor.putString(_name+"_"+"Description", getDescription());
+//		editor.putString(_name+"_"+"LongUnit", getLongUnit());
+//		editor.putString(_name+"_"+"ShortUnit", getShortUnit());
+//		editor.putFloat (_name+"_"+"Factor", getFactor());
+//		editor.putFloat (_name+"_"+"Offset", getOffset());
+//		editor.putInt(_name+"_"+"MovingAverage", getMovingAverage());
+//		editor.putInt(_name+"_"+"Precision", getPrecision());
+//		editor.putBoolean(_name+"_"+"Silent", silent);
+//		
+		dest.writeString(_description);
+		dest.writeString(_longUnit);
+		dest.writeString(_shortUnit);
+		dest.writeFloat(_factor);
+		dest.writeFloat(_offset);
+		dest.writeInt(_movingAverage);
+		dest.writeInt(_precision);
+		//dest.writeBool(silent);
+		
+		
+		//dest.writeInt(intValue);
+	}
+ 
+
+	private void readFromParcel(Parcel in) {
+ 
+		// We just need to read back each
+		// field in the order that it was
+		// written to the parcel
+
+		_description = in.readString();
+		_longUnit = in.readString();
+		_shortUnit = in.readString();
+		_factor = in.readFloat();
+		_offset = in.readFloat();
+		_movingAverage = in.readInt();
+		_precision = in.readInt();
+	}
+	
+	public static final Parcelable.Creator CREATOR =
+	    	new Parcelable.Creator() {
+	            public Channel createFromParcel(Parcel in) {
+	                return new Channel(in);
+	            }
+	 
+	            public Channel[] newArray(int size) {
+	                return new Channel[size];
+	            }
+	        };
+	
 }

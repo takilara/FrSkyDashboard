@@ -438,6 +438,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 //		editor.putInt(_name+"_"+"Precision", getPrecision());
 //		editor.putBoolean(_name+"_"+"Silent", silent);
 //		
+		dest.writeString(_name);
 		dest.writeString(_description);
 		dest.writeString(_longUnit);
 		dest.writeString(_shortUnit);
@@ -457,7 +458,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		// We just need to read back each
 		// field in the order that it was
 		// written to the parcel
-
+		_name = in.readString();
 		_description = in.readString();
 		_longUnit = in.readString();
 		_shortUnit = in.readString();

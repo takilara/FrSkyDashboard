@@ -102,6 +102,19 @@ public class Model {
 		return _channels.remove(channel);
 	}
 	
+	// I need to be able to set a given channel for this model
+	public void setChannel(int id, Channel channel)
+	{
+		
+		if(DEBUG) Log.d(TAG,"Replacing channel at id "+id);
+		
+		if(_channels.get(id)!=null)
+		{
+			if(DEBUG) Log.d(TAG,"Old channel existed");
+			_channels.set(id, channel);
+		}
+	}
+	
 	// I need to be able to return list of channels from this model
 	public Channel[] getChannels()
 	{
@@ -214,6 +227,8 @@ public class Model {
 		}
 	}
 	
+	
+
 	
 	public static Model[] getAllModels(Context context)
 	{

@@ -94,6 +94,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			int ii=id-1000;
 			Intent i = new Intent(this, ActivityModelConfig.class);
     		i.putExtra("modelId", (long) ii);	// Should edit existing model
+    		
     		startActivityForResult(i,MODEL_CONFIG_RETURN);
 		}
 		else if(id>100) // DELETE

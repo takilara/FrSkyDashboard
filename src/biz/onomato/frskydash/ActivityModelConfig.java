@@ -22,6 +22,7 @@ import android.widget.TextView;
 public class ActivityModelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ModelConfig";
 	private static final boolean DEBUG=true;
+	private static final int CHANNEL_CONFIG_RETURN = 1;
 	private FrSkyServer server;
 	
 	private Model _model;
@@ -203,6 +204,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	{
 		if(DEBUG) Log.d(TAG,"Populate list of channels");
 		llChannelsLayout.removeAllViews();
+		int n = 0;
 		for(Channel c:_model.getChannels())
 		{
 			if(DEBUG) Log.i(TAG,c.getName());
@@ -221,8 +223,19 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			
 			Button btnEdit = new Button(getApplicationContext());
 			btnEdit.setText("...");
-//			btnEdit.setId(1000+id);// ID for delete should be 100+channelId
-			btnEdit.setOnClickListener(this);
+			btnEdit.setId(1000+n);// ID for delete should be 100+channelId
+			//btnEdit.setOnClickListener(this);
+			btnEdit.setOnClickListener(new OnClickListener(){
+				public void onClick(View v){
+					if(DEBUG) Log.d(TAG,"Edit channel "+_model.getChannels()[v.getId()-1000].getDescription());
+					// Launch editchannel with channel attached.. 
+					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
+		    		//i.putExtra("channelId", 1);
+					i.putExtra("channel", _model.getChannels()[v.getId()-1000]);
+					i.putExtra("idInModel", v.getId()-1000);
+		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
+				}
+			});
 			
 			ll.addView(tvDesc);
 			ll.addView(btnEdit);
@@ -235,7 +248,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			
 			llChannelsLayout.addView(ll);
 			
-			
+			n++;
 			
 			
 			
@@ -243,4 +256,35 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	}
 	
 
+	 protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+	    {
+	    	switch (requestCode)
+	    	{
+	            case CHANNEL_CONFIG_RETURN:
+	            	if(DEBUG) Log.d(TAG,"Done editing the channel");
+	            	Channel returnChannel = null;
+	            	try
+	            	{
+	            		returnChannel = data.getParcelableExtra("channel");
+	            		int idInModel = data.getIntExtra("idInModel",-1);
+	            		if(idInModel>-1)
+	            		{
+	            			_model.setChannel(idInModel,returnChannel);
+	            			//populateChannelList();
+	            			
+	            		}
+	            		if(DEBUG) Log.d(TAG,"Return channel:"+returnChannel.getDescription());
+	            		
+	            	}
+	            	catch (Exception e)
+	            	{
+	            		Log.e(TAG,"No return channel");
+	            	}
+	            	
+	            	populateChannelList();
+	            	break;
+	    	}
+	    }
+	
+	
 }

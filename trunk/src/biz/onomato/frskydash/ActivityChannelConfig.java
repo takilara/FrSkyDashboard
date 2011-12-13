@@ -18,7 +18,9 @@ import android.widget.TextView;
 
 public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ChannelConfig";
+	private static final boolean DEBUG=true;
 	private int _channelId = -1;
+	private int _idInModel = -1;
 	private FrSkyServer server;
 	SharedPreferences settings;
 	SharedPreferences.Editor editor;
@@ -28,6 +30,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private EditText edDesc,edUnit,edShortUnit,edOffset,edFactor,edPrecision,edMovingAverage;
 	private CheckBox chkSpeechEnabled;
 	private Button btnSave;
+	
+	
 	//chConf_edVoice
     
 	@Override
@@ -37,6 +41,18 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		doBindService();
 		
 		Intent launcherIntent = getIntent();
+		try
+		{
+			channel = launcherIntent.getParcelableExtra("channel");
+			_idInModel = launcherIntent.getIntExtra("idInModel", -1);
+			Log.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
+			
+		}
+		catch(Exception e)
+		{
+			Log.d(TAG,"Channel config launched without attached channel");
+			channel = null;
+		}
 		_channelId = launcherIntent.getIntExtra("channelId", -1);
 		Log.d(TAG, "Channel Id is: "+_channelId);
 		
@@ -95,11 +111,15 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        editor = settings.edit();
 	        
 			// Show a particular channel
-			if(_channelId>-1)
+
+	        if((_channelId>-1) && (channel==null))
 			{
 				// Get the Channel instance
 				channel = server.getChannelById(_channelId);
-				
+			}
+			
+	        if(channel!=null)
+	        {
 				// Get configuration from config store
 				String cShortUnit = settings.getString(channel.getName() + "_shortUnit","A");
 				
@@ -136,9 +156,21 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				Log.i(TAG,"Apply settings to channel: "+_channelId);
 				applyChannel();
 				Log.i(TAG,"Store settings to database for channel: "+_channelId);
-				server.saveChannelConfig(channel);
+				
+				if(_channelId>-1)
+				{
+					server.saveChannelConfig(channel);
+				}
+				
+				//Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
+	    		//i.putExtra("channelId", 1);
+				Intent i = new Intent();
+				i.putExtra("channel", channel);
+				i.putExtra("idInModel",_idInModel);
+				
 				Log.i(TAG,"Go back to dashboard");
-				this.setResult(RESULT_OK);
+				this.setResult(RESULT_OK,i);
+				
 				this.finish();
 				break;
 		}
@@ -168,7 +200,16 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		int ma = Integer.parseInt(edMovingAverage.getText().toString());
 		channel.setMovingAverage(ma);
 		
-		channel.saveToConfig(settings);
+		//Save to regular persistant settings only if this is a "raw/server" channel
+		if(_channelId>-1)
+		{
+			if(DEBUG) Log.d(TAG,"This is a server channel, save settings to persistant store (not database)");
+			channel.saveToConfig(settings);
+		}
+		else
+		{
+			if(DEBUG) Log.d(TAG,"This is a model channel, allow model to save it upon model save");
+		}
 		
 		
 	}

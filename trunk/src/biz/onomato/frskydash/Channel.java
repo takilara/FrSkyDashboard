@@ -1,6 +1,11 @@
 package biz.onomato.frskydash;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -16,8 +21,11 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public static final int CHANNELTYPE_AD1=0;
 	public static final int CHANNELTYPE_AD2=1;
 	public static final int CHANNELTYPE_RSSI=2;
+	public static final String MESSAGE_CHANNEL_UPDATED = "biz.onomato.frskydash.update.channel.";
 	//public static final String crlf="\r\n";
 	public static final String delim=";";
+	
+	private static final boolean DEBUG=true;
 	
 	public double raw,rawAvg;
 	public double eng,engAvg;
@@ -32,7 +40,10 @@ public class Channel implements OnChannelListener, Parcelable  {
 	private float _offset;
 	private float _factor;
 	private int _precision;
-	 
+	private Context _context;
+	
+	private IntentFilter mIntentFilter;
+	
 	private String _shortUnit;
 	private String _longUnit;
 	private int _movingAverage;
@@ -43,8 +54,12 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public Alarm[] alarms;
 	public int alarmCount = 0;
 	private long _modelId = -1;
+	private long _channelId = -1;
 	
 	private ArrayList <OnChannelListener> _listeners;
+
+	//public static final Channel AD1 = new Channel("ad1","FrSky AD1",(float)0,(float)1,"","");
+	//public static final Channel AD2 = new Channel("ad2","FrSky AD2",(float)0,(float)1,"","");
 	
 	private MyStack _stack;
 	SharedPreferences _settings;
@@ -94,6 +109,30 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void addListener(OnChannelListener channel)
 	{
 		_listeners.add(channel);
+	}
+	
+	public void setContext(Context context)
+	{
+		Log.d(TAG,"Channel '"+_name+"' Set context to:"+context);
+		_context = context;
+		
+	}
+	
+	public void setId(long channelId)
+	{
+		
+		_channelId = channelId;
+	}
+	
+	public void listenTo(int channelId)
+	{
+		mIntentFilter = new IntentFilter();
+		String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
+		Log.d(TAG,"Listens for broadcast of values to on context "+_context+", with message: "+bCastAction);
+		
+	    mIntentFilter.addAction(bCastAction);
+	    Log.d(TAG,"Context is : "+_context);
+	    _context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
 	}
 	
 	public void reset()
@@ -189,6 +228,17 @@ public class Channel implements OnChannelListener, Parcelable  {
 			ch.onSourceUpdate(outVal);
 		}
 		
+		// send to broadcast receivers
+		if((_context!=null) && (_channelId!=-1))
+		{
+			String bCastAction = MESSAGE_CHANNEL_UPDATED+_channelId;
+			Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
+			
+			Intent i = new Intent();
+			i.setAction(bCastAction);
+			i.putExtra("channelValue", outVal);
+			_context.sendBroadcast(i);
+		}
 		return outVal;
 	}
 	
@@ -478,5 +528,23 @@ public class Channel implements OnChannelListener, Parcelable  {
 	                return new Channel[size];
 	            }
 	        };
-	
+
+    private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	String msg = intent.getAction();
+        	Bundle extras = intent.getExtras();
+        	Log.i(TAG,"Received Broadcast: '"+msg+"'");
+        	// no purpose to compare msg, since we should only listen to relevant broadcasts..
+        	//Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
+        	//if(msg.equals(FrSkyServer.MESSAGE_STARTED))
+        	//	Log.i(TAG,"I have received BroadCast that the server has started");
+        	// Get the value..
+        	double val = intent.getDoubleExtra("channelValue", -1);
+        	if(DEBUG) Log.d(TAG,"Received input value "+val);
+        	double v = setRaw(val);
+    		Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
+
+        }
+    };	 
 }

@@ -231,15 +231,22 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
+		AD1.setContext(getApplicationContext());
+		AD1.setId(5);
 		
+		Channel testChannel1 =  new Channel("TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
+		testChannel1.setContext(getApplicationContext());
+		testChannel1.listenTo(5);
+		_currentModel.addChannel(testChannel1);
 		
-//		Channel testChannel1 =  new Channel("TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
+//		Channel.AD1.addListener(testChannel1);
+		
 //		Channel testChannel2 =  new Channel("TestAD2", "channel that derives from AD2, multiplies by 100",0, 100, "V", "Volt");
 //
 //		AD1.addListener(testChannel1);
 //		AD2.addListener(testChannel2);
 //		//_currentModel.setId(1);
-//		_currentModel.addChannel(testChannel1);
+
 //		_currentModel.addChannel(testChannel2);
 		
 		
@@ -1074,6 +1081,11 @@ private final Handler mHandlerBT = new Handler() {
 				AD2.setRaw(f.ad2);
 				RSSIrx.setRaw(f.rssirx);
 				RSSItx.setRaw(f.rssitx);
+				
+//				Channel.AD1.setRaw(f.ad1);
+//				Channel.AD2.setRaw(f.ad2);
+				
+				
 				if(inBound)	
 				{
 					_framecountRx++;

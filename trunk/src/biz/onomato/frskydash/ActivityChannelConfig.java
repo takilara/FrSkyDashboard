@@ -19,7 +19,7 @@ import android.widget.TextView;
 public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ChannelConfig";
 	private static final boolean DEBUG=true;
-	private int _channelId = -1;
+	private long _channelId = -1;
 	private int _idInModel = -1;
 	private FrSkyServer server;
 	SharedPreferences settings;
@@ -45,6 +45,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		{
 			channel = launcherIntent.getParcelableExtra("channel");
 			_idInModel = launcherIntent.getIntExtra("idInModel", -1);
+			_channelId = channel.getId();
 			Log.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
 			
 		}
@@ -52,8 +53,9 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		{
 			Log.d(TAG,"Channel config launched without attached channel");
 			channel = null;
+			_channelId = launcherIntent.getIntExtra("channelId", -1);
 		}
-		_channelId = launcherIntent.getIntExtra("channelId", -1);
+		
 		Log.d(TAG, "Channel Id is: "+_channelId);
 		
 		// Show the form
@@ -115,7 +117,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        if((_channelId>-1) && (channel==null))
 			{
 				// Get the Channel instance
-				channel = server.getChannelById(_channelId);
+				channel = server.getChannelById((int) _channelId);
 			}
 			
 	        if(channel!=null)

@@ -56,6 +56,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 			_model = new Model(getApplicationContext());
 			_model.loadFromSettings(_modelId);
+			
+			
 //			_model = new Model(getApplicationContext());
 //			_model.loadFromSettings(_modelId);
 			//_model = Model.createFromSettings(getApplicationContext(), _modelId);
@@ -174,19 +176,14 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				_model.setName(edName.getText().toString());
 				_model.saveSettings();
 				
-				// Save the channels (using this models id)
-				for(Channel c:_model.getChannels())
-				{
-					if(DEBUG) Log.i(TAG,"Save channel "+c.getName());
-					
-				}
+				
 				
 				this.setResult(RESULT_OK);
 				this.finish();
 				break;
 			case R.id.modConf_btnAddChannel:
 				if(DEBUG) Log.d(TAG,"Add a channel");
-				Channel c = new Channel();
+				Channel c = new Channel(getApplicationContext());
 				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
 				c.setDescription("Description"+(_model.getChannels().length+1));
 				_model.addChannel(c);

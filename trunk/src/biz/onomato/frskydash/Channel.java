@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,9 +35,11 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public double rounder;
 	
 	private double _val;
+	//private long _id;
 	private double _avg;
 	private String _name;
 	private String _description;
+	private long _sourceChannelId;
 	private float _offset;
 	private float _factor;
 	private int _precision;
@@ -56,6 +59,8 @@ public class Channel implements OnChannelListener, Parcelable  {
 	private long _modelId = -1;
 	private long _channelId = -1;
 	
+	private static DBAdapterChannel db;
+	
 	private ArrayList <OnChannelListener> _listeners;
 
 	//public static final Channel AD1 = new Channel("ad1","FrSky AD1",(float)0,(float)1,"","");
@@ -65,9 +70,9 @@ public class Channel implements OnChannelListener, Parcelable  {
 	SharedPreferences _settings;
 	SharedPreferences.Editor editor;
 
-	public Channel()
+	public Channel(Context context)
 	{
-		this("derived","description",(float)0,(float)1,"Symbol","UnitName");
+		this(context,"derived","description",(float)0,(float)1,"Symbol","UnitName");
 	}
 	
 	public Channel(Parcel in)
@@ -76,11 +81,11 @@ public class Channel implements OnChannelListener, Parcelable  {
 	}
 	
 	
-	public Channel(String name,String description,float offset,float factor,String unit,String longUnit)
+	public Channel(Context context,String name,String description,float offset,float factor,String unit,String longUnit)
 	{
 		// instanciate listeners list
 		_listeners = new ArrayList<OnChannelListener> ();
-
+		_sourceChannelId = -1;
 		rounder=1;
 		silent = false;
 		_precision = 2;
@@ -92,6 +97,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_shortUnit = unit;
 		_longUnit = longUnit;
 		_mc = new MathContext(2);
+		_context = context;
 		setMovingAverage(0);
 
 //		_movingAverage = 10;
@@ -104,6 +110,8 @@ public class Channel implements OnChannelListener, Parcelable  {
 		
 		// FRSKY channels only for now
 		alarms = new Alarm[2];
+		
+		db = new DBAdapterChannel(context);
 	}
 	
 	public void addListener(OnChannelListener channel)
@@ -111,28 +119,47 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_listeners.add(channel);
 	}
 	
-	public void setContext(Context context)
-	{
-		Log.d(TAG,"Channel '"+_name+"' Set context to:"+context);
-		_context = context;
-		
-	}
+//	public void setContext(Context context)
+//	{
+//		Log.d(TAG,"Channel '"+_name+"' Set context to:"+context);
+//		_context = context;
+//		
+//	}
 	
 	public void setId(long channelId)
 	{
 		
 		_channelId = channelId;
 	}
+	public long getId()
+	{
+		return _channelId;
+	}
 	
 	public void listenTo(int channelId)
 	{
-		mIntentFilter = new IntentFilter();
-		String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
-		Log.d(TAG,"Listens for broadcast of values to on context "+_context+", with message: "+bCastAction);
-		
-	    mIntentFilter.addAction(bCastAction);
-	    Log.d(TAG,"Context is : "+_context);
-	    _context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
+		if(channelId!=-1)
+		{
+			mIntentFilter = new IntentFilter();
+			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
+			_sourceChannelId = channelId;
+			Log.d(TAG,"Listens for broadcast of values to on context "+_context+", with message: "+bCastAction);
+			
+		    mIntentFilter.addAction(bCastAction);
+		    Log.d(TAG,"Context is : "+_context);
+		    _context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
+		}
+		else
+		{
+			try
+			{
+				_context.unregisterReceiver(mChannelUpdateReceiver);
+			}
+			catch (Exception e)
+			{
+				
+			}
+		}
 	}
 	
 	public void reset()
@@ -158,6 +185,10 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public long getModelId()
 	{
 		return _modelId;
+	}
+	public long getSourceChannelId()
+	{
+		return _sourceChannelId;
 	}
 	
 	public boolean loadFromConfig(SharedPreferences settings)
@@ -546,5 +577,95 @@ public class Channel implements OnChannelListener, Parcelable  {
     		Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
 
         }
-    };	 
+    };	
+    
+    
+    // DATABASE stuffs
+    public void saveToDatabase()
+	{
+		if(_channelId==-1)
+		{
+			if(DEBUG) Log.d(TAG,"Saving, using insert");
+			db.open();
+			long id = db.insertChannel(this);
+			if(id==-1)
+			{
+				Log.e(TAG,"Insert Failed");
+			}
+			else
+			{
+				if(DEBUG) Log.d(TAG,"Insert ok, id:"+id);
+				_channelId = id;
+			}
+			db.close();
+			// Run insert
+		}
+		else
+		{
+			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_channelId+",description:"+_description+")");
+			db.open();
+			if(db.updateChannel(this))
+			{
+				if(DEBUG)Log.d(TAG,"Update successful");
+			}
+			else
+			{
+				if(DEBUG)Log.e(TAG,"Update failed");
+			}
+			db.close();
+			// run update
+		}
+	}
+	
+	
+	public boolean loadFromDatabase(long id)
+	{
+		// False if not found
+		db.open();
+		Cursor c = db.getChannel(id);
+		
+		if(c.getCount()==0)
+		{
+			if(DEBUG) Log.w(TAG,"Channel id "+id+" does not exist.");	
+			_channelId= -1;
+			db.close();
+			return false;
+		}
+		else
+		{
+			if(DEBUG) Log.d(TAG,"Found the channel");
+			if(DEBUG) Log.d(TAG,c.getString(1));
+			_channelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_ROWID));
+			_description = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_DESCRIPTION));
+			_longUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_LONGUNIT));
+			_shortUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SHORTUNIT));
+			_factor = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_FACTOR));
+			_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
+			_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
+			_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+			listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
+			//_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+			db.close();
+			return true;
+		}
+		
+	}
+	
+	public static Channel[] getChannelsForModel(Context context, Model model)
+	{
+		db = new DBAdapterChannel(context);
+		db.open();
+		Cursor c = db.getAllChannels();
+		c.moveToFirst();
+		Channel[] channels = new Channel[c.getCount()];
+		
+		while(!c.isLast())
+		{
+				c.moveToNext();
+				Log.d(TAG,"Add Channel "+c.getString(1)+" to channellist");
+				
+		}
+		db.close();
+		return channels;
+	}
 }

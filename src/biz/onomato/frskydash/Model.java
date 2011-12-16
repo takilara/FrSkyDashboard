@@ -176,6 +176,16 @@ public class Model {
 			db.close();
 			// run update
 		}
+		
+		
+		// Save the channels (using this models id)
+		for(Channel ch :getChannels())
+		{
+			if(DEBUG) Log.i(TAG,"Save channel "+ch.getName());
+			ch.setModelId(_id);
+			ch.saveToDatabase();
+			
+		}
 	}
 	
 	// I need to be able to load settings from file or config storage
@@ -195,6 +205,8 @@ public class Model {
 			if(DEBUG) Log.w(TAG,"Model id "+id+" does not exist.");	
 			_id= -1;
 			db.close();
+			
+			// no channels
 			return false;
 		}
 		else
@@ -204,6 +216,13 @@ public class Model {
 			_id = c.getLong(0);
 			_name = c.getString(1);
 			db.close();
+			
+			// load channels
+			
+			for(Channel ch : Channel.getChannelsForModel(_context,this))
+			{
+				
+			}
 			return true;
 		}
 		

@@ -207,7 +207,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//String _prevModel = "FunCub 1";
 		long _prevModelId = _settings.getLong("prevModelId", -1);
 		
-		_currentModel = new Model(getApplicationContext());
+		_currentModel = new Model(context);
 		if(!_currentModel.loadFromSettings(_prevModelId))
 		{
 			Log.w(TAG,"The previous model does not exist");
@@ -231,11 +231,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
-		AD1.setContext(getApplicationContext());
+		//AD1.setContext(getApplicationContext());
 		AD1.setId(5);
 		
-		Channel testChannel1 =  new Channel("TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
-		testChannel1.setContext(getApplicationContext());
+		Channel testChannel1 =  new Channel(context,"TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
+		//testChannel1.setContext(context);
 		testChannel1.listenTo(5);
 		_currentModel.addChannel(testChannel1);
 		
@@ -734,7 +734,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public int createChannel(String name,String description,float offset,float factor,String unit,String longUnit)
 	{
-		Channel AD1 =  new Channel(name, description, offset, factor, unit, longUnit);
+		Channel AD1 =  new Channel(context,name, description, offset, factor, unit, longUnit);
 		objs[channels] = AD1;
 		Log.i("MyApp","createChannel");
 		hRaw[channels]=-1;

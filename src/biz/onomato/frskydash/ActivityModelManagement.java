@@ -224,6 +224,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
+            	//TODO: Remove, make global to class?
             	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
             	db.open();
             	db.deleteModel(_deleteId);

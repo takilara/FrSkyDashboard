@@ -27,7 +27,7 @@ public class Model {
 	private long _id;
 	private Context _context;
 	
-	private DBAdapterModel db;
+	private static DBAdapterModel db;
 	
 
 	// Constructor
@@ -221,7 +221,8 @@ public class Model {
 			
 			for(Channel ch : Channel.getChannelsForModel(_context,this))
 			{
-				
+				if(DEBUG)Log.d(TAG,"Found and adding channel "+ch.getDescription()+" to "+_name);
+				addChannel(ch);
 			}
 			return true;
 		}
@@ -253,8 +254,9 @@ public class Model {
 	{
 		if(DEBUG) Log.d(TAG,"Get all models");
 		// Needs to create the model if it does not exists
-		DBAdapterModel db = new DBAdapterModel(context);
+	//	AbstractDBAdapter db = new AbstractDBAdapter(context);
 		db.open();
+		
 		Cursor c = db.getAllModels();
 		Model[] modelA = new Model[c.getCount()];
 		if(c.getCount()>0)

@@ -519,6 +519,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 //		editor.putInt(_name+"_"+"Precision", getPrecision());
 //		editor.putBoolean(_name+"_"+"Silent", silent);
 //		
+		dest.writeLong(_channelId);
 		dest.writeString(_name);
 		dest.writeString(_description);
 		dest.writeString(_longUnit);
@@ -539,6 +540,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		// We just need to read back each
 		// field in the order that it was
 		// written to the parcel
+		_channelId = in.readLong();
 		_name = in.readString();
 		_description = in.readString();
 		_longUnit = in.readString();
@@ -617,7 +619,21 @@ public class Channel implements OnChannelListener, Parcelable  {
 		}
 	}
 	
-	
+    public boolean loadFromDatabase(Cursor c)
+	{
+    	_channelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_ROWID));
+		_description = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_DESCRIPTION));
+		_longUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_LONGUNIT));
+		_shortUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SHORTUNIT));
+		_factor = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_FACTOR));
+		_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
+		_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
+		_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+		listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
+		//_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+		db.close();
+		return true;
+	}
 	public boolean loadFromDatabase(long id)
 	{
 		// False if not found
@@ -634,17 +650,18 @@ public class Channel implements OnChannelListener, Parcelable  {
 		else
 		{
 			if(DEBUG) Log.d(TAG,"Found the channel");
-			if(DEBUG) Log.d(TAG,c.getString(1));
-			_channelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_ROWID));
-			_description = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_DESCRIPTION));
-			_longUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_LONGUNIT));
-			_shortUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SHORTUNIT));
-			_factor = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_FACTOR));
-			_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
-			_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
-			_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
-			listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
-			//_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+//			if(DEBUG) Log.d(TAG,c.getString(1));
+//			_channelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_ROWID));
+//			_description = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_DESCRIPTION));
+//			_longUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_LONGUNIT));
+//			_shortUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SHORTUNIT));
+//			_factor = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_FACTOR));
+//			_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
+//			_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
+//			_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+//			listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
+//			//_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+			loadFromDatabase(c);
 			db.close();
 			return true;
 		}
@@ -653,19 +670,26 @@ public class Channel implements OnChannelListener, Parcelable  {
 	
 	public static Channel[] getChannelsForModel(Context context, Model model)
 	{
-		db = new DBAdapterChannel(context);
-		db.open();
-		Cursor c = db.getAllChannels();
+		DBAdapterChannel dbb = new DBAdapterChannel(context);
+		Log.d(TAG,"Try to open channels database");
+		dbb.open();
+		Log.d(TAG,"Db opened, try to get all channels");
+		Cursor c = dbb.getAllChannelsForModel(model.getId());
+		Log.d(TAG,"Cursor count: "+c.getCount());
 		c.moveToFirst();
 		Channel[] channels = new Channel[c.getCount()];
 		
-		while(!c.isLast())
+		int n = 0;
+		while(!c.isAfterLast())
 		{
-				c.moveToNext();
-				Log.d(TAG,"Add Channel "+c.getString(1)+" to channellist");
 				
+				Log.d(TAG,"Add Channel "+c.getString(1)+" to channellist");
+				channels[n] = new Channel(context);
+				channels[n].loadFromDatabase(c);
+				c.moveToNext();
+				n++;
 		}
-		db.close();
+		dbb.close();
 		return channels;
 	}
 }

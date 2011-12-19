@@ -36,6 +36,7 @@ public class DBAdapterChannel extends AbstractDBAdapter {
         initialValues.put(KEY_MOVINGAVERAGE, channel.getMovingAverage());
         initialValues.put(KEY_MODELID, channel.getModelId());
         initialValues.put(KEY_SOURCECHANNELID, channel.getSourceChannelId());
+        initialValues.put(KEY_SILENT, channel.getSilent());
         
         
         
@@ -145,7 +146,7 @@ public class DBAdapterChannel extends AbstractDBAdapter {
         args.put(KEY_MOVINGAVERAGE, channel.getMovingAverage());
         args.put(KEY_MODELID, channel.getModelId());
         args.put(KEY_SOURCECHANNELID, channel.getSourceChannelId());
-
+        args.put(KEY_SILENT, channel.getSilent());
         
         return db.update(DATABASE_TABLE_CHANNELS, args, 
                          KEY_ROWID + "=" + rowId, null) > 0;

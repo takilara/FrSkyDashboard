@@ -171,6 +171,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				i.putExtra("idInModel",_idInModel);
 				
 				Log.i(TAG,"Go back to dashboard");
+				if(DEBUG) Log.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
 				this.setResult(RESULT_OK,i);
 				
 				this.finish();

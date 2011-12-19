@@ -242,7 +242,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            			//populateChannelList();
 	            			
 	            		}
-	            		if(DEBUG) Log.d(TAG,"Return channel:"+returnChannel.getDescription());
+	            		if(DEBUG) Log.d(TAG,"Received channel from ActivityChannelConfig: channel:"+returnChannel.getDescription()+", silent: "+returnChannel.getSilent());
 	            		
 	            	}
 	            	catch (Exception e)

@@ -304,7 +304,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				{
 					for(int n=0;n<MAX_CHANNELS;n++)
 					{
-							if(!getChannelById(n).silent) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+							if(!getChannelById(n).getSilent()) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					}
 				}
 				
@@ -787,7 +787,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		RSSIrx.setMovingAverage(-1);
 		RSSIrx.setLongUnit("dBm");
 		RSSIrx.setShortUnit("dBm");
-		RSSIrx.silent = true;
+		RSSIrx.setSilent(true);
 		
 		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
@@ -795,7 +795,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		RSSItx.setMovingAverage(-1);
 		RSSItx.setLongUnit("dBm");
 		RSSItx.setShortUnit("dBm");
-		RSSItx.silent = true;
+		RSSItx.setSilent(true);
 		
 		// Force alarm creation/initiation
 		Frame alarmframe1 = Frame.AlarmFrame(
@@ -1265,7 +1265,7 @@ private final Handler mHandlerBT = new Handler() {
 		channel.setOffset(settings.getFloat(cName+"_"+"Offset", (float) (0)));
 		channel.setMovingAverage(cMovingAverage = settings.getInt(cName+"_"+"MovingAverage", 8));
 		channel.setPrecision(settings.getInt(cName+"_"+"Precision", 2));
-		channel.silent = settings.getBoolean(cName+"_"+"Silent", false);
+		channel.setSilent(settings.getBoolean(cName+"_"+"Silent", false));
 		return true;
 	}
 	

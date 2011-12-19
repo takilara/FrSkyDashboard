@@ -51,7 +51,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	private String _longUnit;
 	private int _movingAverage;
 	private MathContext _mc;
-	public boolean silent;
+	public boolean _silent;
 	public Date timestamp;
 	
 	public Alarm[] alarms;
@@ -87,7 +87,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_listeners = new ArrayList<OnChannelListener> ();
 		_sourceChannelId = -1;
 		rounder=1;
-		silent = false;
+		_silent = false;
 		_precision = 2;
 		
 		_name = name;
@@ -136,7 +136,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		return _channelId;
 	}
 	
-	public void listenTo(int channelId)
+	public void listenTo(long channelId)
 	{
 		if(channelId!=-1)
 		{
@@ -201,8 +201,10 @@ public class Channel implements OnChannelListener, Parcelable  {
 		setOffset(settings.getFloat(_name+"_"+"Offset", (0)));
 		setMovingAverage(settings.getInt(_name+"_"+"MovingAverage", 8));
 		setPrecision(settings.getInt(_name+"_"+"Precision", 2));
-		silent = settings.getBoolean(_name+"_"+"Silent", false);
-		
+		setSilent(settings.getBoolean(_name+"_"+"Silent", false));
+		listenTo(settings.getLong(_name+"_"+"SourceChannel", -1));
+		//TODO: Add source channel
+		//TODO: Deprecate
 		return true;
 	}
 	
@@ -217,9 +219,10 @@ public class Channel implements OnChannelListener, Parcelable  {
 		editor.putFloat (_name+"_"+"Offset", getOffset());
 		editor.putInt(_name+"_"+"MovingAverage", getMovingAverage());
 		editor.putInt(_name+"_"+"Precision", getPrecision());
-		editor.putBoolean(_name+"_"+"Silent", silent);
-		
+		editor.putBoolean(_name+"_"+"Silent", getSilent());
 		editor.commit();
+		//TODO: Add source channel
+		//TODO: Deprecate
 		
 		return true;
 	}
@@ -461,12 +464,25 @@ public class Channel implements OnChannelListener, Parcelable  {
 	
 	public boolean getSpeechEnabled()
 	{
-		return !silent;
+		return !_silent;
 	}
+	
+	public boolean getSilent()
+	{
+		return _silent;
+	}
+	
+	public void setSilent(boolean setSilent)
+	{
+		_silent = setSilent;
+	}
+	
+
+	
 
 	public void setSpeechEnabled(boolean speech)
 	{
-		silent = !speech;
+		_silent = !speech;
 	}
 	
 	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
@@ -528,10 +544,10 @@ public class Channel implements OnChannelListener, Parcelable  {
 		dest.writeFloat(_offset);
 		dest.writeInt(_movingAverage);
 		dest.writeInt(_precision);
-		//dest.writeBool(silent);
-		
-		
-		//dest.writeInt(intValue);
+		//dest.writeByte((byte) (getSilent() ? 1 : 0));
+		dest.writeByte((byte) (_silent ? 1 : 0));
+		dest.writeLong(_sourceChannelId);
+
 	}
  
 
@@ -549,6 +565,9 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_offset = in.readFloat();
 		_movingAverage = in.readInt();
 		_precision = in.readInt();
+		_silent = in.readByte()==1;
+		//setSilent(in.readByte()==1);
+		_sourceChannelId = in.readLong();
 	}
 	
 	public static final Parcelable.Creator CREATOR =
@@ -604,7 +623,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		}
 		else
 		{
-			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_channelId+",description:"+_description+")");
+			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_channelId+",description:"+_description+", silent="+getSilent()+")");
 			db.open();
 			if(db.updateChannel(this))
 			{
@@ -629,9 +648,13 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
 		_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
 		_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+		_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0;
+		//setSilent(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0);
 		listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
-		//_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
 		db.close();
+		
+		if(DEBUG) Log.d(TAG,"Loaded '"+getDescription()+"' from database");
+		if(DEBUG) Log.d(TAG,"\tSilent:\t"+getSilent());
 		return true;
 	}
 	public boolean loadFromDatabase(long id)

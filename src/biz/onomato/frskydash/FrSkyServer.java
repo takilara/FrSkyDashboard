@@ -208,7 +208,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		long _prevModelId = _settings.getLong("prevModelId", -1);
 		
 		_currentModel = new Model(context);
-		if(!_currentModel.loadFromSettings(_prevModelId))
+		if(!_currentModel.loadFromDatabase(_prevModelId))
 		{
 			Log.w(TAG,"The previous model does not exist");
 			Log.w(TAG,"Try to get the first model");
@@ -216,7 +216,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			{
 				// no models exist, 
 				// Set defaults
-				_currentModel.saveSettings();
+				_currentModel.saveToDatabase();
 				// and save it
 			}
 		}

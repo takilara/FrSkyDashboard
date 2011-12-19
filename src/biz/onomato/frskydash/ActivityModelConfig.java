@@ -57,7 +57,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		{
 			if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 			_model = new Model(getApplicationContext());
-			_model.loadFromSettings(_modelId);
+			_model.loadFromDatabase(_modelId);
 			
 			
 //			_model = new Model(getApplicationContext());
@@ -140,7 +140,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 
 				// Save the model
 				_model.setName(edName.getText().toString());
-				_model.saveSettings();
+				_model.saveToDatabase();
 				
 				this.setResult(RESULT_OK);
 				this.finish();

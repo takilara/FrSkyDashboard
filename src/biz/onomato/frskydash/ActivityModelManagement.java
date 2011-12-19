@@ -82,7 +82,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			rbCurrentModel = (RadioButton) findViewById(id);
 			rbCurrentModel.setChecked(true);
 			Model m = new Model(getApplicationContext());
-			m.loadFromSettings(ii);
+			m.loadFromDatabase(ii);
 			if(server!=null)
 			{
 				server.setCurrentModel(m);
@@ -212,7 +212,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	{
 		///TODO: Modify for deletion of models
 		Model m = new Model(getApplicationContext());
-		m.loadFromSettings(id);
+		m.loadFromDatabase(id);
 		Log.i(TAG,"Delete model with id:"+id);
 		_deleteId = id;
 		AlertDialog dialog = new AlertDialog.Builder(this).create();

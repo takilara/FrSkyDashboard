@@ -143,7 +143,7 @@ public class Model {
 	}
 	
 	// I need to be able to save settings to file or config storage
-	public void saveSettings()
+	public void saveToDatabase()
 	{
 		if(_id==-1)
 		{
@@ -195,7 +195,7 @@ public class Model {
 		
 	}
 	
-	public boolean loadFromSettings(long id)
+	public boolean loadFromDatabase(long id)
 	{
 		// False if not found
 		db.open();
@@ -237,7 +237,7 @@ public class Model {
 		if(c.getCount()>0)
 		{
 			c.moveToFirst();
-			loadFromSettings(c.getInt(0));
+			loadFromDatabase(c.getInt(0));
 			db.close();
 			return true;
 		}
@@ -268,7 +268,7 @@ public class Model {
 			{
 				modelA[i] = new Model(context);
 				long id = c.getLong(0);
-				modelA[i].loadFromSettings(id);
+				modelA[i].loadFromDatabase(id);
 			}
 		}
 		

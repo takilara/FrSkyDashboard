@@ -1,7 +1,9 @@
 package biz.onomato.frskydash;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -123,37 +125,6 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			Log.i(TAG,"Bound to Service");
 			
 			populateChannelList();
-			
-			//Log.i(TAG,"Fetch Model "+_channelId+" from Server");
-			
-			//_model = server.getCurrentModel();
-			
-			
-			
-			// Show a particular channel
-//			if(_channelId>-1)
-//			{
-//				// Get the Channel instance
-//				channel = server.getChannelById(_channelId);
-//				
-//				// Get configuration from config store
-//
-//				// Name is common from configstore and server
-//				tvName.setText(channel.getName());
-//				
-//				// Use config from Server
-//				edDesc.setText(channel.getDescription());
-//				edUnit.setText(channel.getLongUnit());
-//				edShortUnit.setText(channel.getShortUnit());
-//				edOffset.setText(Float.toString(channel.getOffset()));
-//				//edFactor.setText(Double.toString(channel.getFactor()));
-//				edFactor.setText(Float.toString(channel.getFactor()));
-//				edPrecision.setText(Integer.toString(channel.getPrecision()));
-//				edMovingAverage.setText(Integer.toString(channel.getMovingAverage()));
-//				chkSpeechEnabled.setChecked(channel.getSpeechEnabled());
-//				
-//				
-//			}
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -166,17 +137,10 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		switch(v.getId()){
 			case R.id.modConf_btnSave:
 				if(DEBUG) Log.d(TAG,"Save this model");
-//				applyChannel();
-//				Log.i(TAG,"Store settings to database for channel: "+_channelId);
-//				server.saveChannelConfig(channel);
-//				Log.i(TAG,"Go back to dashboard");
-				
 
 				// Save the model
 				_model.setName(edName.getText().toString());
 				_model.saveSettings();
-				
-				
 				
 				this.setResult(RESULT_OK);
 				this.finish();
@@ -188,11 +152,6 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				c.setDescription("Description"+(_model.getChannels().length+1));
 				_model.addChannel(c);
 				populateChannelList();
-//				applyChannel();
-//				Log.i(TAG,"Store settings to database for channel: "+_channelId);
-//				server.saveChannelConfig(channel);
-//				Log.i(TAG,"Go back to dashboard");
-				
 				break;
 		}
 	}
@@ -215,8 +174,21 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			
 			Button btnDelete = new Button(getApplicationContext());
 			btnDelete.setText("Delete");
+			btnDelete.setId(10000+n);
 			//btnDelete.setId(100+id); // ID for delete should be 100+channelId
-			btnDelete.setOnClickListener(this);
+			//btnDelete.setOnClickListener(this);
+			btnDelete.setOnClickListener(new OnClickListener(){
+				public void onClick(View v){
+					if(DEBUG) Log.d(TAG,"Delete channel "+_model.getChannels()[v.getId()-10000].getDescription());
+					showDeleteChannelDialog(_model.getChannels()[v.getId()-10000]);
+					// Launch editchannel with channel attached.. 
+//					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
+//		    		//i.putExtra("channelId", 1);
+//					i.putExtra("channel", _model.getChannels()[v.getId()-1000]);
+//					i.putExtra("idInModel", v.getId()-1000);
+//		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
+				}
+			});
 			
 			Button btnEdit = new Button(getApplicationContext());
 			btnEdit.setText("...");
@@ -283,5 +255,35 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	    	}
 	    }
 	
-	
+	 private void showDeleteChannelDialog(final Channel channel)
+		{
+			///TODO: Modify for deletion of models
+			Log.i(TAG,"Delete channel "+channel.getDescription());
+			AlertDialog dialog = new AlertDialog.Builder(this).create();
+			dialog.setTitle("Delete "+channel.getDescription()+"?");
+
+			dialog.setMessage("Do you really want to delete the channel '"+channel.getDescription()+"'?");
+			
+			dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+	            	_model.removeChannel(channel);
+	            	populateChannelList();
+	            }
+
+	        });
+	        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+
+	                //Stop the activity
+	            	//_deleteId=-1;
+	                Log.i(TAG,"Cancel Deletion");
+	            }
+
+	        });
+	        dialog.show();
+		}
 }

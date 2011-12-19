@@ -99,6 +99,7 @@ public class Model {
 	// I need to be able to delete channels from this model
 	public boolean removeChannel(Channel channel)
 	{
+		channel.deleteFromDatabase();
 		return _channels.remove(channel);
 	}
 	

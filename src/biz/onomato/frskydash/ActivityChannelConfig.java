@@ -215,4 +215,6 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		
 		
 	}
+	
+	
 }

@@ -650,23 +650,26 @@ public class Channel implements OnChannelListener, Parcelable  {
 		else
 		{
 			if(DEBUG) Log.d(TAG,"Found the channel");
-//			if(DEBUG) Log.d(TAG,c.getString(1));
-//			_channelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_ROWID));
-//			_description = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_DESCRIPTION));
-//			_longUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_LONGUNIT));
-//			_shortUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SHORTUNIT));
-//			_factor = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_FACTOR));
-//			_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
-//			_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
-//			_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
-//			listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
-//			//_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
 			loadFromDatabase(c);
 			db.close();
 			return true;
 		}
-		
 	}
+	
+	public void deleteFromDatabase()
+	{
+		db.open();
+		try
+		{
+			db.deleteChannel(this._channelId);
+		}
+		catch(Exception e)
+		{
+			if(DEBUG) Log.e(TAG,e.toString());
+		}
+		db.close();
+	}
+	
 	
 	public static Channel[] getChannelsForModel(Context context, Model model)
 	{

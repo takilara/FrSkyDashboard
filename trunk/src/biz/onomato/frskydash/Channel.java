@@ -117,18 +117,9 @@ public class Channel implements OnChannelListener, Parcelable  {
 		db = new DBAdapterChannel(context);
 	}
 	
-	public void addListener(OnChannelListener channel)
-	{
-		_listeners.add(channel);
-		setDirtyFlag(true);
-	}
-	
-//	public void setContext(Context context)
-//	{
-//		Log.d(TAG,"Channel '"+_name+"' Set context to:"+context);
-//		_context = context;
-//		
-//	}
+	// ==========================================================================================
+	// ====                        PROPERTIES                                               =====
+	// ==========================================================================================
 	
 	public void setDirtyFlag(boolean dirty)
 	{
@@ -148,45 +139,6 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public long getId()
 	{
 		return _channelId;
-	}
-	
-	public void listenTo(long channelId)
-	{
-		if(channelId!=-1)
-		{
-			mIntentFilter = new IntentFilter();
-			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
-			_sourceChannelId = channelId;
-			Log.d(TAG,"Listens for broadcast of values to on context "+_context+", with message: "+bCastAction);
-			
-		    mIntentFilter.addAction(bCastAction);
-		    Log.d(TAG,"Context is : "+_context);
-		    _context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
-		}
-		else
-		{
-			try
-			{
-				_context.unregisterReceiver(mChannelUpdateReceiver);
-			}
-			catch (Exception e)
-			{
-				
-			}
-		}
-		setDirtyFlag(true);
-	}
-	
-	public void reset()
-	{
-		_raw = -1;
-		_val = -1;
-		_avg = 0;
-		raw = _raw;
-		rawAvg = _avg;
-		eng = _val;
-		_stack = new MyStack(_movingAverage);
-		setDirtyFlag(true);
 	}
 	
 	public void setModelId(Model model)
@@ -209,41 +161,10 @@ public class Channel implements OnChannelListener, Parcelable  {
 		return _sourceChannelId;
 	}
 	
-//	public boolean loadFromConfig(SharedPreferences settings)
-//	{
-//
-//		setDescription(settings.getString(_name+"_"+"Description","Main cell voltage"));
-//		setLongUnit(settings.getString(_name+"_"+"LongUnit","Volt"));
-//		setShortUnit(settings.getString(_name+"_"+"ShortUnit","V"));
-//		setFactor(settings.getFloat(_name+"_"+"Factor", (float)(0.1/6)));
-//		setOffset(settings.getFloat(_name+"_"+"Offset", (0)));
-//		setMovingAverage(settings.getInt(_name+"_"+"MovingAverage", 8));
-//		setPrecision(settings.getInt(_name+"_"+"Precision", 2));
-//		setSilent(settings.getBoolean(_name+"_"+"Silent", false));
-//		listenTo(settings.getLong(_name+"_"+"SourceChannel", -1));
-//		//TODO: Add source channel
-//		//TODO: Deprecate
-//		return true;
-//	}
-	
-//	public boolean saveToConfig(SharedPreferences settings)
-//	{
-//		editor = settings.edit();
-//		
-//		editor.putString(_name+"_"+"Description", getDescription());
-//		editor.putString(_name+"_"+"LongUnit", getLongUnit());
-//		editor.putString(_name+"_"+"ShortUnit", getShortUnit());
-//		editor.putFloat (_name+"_"+"Factor", getFactor());
-//		editor.putFloat (_name+"_"+"Offset", getOffset());
-//		editor.putInt(_name+"_"+"MovingAverage", getMovingAverage());
-//		editor.putInt(_name+"_"+"Precision", getPrecision());
-//		editor.putBoolean(_name+"_"+"Silent", getSilent());
-//		editor.commit();
-//		//TODO: Add source channel
-//		//TODO: Deprecate
-//		
-//		return true;
-//	}
+	public int getMovingAverage()
+	{
+		return _movingAverage;
+	}
 	
 	public void setMovingAverage(int Size)
 	{
@@ -256,6 +177,112 @@ public class Channel implements OnChannelListener, Parcelable  {
 		setDirtyFlag(true);
 	}
 	
+	public String getDescription()
+	{
+		return _description;
+	}
+	
+	public void setDescription(String d)
+	{
+		_description = d;
+		setDirtyFlag(true);
+	}
+	
+	public String getName()
+	{
+		return _name;
+	}
+	public void setName(String n)
+	{
+		_name = n;
+		setDirtyFlag(true);
+	}
+	
+	public String getLongUnit()
+	{
+		return _longUnit;
+	}
+	
+	public void setLongUnit(String unit)
+	{
+		_longUnit = unit;
+		setDirtyFlag(true);
+	}
+	
+	public String getShortUnit()
+	{
+		return _shortUnit;
+	}
+	
+	public void setShortUnit(String unit)
+	{
+		_shortUnit = unit;
+		setDirtyFlag(true);
+	}
+	
+	public int getPrecision()
+	{
+		return _precision;
+	}
+	
+	public void setPrecision(int precision)
+	{
+		_precision = precision;
+		rounder = 1;
+		for(int i=0;i<precision;i++)
+		{
+			rounder = rounder * 10;
+		}
+		setDirtyFlag(true);
+	}
+	
+	public float getOffset()
+	{
+		return _offset;
+	}
+	public void setOffset(float o)
+	{
+		_offset = o;
+		setDirtyFlag(true);
+	}	
+	
+	public float getFactor()
+	{
+		return _factor;
+	}	
+	public void setFactor(float f)
+	{
+		_factor = f;
+		setDirtyFlag(true);
+	}	
+	
+	public boolean getSpeechEnabled()
+	{
+		return !_silent;
+	}
+	
+	public boolean getSilent()
+	{
+		return _silent;
+	}
+	
+	public void setSilent(boolean setSilent)
+	{
+		_silent = setSilent;
+		setDirtyFlag(true);
+	}
+
+	public void setSpeechEnabled(boolean speech)
+	{
+		_silent = !speech;
+		setDirtyFlag(true);
+	}
+
+	
+	
+	// ==========================================================================================
+	// ====                        CHANNEL METHODS                                          =====
+	// ==========================================================================================	
 	public double setRaw(int value)
 	{
 		return setRaw((double) value);
@@ -295,33 +322,13 @@ public class Channel implements OnChannelListener, Parcelable  {
 		return outVal;
 	}
 	
-	public void onSourceUpdate(double sourceValue)
-	{
-		
-		double v = setRaw(sourceValue);
-		Log.d(TAG,_name+" updated by parent to "+sourceValue+" -> "+v+" "+_shortUnit);
-	}
-	
-	private double convert(double inputValue)
-	{
-		double o = (inputValue * _factor)+_offset;
-		Log.d(TAG,_name+" convert from inputvalue ("+inputValue+") to outputvalue ("+o+")");
-		return Math.round(o*rounder)/rounder;
-	}
-	
-	public void setPrecision(int precision)
-	{
-		_precision = precision;
-		rounder = 1;
-		for(int i=0;i<precision;i++)
-		{
-			rounder = rounder * 10;
-		}
-		setDirtyFlag(true);
-	}
 	
 	
-	// Getters
+	
+	
+	
+	
+	
 	public double getValue()
 	{
 		return getValue(false);
@@ -405,118 +412,112 @@ public class Channel implements OnChannelListener, Parcelable  {
 		}
 	}
 
-	
-	
-	
-	
-	
-	public String getDescription()
+	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
 	{
-		return _description;
+		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
+		alarmCount += 1;
+		setDirtyFlag(true);
 	}
+
 	
-	public void setDescription(String d)
+	
+	
+	
+	// ==========================================================================================
+	// ====                        INTER CHANNEL COMMUNICATION                              =====
+	// ==========================================================================================
+	
+	public void listenTo(Channel channel)
 	{
-		_description = d;
+		listenTo(channel.getId());
+	}
+	public void listenTo(long channelId)
+	{
+		if(channelId!=-1)
+		{
+			mIntentFilter = new IntentFilter();
+			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
+			_sourceChannelId = channelId;
+			Log.d(TAG,"Listens for broadcast of values to on context "+_context+", with message: "+bCastAction);
+			
+		    mIntentFilter.addAction(bCastAction);
+		    Log.d(TAG,"Context is : "+_context);
+		    _context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
+		}
+		else
+		{
+			try
+			{
+				_context.unregisterReceiver(mChannelUpdateReceiver);
+			}
+			catch (Exception e)
+			{
+				
+			}
+		}
 		setDirtyFlag(true);
 	}
 	
-	public String getName()
-	{
-		return _name;
-	}
-	public void setName(String n)
-	{
-		_name = n;
-		setDirtyFlag(true);
-	}
+	private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	String msg = intent.getAction();
+        	Bundle extras = intent.getExtras();
+        	Log.i(TAG,"Received Broadcast: '"+msg+"'");
+        	// no purpose to compare msg, since we should only listen to relevant broadcasts..
+        	//Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
+        	//if(msg.equals(FrSkyServer.MESSAGE_STARTED))
+        	//	Log.i(TAG,"I have received BroadCast that the server has started");
+        	// Get the value..
+        	double val = intent.getDoubleExtra("channelValue", -1);
+        	if(DEBUG) Log.d(TAG,"Received input value "+val);
+        	double v = setRaw(val);
+    		Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
+
+        }
+    };	
 	
-	public String getLongUnit()
-	{
-		return _longUnit;
-	}
-	
-	public void setLongUnit(String unit)
-	{
-		_longUnit = unit;
-		setDirtyFlag(true);
-	}
-	
-	public String getShortUnit()
-	{
-		return _shortUnit;
-	}
-	
-	public void setShortUnit(String unit)
-	{
-		_shortUnit = unit;
-		setDirtyFlag(true);
-	}
-	
+    //TODO: Deprecate
+  	public void onSourceUpdate(double sourceValue)
+  	{
+  		
+  		double v = setRaw(sourceValue);
+  		Log.d(TAG,_name+" updated by parent to "+sourceValue+" -> "+v+" "+_shortUnit);
+  	}
+    
+    
+	// ==========================================================================================
+	// ====                        UTILITY METHODS                                          =====
+	// ==========================================================================================
 	public String toVoiceString()
 	{
 		return getDescription()+": "+toString()+" "+getLongUnit();
 	}
 	
-	public float getOffset()
+	public void reset()
 	{
-		return _offset;
-	}
-	public void setOffset(float o)
-	{
-		_offset = o;
-		setDirtyFlag(true);
-	}	
-	
-	public float getFactor()
-	{
-		return _factor;
-	}	
-	public void setFactor(float f)
-	{
-		_factor = f;
-		setDirtyFlag(true);
-	}	
-	
-	public int getPrecision()
-	{
-		return _precision;
-	}
-	
-	public int getMovingAverage()
-	{
-		return _movingAverage;
-	}
-	
-	public boolean getSpeechEnabled()
-	{
-		return !_silent;
-	}
-	
-	public boolean getSilent()
-	{
-		return _silent;
-	}
-	
-	public void setSilent(boolean setSilent)
-	{
-		_silent = setSilent;
+		_raw = -1;
+		_val = -1;
+		_avg = 0;
+		raw = _raw;
+		rawAvg = _avg;
+		eng = _val;
+		_stack = new MyStack(_movingAverage);
 		setDirtyFlag(true);
 	}
 	
-
-	
-
-	public void setSpeechEnabled(boolean speech)
+	private double convert(double inputValue)
 	{
-		_silent = !speech;
-		setDirtyFlag(true);
+		double o = (inputValue * _factor)+_offset;
+		Log.d(TAG,_name+" convert from inputvalue ("+inputValue+") to outputvalue ("+o+")");
+		return Math.round(o*rounder)/rounder;
 	}
 	
-	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
+	
+	//TODO: Deprecate
+	public void addListener(OnChannelListener channel)
 	{
-		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
-		alarmCount += 1;
+		_listeners.add(channel);
 		setDirtyFlag(true);
 	}
 	
@@ -525,12 +526,8 @@ public class Channel implements OnChannelListener, Parcelable  {
 		
 		StringBuilder sb = new StringBuilder();
 		
-		//sb.append(_description+delim);
-		//sb.append(_raw+delim);
-		//sb.append(_avg+delim);
 		sb.append(String.format("%."+_precision+"f",convert(_raw))+delim);
 		sb.append(String.format("%."+_precision+"f",convert(_avg))+delim);
-		//sb.append(_longUnit+delim);
 		return sb.toString();
 	}
 	public String toCsvHeader()
@@ -542,7 +539,13 @@ public class Channel implements OnChannelListener, Parcelable  {
 		return sb.toString();
 	}
 	
-	// Parcelable
+
+
+	
+	// ==========================================================================================
+	// ====                        PARCELABLE                                               =====
+	// ==========================================================================================
+	
 	@Override
 	public int describeContents() {
 		return 0;
@@ -601,27 +604,12 @@ public class Channel implements OnChannelListener, Parcelable  {
 	            }
 	        };
 
-    private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-        	String msg = intent.getAction();
-        	Bundle extras = intent.getExtras();
-        	Log.i(TAG,"Received Broadcast: '"+msg+"'");
-        	// no purpose to compare msg, since we should only listen to relevant broadcasts..
-        	//Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
-        	//if(msg.equals(FrSkyServer.MESSAGE_STARTED))
-        	//	Log.i(TAG,"I have received BroadCast that the server has started");
-        	// Get the value..
-        	double val = intent.getDoubleExtra("channelValue", -1);
-        	if(DEBUG) Log.d(TAG,"Received input value "+val);
-        	double v = setRaw(val);
-    		Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
-
-        }
-    };	
     
     
-    // DATABASE stuffs
+    
+	// ==========================================================================================
+	// ====                        DATABASE ACCESS                                          =====
+	// ==========================================================================================
     public void saveToDatabase()
 	{
 		if(_channelId==-1)
@@ -672,7 +660,6 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
 		_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0;
 		_modelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MODELID));
-		//setSilent(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0);
 		listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
 		db.close();
 		
@@ -717,6 +704,11 @@ public class Channel implements OnChannelListener, Parcelable  {
 		db.close();
 	}
 	
+	
+	
+	// ==========================================================================================
+	// ====                        STATIC METHODS                                           =====
+	// ==========================================================================================
 	
 	public static Channel[] getChannelsForModel(Context context, Model model)
 	{

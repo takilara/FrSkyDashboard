@@ -1,13 +1,22 @@
 package biz.onomato.frskydash;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,13 +25,14 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ActivityDebug extends Activity implements OnClickListener {
 	private static final String TAG = "DebugActivity";
 	private static final boolean DEBUG=true;
 	private FrSkyServer server;
 	
-	private Button btnSchema,btnChannels,btnModels;
+	private Button btnSchema,btnChannels,btnModels,btnExportDb;
 	
 	
 	//chConf_edVoice
@@ -40,11 +50,13 @@ public class ActivityDebug extends Activity implements OnClickListener {
 		btnSchema			= (Button) findViewById(R.id.debug_btnSchema);
 		btnChannels			= (Button) findViewById(R.id.debug_btnChannels);
 		btnModels			= (Button) findViewById(R.id.debug_btnModels);
+		btnExportDb			= (Button) findViewById(R.id.debug_btnExportDb);
 		
 		
 		btnSchema.setOnClickListener(this);
 		btnChannels.setOnClickListener(this);
 		btnModels.setOnClickListener(this);
+		btnExportDb.setOnClickListener(this);
 		
 	
 	}
@@ -139,10 +151,66 @@ public class ActivityDebug extends Activity implements OnClickListener {
 				}
 				db3.close();
 				break;
-				
+			case R.id.debug_btnExportDb:
+				Log.i(TAG,"Exporting DB to sdcard");
+				new ExportDatabaseFileTask().execute();
+				break;
 		}
 	}
 	
+	
+	private class ExportDatabaseFileTask extends AsyncTask<String, Void, Boolean> {
+
+        // automatically done on worker thread (separate from UI thread)
+        protected Boolean doInBackground(final String... args) {
+
+           File dbFile =
+                    new File(Environment.getDataDirectory() + "/data/biz.onomato.frskydash/databases/frsky");
+
+           File exportDir = new File(Environment.getExternalStorageDirectory(), "");
+           if (!exportDir.exists()) {
+              exportDir.mkdirs();
+           }
+           File file = new File(exportDir, dbFile.getName()+".db");
+
+           try {
+              file.createNewFile();
+              this.copyFile(dbFile, file);
+              Log.d(TAG,"Database exported");
+              //Toast.makeText(getApplicationContext(),"Database exported", Toast.LENGTH_LONG).show();
+              return true;
+           } catch (IOException e) {
+              Log.e(TAG, e.getMessage(), e);
+              return false;
+           }
+        }
+
+        protected void onPostExecute(Boolean result)
+        {
+        	if(result)
+        	{
+        		Toast.makeText(getApplicationContext(),"Database exported", Toast.LENGTH_LONG).show();
+        	}
+        	else
+        	{
+        		Toast.makeText(getApplicationContext(),"Export Failed", Toast.LENGTH_LONG).show();
+        	}
+        }
+
+        void copyFile(File src, File dst) throws IOException {
+           FileChannel inChannel = new FileInputStream(src).getChannel();
+           FileChannel outChannel = new FileOutputStream(dst).getChannel();
+           try {
+              inChannel.transferTo(0, inChannel.size(), outChannel);
+           } finally {
+              if (inChannel != null)
+                 inChannel.close();
+              if (outChannel != null)
+                 outChannel.close();
+           }
+        }
+
+     }
 	
 	
 }

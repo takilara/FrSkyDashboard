@@ -58,6 +58,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public int alarmCount = 0;
 	private long _modelId = -1;
 	private long _channelId = -1;
+	private boolean _dirty = false;
 	
 	private static DBAdapterChannel db;
 	
@@ -99,6 +100,8 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_mc = new MathContext(2);
 		_context = context;
 		setMovingAverage(0);
+		
+		setDirtyFlag(true);
 
 //		_movingAverage = 10;
 //		_raw=-1;
@@ -117,6 +120,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void addListener(OnChannelListener channel)
 	{
 		_listeners.add(channel);
+		setDirtyFlag(true);
 	}
 	
 //	public void setContext(Context context)
@@ -126,10 +130,20 @@ public class Channel implements OnChannelListener, Parcelable  {
 //		
 //	}
 	
+	public void setDirtyFlag(boolean dirty)
+	{
+		_dirty=dirty;
+	}
+	
+	public boolean getDirtyFlag()
+	{
+		return _dirty;
+	}
+	
 	public void setId(long channelId)
 	{
-		
 		_channelId = channelId;
+		setDirtyFlag(true);
 	}
 	public long getId()
 	{
@@ -160,6 +174,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 				
 			}
 		}
+		setDirtyFlag(true);
 	}
 	
 	public void reset()
@@ -171,15 +186,18 @@ public class Channel implements OnChannelListener, Parcelable  {
 		rawAvg = _avg;
 		eng = _val;
 		_stack = new MyStack(_movingAverage);
+		setDirtyFlag(true);
 	}
 	
 	public void setModelId(Model model)
 	{
 		_modelId = model.getId();
+		setDirtyFlag(true);
 	}
 	public void setModelId(long modelId)
 	{
 		_modelId = modelId;
+		setDirtyFlag(true);
 	}
 	
 	public long getModelId()
@@ -235,6 +253,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		}
 		_stack = new MyStack(Size);
 		_movingAverage = Size;
+		setDirtyFlag(true);
 	}
 	
 	public double setRaw(int value)
@@ -298,6 +317,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		{
 			rounder = rounder * 10;
 		}
+		setDirtyFlag(true);
 	}
 	
 	
@@ -398,6 +418,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setDescription(String d)
 	{
 		_description = d;
+		setDirtyFlag(true);
 	}
 	
 	public String getName()
@@ -407,6 +428,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setName(String n)
 	{
 		_name = n;
+		setDirtyFlag(true);
 	}
 	
 	public String getLongUnit()
@@ -417,6 +439,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setLongUnit(String unit)
 	{
 		_longUnit = unit;
+		setDirtyFlag(true);
 	}
 	
 	public String getShortUnit()
@@ -427,6 +450,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setShortUnit(String unit)
 	{
 		_shortUnit = unit;
+		setDirtyFlag(true);
 	}
 	
 	public String toVoiceString()
@@ -441,6 +465,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setOffset(float o)
 	{
 		_offset = o;
+		setDirtyFlag(true);
 	}	
 	
 	public float getFactor()
@@ -450,6 +475,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setFactor(float f)
 	{
 		_factor = f;
+		setDirtyFlag(true);
 	}	
 	
 	public int getPrecision()
@@ -475,6 +501,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setSilent(boolean setSilent)
 	{
 		_silent = setSilent;
+		setDirtyFlag(true);
 	}
 	
 
@@ -483,12 +510,14 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public void setSpeechEnabled(boolean speech)
 	{
 		_silent = !speech;
+		setDirtyFlag(true);
 	}
 	
 	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
 	{
 		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
 		alarmCount += 1;
+		setDirtyFlag(true);
 	}
 	
 	public String toCsv()
@@ -544,9 +573,9 @@ public class Channel implements OnChannelListener, Parcelable  {
 		dest.writeFloat(_offset);
 		dest.writeInt(_movingAverage);
 		dest.writeInt(_precision);
-		//dest.writeByte((byte) (getSilent() ? 1 : 0));
 		dest.writeByte((byte) (_silent ? 1 : 0));
 		dest.writeLong(_sourceChannelId);
+		dest.writeLong(_modelId);
 
 	}
  
@@ -566,8 +595,8 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_movingAverage = in.readInt();
 		_precision = in.readInt();
 		_silent = in.readByte()==1;
-		//setSilent(in.readByte()==1);
 		_sourceChannelId = in.readLong();
+		_modelId = in.readLong();
 	}
 	
 	public static final Parcelable.Creator CREATOR =
@@ -617,6 +646,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 			{
 				if(DEBUG) Log.d(TAG,"Insert ok, id:"+id);
 				_channelId = id;
+				setDirtyFlag(false);
 			}
 			db.close();
 			// Run insert
@@ -628,6 +658,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 			if(db.updateChannel(this))
 			{
 				if(DEBUG)Log.d(TAG,"Update successful");
+				setDirtyFlag(false);
 			}
 			else
 			{
@@ -649,12 +680,14 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
 		_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
 		_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0;
+		_modelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MODELID));
 		//setSilent(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0);
 		listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
 		db.close();
 		
 		if(DEBUG) Log.d(TAG,"Loaded '"+getDescription()+"' from database");
 		if(DEBUG) Log.d(TAG,"\tSilent:\t"+getSilent());
+		setDirtyFlag(false);	// clean after loaded
 		return true;
 	}
 	public boolean loadFromDatabase(long id)
@@ -697,11 +730,11 @@ public class Channel implements OnChannelListener, Parcelable  {
 	public static Channel[] getChannelsForModel(Context context, Model model)
 	{
 		DBAdapterChannel dbb = new DBAdapterChannel(context);
-		Log.d(TAG,"Try to open channels database");
+		if(DEBUG) Log.d(TAG,"Try to open channels database");
 		dbb.open();
-		Log.d(TAG,"Db opened, try to get all channels");
+		if(DEBUG) Log.d(TAG,"Db opened, try to get all channels");
 		Cursor c = dbb.getAllChannelsForModel(model.getId());
-		Log.d(TAG,"Cursor count: "+c.getCount());
+		if(DEBUG) Log.d(TAG,"Cursor count: "+c.getCount());
 		c.moveToFirst();
 		Channel[] channels = new Channel[c.getCount()];
 		
@@ -709,7 +742,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		while(!c.isAfterLast())
 		{
 				
-				Log.d(TAG,"Add Channel "+c.getString(1)+" to channellist");
+			if(DEBUG) Log.d(TAG,"Add Channel "+c.getString(1)+" to channellist");
 				channels[n] = new Channel(context);
 				channels[n].loadFromDatabase(c);
 				c.moveToNext();
@@ -717,5 +750,15 @@ public class Channel implements OnChannelListener, Parcelable  {
 		}
 		dbb.close();
 		return channels;
+	}
+	
+	public static void deleteChannelsForModel(Context context, Model model)
+	{
+		DBAdapterChannel dbb = new DBAdapterChannel(context);
+		if(DEBUG) Log.d(TAG,"Try to open channels database");
+		dbb.open();
+		if(DEBUG) Log.d(TAG,"Db opened, try to delete all channels for model "+model.getId());
+		dbb.deleteAllChannelsForModel(model.getId());
+		dbb.close();
 	}
 }

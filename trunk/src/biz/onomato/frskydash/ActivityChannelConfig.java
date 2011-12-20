@@ -203,16 +203,28 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		int ma = Integer.parseInt(edMovingAverage.getText().toString());
 		channel.setMovingAverage(ma);
 		
+		//channel.setDirtyFlag(true);
+		
 		//Save to regular persistant settings only if this is a "raw/server" channel
-		if(_channelId>-1)
+//		if(_channelId>-1)
+//		{
+//			//TODO: remove at some point
+//			if(DEBUG) Log.d(TAG,"This is a server channel, save settings to persistant store (not database)");
+//			channel.saveToConfig(settings);
+//		}
+//		else
+//		{
+		if(DEBUG) Log.d(TAG,"This is a model channel for modelId: "+channel.getModelId());
+		if(channel.getModelId()>-1)
 		{
-			if(DEBUG) Log.d(TAG,"This is a server channel, save settings to persistant store (not database)");
-			channel.saveToConfig(settings);
+			if(DEBUG) Log.d(TAG,"This is an existing model, feel free to save");
+			channel.saveToDatabase();
 		}
 		else
 		{
-			if(DEBUG) Log.d(TAG,"This is a model channel, allow model to save it upon model save");
+			if(DEBUG) Log.d(TAG,"This is a new model, delay saving");
 		}
+		//}
 		
 		
 	}

@@ -50,6 +50,12 @@ public class DBAdapterChannel extends AbstractDBAdapter {
         return db.delete(DATABASE_TABLE_CHANNELS, KEY_ROWID + 
         		"=" + rowId, null) > 0;
     }
+    
+    public void deleteAllChannelsForModel(long modelId)
+    {
+    	if(DEBUG)Log.d(TAG,"Deleting from the database where modelId="+modelId);
+    	db.delete(DATABASE_TABLE_CHANNELS,KEY_MODELID+"="+modelId,null);
+    }
 
     //---retrieves all the titles---
     public Cursor getAllChannels() 

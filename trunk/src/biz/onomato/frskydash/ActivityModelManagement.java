@@ -211,7 +211,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	private void showDeleteDialog(int id)
 	{
 		///TODO: Modify for deletion of models
-		Model m = new Model(getApplicationContext());
+		final Model m = new Model(getApplicationContext());
 		m.loadFromDatabase(id);
 		Log.i(TAG,"Delete model with id:"+id);
 		_deleteId = id;
@@ -225,6 +225,9 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             @Override
             public void onClick(DialogInterface dialog, int which) {
             	//TODO: Remove, make global to class?
+            	
+            	Channel.deleteChannelsForModel(getApplicationContext(),m);
+            	
             	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
             	db.open();
             	db.deleteModel(_deleteId);

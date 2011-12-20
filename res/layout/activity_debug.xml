@@ -8,8 +8,20 @@
 
         <Button
             android:id="@+id/debug_btnSchema"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Database Schema->Log.d" />    </LinearLayout>
+            android:text="Database Schema->Log.d" />
+        
+        <Button
+            android:id="@+id/debug_btnChannels"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select * from channels -> Log" />    
+        <Button
+            android:id="@+id/debug_btnModels"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select * from models -> Log" />
+    </LinearLayout>
     </ScrollView>
 </LinearLayout>

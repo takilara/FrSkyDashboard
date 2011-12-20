@@ -22,7 +22,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	private static final boolean DEBUG=true;
 	private FrSkyServer server;
 	
-	private Button btnSchema;
+	private Button btnSchema,btnChannels,btnModels;
 	
 	
 	//chConf_edVoice
@@ -38,9 +38,14 @@ public class ActivityDebug extends Activity implements OnClickListener {
 
 		// Find all form elements
 		btnSchema			= (Button) findViewById(R.id.debug_btnSchema);
+		btnChannels			= (Button) findViewById(R.id.debug_btnChannels);
+		btnModels			= (Button) findViewById(R.id.debug_btnModels);
 		
 		
 		btnSchema.setOnClickListener(this);
+		btnChannels.setOnClickListener(this);
+		btnModels.setOnClickListener(this);
+		
 	
 	}
 	
@@ -98,6 +103,43 @@ public class ActivityDebug extends Activity implements OnClickListener {
 				}
 				db.close();
 				break;
+			case R.id.debug_btnChannels:
+				Log.i(TAG,"SELECT * from channels");
+				DBAdapterChannel db2 = new DBAdapterChannel(getApplicationContext());
+				db2.open();
+				Cursor c2 = db2.getAllChannels();
+				c2.moveToFirst();
+				while(!c2.isAfterLast())
+				{
+					
+					for (String key: c2.getColumnNames())
+					{
+						Log.d(TAG,key+":"+c2.getString(c2.getColumnIndex(key)));
+					}
+					c2.moveToNext();
+					Log.d(TAG,"-------------------------------------------------");
+				}
+				db2.close();
+				break;
+			case R.id.debug_btnModels:
+				Log.i(TAG,"SELECT * from channels");
+				DBAdapterModel db3 = new DBAdapterModel(getApplicationContext());
+				db3.open();
+				Cursor c3 = db3.getAllModels();
+				c3.moveToFirst();
+				while(!c3.isAfterLast())
+				{
+				
+					for (String key: c3.getColumnNames())
+					{
+						Log.d(TAG,key+":"+c3.getString(c3.getColumnIndex(key)));
+					}
+					c3.moveToNext();
+					Log.d(TAG,"-------------------------------------------------");
+				}
+				db3.close();
+				break;
+				
 		}
 	}
 	

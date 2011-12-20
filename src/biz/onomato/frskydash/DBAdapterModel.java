@@ -43,7 +43,8 @@ public class DBAdapterModel extends AbstractDBAdapter {
 
     	return db.query(DATABASE_TABLE_MODELS, new String[] {
         		KEY_ROWID, 
-        		KEY_NAME
+        		KEY_NAME,
+        		KEY_MODELTYPE
                 }, 
                 null, 
                 null, 
@@ -62,7 +63,8 @@ public class DBAdapterModel extends AbstractDBAdapter {
         Cursor mCursor =
                 db.query(true, DATABASE_TABLE_MODELS, new String[] {
                 		KEY_ROWID,
-                		KEY_NAME 
+                		KEY_NAME,
+                		KEY_MODELTYPE
                 		}, 
                 		KEY_ROWID + "=" + rowId, 
                 		null,

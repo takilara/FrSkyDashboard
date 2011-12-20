@@ -23,6 +23,7 @@ public abstract class AbstractDBAdapter {
     protected static final String DATABASE_TABLE_MODELS = "models";
     protected static final String KEY_ROWID = "_id";
     protected static final String KEY_NAME = "name";
+    protected static final String KEY_MODELTYPE = "type";
     
     private static final String DATABASE_CREATE_MODELS =
         "create table models (_id integer primary key autoincrement, "

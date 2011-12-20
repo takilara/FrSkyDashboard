@@ -696,6 +696,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	Log.i(TAG,"User has clicked something");
     	switch(item.getItemId()) 
     	{
+	    	case R.id.menu_debug:
+				Log.d(TAG,"Open Debug Activity");
+				Intent mIntentDebug = new Intent(this,ActivityDebug.class);
+    			startActivity(mIntentDebug);
+				break;
     		case R.id.menu_about_dialog:
     			Log.d(TAG,"Open About dialog");
     			showDialog(DIALOG_ABOUT_ID);

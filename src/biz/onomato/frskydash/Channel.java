@@ -209,41 +209,41 @@ public class Channel implements OnChannelListener, Parcelable  {
 		return _sourceChannelId;
 	}
 	
-	public boolean loadFromConfig(SharedPreferences settings)
-	{
-
-		setDescription(settings.getString(_name+"_"+"Description","Main cell voltage"));
-		setLongUnit(settings.getString(_name+"_"+"LongUnit","Volt"));
-		setShortUnit(settings.getString(_name+"_"+"ShortUnit","V"));
-		setFactor(settings.getFloat(_name+"_"+"Factor", (float)(0.1/6)));
-		setOffset(settings.getFloat(_name+"_"+"Offset", (0)));
-		setMovingAverage(settings.getInt(_name+"_"+"MovingAverage", 8));
-		setPrecision(settings.getInt(_name+"_"+"Precision", 2));
-		setSilent(settings.getBoolean(_name+"_"+"Silent", false));
-		listenTo(settings.getLong(_name+"_"+"SourceChannel", -1));
-		//TODO: Add source channel
-		//TODO: Deprecate
-		return true;
-	}
+//	public boolean loadFromConfig(SharedPreferences settings)
+//	{
+//
+//		setDescription(settings.getString(_name+"_"+"Description","Main cell voltage"));
+//		setLongUnit(settings.getString(_name+"_"+"LongUnit","Volt"));
+//		setShortUnit(settings.getString(_name+"_"+"ShortUnit","V"));
+//		setFactor(settings.getFloat(_name+"_"+"Factor", (float)(0.1/6)));
+//		setOffset(settings.getFloat(_name+"_"+"Offset", (0)));
+//		setMovingAverage(settings.getInt(_name+"_"+"MovingAverage", 8));
+//		setPrecision(settings.getInt(_name+"_"+"Precision", 2));
+//		setSilent(settings.getBoolean(_name+"_"+"Silent", false));
+//		listenTo(settings.getLong(_name+"_"+"SourceChannel", -1));
+//		//TODO: Add source channel
+//		//TODO: Deprecate
+//		return true;
+//	}
 	
-	public boolean saveToConfig(SharedPreferences settings)
-	{
-		editor = settings.edit();
-		
-		editor.putString(_name+"_"+"Description", getDescription());
-		editor.putString(_name+"_"+"LongUnit", getLongUnit());
-		editor.putString(_name+"_"+"ShortUnit", getShortUnit());
-		editor.putFloat (_name+"_"+"Factor", getFactor());
-		editor.putFloat (_name+"_"+"Offset", getOffset());
-		editor.putInt(_name+"_"+"MovingAverage", getMovingAverage());
-		editor.putInt(_name+"_"+"Precision", getPrecision());
-		editor.putBoolean(_name+"_"+"Silent", getSilent());
-		editor.commit();
-		//TODO: Add source channel
-		//TODO: Deprecate
-		
-		return true;
-	}
+//	public boolean saveToConfig(SharedPreferences settings)
+//	{
+//		editor = settings.edit();
+//		
+//		editor.putString(_name+"_"+"Description", getDescription());
+//		editor.putString(_name+"_"+"LongUnit", getLongUnit());
+//		editor.putString(_name+"_"+"ShortUnit", getShortUnit());
+//		editor.putFloat (_name+"_"+"Factor", getFactor());
+//		editor.putFloat (_name+"_"+"Offset", getOffset());
+//		editor.putInt(_name+"_"+"MovingAverage", getMovingAverage());
+//		editor.putInt(_name+"_"+"Precision", getPrecision());
+//		editor.putBoolean(_name+"_"+"Silent", getSilent());
+//		editor.commit();
+//		//TODO: Add source channel
+//		//TODO: Deprecate
+//		
+//		return true;
+//	}
 	
 	public void setMovingAverage(int Size)
 	{
@@ -555,15 +555,6 @@ public class Channel implements OnChannelListener, Parcelable  {
 		// parcel. When we read from parcel, they
 		// will come back in the same order
 		
-//		editor.putString(_name+"_"+"Description", getDescription());
-//		editor.putString(_name+"_"+"LongUnit", getLongUnit());
-//		editor.putString(_name+"_"+"ShortUnit", getShortUnit());
-//		editor.putFloat (_name+"_"+"Factor", getFactor());
-//		editor.putFloat (_name+"_"+"Offset", getOffset());
-//		editor.putInt(_name+"_"+"MovingAverage", getMovingAverage());
-//		editor.putInt(_name+"_"+"Precision", getPrecision());
-//		editor.putBoolean(_name+"_"+"Silent", silent);
-//		
 		dest.writeLong(_channelId);
 		dest.writeString(_name);
 		dest.writeString(_description);

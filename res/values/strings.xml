@@ -12,6 +12,7 @@
 	<string name="activity_simulator">Simulator</string>
 	<string name="activity_model_configuration">Module Configuration</string>
 	<string name="activity_model_management">Module Management</string>
+	<string name="activity_debug">Debug</string>
 	
 	    
     

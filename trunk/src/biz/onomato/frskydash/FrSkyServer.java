@@ -196,8 +196,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		///TODO: in setupChannels, if settings exist, use that for setup
 		setupChannels();
 
-		AD1.loadFromConfig(_settings);
-		AD2.loadFromConfig(_settings);
+		//AD1.loadFromConfig(_settings);
+		//AD2.loadFromConfig(_settings);
 		logger.setCsvHeader(AD1,AD2);
 		logger.setLogToRaw(getLogToRaw());
 		logger.setLogToCsv(getLogToCsv());
@@ -768,8 +768,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		// hardcoded
 		// should be set up empty, contents filled from config
-		int tad1 = createChannel("AD1", "Default description", 0, (float) 1, "V","Volt");
+		int tad1 = createChannel("AD1", "AD1", 0, (float) 1, "","");
 		AD1 = getChannelById(tad1);
+		AD1.setPrecision(0);
+		AD1.setSilent(true);
 		
 		// test to make a channel that uses values from AD1
 		//Channel testChannel1 =  new Channel("TestAD1_1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
@@ -778,10 +780,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//AD1.addListener(testChannel1);
 		//AD1.addListener(testChannel2);
 		
-		int tad2 = createChannel("AD2", "Default description", 0, (float) 1, "V","Volt");
+		int tad2 = createChannel("AD2", "AD2", 0, (float) 1, "","");
 		AD2 = getChannelById(tad2);
+		AD2.setPrecision(0);
+		AD2.setSilent(true);
 		
-		int trssirx = createChannel("RSSIrx", "Signal strength receiver", 0, 1, "","");
+		int trssirx = createChannel("RSSIrx", "RSSIrx", 0, 1, "","");
 		RSSIrx = getChannelById(trssirx);
 		RSSIrx.setPrecision(0);
 		RSSIrx.setMovingAverage(-1);
@@ -789,7 +793,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		RSSIrx.setShortUnit("dBm");
 		RSSIrx.setSilent(true);
 		
-		int trssitx = createChannel("RSSItx", "Signal strength transmitter", 0, 1, "","");
+		int trssitx = createChannel("RSSItx", "RSSItx", 0, 1, "","");
 		RSSItx = getChannelById(trssitx);
 		RSSItx.setPrecision(0);
 		RSSItx.setMovingAverage(-1);

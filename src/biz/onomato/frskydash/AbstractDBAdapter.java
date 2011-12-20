@@ -118,5 +118,20 @@ public abstract class AbstractDBAdapter {
         DBHelper.close();
     }
     
+
+    public Cursor schema()
+    {
+    	try
+    	{
+    		Cursor cursor = DBHelper.getReadableDatabase().rawQuery("SELECT type,tbl_name,sql from sqlite_master;",null);
+    		return cursor;
+    	}
+    	catch(Exception e)
+    	{
+    		Log.e(TAG,e.toString());
+    		return null;
+    	}
+    	
+    }
 	
 }

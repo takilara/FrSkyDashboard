@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -86,6 +87,16 @@ public class ActivityDebug extends Activity implements OnClickListener {
 		switch(v.getId()){
 			case R.id.debug_btnSchema:
 				Log.i(TAG,"Display database schema");
+				DBAdapterModel db = new DBAdapterModel(getApplicationContext());
+				db.open();
+				Cursor c = db.schema();
+				c.moveToFirst();
+				while(!c.isAfterLast())
+				{
+					Log.d(TAG,c.getString(1)+"      "+c.getString(2));
+					c.moveToNext();
+				}
+				db.close();
 				break;
 		}
 	}

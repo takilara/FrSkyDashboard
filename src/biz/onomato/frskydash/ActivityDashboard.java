@@ -44,12 +44,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private static final int DIALOG_ABOUT_ID=0;
     private Dialog dlgAbout;
     private static final boolean DEBUG=true;
+    private static boolean _enableDebugActivity=false;
     
     // Used for GUI updates
     private Handler tickHandler;
     private Runnable runnableTick;
     
     private boolean bluetoothEnabledAtStart;
+    private int _clickToDebug=0;
     
     
     
@@ -101,6 +103,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         Log.i(TAG,"onCreate");
 
+        _enableDebugActivity=false;
         // Audio Setup
         
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -260,6 +263,22 @@ public class ActivityDashboard extends Activity implements OnClickListener {
             dialog.setTitle("About "+getString(R.string.app_name));
             TextView tvAboutVersion = (TextView) dialog.findViewById(R.id.tvAboutVersion);
             TextView tvAboutAuthor = (TextView) dialog.findViewById(R.id.tvAboutAuthor);
+            tvAboutAuthor.setOnClickListener(new OnClickListener(){
+            	public void onClick(View v)
+            	{
+            		//Log.d(TAG,"clicked author");
+            		_clickToDebug++;
+            		if(_clickToDebug>5)
+            		{
+            			Log.d(TAG,"Enable debugging");
+            			Toast.makeText(getApplicationContext(), "Debugging enabled", Toast.LENGTH_LONG).show();
+            	    	//MenuItem tDebug = (MenuItem) menu.findItem(R.id.menu_debug);
+            			enableDebugging();
+            	    	//tDebug.setVisible(false);
+            		}
+            	}
+            	
+            });
             
         	PackageManager pm = this.getPackageManager();
         	try
@@ -280,6 +299,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     
     
+    public void enableDebugging()
+    {
+    	_enableDebugActivity=true;
+    }
     
     // Check for bluetooth capabilities, request if no capabilities
     public void checkForBt()
@@ -430,6 +453,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	
     	// enable updates
     	Log.i(TAG,"onResume");
+    	_enableDebugActivity=false;
     	if(server != null)
     	{
     		btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
@@ -654,6 +678,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	super.onPrepareOptionsMenu(menu);
     	MenuItem tConItem = (MenuItem)  menu.findItem(R.id.connect_bluetooth);
     	MenuItem tDisConItem = (MenuItem)  menu.findItem(R.id.disconnect_bluetooth);
+    	MenuItem tDebug = (MenuItem) menu.findItem(R.id.menu_debug);
+    	if(DEBUG) Log.d(TAG,"prepare options");
+    	
     	//if(mBluetoothAdapter).
     	if (mBluetoothAdapter != null)
     	{
@@ -684,7 +711,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     		tDisConItem.setVisible(true);
     	}
 	
-    		
+    	if(_enableDebugActivity)
+    	{
+    		tDebug.setVisible(true);
+    	}
+    	else
+    	{
+    		tDebug.setVisible(false);
+    	}
     	
 		return true;
     }

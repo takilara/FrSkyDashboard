@@ -175,18 +175,10 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			Button btnDelete = new Button(getApplicationContext());
 			btnDelete.setText("Delete");
 			btnDelete.setId(10000+n);
-			//btnDelete.setId(100+id); // ID for delete should be 100+channelId
-			//btnDelete.setOnClickListener(this);
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					if(DEBUG) Log.d(TAG,"Delete channel "+_model.getChannels()[v.getId()-10000].getDescription());
 					showDeleteChannelDialog(_model.getChannels()[v.getId()-10000]);
-					// Launch editchannel with channel attached.. 
-//					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
-//		    		//i.putExtra("channelId", 1);
-//					i.putExtra("channel", _model.getChannels()[v.getId()-1000]);
-//					i.putExtra("idInModel", v.getId()-1000);
-//		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}
 			});
 			

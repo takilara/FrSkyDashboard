@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -120,6 +121,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public boolean statusTx=false;
 	public boolean statusRx=false;
 	
+	private HashMap<String,Channel> _serverChannels;
+	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
 	private int _framecount=0;
@@ -138,7 +141,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private String[] hUnit;
 	private String[] hLongUnit;
 	private int channels=0;
-	private Channel[] objs;
+	
+	private Channel[] objs; //TODO: Deprecate
 	
 	
 	private HashMap<String, String> _myAudibleStreamMap;
@@ -164,6 +168,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.i(TAG,"onCreate");
 		super.onCreate();
 		context = getApplicationContext();
+		_serverChannels = new HashMap<String,Channel>();
 		
 		logger = new Logger(getApplicationContext(),true,true,true);
 		
@@ -234,23 +239,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//AD1.setContext(getApplicationContext());
 		AD1.setId(5);
 		
-		Channel testChannel1 =  new Channel(context,"TestAD1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
-		//testChannel1.setContext(context);
-		testChannel1.listenTo(5);
-		_currentModel.addChannel(testChannel1);
-		
-//		Channel.AD1.addListener(testChannel1);
-		
-//		Channel testChannel2 =  new Channel("TestAD2", "channel that derives from AD2, multiplies by 100",0, 100, "V", "Volt");
-//
-//		AD1.addListener(testChannel1);
-//		AD2.addListener(testChannel2);
-//		//_currentModel.setId(1);
-
-//		_currentModel.addChannel(testChannel2);
-		
-		
-		
 		
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -267,12 +255,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
 		 getWakeLock();
-		 
-		 //globals = ((MyApp)getApplicationContext());
-		 
-		 //FrskyDatabase database = new FrskyDatabase(globals);
-		 //database.getChannel(0);
-		 
 		 
 		 
 		 mSerialService = new BluetoothSerialService(this, mHandlerBT);
@@ -408,7 +390,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return mBinder;
 		//return null;
 	}
-	
 	
 
 	
@@ -732,6 +713,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     	}
     }
 	
+	//TODO: Deprecate
 	public int createChannel(String name,String description,float offset,float factor,String unit,String longUnit)
 	{
 		Channel AD1 =  new Channel(context,name, description, offset, factor, unit, longUnit);
@@ -753,6 +735,27 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private void setupChannels()
 	{
+		//TODO: Change this completely, use _serverChannels
+		
+		Channel ad1 =  new Channel(context,"AD1", "AD1", 0, 1, "", "");
+		ad1.setId(-100);
+		_serverChannels.put("ad1",ad1);
+		
+		Channel ad2 =  new Channel(context,"AD2", "AD2", 0, 1, "", "");
+		ad2.setId(-101);
+		_serverChannels.put("ad2",ad2);
+
+		Channel rssirx =  new Channel(context,"RSSIrx", "RSSIrx", 0, 1, "", "");
+		rssirx.setId(-102);
+		_serverChannels.put("rssirx",rssirx);
+		
+		Channel rssitx =  new Channel(context,"RSSItx", "RSSItx", 0, 1, "", "");
+		_serverChannels.put("rssitx",rssitx);
+		rssitx.setId(-103);
+		
+		
+		
+		
 		hRaw = new int[MAX_CHANNELS];
 		hVal = new double[MAX_CHANNELS];
 		hName = new String[MAX_CHANNELS];
@@ -1081,6 +1084,11 @@ private final Handler mHandlerBT = new Handler() {
 			// Analog values
 			case Frame.FRAMETYPE_ANALOG:
 				// get AD1, AD2 etc from frame
+				_serverChannels.get("ad1").setRaw(f.ad1);
+				_serverChannels.get("ad2").setRaw(f.ad2);
+				_serverChannels.get("rssirx").setRaw(f.rssirx);
+				_serverChannels.get("rssitx").setRaw(f.rssitx);
+				
 				AD1.setRaw(f.ad1);
 				AD2.setRaw(f.ad2);
 				RSSIrx.setRaw(f.rssirx);
@@ -1351,31 +1359,7 @@ private final Handler mHandlerBT = new Handler() {
         		}
         		
         	}
-//        	else if(msg.equals("android.bluetooth.headset.action.STATE_CHANGED"))
-//        	{
-//        		int state = intent.getIntExtra("android.bluetooth.headset.action.extra.STATE",-1);
-//        		Bundle b = intent.getExtras();
-//        		//int headsetState
-//        		// try to enable sco?
-//        		Log.d(TAG,"Got a headset statechange, state :"+state);
-//        		Log.d(TAG,"Keys: "+b.keySet());
-//        		try
-//        		{
-//        			Log.d(TAG,"IS sco available?");
-////        			if(_audiomanager.isBluetoothScoAvailableOffCall())
-////        			{
-////        				Log.d(TAG,"yes, request start sco");
-////        				_audiomanager.setSpeakerphoneOn(true);
-////        				_audiomanager.startBluetoothSco();
-////        				_audiomanager.setBluetoothScoOn(true);
-////        			}
-//        		}
-//        		catch(Exception e)
-//        		{
-//        			
-//        		}
-//        		
-//        	}
+
         	else
         	{
         		Log.e(TAG,"Unhandled intent: "+msg);

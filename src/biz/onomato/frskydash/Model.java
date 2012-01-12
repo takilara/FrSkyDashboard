@@ -201,11 +201,13 @@ public class Model {
 		// False if not found
 		db.open();
 		Cursor c = db.getModel(id);
+		//startManagingCursor(c);
 		
 		if(c.getCount()==0)
 		{
 			if(DEBUG) Log.w(TAG,"Model id "+id+" does not exist.");	
 			_id= -1;
+			c.deactivate();
 			db.close();
 			
 			// no channels
@@ -217,6 +219,7 @@ public class Model {
 			if(DEBUG) Log.d(TAG,c.getString(1));
 			_id = c.getLong(0);
 			_name = c.getString(1);
+			c.deactivate();
 			db.close();
 			
 			// load channels
@@ -229,6 +232,7 @@ public class Model {
 			return true;
 		}
 		
+		
 	}
 	
 	public boolean getFirstModel()
@@ -239,11 +243,13 @@ public class Model {
 		{
 			c.moveToFirst();
 			loadFromDatabase(c.getInt(0));
+			c.deactivate();
 			db.close();
 			return true;
 		}
 		else
 		{
+			c.deactivate();
 			db.close();
 			return false;
 		}
@@ -272,7 +278,7 @@ public class Model {
 				modelA[i].loadFromDatabase(id);
 			}
 		}
-		
+		c.deactivate();
 		db.close();
 		//m.loadFromSettings(id);
 		

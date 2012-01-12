@@ -62,8 +62,8 @@ public abstract class AbstractDBAdapter {
         
     protected final Context context; 
     
-    protected DatabaseHelper DBHelper;
-    protected SQLiteDatabase db;
+    protected static DatabaseHelper DBHelper;
+    protected static SQLiteDatabase db;
 
     public AbstractDBAdapter(Context ctx) 
     {
@@ -107,7 +107,7 @@ public abstract class AbstractDBAdapter {
     //---opens the database---
     public AbstractDBAdapter open() throws SQLException 
     {
-    	if(DEBUG)Log.d(TAG,"Open the database");
+    	if(DEBUG)Log.d(TAG,"Open the database:"+this.getClass().getName());
         db = DBHelper.getWritableDatabase();
         return this;
     }
@@ -115,13 +115,15 @@ public abstract class AbstractDBAdapter {
     //---closes the database---    
     public void close() 
     {
-    	if(DEBUG)Log.d(TAG,"Close the database");
+    	if(DEBUG)Log.d(TAG,"Close the database:"+this.getClass().getName());
+    	db.close();
         DBHelper.close();
     }
     
 
     public Cursor schema()
     {
+    	Log.d(TAG,"DATABASE SCHEMA");
     	try
     	{
     		Cursor cursor = DBHelper.getReadableDatabase().rawQuery("SELECT type,tbl_name,sql from sqlite_master;",null);

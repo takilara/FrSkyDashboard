@@ -138,6 +138,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			currentModelId=server.getCurrentModel().getId();
 		}
 		
+		//TODO: Why do i do this from the database instead of from a static in Model?
 		DBAdapterModel db = new DBAdapterModel(getApplicationContext());
 		db.open();
 		Cursor c = db.getAllModels();
@@ -204,6 +205,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 //			//params.height = LayoutParams.WRAP_CONTENT;
 			n++;
 		}
+		c.deactivate();
 		db.close();
 	}
 	

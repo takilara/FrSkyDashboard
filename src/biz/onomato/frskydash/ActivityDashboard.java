@@ -15,11 +15,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.speech.tts.TextToSpeech;
 import android.media.AudioManager;
@@ -102,6 +104,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private static final int REQUEST_CONNECT_DEVICE = 6;
     private static final int REQUEST_ENABLE_BT = 2;
     
+    // graphical stuff:
+    private float scale;
+    
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,6 +125,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         doBindService();
      		
         setContentView(R.layout.activity_dashboard);
+        
+        // setup scale for programatically setting sizes
+        scale = getApplicationContext().getResources().getDisplayMetrics().density;
+        if(DEBUG)Log.d(TAG,"Scale is: "+scale);
         
         // Check for TTS
         Log.i(TAG,"Checking for TTS");
@@ -521,8 +530,24 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			// Table Row with Edit button, Value and Unit
 			TableRow tr = new TableRow(getApplicationContext());
 			
+			// btn
 			Button btnEdit = new Button(getApplicationContext());
+			
+//			int dpsw = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 40, getResources().getDisplayMetrics());
+//			int dpsh = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 40, getResources().getDisplayMetrics());
+//			btnEdit.setWidth(dpsw);
+//			btnEdit.setHeight(dpsh);
+			
+			
+			int pixels = (int) (40 * scale + 0.5f);
+			if(DEBUG) Log.d(TAG,"Add buttons with with and heigh: "+pixels);
 			btnEdit.setText("...");
+			//ViewGroup.LayoutParams params = btnEdit.getLayoutParams();
+			//params.width=pixels;
+			//params.height=pixels;
+			//btnEdit.setLayoutParams(new LayoutParams(pixels, pixels));
+			
+			
 			btnEdit.setId(1000+n);// ID for delete should be 100+channelId
 			//btnEdit.setOnClickListener(this);
 			btnEdit.setOnClickListener(new OnClickListener(){

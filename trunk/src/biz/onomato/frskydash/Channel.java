@@ -661,7 +661,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0;
 		_modelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MODELID));
 		listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
-		db.close();
+		//db.close();
 		
 		if(DEBUG) Log.d(TAG,"Loaded '"+getDescription()+"' from database");
 		if(DEBUG) Log.d(TAG,"\tSilent:\t"+getSilent());
@@ -678,6 +678,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		{
 			if(DEBUG) Log.w(TAG,"Channel id "+id+" does not exist.");	
 			_channelId= -1;
+			c.deactivate();
 			db.close();
 			return false;
 		}
@@ -685,6 +686,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		{
 			if(DEBUG) Log.d(TAG,"Found the channel");
 			loadFromDatabase(c);
+			c.deactivate();
 			db.close();
 			return true;
 		}
@@ -712,11 +714,12 @@ public class Channel implements OnChannelListener, Parcelable  {
 	
 	public static Channel[] getChannelsForModel(Context context, Model model)
 	{
-		DBAdapterChannel dbb = new DBAdapterChannel(context);
+		//DBAdapterChannel dbb = new DBAdapterChannel(context);
 		if(DEBUG) Log.d(TAG,"Try to open channels database");
-		dbb.open();
+		db.open();
 		if(DEBUG) Log.d(TAG,"Db opened, try to get all channels");
-		Cursor c = dbb.getAllChannelsForModel(model.getId());
+		Cursor c = db.getAllChannelsForModel(model.getId());
+		//dbb.close();
 		if(DEBUG) Log.d(TAG,"Cursor count: "+c.getCount());
 		c.moveToFirst();
 		Channel[] channels = new Channel[c.getCount()];
@@ -731,17 +734,18 @@ public class Channel implements OnChannelListener, Parcelable  {
 				c.moveToNext();
 				n++;
 		}
-		dbb.close();
+		c.deactivate();
+		db.close();
 		return channels;
 	}
 	
 	public static void deleteChannelsForModel(Context context, Model model)
 	{
-		DBAdapterChannel dbb = new DBAdapterChannel(context);
+		//DBAdapterChannel dbb = new DBAdapterChannel(context);
 		if(DEBUG) Log.d(TAG,"Try to open channels database");
-		dbb.open();
+		db.open();
 		if(DEBUG) Log.d(TAG,"Db opened, try to delete all channels for model "+model.getId());
-		dbb.deleteAllChannelsForModel(model.getId());
-		dbb.close();
+		db.deleteAllChannelsForModel(model.getId());
+		db.close();
 	}
 }

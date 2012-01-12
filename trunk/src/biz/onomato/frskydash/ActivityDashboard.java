@@ -20,12 +20,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.speech.tts.TextToSpeech;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -67,6 +71,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private TextView tv_statusBt,tv_statusRx,tv_statusTx;
     private TextView tv_rssitx,tv_rssirx,tv_fps;
     private TextView tv_dash_ch0NameDesc,tv_dash_ch1NameDesc;
+    private TableLayout tlChannelsTable;
     private ToggleButton btnTglSpeak;
     private Button btnConfigCurrentModel;
     private TextToSpeech mTts;
@@ -148,6 +153,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         btnTglSpeak = (ToggleButton) findViewById(R.id.dash_tglSpeak);
 
         btnConfigCurrentModel = (Button) findViewById(R.id.dash_btnConfigCurrentModel);
+
+        
+        // dynamic content:
+        tlChannelsTable	= (TableLayout) findViewById(R.id.dashChannelTable);
+        
         
         
         // Setup Click Listeners
@@ -409,7 +419,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			{
 				server.createSpeaker();
 			}
-			Log.i(TAG,"Setting up server from settings");
+			Log.i(TAG,"Setting up dashboard");
 	
 			Log.d(TAG,"Cyclic speaker should be set to "+server.getCyclicSpeechEnabledAtStartup()+" at startup");
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabledAtStartup());
@@ -437,6 +447,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			
 			// check for bt
 			checkForBt();
+			
+			populateChannelList();
 			
 			onResume();
 			
@@ -468,6 +480,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
     	registerReceiver(mIntentReceiver, mIntentFilter);	  // Used to receive messages from Server
     	registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
+    
+    	
     	
    	
     }
@@ -484,7 +498,64 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     }
     
     
-   
+    private void populateChannelList()
+	{
+		if(DEBUG) Log.d(TAG,"Populate list of channels");
+		//tlChannelsTable.removeAllViews();
+		final Model currentModel = server.getCurrentModel();
+		int n = 0;
+		if(DEBUG) Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().length);
+		for(Channel c: currentModel.getChannels())
+		{
+			if(DEBUG) Log.i(TAG,c.getDescription());
+			
+
+			// Add Description
+			TextView tvDesc = new TextView(getApplicationContext());
+			tvDesc.setText(c.getDescription());
+			//tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
+			tvDesc.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			
+			tlChannelsTable.addView(tvDesc);
+
+			// Table Row with Edit button, Value and Unit
+			TableRow tr = new TableRow(getApplicationContext());
+			
+			Button btnEdit = new Button(getApplicationContext());
+			btnEdit.setText("...");
+			btnEdit.setId(1000+n);// ID for delete should be 100+channelId
+			//btnEdit.setOnClickListener(this);
+			btnEdit.setOnClickListener(new OnClickListener(){
+				public void onClick(View v){
+					if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
+					// Launch editchannel with channel attached.. 
+					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
+		    		//i.putExtra("channelId", 1);
+					i.putExtra("channel", currentModel.getChannels()[v.getId()-1000]);
+					i.putExtra("idInModel", v.getId()-1000);
+		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
+				}
+			});
+			
+			
+			tr.addView(btnEdit);
+			tr.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			tr.setBackgroundColor(0xffff0000);
+			//ll.setGravity();
+			tlChannelsTable.addView(tr);
+			
+			// View for separator
+			View v = new View(getApplicationContext());
+			v.setBackgroundColor(0xFF909090);
+			//v.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			tlChannelsTable.addView(v);
+			
+			n++;
+			
+			
+			
+		}
+	}
     
     public void onClick(View v) {
     	switch (v.getId()) 

@@ -85,7 +85,7 @@
 		android:layout_gravity="top"
 		android:gravity="top"
 		android:layout_height="wrap_content">
-    <TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center" android:stretchColumns="1" android:id="@+id/tableLayout1">
+    <TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center" android:stretchColumns="1" android:id="@+id/dashChannelTable">
         <TextView android:text="TextView" android:layout_width="wrap_content" android:id="@+id/dash_ch0NameDesc" android:layout_height="wrap_content"></TextView>
         <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:baselineAligned="true" android:layout_height="40dp">
             <Button 

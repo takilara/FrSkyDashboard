@@ -158,4 +158,20 @@ public class DBAdapterChannel extends AbstractDBAdapter {
                          KEY_ROWID + "=" + rowId, null) > 0;
     }
 	
+//    @Override
+//    public AbstractDBAdapter open() throws SQLException 
+//    {
+//    	
+//    	if(DEBUG)Log.d(TAG,"Open the database");
+//        return super.open();
+//    }
+//
+//    //---closes the database---
+//    @Override
+//    public void close() 
+//    {
+//    	if(DEBUG)Log.d(TAG,"Close the database");
+//        DBHelper.close();
+//    }
+    
 }

@@ -532,33 +532,15 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			// Add Description
 			TextView tvDesc = new TextView(getApplicationContext());
 			tvDesc.setText(c.getDescription());
-			//tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
 			tvDesc.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
 			
 			llDashboardChannels.addView(tvDesc);
 			
-			//tlChannelsTable.addView(tvDesc);
-
 			// btn
 			Button btnEdit = new Button(getApplicationContext());
-			
-//			int dpsw = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 40, getResources().getDisplayMetrics());
-//			int dpsh = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 40, getResources().getDisplayMetrics());
-//			btnEdit.setWidth(dpsw);
-//			btnEdit.setHeight(dpsh);
-			
-			
-			int pixels = (int) (40 * scale + 0.5f);
-			if(DEBUG) Log.d(TAG,"Add buttons with with and heigh: "+pixels);
 			btnEdit.setText("...");
-			//ViewGroup.LayoutParams params = btnEdit.getLayoutParams();
-			//params.width=pixels;
-			//params.height=pixels;
-			//btnEdit.setLayoutParams(new LayoutParams(pixels, pixels));
-			
-			
 			btnEdit.setId(1000+n);// ID for delete should be 100+channelId
-			//btnEdit.setOnClickListener(this);
+
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
@@ -573,19 +555,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			
 			
 			llLine.addView(btnEdit);
-			//tr.addView(btnEdit,0);
-			
-			
-//            <TextView 
-//       		android:layout_column="1"
-//         	android:text="0"
-//         	android:padding="0dp" 
-//         	android:id="@+id/ad1Value"
-//         	android:layout_width="wrap_content"
-//         	android:layout_height="wrap_content"
-//         	android:textSize="35sp"
-//         	android:gravity="right"/>
-            
+
+			// Value
 			if(DEBUG) Log.d(TAG,"Add TextView for Value: "+c.getValue(true));
 			TextView tvValue = new TextView(getApplicationContext());
 			tvValue.setText(""+c.getValue());
@@ -593,50 +564,24 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			
 			tvValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
 			tvValue.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
-			//tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
-			//tvValue.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
-			//tr.addView(tvValue,1);
-			//,new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT)
 			llLine.addView(tvValue);
 			
-			
-//			android:layout_column="3"
-//	            	android:text="V"
-//	            	android:id="@+id/ad1Unit"
-//	            	android:layout_height="wrap_content"		x
-//	            	android:layout_marginLeft="10dip"			x
-//	            	android:layout_marginRight="10dip"			x
-//	            	android:textSize="20sp"						x
-//	            	android:layout_width="wrap_content"			x
-//	            	android:gravity="left"/>					x
-			
+			// Unit
 			if(DEBUG) Log.d(TAG,"Add TextView for Unit: "+c.getShortUnit());
 			TextView tvUnit = new TextView(getApplicationContext());
-			
-			//tvUnit.setLayoutParams(llpUnit);
-			
 			tvUnit.setText(""+c.getShortUnit());
-			//tvUnit.setL
 			tvUnit.setGravity(Gravity.LEFT);
-			
 			tvUnit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-			//tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
-			//tvUnit.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
-			//tr.addView(tvUnit,2,llpUnit);
 			llLine.addView(tvUnit);
-			
-			
-			
-			//tr.setBackgroundColor(0xffff0000);
-			//ll.setGravity();
-			//tlChannelsTable.addView(tr);
 			
 			// View for separator
 			View v = new View(getApplicationContext());
 			v.setBackgroundColor(0xFF909090);
 			v.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,2));
-			//tlChannelsTable.addView(v);
+
+			// Add line to channel List
 			llDashboardChannels.addView(llLine);
+			// Add separator view to channel List
 			llDashboardChannels.addView(v);
 			
 			n++;

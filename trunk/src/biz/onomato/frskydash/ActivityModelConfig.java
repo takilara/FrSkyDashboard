@@ -141,6 +141,15 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				// Save the model
 				_model.setName(edName.getText().toString());
 				_model.saveToDatabase();
+				if(_model.getId()==server.getCurrentModel().getId())
+				{
+					if(DEBUG)Log.d(TAG,"Should update the servers.currentmodel");
+					server.setCurrentModel(_model);
+				}
+				else
+				{
+					if(DEBUG)Log.d(TAG,"This is not the current model");
+				}
 				
 				this.setResult(RESULT_OK);
 				this.finish();

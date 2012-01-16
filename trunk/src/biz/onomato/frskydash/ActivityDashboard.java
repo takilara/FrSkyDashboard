@@ -756,7 +756,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	                startActivity(installIntent);
 	            }
 	            break;
-            case CHANNEL_CONFIG_RETURN:
+            case CHANNEL_CONFIG_RETURN:			// User edited a channel
 	        	switch(resultCode)
 	        	{
 	        		case RESULT_OK:
@@ -767,33 +767,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        			break;
 	        	}
 	        	
-	        	returnChannel = null;
-            	try
-            	{
-            		returnChannel = data.getParcelableExtra("channel");
-            		if(DEBUG)Log.d(TAG,"Got channel:"+returnChannel.getDescription());
-            		int idInModel = data.getIntExtra("idInModel",-1);
-            		if(DEBUG)Log.d(TAG,"Got idInModel:"+idInModel);
-            		if(idInModel>-1)
-            		{
-            			if(DEBUG)Log.d(TAG,"Try to update the server.currentModel");
-            			server.getCurrentModel().setChannel(idInModel,returnChannel);
-            			
-            			//populateChannelList();
-            			
-            		}
-            		if(DEBUG) Log.d(TAG,"Received channel from ActivityChannelConfig: channel:"+returnChannel.getDescription()+", silent: "+returnChannel.getSilent());
-            		
-            	}
-            	catch (Exception e)
-            	{
-            		Log.e(TAG,"No return channel: "+e.toString());
-            	}
-	        	
-	        	
 	        	populateChannelList();
 	        	break;
-            case MODEL_CONFIG_RETURN:
+            case MODEL_CONFIG_RETURN:		// User edited a model, or swapped current model
 	        	switch(resultCode)
 	        	{
 	        		case RESULT_OK:
@@ -803,9 +779,6 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        			Log.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
-	        	
-	        	
-            	
 	        	
 	        	populateChannelList();
 	        	break;
@@ -951,7 +924,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     			Log.i(TAG,"User clicked on Manage models");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			//Intent mIntent = new Intent(this,ActivityModuleSettings.class);
-    			startActivity(new Intent(this,ActivityModelManagement.class));
+    			startActivityForResult(new Intent(this,ActivityModelManagement.class),MODEL_CONFIG_RETURN);
     			break;
     		case R.id.menu_choose_simulator:
     			Log.i(TAG,"User clicked on Simulator");

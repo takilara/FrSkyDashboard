@@ -152,7 +152,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public Channel AD1,AD2,RSSIrx,RSSItx;
 	
-	public Model currentModel;
+	//public Model currentModel;
 	
 	
 
@@ -1159,7 +1159,7 @@ private final Handler mHandlerBT = new Handler() {
 		}
 		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
 	}
-	
+	 
 	
 	
 	

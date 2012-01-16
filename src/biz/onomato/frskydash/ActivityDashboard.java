@@ -16,6 +16,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -73,7 +75,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private TextView tv_statusBt,tv_statusRx,tv_statusTx;
     private TextView tv_rssitx,tv_rssirx,tv_fps;
     private TextView tv_dash_ch0NameDesc,tv_dash_ch1NameDesc;
+    private LinearLayout llDashboardMain;
+    private LinearLayout llDashboardChannels;
     private TableLayout tlChannelsTable;
+    private ScrollView svDashboard;
     private ToggleButton btnTglSpeak;
     private Button btnConfigCurrentModel;
     private TextToSpeech mTts;
@@ -166,6 +171,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         
         // dynamic content:
         tlChannelsTable	= (TableLayout) findViewById(R.id.dashChannelTable);
+        svDashboard	=	(ScrollView) findViewById(R.id.ScrollViewDashboard);
+        llDashboardMain = (LinearLayout) findViewById(R.id.llDashboardFull);
+        llDashboardChannels = (LinearLayout) findViewById(R.id.llDashboardChannels);
         
         
         
@@ -511,13 +519,15 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	{
 		if(DEBUG) Log.d(TAG,"Populate list of channels");
 		//tlChannelsTable.removeAllViews();
+		llDashboardChannels.removeAllViews();
 		final Model currentModel = server.getCurrentModel();
 		int n = 0;
 		if(DEBUG) Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().length);
 		for(Channel c: currentModel.getChannels())
 		{
 			if(DEBUG) Log.i(TAG,c.getDescription());
-			
+			LinearLayout llLine = new LinearLayout(getApplicationContext());
+			llLine.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
 
 			// Add Description
 			TextView tvDesc = new TextView(getApplicationContext());
@@ -525,11 +535,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			//tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
 			tvDesc.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
 			
-			tlChannelsTable.addView(tvDesc);
-
-			// Table Row with Edit button, Value and Unit
-			TableRow tr = new TableRow(getApplicationContext());
+			llDashboardChannels.addView(tvDesc);
 			
+			//tlChannelsTable.addView(tvDesc);
+
 			// btn
 			Button btnEdit = new Button(getApplicationContext());
 			
@@ -563,23 +572,81 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			});
 			
 			
-			tr.addView(btnEdit);
-			tr.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
-			tr.setBackgroundColor(0xffff0000);
+			llLine.addView(btnEdit);
+			//tr.addView(btnEdit,0);
+			
+			
+//            <TextView 
+//       		android:layout_column="1"
+//         	android:text="0"
+//         	android:padding="0dp" 
+//         	android:id="@+id/ad1Value"
+//         	android:layout_width="wrap_content"
+//         	android:layout_height="wrap_content"
+//         	android:textSize="35sp"
+//         	android:gravity="right"/>
+            
+			if(DEBUG) Log.d(TAG,"Add TextView for Value: "+c.getValue(true));
+			TextView tvValue = new TextView(getApplicationContext());
+			tvValue.setText(""+c.getValue());
+			tvValue.setGravity(Gravity.RIGHT);
+			
+			tvValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
+			tvValue.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
+			//tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
+			//tvValue.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+			//tr.addView(tvValue,1);
+			//,new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT)
+			llLine.addView(tvValue);
+			
+			
+//			android:layout_column="3"
+//	            	android:text="V"
+//	            	android:id="@+id/ad1Unit"
+//	            	android:layout_height="wrap_content"		x
+//	            	android:layout_marginLeft="10dip"			x
+//	            	android:layout_marginRight="10dip"			x
+//	            	android:textSize="20sp"						x
+//	            	android:layout_width="wrap_content"			x
+//	            	android:gravity="left"/>					x
+			
+			if(DEBUG) Log.d(TAG,"Add TextView for Unit: "+c.getShortUnit());
+			TextView tvUnit = new TextView(getApplicationContext());
+			
+			//tvUnit.setLayoutParams(llpUnit);
+			
+			tvUnit.setText(""+c.getShortUnit());
+			//tvUnit.setL
+			tvUnit.setGravity(Gravity.LEFT);
+			
+			tvUnit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+			//tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
+			//tvUnit.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			//tr.addView(tvUnit,2,llpUnit);
+			llLine.addView(tvUnit);
+			
+			
+			
+			//tr.setBackgroundColor(0xffff0000);
 			//ll.setGravity();
-			tlChannelsTable.addView(tr);
+			//tlChannelsTable.addView(tr);
 			
 			// View for separator
 			View v = new View(getApplicationContext());
 			v.setBackgroundColor(0xFF909090);
-			//v.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
-			tlChannelsTable.addView(v);
+			v.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,2));
+			//tlChannelsTable.addView(v);
+			llDashboardChannels.addView(llLine);
+			llDashboardChannels.addView(v);
 			
 			n++;
 			
 			
 			
 		}
+		//ScrollViewDashboard
+		//if(DEBUG)Log.d(TAG,"Request new layout of scrollView");
+		//llDashboardMain.requestLayout();
 	}
     
     public void onClick(View v) {
@@ -632,6 +699,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     protected void onActivityResult(int requestCode, int resultCode, Intent data) 
     {
+    	Channel returnChannel = null;
     	switch (requestCode)
     	{
             case REQUEST_CONNECT_DEVICE:
@@ -698,6 +766,32 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        			Log.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
+	        	
+	        	returnChannel = null;
+            	try
+            	{
+            		returnChannel = data.getParcelableExtra("channel");
+            		if(DEBUG)Log.d(TAG,"Got channel:"+returnChannel.getDescription());
+            		int idInModel = data.getIntExtra("idInModel",-1);
+            		if(DEBUG)Log.d(TAG,"Got idInModel:"+idInModel);
+            		if(idInModel>-1)
+            		{
+            			if(DEBUG)Log.d(TAG,"Try to update the server.currentModel");
+            			server.getCurrentModel().setChannel(idInModel,returnChannel);
+            			
+            			//populateChannelList();
+            			
+            		}
+            		if(DEBUG) Log.d(TAG,"Received channel from ActivityChannelConfig: channel:"+returnChannel.getDescription()+", silent: "+returnChannel.getSilent());
+            		
+            	}
+            	catch (Exception e)
+            	{
+            		Log.e(TAG,"No return channel: "+e.toString());
+            	}
+	        	
+	        	
+	        	populateChannelList();
 	        	break;
             case MODEL_CONFIG_RETURN:
 	        	switch(resultCode)
@@ -709,6 +803,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        			Log.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
+	        	
+	        	
+            	
+	        	
+	        	populateChannelList();
 	        	break;
         }
         	

@@ -171,6 +171,15 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				i.putExtra("idInModel",_idInModel);
 				
 				Log.i(TAG,"Go back to dashboard");
+				if(server.getCurrentModel().getId() == channel.getModelId())
+				{
+					if(DEBUG) Log.d(TAG,"This is the current model, please replace run setChannel ");
+					server.getCurrentModel().setChannel(_idInModel,channel);
+				}
+				else
+				{
+					if(DEBUG) Log.d(TAG,"This is NOT the current model");
+				}
 				if(DEBUG) Log.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent()+"_idInModel:"+_idInModel);
 				this.setResult(RESULT_OK,i);
 				

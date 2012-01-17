@@ -69,6 +69,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private static final int CHANNEL_CONFIG_RETURN = 1;
     private static final int MODEL_CONFIG_RETURN = 8;
     
+    
+    // Used for unique id's
+    private static final int ID_CHANNEL_BUTTON_EDIT = 1000;
+    private static final int ID_CHANNEL_TEXTVIEW_VALUE = 2000;
+    
+    
     //MyApp globals;
     
     private TextView tv_ad1_val,tv_ad2_val,tv_ad1_unit,tv_ad2_unit;
@@ -91,6 +97,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private FrSkyServer server=null;
     
     private boolean createSpeakerLater=false;
+    
+    
 	//private SharedPreferences settings;
     
 	
@@ -203,6 +211,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			    	
 			    	tv_fps.setText("FPS: "+server.getFps());
 			    	
+			    	
+			    	updateChannelValues();
+			    	
+			    	
 			    	// set status lights
 			    	if(server.statusBt)
 			    	{
@@ -276,6 +288,20 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    // Listen for BT events (not used yet)
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+    }
+    
+    
+    private void updateChannelValues()
+    {
+    	if(server!=null)
+		{
+	    	for(Channel c : server.getCurrentModel().getChannels())
+	    	{
+	    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
+	    		TextView tv = (TextView) findViewById(c.getTextViewId());
+	    		tv.setText(c.toString());
+	    	}
+		}
     }
     
     
@@ -543,7 +569,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			// btn
 			Button btnEdit = new Button(getApplicationContext());
 			btnEdit.setText("...");
-			btnEdit.setId(1000+n);// ID for delete should be 100+channelId
+			btnEdit.setId(ID_CHANNEL_BUTTON_EDIT+n);// ID for delete should be 100+channelId
 
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
@@ -568,6 +594,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			
 			tvValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
 			tvValue.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
+			tvValue.setId(ID_CHANNEL_TEXTVIEW_VALUE+n);
+			c.setTextViewId(ID_CHANNEL_TEXTVIEW_VALUE+n);
 			llLine.addView(tvValue);
 			
 			// Unit

@@ -74,6 +74,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private TextView tv_ad1_val,tv_ad2_val,tv_ad1_unit,tv_ad2_unit;
     private TextView tv_statusBt,tv_statusRx,tv_statusTx;
     private TextView tv_rssitx,tv_rssirx,tv_fps;
+    private TextView tv_modelName;
     private TextView tv_dash_ch0NameDesc,tv_dash_ch1NameDesc;
     private LinearLayout llDashboardMain;
     private LinearLayout llDashboardChannels;
@@ -154,6 +155,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         tv_rssitx   = (TextView) findViewById(R.id.dash_tvRSSItx);
         tv_rssirx   = (TextView) findViewById(R.id.dash_tvRSSIrx);
         tv_fps      = (TextView) findViewById(R.id.dash_tvFps);
+        
+        tv_modelName = (TextView) findViewById(R.id.dash_tvModelName);
         
         
         tv_dash_ch0NameDesc = (TextView) findViewById(R.id.dash_ch0NameDesc);
@@ -520,6 +523,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		//tlChannelsTable.removeAllViews();
 		llDashboardChannels.removeAllViews();
 		final Model currentModel = server.getCurrentModel();
+		
+		tv_modelName.setText(currentModel.getName());
 		int n = 0;
 		if(DEBUG) Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().length);
 		for(Channel c: currentModel.getChannels())

@@ -104,6 +104,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private Handler fpsHandler, watchdogHandler, speakHandler;
     private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
     
+    // server Channels, add constants for all known source channels
+    public static final int CHANNEL_INDEX_AD1 = 0;
+    public static final int CHANNEL_INDEX_AD2 = 1;
+    public static final int CHANNEL_INDEX_RSSIRX = 2;
+    public static final int CHANNEL_INDEX_RSSITX = 3;
+    
+    private Channel[] _sourceChannels = new Channel[4];
+    
     
     
     private boolean _dying=false;
@@ -121,7 +129,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public boolean statusTx=false;
 	public boolean statusRx=false;
 	
-	private HashMap<String,Channel> _serverChannels;
+	//private HashMap<String,Channel> _serverChannels;
+	
 	
 	private int MAX_CHANNELS=4;
 	private int[] hRaw;
@@ -150,7 +159,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	
 	
-	public Channel AD1,AD2,RSSIrx,RSSItx;
+	//public Channel AD1,AD2,RSSIrx,RSSItx;
 	
 	//public Model currentModel;
 	
@@ -168,7 +177,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.i(TAG,"onCreate");
 		super.onCreate();
 		context = getApplicationContext();
-		_serverChannels = new HashMap<String,Channel>();
+		//_serverChannels = new HashMap<String,Channel>();
+		
 		
 		logger = new Logger(getApplicationContext(),true,true,true);
 		
@@ -203,7 +213,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		//AD1.loadFromConfig(_settings);
 		//AD2.loadFromConfig(_settings);
-		logger.setCsvHeader(AD1,AD2);
+		logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
 		logger.setLogToRaw(getLogToRaw());
 		logger.setLogToCsv(getLogToCsv());
 		logger.setLogToHuman(getLogToHuman());
@@ -237,7 +247,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		
 		//AD1.setContext(getApplicationContext());
-		AD1.setId(5);
+		//AD1.setId(5);
 		
 		
 		mIntentFilterBt = new IntentFilter();
@@ -284,10 +294,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Log.i(TAG,"Cyclic Speak stuff");
 				if(statusRx)
 				{
-					for(int n=0;n<MAX_CHANNELS;n++)
+					for(Channel c : getCurrentModel().getChannels())
 					{
-							if(!getChannelById(n).getSilent()) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+						if(!c.getSilent()) mTts.speak(c.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					}
+//					for(int n=0;n<MAX_CHANNELS;n++)
+//					{
+//						if(!getChannelById(n).getSilent()) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
+//					}
 				}
 				
 				speakHandler.removeCallbacks(runnableSpeaker);
@@ -392,6 +406,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 
+	public Channel getSourceChannel(int index)
+	{
+		return _sourceChannels[index];
+	}
+	
+	public Channel[] getSourceChannels()
+	{
+		return _sourceChannels;
+	}
+	
 	
     private void showNotification() {
     	 CharSequence text = "FrSkyServer Started";
@@ -735,23 +759,45 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private void setupChannels()
 	{
-		//TODO: Change this completely, use _serverChannels
+		//TODO: Remove _serverChannels
+		
+		
+		
 		
 		Channel ad1 =  new Channel(context,"AD1", "AD1", 0, 1, "", "");
 		ad1.setId(-100);
-		_serverChannels.put("ad1",ad1);
+		ad1.setPrecision(0);
+		ad1.setSilent(true);
+		//_serverChannels.put("ad1",ad1);
+		_sourceChannels[CHANNEL_INDEX_AD1] = ad1;
+		
 		
 		Channel ad2 =  new Channel(context,"AD2", "AD2", 0, 1, "", "");
 		ad2.setId(-101);
-		_serverChannels.put("ad2",ad2);
+		ad2.setPrecision(0);
+		ad2.setSilent(true);
+		//_serverChannels.put("ad2",ad2);
+		_sourceChannels[CHANNEL_INDEX_AD2] = ad2;
 
 		Channel rssirx =  new Channel(context,"RSSIrx", "RSSIrx", 0, 1, "", "");
 		rssirx.setId(-102);
-		_serverChannels.put("rssirx",rssirx);
+		rssirx.setPrecision(0);
+		rssirx.setMovingAverage(-1);
+		rssirx.setLongUnit("dBm");
+		rssirx.setShortUnit("dBm");
+		rssirx.setSilent(true);
+		//_serverChannels.put("rssirx",rssirx);
+		_sourceChannels[CHANNEL_INDEX_RSSIRX] = rssirx;
 		
 		Channel rssitx =  new Channel(context,"RSSItx", "RSSItx", 0, 1, "", "");
-		_serverChannels.put("rssitx",rssitx);
 		rssitx.setId(-103);
+		rssitx.setPrecision(0);
+		rssitx.setMovingAverage(-1);
+		rssitx.setLongUnit("dBm");
+		rssitx.setShortUnit("dBm");
+		rssitx.setSilent(true);
+		//_serverChannels.put("rssitx",rssitx);
+		_sourceChannels[CHANNEL_INDEX_RSSITX] = rssitx;
 		
 		
 		
@@ -771,11 +817,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		// hardcoded
 		// should be set up empty, contents filled from config
-		int tad1 = createChannel("AD1", "AD1", 0, (float) 1, "","");
-		AD1 = getChannelById(tad1);
-		AD1.setPrecision(0);
-		AD1.setSilent(true);
-		
+//		int tad1 = createChannel("AD1", "AD1", 0, (float) 1, "","");
+//		AD1 = getChannelById(tad1);
+//		AD1.setPrecision(0);
+//		AD1.setSilent(true);
+//		
 		// test to make a channel that uses values from AD1
 		//Channel testChannel1 =  new Channel("TestAD1_1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
 		//Channel testChannel2 =  new Channel("TestAD1_2", "channel that derives from AD1, multiplies by 100",0, 100, "V", "Volt");
@@ -783,26 +829,26 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//AD1.addListener(testChannel1);
 		//AD1.addListener(testChannel2);
 		
-		int tad2 = createChannel("AD2", "AD2", 0, (float) 1, "","");
-		AD2 = getChannelById(tad2);
-		AD2.setPrecision(0);
-		AD2.setSilent(true);
+//		int tad2 = createChannel("AD2", "AD2", 0, (float) 1, "","");
+//		AD2 = getChannelById(tad2);
+//		AD2.setPrecision(0);
+//		AD2.setSilent(true);
 		
-		int trssirx = createChannel("RSSIrx", "RSSIrx", 0, 1, "","");
-		RSSIrx = getChannelById(trssirx);
-		RSSIrx.setPrecision(0);
-		RSSIrx.setMovingAverage(-1);
-		RSSIrx.setLongUnit("dBm");
-		RSSIrx.setShortUnit("dBm");
-		RSSIrx.setSilent(true);
+//		int trssirx = createChannel("RSSIrx", "RSSIrx", 0, 1, "","");
+//		RSSIrx = getChannelById(trssirx);
+//		RSSIrx.setPrecision(0);
+//		RSSIrx.setMovingAverage(-1);
+//		RSSIrx.setLongUnit("dBm");
+//		RSSIrx.setShortUnit("dBm");
+//		RSSIrx.setSilent(true);
 		
-		int trssitx = createChannel("RSSItx", "RSSItx", 0, 1, "","");
-		RSSItx = getChannelById(trssitx);
-		RSSItx.setPrecision(0);
-		RSSItx.setMovingAverage(-1);
-		RSSItx.setLongUnit("dBm");
-		RSSItx.setShortUnit("dBm");
-		RSSItx.setSilent(true);
+//		int trssitx = createChannel("RSSItx", "RSSItx", 0, 1, "","");
+//		RSSItx = getChannelById(trssitx);
+//		RSSItx.setPrecision(0);
+//		RSSItx.setMovingAverage(-1);
+//		RSSItx.setLongUnit("dBm");
+//		RSSItx.setShortUnit("dBm");
+//		RSSItx.setSilent(true);
 		
 		// Force alarm creation/initiation
 		Frame alarmframe1 = Frame.AlarmFrame(
@@ -821,16 +867,17 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private void resetChannels()
 	{
-		for(int n=0;n<MAX_CHANNELS;n++)
+		for(int n=0;n<_sourceChannels.length;n++)
 		{
-			getChannelById(n).setRaw(0);
+			_sourceChannels[n].setRaw(0);
+			//getChannelById(n).setRaw(0);
 		}
 	}
 	
-	public Channel getChannelById(int id)
-	{
-		return objs[id];
-	}
+//	public Channel getChannelById(int id)
+//	{
+//		return objs[id];
+//	}
 	
 	// *************************************************
 	// Public methods
@@ -849,10 +896,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public void wasDisconnected(String source)
 	{
-		AD1.reset();
-    	AD2.reset();
-    	RSSItx.reset();
-    	RSSIrx.reset();
+//		AD1.reset();
+//    	AD2.reset();
+//    	RSSItx.reset();
+//    	RSSIrx.reset();
+    	_sourceChannels[CHANNEL_INDEX_AD1].reset();
+    	_sourceChannels[CHANNEL_INDEX_AD2].reset();
+    	_sourceChannels[CHANNEL_INDEX_RSSIRX].reset();
+    	_sourceChannels[CHANNEL_INDEX_RSSITX].reset();
+    	
     	
     	// speak warning
     	saySomething("Alarm! Alarm! Alarm! Connection Lost!");
@@ -1084,15 +1136,22 @@ private final Handler mHandlerBT = new Handler() {
 			// Analog values
 			case Frame.FRAMETYPE_ANALOG:
 				// get AD1, AD2 etc from frame
-				_serverChannels.get("ad1").setRaw(f.ad1);
-				_serverChannels.get("ad2").setRaw(f.ad2);
-				_serverChannels.get("rssirx").setRaw(f.rssirx);
-				_serverChannels.get("rssitx").setRaw(f.rssitx);
+//				_serverChannels.get("ad1").setRaw(f.ad1);
+				_sourceChannels[CHANNEL_INDEX_AD1].setRaw(f.ad1);
 				
-				AD1.setRaw(f.ad1);
-				AD2.setRaw(f.ad2);
-				RSSIrx.setRaw(f.rssirx);
-				RSSItx.setRaw(f.rssitx);
+//				_serverChannels.get("ad2").setRaw(f.ad2);
+				_sourceChannels[CHANNEL_INDEX_AD2].setRaw(f.ad2);
+				
+//				_serverChannels.get("rssirx").setRaw(f.rssirx);
+				_sourceChannels[CHANNEL_INDEX_RSSIRX].setRaw(f.rssirx);
+				
+//				_serverChannels.get("rssitx").setRaw(f.rssitx);
+				_sourceChannels[CHANNEL_INDEX_RSSITX].setRaw(f.rssitx);
+				
+//				AD1.setRaw(f.ad1);
+//				AD2.setRaw(f.ad2);
+//				RSSIrx.setRaw(f.rssirx);
+//				RSSItx.setRaw(f.rssitx);
 				
 //				Channel.AD1.setRaw(f.ad1);
 //				Channel.AD2.setRaw(f.ad2);
@@ -1101,7 +1160,8 @@ private final Handler mHandlerBT = new Handler() {
 				if(inBound)	
 				{
 					_framecountRx++;
-					logger.logCsv(AD1,AD2);
+					//logger.logCsv(AD1,AD2);
+					logger.logCsv(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
 				}
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
@@ -1110,13 +1170,13 @@ private final Handler mHandlerBT = new Handler() {
 				switch(f.alarmChannel)
 				{
 				case Channel.CHANNELTYPE_AD1:
-					AD1.setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+					_sourceChannels[CHANNEL_INDEX_AD1].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
 					break;
 				case Channel.CHANNELTYPE_AD2:
-					AD2.setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+					_sourceChannels[CHANNEL_INDEX_AD2].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
 					break;
 				case Channel.CHANNELTYPE_RSSI:
-					RSSItx.setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+					_sourceChannels[CHANNEL_INDEX_RSSITX].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
 					break;
 				default:
 					Log.i(TAG,"Unsupported FrSky alarm?");

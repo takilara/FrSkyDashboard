@@ -118,11 +118,11 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        
 			// Show a particular channel
 
-	        if((_channelId>-1) && (channel==null))
-			{
-				// Get the Channel instance
-				channel = server.getChannelById((int) _channelId);
-			}
+//	        if((_channelId>-1) && (channel==null))
+//			{
+//				// Get the Channel instance
+//				channel = server.getChannelById((int) _channelId);
+//			}
 			
 	        if(channel!=null)
 	        {
@@ -135,7 +135,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				valuesChannelDescriptions[0] = "AD1";
 				valuesChannelDescriptions[1] = "AD2";
 				//ArrayAdapter<String> channelDescriptionAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesChannelDescriptions );
-				ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,server.getCurrentModel().getChannels() );
+				ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,server.getSourceChannels());
 				channelDescriptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				spSourceChannel.setAdapter(channelDescriptionAdapter);
 				

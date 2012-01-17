@@ -203,13 +203,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 				//Log.i(TAG,"Update GUI");
 				if(server!=null)
 				{
-			    	tv_ad1_val.setText(server.AD1.toValueString());
-			    	tv_ad2_val.setText(server.AD2.toValueString());
-			    	tv_rssitx.setText("RSSItx: "+server.RSSItx.toValueString());
-			    	
-			    	tv_rssirx.setText("RSSIrx: "+server.RSSIrx.toValueString());
-			    	
-			    	tv_fps.setText("FPS: "+server.getFps());
+
 			    	
 			    	
 			    	updateChannelValues();
@@ -295,6 +289,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     {
     	if(server!=null)
 		{
+    		// "Hard Channels"
+	    	tv_rssitx.setText("RSSItx: "+server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).toValueString());
+	    	tv_rssirx.setText("RSSIrx: "+server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX).toValueString());
+	    	tv_fps.setText("FPS: "+server.getFps());
+	    	
+	    	// Current Models channels
 	    	for(Channel c : server.getCurrentModel().getChannels())
 	    	{
 	    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
@@ -515,10 +515,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	{
     		btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
     		
-    		tv_dash_ch0NameDesc.setText(server.AD1.getName()+": "+server.AD1.getDescription());
-    		tv_dash_ch1NameDesc.setText(server.AD2.getName()+": "+server.AD2.getDescription());
-    		tv_ad1_unit.setText(server.AD1.getShortUnit());
-    		tv_ad2_unit.setText(server.AD2.getShortUnit());
+    		// TODO: might put populateChannels here?
+    		
+//    		tv_dash_ch0NameDesc.setText(server.AD1.getName()+": "+server.AD1.getDescription());
+//    		tv_dash_ch1NameDesc.setText(server.AD2.getName()+": "+server.AD2.getDescription());
+//    		tv_ad1_unit.setText(server.AD1.getShortUnit());
+//    		tv_ad2_unit.setText(server.AD2.getShortUnit());
     	}
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);

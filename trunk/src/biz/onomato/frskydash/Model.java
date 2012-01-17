@@ -122,6 +122,7 @@ public class Model {
 	{
 		Channel[] outChannels = new Channel[_channels.size()];
 		int i=0;
+		//TODO for each is ineficcient for arraylists!
 		for(Channel ch:_channels)
 		{
 			outChannels[i]=ch;

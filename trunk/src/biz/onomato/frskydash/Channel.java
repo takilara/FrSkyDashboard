@@ -44,6 +44,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	private float _factor;
 	private int _precision;
 	private Context _context;
+	private int _textViewId=-1;
 	
 	private IntentFilter mIntentFilter;
 	
@@ -120,6 +121,16 @@ public class Channel implements OnChannelListener, Parcelable  {
 	// ==========================================================================================
 	// ====                        PROPERTIES                                               =====
 	// ==========================================================================================
+	
+	public void setTextViewId(int id)
+	{
+		_textViewId= id;
+	}
+	
+	public int getTextViewId()
+	{
+		return _textViewId;
+	}
 	
 	public void setDirtyFlag(boolean dirty)
 	{
@@ -294,17 +305,17 @@ public class Channel implements OnChannelListener, Parcelable  {
 		_avg = _stack.push(value);
 
 		
-		Log.d(TAG,_name+" setting new input value to "+value);
+		//Log.d(TAG,_name+" setting new input value to "+value);
 		_raw = value;
 		//_val = (_avg * _factor)+_offset;
 		_val = convert(_avg);
 		double outVal =getValue(true);
-		Log.d(TAG,_name+" new outValue should now be "+outVal);
+		//Log.d(TAG,_name+" new outValue should now be "+outVal);
 		
 		// send new avg value to listeners
 		for(OnChannelListener ch : _listeners)
 		{
-			Log.d(TAG,"\t"+_name+" send to listener");
+			//Log.d(TAG,"\t"+_name+" send to listener");
 			ch.onSourceUpdate(outVal);
 		}
 		
@@ -312,7 +323,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		if((_context!=null) && (_channelId!=-1))
 		{
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+_channelId;
-			Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
+			//Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
 			
 			Intent i = new Intent();
 			i.setAction(bCastAction);
@@ -336,7 +347,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	
 	public double getValue(boolean average)
 	{
-		Log.i(TAG, _name+" Try to calculate new outValue");
+		//Log.i(TAG, _name+" Try to calculate new outValue");
 		double tVal;
 		if(average)
 		{

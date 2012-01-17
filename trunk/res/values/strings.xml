@@ -87,7 +87,7 @@
     <string name="save">Save</string>
     <string name="cyclicSpeakerEnabledAtStartup">Cyclic speaker enabled at startup</string>
     
-	<!--  Channel configuration  -->       
+	<!--  Channel configuration  -->   
     <string name="chConf_Description">Description</string>
     <string name="chConf_Unit">Unit</string>
     <string name="chConf_Offset">Offset</string>

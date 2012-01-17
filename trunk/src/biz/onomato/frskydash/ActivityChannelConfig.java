@@ -11,9 +11,11 @@ import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class ActivityChannelConfig extends Activity implements OnClickListener {
@@ -29,6 +31,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private TextView tvName;
 	private EditText edDesc,edUnit,edShortUnit,edOffset,edFactor,edPrecision,edMovingAverage;
 	private CheckBox chkSpeechEnabled;
+	private Spinner spSourceChannel;
 	private Button btnSave;
 	
 	
@@ -62,6 +65,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_channelconfig);
 
 		// Find all form elements
+		spSourceChannel		= (Spinner)  findViewById(R.id.chConf_spSourceChannel);
 		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
 		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
 		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
@@ -124,6 +128,20 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        {
 				// Get configuration from config store
 				String cShortUnit = settings.getString(channel.getName() + "_shortUnit","A");
+				
+				String[] valuesChannelDescriptions = new String[2];
+
+				//TODO: Populate dynamically with the server channels
+				valuesChannelDescriptions[0] = "AD1";
+				valuesChannelDescriptions[1] = "AD2";
+				//ArrayAdapter<String> channelDescriptionAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesChannelDescriptions );
+				ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,server.getCurrentModel().getChannels() );
+				channelDescriptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				spSourceChannel.setAdapter(channelDescriptionAdapter);
+				
+				//TODO: set correct startup source channel
+				
+				//TODO: need listener
 				
 
 				// Name is common from configstore and server

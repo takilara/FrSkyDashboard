@@ -170,7 +170,6 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
         
         // dynamic content:
-        tlChannelsTable	= (TableLayout) findViewById(R.id.dashChannelTable);
         svDashboard	=	(ScrollView) findViewById(R.id.ScrollViewDashboard);
         llDashboardMain = (LinearLayout) findViewById(R.id.llDashboardFull);
         llDashboardChannels = (LinearLayout) findViewById(R.id.llDashboardChannels);

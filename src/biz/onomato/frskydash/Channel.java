@@ -378,9 +378,12 @@ public class Channel implements OnChannelListener, Parcelable  {
 		}
 	}
 	
-	
-	
 	public String toString()
+	{
+		return getDescription();
+	}
+	
+	public String toValueString()
 	{
 		return String.format("%."+_precision+"f", _val);
 	}
@@ -502,7 +505,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	// ==========================================================================================
 	public String toVoiceString()
 	{
-		return getDescription()+": "+toString()+" "+getLongUnit();
+		return getDescription()+": "+toValueString()+" "+getLongUnit();
 	}
 	
 	public void reset()

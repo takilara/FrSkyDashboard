@@ -203,11 +203,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 				//Log.i(TAG,"Update GUI");
 				if(server!=null)
 				{
-			    	tv_ad1_val.setText(server.AD1.toString());
-			    	tv_ad2_val.setText(server.AD2.toString());
-			    	tv_rssitx.setText("RSSItx: "+server.RSSItx.toString());
+			    	tv_ad1_val.setText(server.AD1.toValueString());
+			    	tv_ad2_val.setText(server.AD2.toValueString());
+			    	tv_rssitx.setText("RSSItx: "+server.RSSItx.toValueString());
 			    	
-			    	tv_rssirx.setText("RSSIrx: "+server.RSSIrx.toString());
+			    	tv_rssirx.setText("RSSIrx: "+server.RSSIrx.toValueString());
 			    	
 			    	tv_fps.setText("FPS: "+server.getFps());
 			    	
@@ -299,7 +299,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    	{
 	    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
 	    		TextView tv = (TextView) findViewById(c.getTextViewId());
-	    		tv.setText(c.toString());
+	    		tv.setText(c.toValueString());
 	    	}
 		}
     }

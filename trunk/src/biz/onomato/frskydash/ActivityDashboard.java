@@ -571,6 +571,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			TextView tvUnit = new TextView(getApplicationContext());
 			tvUnit.setText(""+c.getShortUnit());
 			tvUnit.setGravity(Gravity.LEFT);
+			LinearLayout.LayoutParams llpUnits = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+			llpUnits.setMargins(10, 0, 5, 0);
+			tvUnit.setLayoutParams(llpUnits);
 			tvUnit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
 			llLine.addView(tvUnit);
 			

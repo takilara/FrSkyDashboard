@@ -247,9 +247,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
-		//AD1.setContext(getApplicationContext());
-		//AD1.setId(5);
-		
 		
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -655,10 +652,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.i(TAG,"Stop FPS counter");
 		fpsHandler.removeCallbacks(runnableFps);
 		
-		//AD1.setRaw(0);
-		//AD2.setRaw(0);
-		//RSSIrx.setRaw(0);
-		//RSSItx.setRaw(0);
 		Log.i(TAG,"Reset channels");
 		resetChannels();
 		
@@ -721,15 +714,7 @@ public class FrSkyServer extends Service implements OnInitListener {
         	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
         	
         	setCyclicSpeechEnabled(getCyclicSpeechEnabledAtStartup());
-        	//getCyclicSpeechEnabled();
-//        	if(getCyclicSpeechEnabledAtStartup())
-//    		{
-//    			startCyclicSpeaker();
-//    		}
-//    		else
-//    		{
-//    			stopCyclicSpeaker();
-//    		}
+        	
     	}
     	} else {
     	// Initialization failed.
@@ -738,37 +723,17 @@ public class FrSkyServer extends Service implements OnInitListener {
     	}
     }
 	
-	//TODO: Deprecate
-//	public int createChannel(String description,float offset,float factor,String unit,String longUnit)
-//	{
-//		Channel AD1 =  new Channel(context, description, offset, factor, unit, longUnit);
-//		objs[channels] = AD1;
-//		Log.i("MyApp","createChannel");
-//		hRaw[channels]=-1;
-//		hVal[channels]=-1;
-//		hDescription[channels]=description;
-//		hOffset[channels]=offset;
-//		hFactor[channels]=factor;
-//		hUnit[channels]=unit;
-//		hLongUnit[channels]=longUnit;
-//		channels += 1;
-//		return channels-1;
-//	}
 	
 
 	
 	private void setupChannels()
 	{
-		//TODO: Remove _serverChannels
-		
-		
-		
+		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
 		
 		Channel ad1 =  new Channel(context, "AD1", 0, 1, "", "");
 		ad1.setId(-100);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
-		//_serverChannels.put("ad1",ad1);
 		_sourceChannels[CHANNEL_INDEX_AD1] = ad1;
 		
 		
@@ -776,7 +741,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		ad2.setId(-101);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
-		//_serverChannels.put("ad2",ad2);
 		_sourceChannels[CHANNEL_INDEX_AD2] = ad2;
 
 		Channel rssirx =  new Channel(context, "RSSIrx", 0, 1, "", "");
@@ -786,7 +750,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssirx.setLongUnit("dBm");
 		rssirx.setShortUnit("dBm");
 		rssirx.setSilent(true);
-		//_serverChannels.put("rssirx",rssirx);
 		_sourceChannels[CHANNEL_INDEX_RSSIRX] = rssirx;
 		
 		Channel rssitx =  new Channel(context, "RSSItx", 0, 1, "", "");
@@ -796,59 +759,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssitx.setLongUnit("dBm");
 		rssitx.setShortUnit("dBm");
 		rssitx.setSilent(true);
-		//_serverChannels.put("rssitx",rssitx);
 		_sourceChannels[CHANNEL_INDEX_RSSITX] = rssitx;
 		
 		
 		
-		
-//		hRaw = new int[MAX_CHANNELS];
-//		hVal = new double[MAX_CHANNELS];
-//		hName = new String[MAX_CHANNELS];
-//		hDescription = new String[MAX_CHANNELS];
-//		hOffset = new double[MAX_CHANNELS];
-//		hFactor = new double[MAX_CHANNELS];
-//		hUnit = new String[MAX_CHANNELS];
-//		hLongUnit = new String[MAX_CHANNELS];
-//		objs = new Channel[MAX_CHANNELS];
-		
-		
-        
-		
-		// hardcoded
-		// should be set up empty, contents filled from config
-//		int tad1 = createChannel("AD1", "AD1", 0, (float) 1, "","");
-//		AD1 = getChannelById(tad1);
-//		AD1.setPrecision(0);
-//		AD1.setSilent(true);
-//		
-		// test to make a channel that uses values from AD1
-		//Channel testChannel1 =  new Channel("TestAD1_1", "channel that derives from AD1, multiplies by 10",0, 10, "V", "Volt");
-		//Channel testChannel2 =  new Channel("TestAD1_2", "channel that derives from AD1, multiplies by 100",0, 100, "V", "Volt");
-		//testChannel.setMovingAverage(10);
-		//AD1.addListener(testChannel1);
-		//AD1.addListener(testChannel2);
-		
-//		int tad2 = createChannel("AD2", "AD2", 0, (float) 1, "","");
-//		AD2 = getChannelById(tad2);
-//		AD2.setPrecision(0);
-//		AD2.setSilent(true);
-		
-//		int trssirx = createChannel("RSSIrx", "RSSIrx", 0, 1, "","");
-//		RSSIrx = getChannelById(trssirx);
-//		RSSIrx.setPrecision(0);
-//		RSSIrx.setMovingAverage(-1);
-//		RSSIrx.setLongUnit("dBm");
-//		RSSIrx.setShortUnit("dBm");
-//		RSSIrx.setSilent(true);
-		
-//		int trssitx = createChannel("RSSItx", "RSSItx", 0, 1, "","");
-//		RSSItx = getChannelById(trssitx);
-//		RSSItx.setPrecision(0);
-//		RSSItx.setMovingAverage(-1);
-//		RSSItx.setLongUnit("dBm");
-//		RSSItx.setShortUnit("dBm");
-//		RSSItx.setSilent(true);
 		
 		// Force alarm creation/initiation
 		Frame alarmframe1 = Frame.AlarmFrame(
@@ -874,10 +788,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 	}
 	
-//	public Channel getChannelById(int id)
-//	{
-//		return objs[id];
-//	}
 	
 	// *************************************************
 	// Public methods
@@ -896,10 +806,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public void wasDisconnected(String source)
 	{
-//		AD1.reset();
-//    	AD2.reset();
-//    	RSSItx.reset();
-//    	RSSIrx.reset();
     	_sourceChannels[CHANNEL_INDEX_AD1].reset();
     	_sourceChannels[CHANNEL_INDEX_AD2].reset();
     	_sourceChannels[CHANNEL_INDEX_RSSIRX].reset();
@@ -1136,32 +1042,20 @@ private final Handler mHandlerBT = new Handler() {
 			// Analog values
 			case Frame.FRAMETYPE_ANALOG:
 				// get AD1, AD2 etc from frame
-//				_serverChannels.get("ad1").setRaw(f.ad1);
 				_sourceChannels[CHANNEL_INDEX_AD1].setRaw(f.ad1);
-				
-//				_serverChannels.get("ad2").setRaw(f.ad2);
 				_sourceChannels[CHANNEL_INDEX_AD2].setRaw(f.ad2);
-				
-//				_serverChannels.get("rssirx").setRaw(f.rssirx);
 				_sourceChannels[CHANNEL_INDEX_RSSIRX].setRaw(f.rssirx);
-				
-//				_serverChannels.get("rssitx").setRaw(f.rssitx);
 				_sourceChannels[CHANNEL_INDEX_RSSITX].setRaw(f.rssitx);
 				
-//				AD1.setRaw(f.ad1);
-//				AD2.setRaw(f.ad2);
-//				RSSIrx.setRaw(f.rssirx);
-//				RSSItx.setRaw(f.rssitx);
-				
-//				Channel.AD1.setRaw(f.ad1);
-//				Channel.AD2.setRaw(f.ad2);
+
 				
 				
 				if(inBound)	
 				{
 					_framecountRx++;
-					//logger.logCsv(AD1,AD2);
+					//TODO: replace with models logged channels
 					logger.logCsv(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
+					//logger.logCsv(_currentModel.getChannels());
 				}
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
@@ -1320,27 +1214,6 @@ private final Handler mHandlerBT = new Handler() {
 		return _settings.getBoolean("autoSetVolume", false);
 	}
 	
-//	public boolean setChannelConfiguration(SharedPreferences settings,Channel channel)
-//	{
-//		
-//      
-//		String cDescription,cLongUnit,cShortUnit,cName;
-//		float cFactor,cOffset;
-//		int cMovingAverage,cPrecision;
-//		boolean cSilent;
-//      
-//		cName=channel.getName();
-//		channel.setDescription(settings.getString(cName+"_"+"Description","Main cell voltage"));
-//		channel.setLongUnit(cLongUnit = settings.getString(cName+"_"+"LongUnit","Volt"));
-//		channel.setShortUnit(cShortUnit = settings.getString(cName+"_"+"ShortUnit","V"));
-//		channel.setFactor(cFactor = settings.getFloat(cName+"_"+"Factor", (float) (0.1/6)));
-//		channel.setOffset(settings.getFloat(cName+"_"+"Offset", (float) (0)));
-//		channel.setMovingAverage(cMovingAverage = settings.getInt(cName+"_"+"MovingAverage", 8));
-//		channel.setPrecision(settings.getInt(cName+"_"+"Precision", 2));
-//		channel.setSilent(settings.getBoolean(cName+"_"+"Silent", false));
-//		return true;
-//	}
-	
 	
 	public Model getCurrentModel()
 	{
@@ -1350,6 +1223,10 @@ private final Handler mHandlerBT = new Handler() {
 	public void setCurrentModel(Model currentModel)
 	{
 		_currentModel = currentModel;
+		//_prevModelId = _currentModel.getId();
+		_editor.putLong("prevModelId", _currentModel.getId());
+		_editor.commit();
+
 	}
 	
 	public SharedPreferences getSettings()
@@ -1357,12 +1234,6 @@ private final Handler mHandlerBT = new Handler() {
 		return _settings;
 	}
 	
-	public void saveChannelConfig(Channel channel)
-	{
-		Log.i(TAG,"Save channel '"+channel+"'");
-		
-		// Update channelconfig database
-	}
 	
 	public void createChannelConfigDatabase()
 	{

@@ -68,7 +68,6 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 
 		// Find all form elements
 		spSourceChannel		= (Spinner)  findViewById(R.id.chConf_spSourceChannel);
-		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
 		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
 		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
 		edShortUnit			= (EditText) findViewById(R.id.chConf_edShortUnit);
@@ -129,9 +128,9 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        if(channel!=null)
 	        {
 				// Get configuration from config store
-				String cShortUnit = settings.getString(channel.getName() + "_shortUnit","A");
+				//String cShortUnit = settings.getString(channel.getName() + "_shortUnit","A");
 				
-				String[] valuesChannelDescriptions = new String[2];
+				//String[] valuesChannelDescriptions = new String[2];
 
 				//TODO: Populate dynamically with the server channels
 //				valuesChannelDescriptions[0] = "AD1";
@@ -158,7 +157,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 								
 
 				// Name is common from configstore and server
-				tvName.setText(channel.getName());
+				//tvName.setText(channel.getName());
 				
 				
 				// Use config from Server

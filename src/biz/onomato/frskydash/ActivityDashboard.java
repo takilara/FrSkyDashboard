@@ -294,13 +294,20 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    	tv_rssirx.setText("RSSIrx: "+server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX).toValueString());
 	    	tv_fps.setText("FPS: "+server.getFps());
 	    	
-	    	// Current Models channels
-	    	for(Channel c : server.getCurrentModel().getChannels())
+	    	int len = server.getCurrentModel().getChannels().size();
+	    	for(int i=0;i<len;i++)
 	    	{
-	    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
-	    		TextView tv = (TextView) findViewById(c.getTextViewId());
-	    		tv.setText(c.toValueString());
+	    		Channel c = server.getCurrentModel().getChannels().get(i);
+		    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
+		    		TextView tv = (TextView) findViewById(c.getTextViewId());
+		    		tv.setText(c.toValueString());
 	    	}
+//	    	for(Channel c : server.getCurrentModel().getChannels())
+//	    	{
+//	    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
+//	    		TextView tv = (TextView) findViewById(c.getTextViewId());
+//	    		tv.setText(c.toValueString());
+//	    	}
 		}
     }
     

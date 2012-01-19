@@ -50,7 +50,9 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			_idInModel = launcherIntent.getIntExtra("idInModel", -1);
 			_channelId = channel.getId();
 			Log.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
-			
+			Log.d(TAG,"channel context is: "+channel.getContext());
+			channel.setContext(getApplicationContext());
+			Log.d(TAG,"channel context is: "+channel.getContext());
 		}
 		catch(Exception e)
 		{
@@ -132,20 +134,32 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				String[] valuesChannelDescriptions = new String[2];
 
 				//TODO: Populate dynamically with the server channels
-				valuesChannelDescriptions[0] = "AD1";
-				valuesChannelDescriptions[1] = "AD2";
+//				valuesChannelDescriptions[0] = "AD1";
+//				valuesChannelDescriptions[1] = "AD2";
 				//ArrayAdapter<String> channelDescriptionAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesChannelDescriptions );
 				ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,server.getSourceChannels());
 				channelDescriptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				
+				
 				spSourceChannel.setAdapter(channelDescriptionAdapter);
 				
 				//TODO: set correct startup source channel
+				long len = channelDescriptionAdapter.getCount();
+				for(int i=0;i<len;i++)
+				{
+					Channel c = (Channel) spSourceChannel.getItemAtPosition(i);
+					if(c.getId()==channel.getSourceChannelId())
+					{
+						spSourceChannel.setSelection(i);
+					}
+				}
 				
-				//TODO: need listener
 				
+								
 
 				// Name is common from configstore and server
 				tvName.setText(channel.getName());
+				
 				
 				// Use config from Server
 				edDesc.setText(channel.getDescription());
@@ -229,6 +243,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		//needs to be done last to clean out "buffer"
 		int ma = Integer.parseInt(edMovingAverage.getText().toString());
 		channel.setMovingAverage(ma);
+		
+		Channel c = (Channel) spSourceChannel.getSelectedItem();
+		if(DEBUG)Log.d(TAG,"Try to set source channel to:"+c.toString()+" (ID: "+c.getId()+")");
+		channel.listenTo(c);
 		
 		//channel.setDirtyFlag(true);
 		

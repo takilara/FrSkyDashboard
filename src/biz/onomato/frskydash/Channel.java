@@ -289,6 +289,15 @@ public class Channel implements OnChannelListener, Parcelable  {
 		setDirtyFlag(true);
 	}
 
+	public Context getContext()
+	{
+		return _context;
+	}
+	
+	public void setContext(Context context)
+	{
+		_context = context;
+	}
 	
 	
 	// ==========================================================================================
@@ -313,11 +322,12 @@ public class Channel implements OnChannelListener, Parcelable  {
 		//Log.d(TAG,_name+" new outValue should now be "+outVal);
 		
 		// send new avg value to listeners
-		for(OnChannelListener ch : _listeners)
-		{
-			//Log.d(TAG,"\t"+_name+" send to listener");
-			ch.onSourceUpdate(outVal);
-		}
+		// do not use direct listeners
+//		for(OnChannelListener ch : _listeners)
+//		{
+//			//Log.d(TAG,"\t"+_name+" send to listener");
+//			ch.onSourceUpdate(outVal);
+//		}
 		
 		// send to broadcast receivers
 		if((_context!=null) && (_channelId!=-1))
@@ -477,16 +487,16 @@ public class Channel implements OnChannelListener, Parcelable  {
         public void onReceive(Context context, Intent intent) {
         	String msg = intent.getAction();
         	Bundle extras = intent.getExtras();
-        	Log.i(TAG,"Received Broadcast: '"+msg+"'");
+        	//Log.i(TAG,"Received Broadcast: '"+msg+"'");
         	// no purpose to compare msg, since we should only listen to relevant broadcasts..
         	//Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
         	//if(msg.equals(FrSkyServer.MESSAGE_STARTED))
         	//	Log.i(TAG,"I have received BroadCast that the server has started");
         	// Get the value..
         	double val = intent.getDoubleExtra("channelValue", -1);
-        	if(DEBUG) Log.d(TAG,"Received input value "+val);
+        	//if(DEBUG) Log.d(TAG,"Received input value "+val);
         	double v = setRaw(val);
-    		Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
+    		//Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
 
         }
     };	
@@ -523,7 +533,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	private double convert(double inputValue)
 	{
 		double o = (inputValue * _factor)+_offset;
-		Log.d(TAG,_name+" convert from inputvalue ("+inputValue+") to outputvalue ("+o+")");
+		//Log.d(TAG,_name+" convert from inputvalue ("+inputValue+") to outputvalue ("+o+")");
 		return Math.round(o*rounder)/rounder;
 	}
 	
@@ -552,6 +562,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		
 		return sb.toString();
 	}
+	
 	
 
 

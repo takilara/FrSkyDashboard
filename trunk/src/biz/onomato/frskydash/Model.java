@@ -118,17 +118,22 @@ public class Model {
 	}
 	
 	// I need to be able to return list of channels from this model
-	public Channel[] getChannels()
+	public ArrayList<Channel> getChannels()
 	{
-		Channel[] outChannels = new Channel[_channels.size()];
-		int i=0;
+		//Channel[] outChannels = new Channel[_channels.size()];
+		//int i=0;
 		//TODO for each is ineficcient for arraylists!
-		for(Channel ch:_channels)
-		{
-			outChannels[i]=ch;
-			i++;
-		}
-		return outChannels;
+//		int n=0;
+//		
+//		for(Channel ch:_channels)
+//		{
+//			outChannels[i]=ch;
+//			i++;
+//		}
+		//return outChannels;
+		//if(DEBUG)Log.d(TAG,"return all channels: "+_channels);
+//		return _channels.toArray(Channel[]);
+		return _channels;
 	}
 	
 	// I need to be able to add alarms to this model

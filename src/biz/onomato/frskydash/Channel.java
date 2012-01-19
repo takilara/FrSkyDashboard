@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 
-public class Channel implements OnChannelListener, Parcelable  {
+public class Channel implements Parcelable  {
 	private static final String TAG = "Channel";
 	
 	public static final int CHANNELTYPE_AD1=0;
@@ -37,7 +37,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 	private double _val;
 	//private long _id;
 	private double _avg;
-	private String _name;
+	//private String _name;
 	private String _description;
 	private long _sourceChannelId;
 	private float _offset;
@@ -51,7 +51,6 @@ public class Channel implements OnChannelListener, Parcelable  {
 	private String _shortUnit;
 	private String _longUnit;
 	private int _movingAverage;
-	private MathContext _mc;
 	public boolean _silent;
 	public Date timestamp;
 	
@@ -63,18 +62,18 @@ public class Channel implements OnChannelListener, Parcelable  {
 	
 	private static DBAdapterChannel db;
 	
-	private ArrayList <OnChannelListener> _listeners;
+	//private ArrayList <OnChannelListener> _listeners;
 
 	//public static final Channel AD1 = new Channel("ad1","FrSky AD1",(float)0,(float)1,"","");
 	//public static final Channel AD2 = new Channel("ad2","FrSky AD2",(float)0,(float)1,"","");
 	
 	private MyStack _stack;
-	SharedPreferences _settings;
-	SharedPreferences.Editor editor;
+	//SharedPreferences _settings;
+	//SharedPreferences.Editor editor;
 
 	public Channel(Context context)
 	{
-		this(context,"derived","description",(float)0,(float)1,"Symbol","UnitName");
+		this(context,"description",(float)0,(float)1,"Symbol","UnitName");
 	}
 	
 	public Channel(Parcel in)
@@ -83,22 +82,22 @@ public class Channel implements OnChannelListener, Parcelable  {
 	}
 	
 	
-	public Channel(Context context,String name,String description,float offset,float factor,String unit,String longUnit)
+	public Channel(Context context,String description,float offset,float factor,String unit,String longUnit)
 	{
 		// instanciate listeners list
-		_listeners = new ArrayList<OnChannelListener> ();
+		//_listeners = new ArrayList<OnChannelListener> ();
 		_sourceChannelId = -1;
 		rounder=1;
 		_silent = false;
 		_precision = 2;
 		
-		_name = name;
+		//_name = name;
 		_description = description;
 		_offset = offset;
 		_factor = factor;
 		_shortUnit = unit;
 		_longUnit = longUnit;
-		_mc = new MathContext(2);
+		//_mc = new MathContext(2);
 		_context = context;
 		setMovingAverage(0);
 		
@@ -199,15 +198,15 @@ public class Channel implements OnChannelListener, Parcelable  {
 		setDirtyFlag(true);
 	}
 	
-	public String getName()
-	{
-		return _name;
-	}
-	public void setName(String n)
-	{
-		_name = n;
-		setDirtyFlag(true);
-	}
+//	public String getName()
+//	{
+//		return _name;
+//	}
+//	public void setName(String n)
+//	{
+//		_name = n;
+//		setDirtyFlag(true);
+//	}
 	
 	public String getLongUnit()
 	{
@@ -502,12 +501,12 @@ public class Channel implements OnChannelListener, Parcelable  {
     };	
 	
     //TODO: Deprecate
-  	public void onSourceUpdate(double sourceValue)
-  	{
-  		
-  		double v = setRaw(sourceValue);
-  		Log.d(TAG,_name+" updated by parent to "+sourceValue+" -> "+v+" "+_shortUnit);
-  	}
+//  	public void onSourceUpdate(double sourceValue)
+//  	{
+//  		
+//  		double v = setRaw(sourceValue);
+//  		Log.d(TAG,_name+" updated by parent to "+sourceValue+" -> "+v+" "+_shortUnit);
+//  	}
     
     
 	// ==========================================================================================
@@ -539,11 +538,11 @@ public class Channel implements OnChannelListener, Parcelable  {
 	
 	
 	//TODO: Deprecate
-	public void addListener(OnChannelListener channel)
-	{
-		_listeners.add(channel);
-		setDirtyFlag(true);
-	}
+//	public void addListener(OnChannelListener channel)
+//	{
+//		_listeners.add(channel);
+//		setDirtyFlag(true);
+//	}
 	
 	public String toCsv()
 	{
@@ -584,7 +583,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		// will come back in the same order
 		
 		dest.writeLong(_channelId);
-		dest.writeString(_name);
+		//dest.writeString(_name);
 		dest.writeString(_description);
 		dest.writeString(_longUnit);
 		dest.writeString(_shortUnit);
@@ -605,7 +604,7 @@ public class Channel implements OnChannelListener, Parcelable  {
 		// field in the order that it was
 		// written to the parcel
 		_channelId = in.readLong();
-		_name = in.readString();
+		//_name = in.readString();
 		_description = in.readString();
 		_longUnit = in.readString();
 		_shortUnit = in.readString();

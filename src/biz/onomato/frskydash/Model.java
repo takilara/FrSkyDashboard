@@ -189,7 +189,7 @@ public class Model {
 		// Save the channels (using this models id)
 		for(Channel ch :getChannels())
 		{
-			if(DEBUG) Log.i(TAG,"Save channel "+ch.getName()+" (Dirty: "+ch.getDirtyFlag()+")");
+			if(DEBUG) Log.i(TAG,"Save channel "+ch.getDescription()+" (Dirty: "+ch.getDirtyFlag()+")");
 			ch.setModelId(_id);
 			ch.saveToDatabase();
 			

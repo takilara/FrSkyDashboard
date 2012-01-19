@@ -151,8 +151,6 @@ public class Logger {
 		for(Channel ch : channels)
 		{
 			
-			sb.append("\""+ch.getName()+"\""+Channel.delim);
-			sb.append("\""+ch.getName()+" (Avg)\""+Channel.delim);
 			sb.append("\""+ch.getDescription()+" ("+ch.getLongUnit()+")\""+Channel.delim);
 			sb.append("\""+ch.getDescription()+" ("+ch.getLongUnit()+") (Avg)\""+Channel.delim);
 			
@@ -173,8 +171,6 @@ public class Logger {
 				
 				for(Channel channel : channels)
 				{
-					sb.append(channel.getRaw()+Channel.delim);
-					sb.append(channel.getRaw(true)+Channel.delim);
 					sb.append(channel.getValue()+Channel.delim);
 					sb.append(channel.getValue(true)+Channel.delim);
 				}

@@ -133,7 +133,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	
 	private int MAX_CHANNELS=4;
-	private int[] hRaw;
+
 	private int _framecount=0;
 	private int _framecountRx=0;
 	private int _framecountTx=0;
@@ -141,17 +141,18 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private boolean _btAutoConnect;
 	private int _minimumVolumeLevel;
 	private boolean _autoSetVolume;
-	
-	private double[] hVal;
-	private String[] hName;
-	private String[] hDescription;
-	private double[] hOffset;
-	private double[] hFactor;
-	private String[] hUnit;
-	private String[] hLongUnit;
+
+//	private int[] hRaw;
+//	private double[] hVal;
+//	private String[] hName;
+//	private String[] hDescription;
+//	private double[] hOffset;
+//	private double[] hFactor;
+//	private String[] hUnit;
+//	private String[] hLongUnit;
 	private int channels=0;
 	
-	private Channel[] objs; //TODO: Deprecate
+//	private Channel[] objs; //TODO: Deprecate
 	
 	
 	private HashMap<String, String> _myAudibleStreamMap;
@@ -738,22 +739,21 @@ public class FrSkyServer extends Service implements OnInitListener {
     }
 	
 	//TODO: Deprecate
-	public int createChannel(String name,String description,float offset,float factor,String unit,String longUnit)
-	{
-		Channel AD1 =  new Channel(context,name, description, offset, factor, unit, longUnit);
-		objs[channels] = AD1;
-		Log.i("MyApp","createChannel");
-		hRaw[channels]=-1;
-		hVal[channels]=-1;
-		hName[channels]=name;
-		hDescription[channels]=description;
-		hOffset[channels]=offset;
-		hFactor[channels]=factor;
-		hUnit[channels]=unit;
-		hLongUnit[channels]=longUnit;
-		channels += 1;
-		return channels-1;
-	}
+//	public int createChannel(String description,float offset,float factor,String unit,String longUnit)
+//	{
+//		Channel AD1 =  new Channel(context, description, offset, factor, unit, longUnit);
+//		objs[channels] = AD1;
+//		Log.i("MyApp","createChannel");
+//		hRaw[channels]=-1;
+//		hVal[channels]=-1;
+//		hDescription[channels]=description;
+//		hOffset[channels]=offset;
+//		hFactor[channels]=factor;
+//		hUnit[channels]=unit;
+//		hLongUnit[channels]=longUnit;
+//		channels += 1;
+//		return channels-1;
+//	}
 	
 
 	
@@ -764,7 +764,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 		
-		Channel ad1 =  new Channel(context,"AD1", "AD1", 0, 1, "", "");
+		Channel ad1 =  new Channel(context, "AD1", 0, 1, "", "");
 		ad1.setId(-100);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
@@ -772,14 +772,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_sourceChannels[CHANNEL_INDEX_AD1] = ad1;
 		
 		
-		Channel ad2 =  new Channel(context,"AD2", "AD2", 0, 1, "", "");
+		Channel ad2 =  new Channel(context,"AD2", 0, 1, "", "");
 		ad2.setId(-101);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
 		//_serverChannels.put("ad2",ad2);
 		_sourceChannels[CHANNEL_INDEX_AD2] = ad2;
 
-		Channel rssirx =  new Channel(context,"RSSIrx", "RSSIrx", 0, 1, "", "");
+		Channel rssirx =  new Channel(context, "RSSIrx", 0, 1, "", "");
 		rssirx.setId(-102);
 		rssirx.setPrecision(0);
 		rssirx.setMovingAverage(-1);
@@ -789,7 +789,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//_serverChannels.put("rssirx",rssirx);
 		_sourceChannels[CHANNEL_INDEX_RSSIRX] = rssirx;
 		
-		Channel rssitx =  new Channel(context,"RSSItx", "RSSItx", 0, 1, "", "");
+		Channel rssitx =  new Channel(context, "RSSItx", 0, 1, "", "");
 		rssitx.setId(-103);
 		rssitx.setPrecision(0);
 		rssitx.setMovingAverage(-1);
@@ -802,15 +802,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 		
-		hRaw = new int[MAX_CHANNELS];
-		hVal = new double[MAX_CHANNELS];
-		hName = new String[MAX_CHANNELS];
-		hDescription = new String[MAX_CHANNELS];
-		hOffset = new double[MAX_CHANNELS];
-		hFactor = new double[MAX_CHANNELS];
-		hUnit = new String[MAX_CHANNELS];
-		hLongUnit = new String[MAX_CHANNELS];
-		objs = new Channel[MAX_CHANNELS];
+//		hRaw = new int[MAX_CHANNELS];
+//		hVal = new double[MAX_CHANNELS];
+//		hName = new String[MAX_CHANNELS];
+//		hDescription = new String[MAX_CHANNELS];
+//		hOffset = new double[MAX_CHANNELS];
+//		hFactor = new double[MAX_CHANNELS];
+//		hUnit = new String[MAX_CHANNELS];
+//		hLongUnit = new String[MAX_CHANNELS];
+//		objs = new Channel[MAX_CHANNELS];
 		
 		
         
@@ -1320,26 +1320,26 @@ private final Handler mHandlerBT = new Handler() {
 		return _settings.getBoolean("autoSetVolume", false);
 	}
 	
-	public boolean setChannelConfiguration(SharedPreferences settings,Channel channel)
-	{
-		
-      
-		String cDescription,cLongUnit,cShortUnit,cName;
-		float cFactor,cOffset;
-		int cMovingAverage,cPrecision;
-		boolean cSilent;
-      
-		cName=channel.getName();
-		channel.setDescription(settings.getString(cName+"_"+"Description","Main cell voltage"));
-		channel.setLongUnit(cLongUnit = settings.getString(cName+"_"+"LongUnit","Volt"));
-		channel.setShortUnit(cShortUnit = settings.getString(cName+"_"+"ShortUnit","V"));
-		channel.setFactor(cFactor = settings.getFloat(cName+"_"+"Factor", (float) (0.1/6)));
-		channel.setOffset(settings.getFloat(cName+"_"+"Offset", (float) (0)));
-		channel.setMovingAverage(cMovingAverage = settings.getInt(cName+"_"+"MovingAverage", 8));
-		channel.setPrecision(settings.getInt(cName+"_"+"Precision", 2));
-		channel.setSilent(settings.getBoolean(cName+"_"+"Silent", false));
-		return true;
-	}
+//	public boolean setChannelConfiguration(SharedPreferences settings,Channel channel)
+//	{
+//		
+//      
+//		String cDescription,cLongUnit,cShortUnit,cName;
+//		float cFactor,cOffset;
+//		int cMovingAverage,cPrecision;
+//		boolean cSilent;
+//      
+//		cName=channel.getName();
+//		channel.setDescription(settings.getString(cName+"_"+"Description","Main cell voltage"));
+//		channel.setLongUnit(cLongUnit = settings.getString(cName+"_"+"LongUnit","Volt"));
+//		channel.setShortUnit(cShortUnit = settings.getString(cName+"_"+"ShortUnit","V"));
+//		channel.setFactor(cFactor = settings.getFloat(cName+"_"+"Factor", (float) (0.1/6)));
+//		channel.setOffset(settings.getFloat(cName+"_"+"Offset", (float) (0)));
+//		channel.setMovingAverage(cMovingAverage = settings.getInt(cName+"_"+"MovingAverage", 8));
+//		channel.setPrecision(settings.getInt(cName+"_"+"Precision", 2));
+//		channel.setSilent(settings.getBoolean(cName+"_"+"Silent", false));
+//		return true;
+//	}
 	
 	
 	public Model getCurrentModel()

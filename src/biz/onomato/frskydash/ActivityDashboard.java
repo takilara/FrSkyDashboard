@@ -554,7 +554,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		
 		tv_modelName.setText(currentModel.getName());
 		int n = 0;
-		if(DEBUG) Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().length);
+		if(DEBUG) Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().size());
 		for(Channel c: currentModel.getChannels())
 		{
 			if(DEBUG) Log.i(TAG,c.getDescription());
@@ -575,11 +575,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
-					if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
+					//if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
+					if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels().get(v.getId()-1000).getDescription());
 					// Launch editchannel with channel attached.. 
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
-					i.putExtra("channel", currentModel.getChannels()[v.getId()-1000]);
+					i.putExtra("channel", currentModel.getChannels().get(v.getId()-1000));
 					i.putExtra("idInModel", v.getId()-1000);
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}

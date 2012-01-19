@@ -157,8 +157,10 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			case R.id.modConf_btnAddChannel:
 				if(DEBUG) Log.d(TAG,"Add a channel");
 				Channel c = new Channel(getApplicationContext());
-				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
-				c.setDescription("Description"+(_model.getChannels().length+1));
+//				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
+//				c.setDescription("Description"+(_model.getChannels().length+1));
+				c.setName(_model.getName()+"_"+(_model.getChannels().size()+1));
+				c.setDescription("Description"+(_model.getChannels().size()+1));
 				_model.addChannel(c);
 				populateChannelList();
 				break;
@@ -186,8 +188,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			btnDelete.setId(10000+n);
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
-					if(DEBUG) Log.d(TAG,"Delete channel "+_model.getChannels()[v.getId()-10000].getDescription());
-					showDeleteChannelDialog(_model.getChannels()[v.getId()-10000]);
+					if(DEBUG) Log.d(TAG,"Delete channel "+_model.getChannels().get(v.getId()-10000).getDescription());
+					showDeleteChannelDialog(_model.getChannels().get(v.getId()-10000));
 				}
 			});
 			
@@ -197,11 +199,11 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			//btnEdit.setOnClickListener(this);
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
-					if(DEBUG) Log.d(TAG,"Edit channel "+_model.getChannels()[v.getId()-1000].getDescription());
+					if(DEBUG) Log.d(TAG,"Edit channel "+_model.getChannels().get(v.getId()-1000).getDescription());
 					// Launch editchannel with channel attached.. 
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
-					i.putExtra("channel", _model.getChannels()[v.getId()-1000]);
+					i.putExtra("channel", _model.getChannels().get(v.getId()-1000));
 					i.putExtra("idInModel", v.getId()-1000);
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}

@@ -188,12 +188,9 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			case R.id.chConf_btnSave:
 				Log.i(TAG,"Apply settings to channel: "+_channelId);
 				applyChannel();
-				Log.i(TAG,"Store settings to database for channel: "+_channelId);
 				
-				if(_channelId>-1)
-				{
-					server.saveChannelConfig(channel);
-				}
+				
+
 				
 				//Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
 	    		//i.putExtra("channelId", 1);

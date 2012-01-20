@@ -89,6 +89,7 @@
     
 	<!--  Channel configuration  -->   
     <string name="chConf_Description">Description</string>
+    <string name="chConf_SourceChannel">Source Channel</string>
     <string name="chConf_Unit">Unit</string>
     <string name="chConf_Offset">Offset</string>
     <string name="chConf_Factor">Factor</string>

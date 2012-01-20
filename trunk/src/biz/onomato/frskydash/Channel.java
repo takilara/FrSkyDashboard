@@ -610,8 +610,8 @@ public class Channel implements Parcelable  {
 		_shortUnit = in.readString();
 		_factor = in.readFloat();
 		_offset = in.readFloat();
-		_movingAverage = in.readInt();
-		_precision = in.readInt();
+		setMovingAverage(in.readInt());
+		setPrecision(in.readInt());
 		_silent = in.readByte()==1;
 		_sourceChannelId = in.readLong();
 		_modelId = in.readLong();
@@ -680,8 +680,8 @@ public class Channel implements Parcelable  {
 		_shortUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SHORTUNIT));
 		_factor = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_FACTOR));
 		_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
-		_precision = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION));
-		_movingAverage = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE));
+		setPrecision(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION)));
+		setMovingAverage(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE)));
 		_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0;
 		_modelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MODELID));
 		listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));

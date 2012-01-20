@@ -565,6 +565,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		for(Channel c: currentModel.getChannels())
 		{
 			if(DEBUG) Log.i(TAG,c.getDescription());
+			if(DEBUG) Log.i(TAG,"Precicion: "+c.getPrecision());
+			if(DEBUG) Log.i(TAG,"Moving Average: "+c.getMovingAverage());
+			
 			LinearLayout llLine = new LinearLayout(getApplicationContext());
 			llLine.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
 

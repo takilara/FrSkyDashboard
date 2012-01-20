@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/linearLayoutApplicationSettingsOuter" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
+<LinearLayout android:id="@+id/linearLayoutApplicationSettingsOuter" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
 <ScrollView 
 	    android:id="@+id/ScrollViewApplicationSettings"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-    <LinearLayout android:id="@+id/linearLayoutApplicationSettings" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+    <LinearLayout android:id="@+id/linearLayoutApplicationSettings" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:orientation="vertical">
             <TextView android:background="#333333" android:id="@+id/textView4" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="center" android:gravity="center" android:text="@string/speakerSettings"></TextView>
             <CheckBox android:id="@+id/chkAutoSetVolume" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/chkAutoSetVolume"></CheckBox>
@@ -32,10 +32,10 @@
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoEnable" android:layout_height="wrap_content" android:text="@string/btAutoEnable"></CheckBox>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoConnect" android:layout_height="wrap_content" android:text="@string/btAutoConnect"></CheckBox>    
             <TextView android:background="#333333" android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/commands" android:layout_width="match_parent" android:gravity="center"></TextView>
-            <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="fill_parent" android:id="@+id/btnSave"></Button>
-            <!-- <Button android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/button1" android:text="@string/defaults"></Button> -->
+            <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="match_parent" android:id="@+id/btnSave"></Button>
+            <!-- <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/button1" android:text="@string/defaults"></Button> -->
             
-            <Button android:layout_width="fill_parent" android:text="@string/btnDeleteLogs" android:layout_height="wrap_content" android:id="@+id/btnDeleteLogs"></Button>
+            <Button android:layout_width="match_parent" android:text="@string/btnDeleteLogs" android:layout_height="wrap_content" android:id="@+id/btnDeleteLogs"></Button>
         </LinearLayout>
     </LinearLayout> 
     </ScrollView>

@@ -214,7 +214,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			ll.addView(btnDelete);
 			
 			
-			ll.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 			//ll.setGravity();
 
 			

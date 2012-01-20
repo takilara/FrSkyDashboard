@@ -2,19 +2,19 @@
 
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/linearLayout1"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 	
 	<ScrollView 
 	    android:id="@+id/ScrollViewFrSkyModuleSettings"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
 		
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/linearLayoutFrSkyModuleSettings"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         
@@ -28,7 +28,7 @@
 
             <TextView
                 android:id="@+id/tv_FrSkySettings_RSSI"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -39,7 +39,7 @@
 
             <TextView
                 android:id="@+id/tv_FrSkySettings_Alarm_1"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -107,7 +107,7 @@
 
             <TextView
                 android:id="@+id/FrSkySettings_RSSI"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -118,7 +118,7 @@
 
             <TextView
                 android:id="@+id/TextView01"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -188,7 +188,7 @@
 
             <TextView
                 android:id="@+id/FrSkySettings_AD1_1"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -199,7 +199,7 @@
 
             <TextView
                 android:id="@+id/TextView01"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -271,7 +271,7 @@
 
             <TextView
                 android:id="@+id/FrSkySettings_AD1_2"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -282,7 +282,7 @@
 
             <TextView
                 android:id="@+id/TextView01"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -352,7 +352,7 @@
 
             <TextView
                 android:id="@+id/FrSkySettings_AD2_1"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -363,7 +363,7 @@
 
             <TextView
                 android:id="@+id/TextView01"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -434,7 +434,7 @@
 
             <TextView
                 android:id="@+id/FrSkySettings_AD2_2"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
@@ -445,7 +445,7 @@
 
             <TextView
                 android:id="@+id/TextView01"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"

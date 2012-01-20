@@ -181,7 +181,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//_serverChannels = new HashMap<String,Channel>();
 		
 		
-		logger = new Logger(getApplicationContext(),true,true,true);
+		
 		
 		_audiomanager = 
         	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -206,18 +206,10 @@ public class FrSkyServer extends Service implements OnInitListener {
         
 		showNotification();		
 		
-		
-		
-		
-		///TODO: in setupChannels, if settings exist, use that for setup
 		setupChannels();
 
 		//AD1.loadFromConfig(_settings);
 		//AD2.loadFromConfig(_settings);
-		logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
-		logger.setLogToRaw(getLogToRaw());
-		logger.setLogToCsv(getLogToCsv());
-		logger.setLogToHuman(getLogToHuman());
 
 		
 		//String _prevModel = "FunCub 1";
@@ -245,6 +237,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// Save this model incase it was new...
 		
 		Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
+
+		logger = new Logger(getApplicationContext(),_currentModel,true,true,true);
+		//logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
+		logger.setCsvHeader();
+		logger.setLogToRaw(getLogToRaw());
+		logger.setLogToCsv(getLogToCsv());
+		logger.setLogToHuman(getLogToHuman());
 
 		
 		
@@ -1054,8 +1053,8 @@ private final Handler mHandlerBT = new Handler() {
 				{
 					_framecountRx++;
 					//TODO: replace with models logged channels
-					logger.logCsv(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
-					//logger.logCsv(_currentModel.getChannels());
+					//logger.logCsv(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
+					logger.logCsv();
 				}
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
@@ -1222,10 +1221,13 @@ private final Handler mHandlerBT = new Handler() {
 	
 	public void setCurrentModel(Model currentModel)
 	{
+		logger.setModel(currentModel);
 		_currentModel = currentModel;
 		//_prevModelId = _currentModel.getId();
 		_editor.putLong("prevModelId", _currentModel.getId());
 		_editor.commit();
+		//logger.stop();		// SetModel will stop current Logger
+		
 
 	}
 	

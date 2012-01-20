@@ -210,7 +210,14 @@ public class Channel implements Parcelable  {
 	
 	public String getLongUnit()
 	{
-		return _longUnit;
+		if(_longUnit==null)
+		{
+			return "";
+		}
+		else
+		{
+			return _longUnit;
+		}
 	}
 	
 	public void setLongUnit(String unit)

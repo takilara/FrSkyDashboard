@@ -244,9 +244,16 @@ public class Channel implements Parcelable  {
 	
 	public void setPrecision(int precision)
 	{
-		_precision = precision;
+		if(precision>=0)
+		{
+			_precision = precision;
+		}
+		else
+		{
+			_precision=0;
+		}
 		rounder = 1;
-		for(int i=0;i<precision;i++)
+		for(int i=0;i<_precision;i++)
 		{
 			rounder = rounder * 10;
 		}

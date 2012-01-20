@@ -569,12 +569,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			if(DEBUG) Log.i(TAG,"Moving Average: "+c.getMovingAverage());
 			
 			LinearLayout llLine = new LinearLayout(getApplicationContext());
-			llLine.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+			llLine.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
 
 			// Add Description
 			TextView tvDesc = new TextView(getApplicationContext());
 			tvDesc.setText(c.getDescription());
-			tvDesc.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			tvDesc.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 			
 			llDashboardChannels.addView(tvDesc);
 			
@@ -625,7 +625,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			// View for separator
 			View v = new View(getApplicationContext());
 			v.setBackgroundColor(0xFF909090);
-			v.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,2));
+			v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,2));
 
 			// Add line to channel List
 			llDashboardChannels.addView(llLine);

@@ -194,14 +194,14 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			ll.addView(btnDelete);
 			
 			
-			ll.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+			ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 			//ll.setGravity();
 
 			
 			llModelsLayout.addView(ll);
 			
 //			LayoutParams params = ll.getLayoutParams();
-//			params.width = LayoutParams.FILL_PARENT;
+//			params.width = LayoutParams.MATCH_PARENT;
 //			//params.height = LayoutParams.WRAP_CONTENT;
 			n++;
 		}

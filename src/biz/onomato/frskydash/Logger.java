@@ -60,13 +60,15 @@ public class Logger {
 	private OutputStream _streamRaw = null;
 	private OutputStream _streamHuman = null;
 	
+	private Model _model;
 	
 	private final Calendar time = Calendar.getInstance();
 	 
 	
-	public Logger(Context Context, boolean LogRaw,boolean LogCsv,boolean LogHuman)
+	public Logger(Context Context, Model model, boolean LogRaw,boolean LogCsv,boolean LogHuman)
 	{
 		//_channelList = new ArrayList<Channel>();
+		_model = model;
 		_logRaw = LogRaw;
 		_logCsv = LogCsv;
 		_logHuman = LogHuman;
@@ -104,6 +106,12 @@ public class Logger {
 		CsvLogger csvLogger = new CsvLogger(channelCsvBuffer);
 		new Thread(csvLogger).start();
 	}
+	
+	public void setModel(Model model)
+	{
+		stop();
+		_model = model;
+	}
 
 	
 	public String makePrefix()
@@ -112,7 +120,7 @@ public class Logger {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
 		startDate = myDate;
 		startDateS = formatter.format(startDate);
-		return startDateS;  
+		return _model.getName()+"_"+startDateS;  
 	}
 	
 	public void setPrefix(String Prefix)
@@ -144,43 +152,59 @@ public class Logger {
 		}
 	}
 	
-	public void setCsvHeader(Channel... channels)
+	//public void setCsvHeader(Channel... channels)
+	public void setCsvHeader()
 	{
 		StringBuilder sb = new StringBuilder();
+		
 		sb.append("\"Time since start (ms)\""+Channel.delim);
-		for(Channel ch : channels)
+		
+		
+		
+		int len = _model.getChannels().size();
+		
+		
+		//for(Channel ch : channels)
+		for(int i=0;i<len;i++)
 		{
 			
-			sb.append("\""+ch.getDescription()+" ("+ch.getLongUnit()+")\""+Channel.delim);
-			sb.append("\""+ch.getDescription()+" ("+ch.getLongUnit()+") (Avg)\""+Channel.delim);
+			if(!_model.getChannels().get(i).getLongUnit().equals(""))
+			{
+				sb.append("\""+_model.getChannels().get(i).getDescription()+" ("+_model.getChannels().get(i).getLongUnit()+")\""+Channel.delim);
+			}
+			else
+			{
+				sb.append("\""+_model.getChannels().get(i).getDescription()+"\""+Channel.delim);
+			}
+			//sb.append("\""+channels.get(i).getDescription()+" ("+channels.get(i).getLongUnit()+") (Avg)\""+Channel.delim);
 			
 		}
 		_headerString = sb.toString(); 
 	}
-	public void logCsv(Channel... channels)
+	
+	
+	// ALWAYS logs average, user need to add non averaged channel if he wants this..
+	public void logCsv()
 	{
 		if(mExternalStorageWriteable)
 		{
 			if(_logCsv){
+				int len = _model.getChannels().size();
 				StringBuilder sb = new StringBuilder();
-//				Date nowDate = new Date();
-//				
-//				long timeElapsed;
-//				timeElapsed = nowDate.getTime()-startDateCsv.getTime();
-//				sb.append(timeElapsed+Channel.delim);
-				
-				for(Channel channel : channels)
+				for(int i=0;i<len;i++)
 				{
-					sb.append(channel.getValue()+Channel.delim);
-					sb.append(channel.getValue(true)+Channel.delim);
+					//sb.append(channels.get(i).getValue()+Channel.delim);
+					sb.append(_model.getChannels().get(i).getValue(true)+Channel.delim);
 				}
 				sb.append(crlf);
 
 				channelCsvBuffer.add(sb.toString());
-				
 			}
 		}
 	}
+	
+	
+	
 	public void logFrame(Frame f)
 	{
 		if(mExternalStorageWriteable)
@@ -194,6 +218,8 @@ public class Logger {
 			}
 		}	
 	}
+	
+	
 	
 	
 	public void stop()
@@ -384,10 +410,24 @@ public class Logger {
 					StringBuilder sb = new StringBuilder();
 					// Comments
 					
+					
+					sb.append("// Model: "+_model.getName()+""+Logger.crlf);
+					
+					
+					// Add Channel data:
+					for(Channel c : _model.getChannels())
+					{
+						sb.append("// Channel '"+c.getDescription()+"', Averaged over "+c.getMovingAverage()+" sample(s), shown with a precision of "+c.getPrecision()+" decimals");
+						sb.append(Logger.crlf);
+					}
+					
 					sb.append("// Log Started: ");
 					SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
 					sb.append(formatter.format(startDate));
-					sb.append(crlf);
+					sb.append(Logger.crlf);
+					sb.append(Logger.crlf);
+					//sb.append("// Model: "+model.getName()+"\""+Channel.delim);
+					setCsvHeader();
 					sb.append(_headerString);
 					sb.append(crlf);
 					try {

@@ -14,11 +14,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class ActivityModelConfig extends Activity implements OnClickListener {
@@ -33,6 +35,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	private Button btnSave,btnAddChannel;
 	private LinearLayout llChannelsLayout;
 	private EditText edName;
+	private Spinner spType;
 	
     
 	@Override
@@ -74,6 +77,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		btnAddChannel		= (Button) findViewById(R.id.modConf_btnAddChannel);
 		edName				= (EditText) findViewById(R.id.modConf_edName);
 		llChannelsLayout	= (LinearLayout) findViewById(R.id.llChannelsLayout);
+		spType 				= (Spinner) findViewById(R.id.modConf_spType);
 //		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
 //		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
 //		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
@@ -124,6 +128,34 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
+			//ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
+			
+			ArrayAdapter<CharSequence> modelTypeAdapter  = ArrayAdapter.createFromResource(getApplicationContext(),R.array.model_types,android.R.layout.simple_spinner_item);
+        	
+//			for(Channel c : server.getCurrentModel().getChannels())
+//			{
+//				channelDescriptionAdapter.add(c);
+//			}
+			
+			modelTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			String[] modelTypes = getApplicationContext().getResources().getStringArray(R.array.model_types);
+			
+			spType.setAdapter(modelTypeAdapter);
+			int n=0;
+			for(int i=0;i<modelTypes.length;i++)
+			{
+				if(DEBUG)Log.i(TAG,"Comparing "+modelTypes[i]+" to "+_model.getType());
+				if(modelTypes[i].equals(_model.getType()))
+				{
+					spType.setSelection(i);
+					break;
+				}
+				
+			}
+			//spType.setSelection(modelTypes);
+			
+			
+			
 			populateChannelList();
 		}
 
@@ -140,6 +172,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 
 				// Save the model
 				_model.setName(edName.getText().toString());
+				_model.setType((String) spType.getSelectedItem());
 				_model.saveToDatabase();
 				if(_model.getId()==server.getCurrentModel().getId())
 				{

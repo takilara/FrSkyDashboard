@@ -25,11 +25,7 @@ public abstract class AbstractDBAdapter {
     protected static final String KEY_NAME = "name";
     protected static final String KEY_MODELTYPE = "type";
     
-    private static final String DATABASE_CREATE_MODELS =
-        "create table models (_id integer primary key autoincrement, "
-        + "name text not null, "
-        + "type text" 
-        + ");";
+    
     
     protected static final String DATABASE_TABLE_CHANNELS = "channels";
     protected static final String KEY_DESCRIPTION = "description";
@@ -42,6 +38,14 @@ public abstract class AbstractDBAdapter {
     protected static final String KEY_SOURCECHANNELID = "sourcechannelid";
     protected static final String KEY_SILENT = "silent";
     protected static final String KEY_MODELID = "modelid";
+    
+    private static final String DATABASE_CREATE_MODELS =
+            "create table "
+    		+ DATABASE_TABLE_MODELS+ "("
+    		+ KEY_ROWID+			" integer primary key autoincrement, "
+            + KEY_NAME+ 			" text not null, "
+            + KEY_MODELTYPE+		" text" 
+            + ");";
     
     private static final String DATABASE_CREATE_CHANNELS =
             "create table "

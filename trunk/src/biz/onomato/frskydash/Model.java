@@ -21,8 +21,9 @@ public class Model {
 	private static final boolean DEBUG=true;
 	
 	private ArrayList<Channel> _channels;
+	private String[] _modelTypes;
 	
-	private int _type;
+	private String _type;
 	private String _name;
 	private long _id;
 	private Context _context;
@@ -31,38 +32,48 @@ public class Model {
 	
 
 	// Constructor
-	public Model(Context context, String modelName,int modelType)
+	public Model(Context context, String modelName,String modelType)
 	{
 		_context = context;
+		_modelTypes = _context.getResources().getStringArray(R.array.model_types);
 		// create if neccessary
 		db = new DBAdapterModel(context);
 		
 		_id = -1; 
 		setName(modelName);
-		setType(modelType);
+		if(modelType.equals(""))
+		{
+			setType(_modelTypes[0]);
+		}
+		else
+		{
+			setType(modelType);
+		}
 		_channels = new ArrayList<Channel>();
 		//setId(-1);
 	}
 	
 	public Model(Context context,String modelName)
 	{
-		this(context,modelName,MODEL_TYPE_UNKNOWN);
+		
+		this(context,modelName,"");
 	}
 	public Model(Context context)
 	{
-		this(context,"Model 1",MODEL_TYPE_UNKNOWN);
+		this(context,"Model 1","");
 	}
 	
 
 
 	
 	
-	public int getType() {
+	public String getType() {
 		return _type;
 	}
 
 
-	public void setType(int modelType) {
+	public void setType(String modelType) {
+		if(DEBUG)Log.d(TAG,"Setting model type to: "+modelType);
 		this._type = modelType;
 	}
 
@@ -156,7 +167,7 @@ public class Model {
 		{
 			if(DEBUG) Log.d(TAG,"Saving, using insert");
 			db.open();
-			long id = db.insertModel(_name);
+			long id = db.insertModel(_name,_type);
 			if(id==-1)
 			{
 				Log.e(TAG,"Insert Failed");
@@ -173,7 +184,7 @@ public class Model {
 		{
 			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_id+",name:"+_name+")");
 			db.open();
-			if(db.updateModel(_id, _name))
+			if(db.updateModel(_id, _name,_type))
 			{
 				if(DEBUG)Log.d(TAG,"Update successful");
 			}
@@ -225,6 +236,7 @@ public class Model {
 			if(DEBUG) Log.d(TAG,c.getString(1));
 			_id = c.getLong(0);
 			_name = c.getString(1);
+			_type = c.getString(2);
 			c.deactivate();
 			db.close();
 			

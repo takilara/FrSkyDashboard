@@ -16,11 +16,12 @@ public class DBAdapterModel extends AbstractDBAdapter {
 	}
 
     //---insert a title into the database---
-    public long insertModel(String name) 
+    public long insertModel(String name, String type) 
     {
     	if(DEBUG)Log.d(TAG,"Insert into the database");
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_NAME, name);
+        initialValues.put(KEY_MODELTYPE, type);
         //initialValues.put(KEY_TITLE, title);
        
         return db.insert(DATABASE_TABLE_MODELS, null, initialValues);
@@ -82,12 +83,13 @@ public class DBAdapterModel extends AbstractDBAdapter {
     }
 
     //---updates a title---
-    public boolean updateModel(long rowId, String name) 
+    public boolean updateModel(long rowId, String name, String type) 
     {
     	if(DEBUG)Log.d(TAG,"Update one model in the database");
     	
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, name);
+        args.put(KEY_MODELTYPE, type);
         return db.update(DATABASE_TABLE_MODELS, args, 
                 KEY_ROWID + "=" + rowId, null) > 0;
         

@@ -108,6 +108,15 @@
     <string name="modelConf_ModelType">Model Type</string>
     <string name="modelConf_Channels">Channels</string>
     <string name="modelConf_addChannel">Add Channel</string>
+    <string-array name="model_types">	<!-- Translators, note that the order is important -->
+		<item>Other</item>
+		<item>Helicopter</item>
+		<item>Airplane</item>
+		<item>Car</item>
+		<item>Boat</item>
+		<item>Multirotor</item>
+		
+	</string-array>
     
         
 </resources>

@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -73,6 +74,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     // Used for unique id's
     private static final int ID_CHANNEL_BUTTON_EDIT = 1000;
     private static final int ID_CHANNEL_TEXTVIEW_VALUE = 2000;
+    private static final int ID_CHANNEL_BUTTON_SILENT = 3000;
     
     
     //MyApp globals;
@@ -571,10 +573,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			LinearLayout llLine = new LinearLayout(getApplicationContext());
 			llLine.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
 
+			LinearLayout llVals = new LinearLayout(getApplicationContext());
+			llVals.setLayoutParams(new LinearLayout.LayoutParams(0,LinearLayout.LayoutParams.WRAP_CONTENT,1));
+			llVals.setGravity(Gravity.CENTER_HORIZONTAL);
+			
 			// Add Description
 			TextView tvDesc = new TextView(getApplicationContext());
 			tvDesc.setText(c.getDescription());
-			tvDesc.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
+			tvDesc.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
 			
 			llDashboardChannels.addView(tvDesc);
 			
@@ -590,8 +596,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					// Launch editchannel with channel attached.. 
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
-					i.putExtra("channel", currentModel.getChannels().get(v.getId()-1000));
-					i.putExtra("idInModel", v.getId()-1000);
+					i.putExtra("channel", currentModel.getChannels().get(v.getId()-ID_CHANNEL_BUTTON_EDIT));
+					i.putExtra("idInModel", v.getId()-ID_CHANNEL_BUTTON_EDIT);
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}
 			});
@@ -606,10 +612,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			tvValue.setGravity(Gravity.RIGHT);
 			
 			tvValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
-			tvValue.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
+			tvValue.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT));
 			tvValue.setId(ID_CHANNEL_TEXTVIEW_VALUE+n);
 			c.setTextViewId(ID_CHANNEL_TEXTVIEW_VALUE+n);
-			llLine.addView(tvValue);
+			llVals.addView(tvValue);
+			//llLine.addView(tvValue);
 			
 			// Unit
 			if(DEBUG) Log.d(TAG,"Add TextView for Unit: "+c.getShortUnit());
@@ -617,10 +624,56 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			tvUnit.setText(""+c.getShortUnit());
 			tvUnit.setGravity(Gravity.LEFT);
 			LinearLayout.LayoutParams llpUnits = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-			llpUnits.setMargins(10, 0, 5, 0);
+			llpUnits.setMargins(10, 0, 0, 0);
 			tvUnit.setLayoutParams(llpUnits);
 			tvUnit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-			llLine.addView(tvUnit);
+			llVals.addView(tvUnit);
+			//llVals.setBackgroundColor(0xffff0000);
+			
+			
+			llLine.addView(llVals);
+			
+			ImageView speakerV = new ImageView(getApplicationContext());
+			//speakerV.setBackgroundResource(android.R.drawable.ic_lock_silent_mode);
+			if(c.getSilent())
+			{
+				speakerV.setImageResource(android.R.drawable.ic_lock_silent_mode);
+			}
+			else
+			{
+				speakerV.setImageResource(android.R.drawable.ic_lock_silent_mode_off);
+				speakerV.setColorFilter(0xff00ff00);
+			}
+			speakerV.setClickable(true);
+			speakerV.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT,0));
+			speakerV.setId(ID_CHANNEL_BUTTON_SILENT+n);
+			speakerV.setOnClickListener(new OnClickListener(){
+				public void onClick(View v){
+					ImageView iv = (ImageView) v;
+					Channel c = currentModel.getChannels().get(v.getId()-ID_CHANNEL_BUTTON_SILENT);
+					//if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
+					if(DEBUG) Log.d(TAG,"Toggle silent on "+c.getDescription());
+					boolean s = !c.getSilent();
+					c.setSilent(s);
+					c.saveToDatabase();
+					if(s)
+					{
+						iv.setImageResource(android.R.drawable.ic_lock_silent_mode);
+						//iv.setColorFilter(0xff00ff00);
+						iv.clearColorFilter();
+					}
+					else
+					{
+						iv.setImageResource(android.R.drawable.ic_lock_silent_mode_off);
+						iv.setColorFilter(0xff00ff00);
+					}
+				
+					// Launch editchannel with channel attached.. 
+				}
+			});
+			
+			
+			llLine.addView(speakerV);
 			
 			// View for separator
 			View v = new View(getApplicationContext());

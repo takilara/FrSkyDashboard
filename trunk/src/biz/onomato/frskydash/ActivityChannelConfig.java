@@ -128,15 +128,28 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        if(channel!=null)
 	        {
 				// Get configuration from config store
-				//String cShortUnit = settings.getString(channel.getName() + "_shortUnit","A");
-				
-				//String[] valuesChannelDescriptions = new String[2];
 
-				//TODO: Populate dynamically with the server channels
-//				valuesChannelDescriptions[0] = "AD1";
-//				valuesChannelDescriptions[1] = "AD2";
-				//ArrayAdapter<String> channelDescriptionAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesChannelDescriptions );
-				ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,server.getSourceChannels());
+	        	Channel[] sourceChannels = new Channel[server.getSourceChannels().length+server.getCurrentModel().getChannels().size()];
+	        	int n =0;
+	        	for(Channel c : server.getSourceChannels())
+	        	{
+	        		sourceChannels[n] = c;
+	        		n++;
+	        	}
+	        	for(Channel c : server.getCurrentModel().getChannels())
+	        	{
+	        		sourceChannels[n] = c;
+	        		n++;
+	        	}
+	        	
+	        	
+				//ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,server.getSourceChannels());
+	        	ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,sourceChannels);
+	        	
+//				for(Channel c : server.getCurrentModel().getChannels())
+//				{
+//					channelDescriptionAdapter.add(c);
+//				}
 				channelDescriptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				
 				

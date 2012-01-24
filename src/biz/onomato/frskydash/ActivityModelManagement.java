@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
@@ -188,8 +189,17 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			btnEdit.setId(1000+id);// ID for delete should be 100+channelId
 			btnEdit.setOnClickListener(this);
 			
+//			ImageView iv = new ImageView(getApplicationContext());
+//			iv.setImageResource(R.drawable.ic_modeltype_helicopter);
+//			//iv.setBackgroundColor(0xffff0000);
+//			iv.setColorFilter(0xffaaaaaa);
+			
+			//iv.setLayoutParams(new LinearLayout.LayoutParams(20,20));
+			
+			//ll.addView(iv);
 			ll.addView(rdThisModel);
 			ll.addView(tvName);
+			
 			ll.addView(btnEdit);
 			ll.addView(btnDelete);
 			

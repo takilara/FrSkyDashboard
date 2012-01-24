@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -27,6 +28,11 @@ public class Model {
 	private String _name;
 	private long _id;
 	private Context _context;
+	public Alarm[] alarms;
+	HashMap<Integer,Alarm> frSkyAlarms;
+	public int alarmCount = 0;
+
+	
 	
 	private static DBAdapterModel db;
 	
@@ -38,6 +44,10 @@ public class Model {
 		_modelTypes = _context.getResources().getStringArray(R.array.model_types);
 		// create if neccessary
 		db = new DBAdapterModel(context);
+		
+		// FRSKY channels only for now
+		alarms = new Alarm[6];
+		frSkyAlarms = new HashMap<Integer, Alarm>();
 		
 		_id = -1; 
 		setName(modelName);
@@ -150,10 +160,34 @@ public class Model {
 	// I need to be able to add alarms to this model
 	public void addAlarm(Alarm alarm)
 	{
-		
+		if(DEBUG)Log.i(TAG,"Adding alarm: "+alarm);
+		if(alarm.getAlarmType()==Alarm.ALARMTYPE_FRSKY)
+		{
+			//--> add to frSkyAlarms
+			if(DEBUG)Log.i(TAG,"FrSky alarm of type: "+alarm.getFrSkyFrameType());
+			frSkyAlarms.put(alarm.getFrSkyFrameType(), alarm);
+		}
+		else
+		{
+			Log.e(TAG,"Unhandled Alarm Type");
+			
+		}
+
+	}
+	public HashMap<Integer,Alarm> getFrSkyAlarms()
+	{
+		return frSkyAlarms;
 	}
 	
-	
+	//TODO: Should compare the alarms before setting them
+	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
+	{
+		
+		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
+		alarmCount += 1;
+		//setDirtyFlag(true);
+	}
+
 	// I need to be able to delete alarms from this model
 	public void deleteAlarm(Alarm alarm)
 	{
@@ -274,7 +308,7 @@ public class Model {
 	}
 	
 	
-
+	
 	
 	public static Model[] getAllModels(Context context)
 	{

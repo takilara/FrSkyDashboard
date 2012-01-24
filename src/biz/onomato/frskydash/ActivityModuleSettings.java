@@ -269,166 +269,25 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				btnAD2_2_Send.setEnabled(setToWhenNotConnected);
 			}
 			
-			
-			float f;
-			float o;
-			float vEng;
-			int p;
-			String u;
-			
-			
-			f = server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).getFactor();
-			o = server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).getOffset();
-			String[] valuesRSSI = new String[maxThresholdRSSI-minThresholdRSSI+1];
-			for(int i=minThresholdRSSI;i<=maxThresholdRSSI;i++)
+			Log.d(TAG,"Try to set up spinners for model: "+server.getCurrentModel().getName());
+			Log.d(TAG,"This model has this many alarms: "+server.getCurrentModel().getFrSkyAlarms().size());
+			for(int key : server.getCurrentModel().getFrSkyAlarms().keySet())
 			{
-				vEng = (i*f)+o;
-				
-				//valuesAD1[i-minThresholdAD]=String.format("%."+p+"f %s (%s)",vEng,u,i);
-				valuesRSSI[i-minThresholdRSSI] = String.format("%s (%s)",server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).toEng(i),i);
-			}
-			
-			
-			
-			
-			f = server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).getFactor();
-			o = server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).getOffset();
-			String[] valuesAD1 = new String[maxThresholdAD-minThresholdAD+1];
-			for(int i=minThresholdAD;i<=maxThresholdAD;i++)
-			{
-				vEng = (i*f)+o;
-				
-				//valuesAD1[i-minThresholdAD]=String.format("%."+p+"f %s (%s)",vEng,u,i);
-				valuesAD1[i-minThresholdAD] = String.format("%s (%s)",server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).toEng(i),i);
-			}
-			
-			f = server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).getFactor();
-			o = server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).getOffset();
-			String[] valuesAD2 = new String[maxThresholdAD-minThresholdAD+1];
-			for(int i=minThresholdAD;i<=maxThresholdAD;i++)
-			{
-				vEng = (i*f)+o;
-				
-				//valuesAD1[i-minThresholdAD]=String.format("%."+p+"f %s (%s)",vEng,u,i);
-				valuesAD2[i-minThresholdAD] = String.format("%s (%s)",server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).toEng(i),i);
+				Log.d(TAG,"\t"+key+"= "+server.getCurrentModel().getFrSkyAlarms().get(key));
 			}
 
-			ArrayAdapter<String> RSSIalarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesRSSI );
-			ArrayAdapter<String> AD1alarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesAD1 );
-			ArrayAdapter<String> AD2alarmValueAdapter  = new ArrayAdapter<String> (server,android.R.layout.simple_spinner_item,valuesAD2 );
 			
-			
-			RSSIalarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			AD1alarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			AD2alarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			
-			
-			RSSIalarm1ValueSpinner.setAdapter(RSSIalarmValueAdapter);
-			RSSIalarm2ValueSpinner.setAdapter(RSSIalarmValueAdapter);
-			AD1alarm1ValueSpinner.setAdapter(AD1alarmValueAdapter);
-			AD1alarm2ValueSpinner.setAdapter(AD1alarmValueAdapter);
-			AD2alarm1ValueSpinner.setAdapter(AD2alarmValueAdapter);
-			AD2alarm2ValueSpinner.setAdapter(AD2alarmValueAdapter);
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			for(int i=minThresholdAD;i<=maxThresholdAD;i++)
+			try
 			{
-//				float v = (i*f)+o;
-//				valuesAD1[i-minThresholdAD]=Integer.toString(i)+
-//						" ("+
-//						String.format("%."+p+"f", v)+
-//						" "+
-//						u+
-//						")";
+				String[] vals = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1).getThresholds();
+				ArrayAdapter<String> ad1valueadapter  = new ArrayAdapter<String> (getApplicationContext(),android.R.layout.simple_spinner_item,vals);
+				AD1alarm1ValueSpinner.setAdapter(ad1valueadapter);
+			}
+			catch(Exception e)
+			{
+				
 			}
 			
-			
-			
-			
-			Log.i(TAG,"Setup Alarms:");
-			// RSSI alarms does not get written from module,
-			// Defaults need to come from FrSky, or
-			// from settings
-			RSSIalarm1LevelSpinner.setSelection(Alarm.ALARMLEVEL_HIGH);
-			RSSIalarm1RelSpinner.setSelection(Alarm.LESSERTHAN);
-			// 45 is default for RSSI alarm 1
-			RSSIalarm1ValueSpinner.setSelection(45-minThresholdRSSI);
-			
-			RSSIalarm2LevelSpinner.setSelection(Alarm.ALARMLEVEL_HIGH);
-			RSSIalarm2RelSpinner.setSelection(Alarm.LESSERTHAN);
-			// 42 is default for RSSI alarm 2
-			RSSIalarm2ValueSpinner.setSelection(42-minThresholdRSSI);
-			
-			if(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).alarmCount>0)
-			{
-				// Alarm 1
-				try
-				{
-					RSSIalarm1LevelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).alarms[0].level);
-					RSSIalarm1RelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).alarms[0].greaterthan);
-					//myAdap = (ArrayAdapter) RSSIalarm1ValueSpinner.getAdapter(); //cast to an ArrayAdapter					
-					//RSSIalarm1ValueSpinner.setSelection(myAdap.getPosition(""+server.RSSItx.alarms[0].threshold));
-					RSSIalarm1ValueSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).alarms[0].threshold-minThresholdRSSI);
-				}
-				catch(Exception e){	}
-				// Alarm 2
-				try
-				{
-					RSSIalarm2LevelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).alarms[1].level);
-					RSSIalarm2RelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).alarms[1].greaterthan);
-					RSSIalarm2ValueSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).alarms[1].threshold-minThresholdRSSI);
-				}
-				catch(Exception e){	}
-					
-			}
-			if(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).alarmCount>0)
-			{
-				// Alarm 1
-				try
-				{
-					AD1alarm1LevelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).alarms[0].level);
-					AD1alarm1RelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).alarms[0].greaterthan);
-					AD1alarm1ValueSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).alarms[0].threshold-minThresholdAD);
-				}
-				catch(Exception e){	}
-				// Alarm 2
-				try
-				{
-					AD1alarm2LevelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).alarms[1].level);
-					AD1alarm2RelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).alarms[1].greaterthan);
-					AD1alarm2ValueSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).alarms[1].threshold-minThresholdAD);
-				}
-				catch(Exception e){	}
-			}
-			if(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).alarmCount>0)
-			{
-				// Alarm 1
-				try
-				{
-					AD2alarm1LevelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).alarms[0].level);
-					AD2alarm1RelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).alarms[0].greaterthan);
-					AD2alarm1ValueSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).alarms[0].threshold-minThresholdAD);
-				}
-				catch(Exception e){	}
-				// Alarm 2
-				try
-				{
-					AD2alarm2LevelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).alarms[1].level);
-					AD2alarm2RelSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).alarms[1].greaterthan);
-					AD2alarm2ValueSpinner.setSelection(server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).alarms[1].threshold-minThresholdAD);
-				}
-				catch(Exception e){	}
-			}
 			
 		}
 

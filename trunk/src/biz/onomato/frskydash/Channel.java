@@ -54,8 +54,8 @@ public class Channel implements Parcelable  {
 	public boolean _silent;
 	public Date timestamp;
 	
-	public Alarm[] alarms;
-	public int alarmCount = 0;
+//	public Alarm[] alarms;
+//	public int alarmCount = 0;
 	private long _modelId = -1;
 	private long _channelId = -1;
 	private boolean _dirty = false;
@@ -112,7 +112,7 @@ public class Channel implements Parcelable  {
 		reset();
 		
 		// FRSKY channels only for now
-		alarms = new Alarm[2];
+//		alarms = new Alarm[2];
 		
 		db = new DBAdapterChannel(context);
 	}
@@ -449,12 +449,12 @@ public class Channel implements Parcelable  {
 		}
 	}
 
-	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
-	{
-		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
-		alarmCount += 1;
-		setDirtyFlag(true);
-	}
+//	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
+//	{
+//		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
+//		alarmCount += 1;
+//		setDirtyFlag(true);
+//	}
 
 	
 	

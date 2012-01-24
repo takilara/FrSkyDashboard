@@ -232,7 +232,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_editor.putLong("prevModelId", _prevModelId);
 		_editor.commit();
 			
-		
+		initializeAlarms();
 		
 		// Save this model incase it was new...
 		
@@ -723,7 +723,22 @@ public class FrSkyServer extends Service implements OnInitListener {
     }
 	
 	
-
+	private void initializeAlarms()
+	{
+		// Force alarm creation/initiation
+				Frame alarmframe1 = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_RSSI, 
+				Alarm.ALARMLEVEL_LOW, 
+				45, 
+				Alarm.LESSERTHAN);
+				Frame alarmframe2 = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_RSSI, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+				parseFrame(alarmframe1,false);	// don't count in fps
+				parseFrame(alarmframe2,false);	// don't count in fps
+	}
 	
 	private void setupChannels()
 	{
@@ -763,19 +778,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 		
-		// Force alarm creation/initiation
-		Frame alarmframe1 = Frame.AlarmFrame(
-		Frame.FRAMETYPE_ALARM1_RSSI, 
-		Alarm.ALARMLEVEL_LOW, 
-		45, 
-		Alarm.LESSERTHAN);
-		Frame alarmframe2 = Frame.AlarmFrame(
-		Frame.FRAMETYPE_ALARM2_RSSI, 
-		Alarm.ALARMLEVEL_MID, 
-		42, 
-		Alarm.LESSERTHAN);
-		parseFrame(alarmframe1,false);	// don't count in fps
-		parseFrame(alarmframe2,false);	// don't count in fps
+		
 	}
 	
 	private void resetChannels()
@@ -1059,22 +1062,30 @@ private final Handler mHandlerBT = new Handler() {
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
 				Log.d(TAG,"handle inbound FrSky alarm");
-				if(inBound)	_framecountTx++;
-				switch(f.alarmChannel)
+				if(_currentModel!=null)
 				{
-				case Channel.CHANNELTYPE_AD1:
-					_sourceChannels[CHANNEL_INDEX_AD1].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-					break;
-				case Channel.CHANNELTYPE_AD2:
-					_sourceChannels[CHANNEL_INDEX_AD2].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-					break;
-				case Channel.CHANNELTYPE_RSSI:
-					_sourceChannels[CHANNEL_INDEX_RSSITX].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-					break;
-				default:
-					Log.i(TAG,"Unsupported FrSky alarm?");
-					Log.i(TAG,"Frame: "+f.toHuman());
+					_currentModel.addAlarm(new Alarm(f));
 				}
+				
+				if(inBound)	_framecountTx++;
+//				switch(f.alarmChannel)
+//				{
+//				case Channel.CHANNELTYPE_AD1:
+//					//_sourceChannels[CHANNEL_INDEX_AD1].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+//					getCurrentModel().setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+//					break;
+//				case Channel.CHANNELTYPE_AD2:
+//					//_sourceChannels[CHANNEL_INDEX_AD2].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+//					getCurrentModel().setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+//					break;
+//				case Channel.CHANNELTYPE_RSSI:
+//					//_sourceChannels[CHANNEL_INDEX_RSSITX].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+//					getCurrentModel().setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
+//					break;
+//				default:
+//					Log.i(TAG,"Unsupported FrSky alarm?");
+//					Log.i(TAG,"Frame: "+f.toHuman());
+//				}
 				
 				break;
 			default:

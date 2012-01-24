@@ -27,6 +27,7 @@ public class Frame {
 	
 	
 	public int frametype;
+	public int frameHeaderByte;
 	private int[] _frame;
 	private int[] _frameRaw;
 	
@@ -63,6 +64,7 @@ public class Frame {
 			int _greaterthan;
 			int _level;
 			
+			frameHeaderByte =frame[1]; 
 			switch(frame[1])
 			{
 				// Analog values

@@ -1,9 +1,11 @@
 package biz.onomato.frskydash;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -149,6 +151,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	//TODO: Need to get channels for another model than currentmodel
 	        	
 	        	//for(Channel c : server.getCurrentModel().getChannels())
+	        	
+	        	sourceChannels.add(Channel.NULL);
+	        	int separatorPos = n;
+	        	
 	        	for(Channel c : Channel.getChannelsForModel(getApplicationContext(),channel.getModelId()))
 	        	{
 	        		if(DEBUG)Log.i(TAG,String.format("Comparing '%s' to '%s'",channel.getDescription(),c.getDescription()));
@@ -171,8 +177,11 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	}
 	        	
 	        	
-				//ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,server.getSourceChannels());
+				
 	        	ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,sourceChannels);
+	        	
+	        	//ChannelListAdapter channelDescriptionAdapter  = new ChannelListAdapter (getApplicationContext(),android.R.layout.simple_spinner_item,sourceChannels);
+	        	
 	        	
 //				for(Channel c : server.getCurrentModel().getChannels())
 //				{
@@ -182,6 +191,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				
 				
 				spSourceChannel.setAdapter(channelDescriptionAdapter);
+				
+				
 				
 				//TODO: set correct startup source channel
 				long len = channelDescriptionAdapter.getCount();
@@ -223,6 +234,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		}
 	};
 
+	
+	
+	
+	
 	@Override
 	public void onClick(View v) {
 		switch(v.getId()){
@@ -311,5 +326,54 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		
 	}
 	
-	
+
+	// Attempt at adding separators
+//	class ChannelListAdapter extends ArrayAdapter<Object>  {
+//		ChannelListAdapter(Context context, int resource, int textViewResourceId, List<Object> objects) {
+//            super(context, resource, textViewResourceId, objects);
+//        }
+//
+//		ChannelListAdapter(Context context, int resource, int textViewResourceId, Object[] objects) {
+//            super(context, resource, textViewResourceId, objects);
+//        }
+//
+//		ChannelListAdapter(Context context, int resource, int textViewResourceId) {
+//            super(context, resource, textViewResourceId);
+//        }
+//
+//		ChannelListAdapter(Context context, int textViewResourceId, List<Object> objects) {
+//            super(context, textViewResourceId, objects);
+//        }
+//
+//		ChannelListAdapter(Context context, int textViewResourceId, Object[] objects) {
+//            super(context, textViewResourceId, objects);
+//        }
+//
+//		ChannelListAdapter(Context context, int textViewResourceId) {
+//            super(context, textViewResourceId);
+//        }
+//
+//        @Override
+//        public boolean isEnabled(int position) {
+//            // return false if position == position you want to disable
+//        	
+//        	if(getItem(position) instanceof Channel)
+//        	{
+//        		return true;
+//        	}
+//        	else
+//        	{
+//        		return false;
+//        	}
+//        }
+//
+//        @Override
+//        public boolean areAllItemsEnabled () {
+//        	return false;
+//        }
+//        
+//
+//
+//        	
+//	}
 }

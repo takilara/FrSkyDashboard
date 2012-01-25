@@ -152,7 +152,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	
 	        	//for(Channel c : server.getCurrentModel().getChannels())
 	        	
-	        	sourceChannels.add(Channel.NULL);
+	        	
 	        	int separatorPos = n;
 	        	
 	        	for(Channel c : Channel.getChannelsForModel(getApplicationContext(),channel.getModelId()))

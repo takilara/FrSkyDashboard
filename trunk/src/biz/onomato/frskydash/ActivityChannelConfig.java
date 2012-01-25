@@ -1,5 +1,7 @@
 package biz.onomato.frskydash;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -129,17 +131,40 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        {
 				// Get configuration from config store
 
-	        	Channel[] sourceChannels = new Channel[server.getSourceChannels().length+server.getCurrentModel().getChannels().size()];
+	        	//Channel[] sourceChannels = new Channel[server.getSourceChannels().length+server.getCurrentModel().getChannels().size()];
+	        	ArrayList<Channel> sourceChannels = new ArrayList<Channel>();
+	        	
 	        	int n =0;
+	        	
+	        	// Add all server channels
 	        	for(Channel c : server.getSourceChannels())
 	        	{
-	        		sourceChannels[n] = c;
+	        		//sourceChannels[n] = c;
+	        		sourceChannels.add(c);
 	        		n++;
 	        	}
+	        	
+	        	// Add channels from this model
+	        	//Channel.getChannelsForModel(context, model)
 	        	for(Channel c : server.getCurrentModel().getChannels())
 	        	{
-	        		sourceChannels[n] = c;
-	        		n++;
+	        		if(DEBUG)Log.i(TAG,String.format("Comparing '%s' to '%s'",channel.getDescription(),c.getDescription()));
+	        		if(c.getId()!=channel.getId())
+	        		{
+	        			//Log.e(TAG,channel+" is different from "+c);
+	        			//Log.e(TAG,channel.getId()+" is different from "+c.getId());
+
+	        			// Channel is different
+	        			//sourceChannels[n] = c;
+	        			sourceChannels.add(c);
+		        		n++;
+	        		}
+	        		else
+	        		{
+	        			// Channel is the same, ignore it
+	        			if(DEBUG)Log.i(TAG,channel+" is same as "+c+", ignore it");
+	        		}
+	        		
 	        	}
 	        	
 	        	

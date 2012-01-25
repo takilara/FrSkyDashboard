@@ -19,6 +19,8 @@ import java.util.List;
 public class Channel implements Parcelable  {
 	private static final String TAG = "Channel";
 	
+	
+	
 	public static final int CHANNELTYPE_AD1=0;
 	public static final int CHANNELTYPE_AD2=1;
 	public static final int CHANNELTYPE_RSSI=2;
@@ -82,6 +84,7 @@ public class Channel implements Parcelable  {
 	}
 	
 	
+	
 	public Channel(Context context,String description,float offset,float factor,String unit,String longUnit)
 	{
 		// instanciate listeners list
@@ -116,6 +119,8 @@ public class Channel implements Parcelable  {
 		
 		db = new DBAdapterChannel(context);
 	}
+	
+	
 	
 	// ==========================================================================================
 	// ====                        PROPERTIES                                               =====

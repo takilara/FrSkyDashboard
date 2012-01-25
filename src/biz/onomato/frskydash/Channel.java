@@ -750,13 +750,14 @@ public class Channel implements Parcelable  {
 	// ====                        STATIC METHODS                                           =====
 	// ==========================================================================================
 	
-	public static Channel[] getChannelsForModel(Context context, Model model)
+	//public static Channel[] getChannelsForModel(Context context, Model model)
+	public static Channel[] getChannelsForModel(Context context, long modelId)
 	{
 		//DBAdapterChannel dbb = new DBAdapterChannel(context);
 		if(DEBUG) Log.d(TAG,"Try to open channels database");
 		db.open();
 		if(DEBUG) Log.d(TAG,"Db opened, try to get all channels");
-		Cursor c = db.getAllChannelsForModel(model.getId());
+		Cursor c = db.getAllChannelsForModel(modelId);
 		//dbb.close();
 		if(DEBUG) Log.d(TAG,"Cursor count: "+c.getCount());
 		c.moveToFirst();
@@ -775,6 +776,10 @@ public class Channel implements Parcelable  {
 		c.deactivate();
 		db.close();
 		return channels;
+	}
+	public static Channel[] getChannelsForModel(Context context, Model model)
+	{
+		return getChannelsForModel(context,model.getId());
 	}
 	
 	public static void deleteChannelsForModel(Context context, Model model)

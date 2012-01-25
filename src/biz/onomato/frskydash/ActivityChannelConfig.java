@@ -146,7 +146,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	
 	        	// Add channels from this model
 	        	//Channel.getChannelsForModel(context, model)
-	        	for(Channel c : server.getCurrentModel().getChannels())
+	        	//TODO: Need to get channels for another model than currentmodel
+	        	
+	        	//for(Channel c : server.getCurrentModel().getChannels())
+	        	for(Channel c : Channel.getChannelsForModel(getApplicationContext(),channel.getModelId()))
 	        	{
 	        		if(DEBUG)Log.i(TAG,String.format("Comparing '%s' to '%s'",channel.getDescription(),c.getDescription()));
 	        		if(c.getId()!=channel.getId())

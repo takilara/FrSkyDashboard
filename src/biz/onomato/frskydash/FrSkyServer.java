@@ -112,7 +112,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     private Channel[] _sourceChannels = new Channel[4];
     
-    
+    public DB dbb;
     
     private boolean _dying=false;
 	
@@ -213,30 +213,47 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		
 		//String _prevModel = "FunCub 1";
-		int _prevModelId = _settings.getInt("prevModelId", -1);
+		int _prevModelId;
+		try
+		{
+			
+			_prevModelId= _settings.getInt("prevModelId", -1);
+		}
+		catch(Exception e)
+		{
+			_prevModelId = -1;
+		}
 		
+		Log.i(TAG,"Previous ModelId was: "+_prevModelId);
 	//	_currentModel = new Model(context);
 		
 		// DEBUG, List all channels for the model using new databaseadapter
-		DB dbb = new DB(getApplicationContext());
+		dbb = new DB(getApplicationContext());
 		_currentModel = dbb.getModel(_prevModelId);
-		
-		
-		
-		if(!_currentModel.loadFromDatabase(_prevModelId))
+		if(_currentModel==null)
 		{
-			Log.w(TAG,"The previous model does not exist");
-			Log.w(TAG,"Try to get the first model");
-			if(!_currentModel.getFirstModel())
-			{
-				// no models exist, 
-				// Set defaults
-				_currentModel.saveToDatabase();
-				// and save it
-			}
+			Log.e(TAG,"No model exists, make a new one");
+			_currentModel = new Model(context,"Model 1");
+			//_currentModel.setId(0);
+			dbb.saveModel(_currentModel);
 		}
+		
+		
+		
+//		if(!_currentModel.loadFromDatabase(_prevModelId))
+//		{
+//			Log.w(TAG,"The previous model does not exist");
+//			Log.w(TAG,"Try to get the first model");
+//			if(!_currentModel.getFirstModel())
+//			{
+//				// no models exist, 
+//				// Set defaults
+//				_currentModel.saveToDatabase();
+//				// and save it
+//			}
+//		}
 		_prevModelId = _currentModel.getId();
-		_editor.putLong("prevModelId", _prevModelId);
+		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
 		
 		Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
@@ -1253,7 +1270,7 @@ private final Handler mHandlerBT = new Handler() {
 		logger.setModel(currentModel);
 		_currentModel = currentModel;
 		//_prevModelId = _currentModel.getId();
-		_editor.putLong("prevModelId", _currentModel.getId());
+		_editor.putInt("prevModelId", _currentModel.getId());
 		_editor.commit();
 		//logger.stop();		// SetModel will stop current Logger
 		

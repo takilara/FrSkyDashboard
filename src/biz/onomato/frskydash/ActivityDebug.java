@@ -104,52 +104,52 @@ public class ActivityDebug extends Activity implements OnClickListener {
 		switch(v.getId()){
 			case R.id.debug_btnSchema:
 				Log.i(TAG,"Display database schema");
-				DBAdapterModel db = new DBAdapterModel(getApplicationContext());
-				db.open();
-				Cursor c = db.schema();
-				c.moveToFirst();
-				while(!c.isAfterLast())
-				{
-					Log.d(TAG,c.getString(1)+"      "+c.getString(2));
-					c.moveToNext();
-				}
-				db.close();
+//				DBAdapterModel db = new DBAdapterModel(getApplicationContext());
+//				db.open();
+//				Cursor c = db.schema();
+//				c.moveToFirst();
+//				while(!c.isAfterLast())
+//				{
+//					Log.d(TAG,c.getString(1)+"      "+c.getString(2));
+//					c.moveToNext();
+//				}
+//				db.close();
 				break;
 			case R.id.debug_btnChannels:
-				Log.i(TAG,"SELECT * from channels");
-				DBAdapterChannel db2 = new DBAdapterChannel(getApplicationContext());
-				db2.open();
-				Cursor c2 = db2.getAllChannels();
-				c2.moveToFirst();
-				while(!c2.isAfterLast())
-				{
-					
-					for (String key: c2.getColumnNames())
-					{
-						Log.d(TAG,key+":"+c2.getString(c2.getColumnIndex(key)));
-					}
-					c2.moveToNext();
-					Log.d(TAG,"-------------------------------------------------");
-				}
-				db2.close();
+//				Log.i(TAG,"SELECT * from channels");
+//				DBAdapterChannel db2 = new DBAdapterChannel(getApplicationContext());
+//				db2.open();
+//				Cursor c2 = db2.getAllChannels();
+//				c2.moveToFirst();
+//				while(!c2.isAfterLast())
+//				{
+//					
+//					for (String key: c2.getColumnNames())
+//					{
+//						Log.d(TAG,key+":"+c2.getString(c2.getColumnIndex(key)));
+//					}
+//					c2.moveToNext();
+//					Log.d(TAG,"-------------------------------------------------");
+//				}
+//				db2.close();
 				break;
 			case R.id.debug_btnModels:
 				Log.i(TAG,"SELECT * from channels");
-				DBAdapterModel db3 = new DBAdapterModel(getApplicationContext());
-				db3.open();
-				Cursor c3 = db3.getAllModels();
-				c3.moveToFirst();
-				while(!c3.isAfterLast())
-				{
-				
-					for (String key: c3.getColumnNames())
-					{
-						Log.d(TAG,key+":"+c3.getString(c3.getColumnIndex(key)));
-					}
-					c3.moveToNext();
-					Log.d(TAG,"-------------------------------------------------");
-				}
-				db3.close();
+//				DBAdapterModel db3 = new DBAdapterModel(getApplicationContext());
+//				db3.open();
+//				Cursor c3 = db3.getAllModels();
+//				c3.moveToFirst();
+//				while(!c3.isAfterLast())
+//				{
+//				
+//					for (String key: c3.getColumnNames())
+//					{
+//						Log.d(TAG,key+":"+c3.getString(c3.getColumnIndex(key)));
+//					}
+//					c3.moveToNext();
+//					Log.d(TAG,"-------------------------------------------------");
+//				}
+//				db3.close();
 				break;
 			case R.id.debug_btnExportDb:
 				Log.i(TAG,"Exporting DB to sdcard");

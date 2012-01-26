@@ -136,7 +136,7 @@ public class Frame {
 				alarmThreshold=_threshold;
 				alarmGreaterThan = _greaterthan;
 				alarmGreaterThanString = _greaterthanhuman;
-				Log.i(TAG,alarmChannel+" alarm "+alarmNumber+": Fires if value is "+_greaterthanhuman+" than "+_threshold+", and is at level "+_level);
+				//Log.i(TAG,alarmChannel+" alarm "+alarmNumber+": Fires if value is "+_greaterthanhuman+" than "+_threshold+", and is at level "+_level);
 				
 				
 			}

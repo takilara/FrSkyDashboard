@@ -90,13 +90,13 @@
 	<!--  Channel configuration  -->   
     <string name="chConf_Description">Description</string>
     <string name="chConf_SourceChannel">Source Channel</string>
-    <string name="chConf_Unit">Unit</string>
+    <string name="chConf_Unit">Unit (used when spoken)</string>
     <string name="chConf_Offset">Offset</string>
     <string name="chConf_Factor">Factor</string>
     <string name="chConf_Precision">Precision - Number of Decimals shown</string>
     <string name="chConf_MovingAverage">Moving Average (samples, 0 for no average)</string>
     <string name="chConf_SpeechEnabled">Spoken Cyclic</string>
-    <string name="chConf_shortUnit">Short Unit</string>
+    <string name="chConf_shortUnit">Short Unit (used in the displays)</string>
 
     <!-- Model management  -->
     <string name="models">Models</string>

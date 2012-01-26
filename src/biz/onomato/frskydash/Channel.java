@@ -58,11 +58,11 @@ public class Channel implements Parcelable  {
 	
 //	public Alarm[] alarms;
 //	public int alarmCount = 0;
-	private long _modelId = -1;
+	private int _modelId = -1;
 	private int _channelId = -1;
 	private boolean _dirty = false;
 	
-	private static DBAdapterChannel db;
+//	private static DBAdapterChannel db;
 	
 	//private ArrayList <OnChannelListener> _listeners;
 
@@ -117,7 +117,7 @@ public class Channel implements Parcelable  {
 		// FRSKY channels only for now
 //		alarms = new Alarm[2];
 		
-		db = new DBAdapterChannel(context);
+		//db = new DBAdapterChannel(context);
 	}
 	
 	
@@ -161,13 +161,13 @@ public class Channel implements Parcelable  {
 		_modelId = model.getId();
 		setDirtyFlag(true);
 	}
-	public void setModelId(long modelId)
+	public void setModelId(int modelId)
 	{
 		_modelId = modelId;
 		setDirtyFlag(true);
 	}
 	
-	public long getModelId()
+	public int getModelId()
 	{
 		return _modelId;
 	}
@@ -612,7 +612,7 @@ public class Channel implements Parcelable  {
 		dest.writeInt(_precision);
 		dest.writeByte((byte) (_silent ? 1 : 0));
 		dest.writeLong(_sourceChannelId);
-		dest.writeLong(_modelId);
+		dest.writeInt(_modelId);
 
 	}
  
@@ -633,7 +633,7 @@ public class Channel implements Parcelable  {
 		setPrecision(in.readInt());
 		_silent = in.readByte()==1;
 		_sourceChannelId = in.readLong();
-		_modelId = in.readLong();
+		_modelId = in.readInt();
 	}
 	
 	public static final Parcelable.Creator CREATOR =

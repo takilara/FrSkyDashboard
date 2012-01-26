@@ -132,34 +132,34 @@ public abstract class AbstractDBAdapter {
     //---opens the database---
     public AbstractDBAdapter open() throws SQLException 
     {
-    	_prevOpen = _open;
-    	if(!_open)
-    	{
+//    	_prevOpen = _open;
+//    	if(!_open)
+//    	{
     		if(DEBUG)Log.d(TAG,"Open the database:"+this.getClass().getName());
         	db = DBHelper.getWritableDatabase();
         	_open = true;
-    	}
-    	else
-    	{
-    		if(DEBUG)Log.d(TAG,"Database was already open");
-    	}
+//    	}
+//    	else
+//    	{
+//    		if(DEBUG)Log.d(TAG,"Database was already open");
+//    	}
         return this;
     }
 
     //---closes the database---    
     public void close() 
     {
-    	if(_prevOpen)
-    	{
+//    	if(_prevOpen)
+//    	{
     		if(DEBUG)Log.d(TAG,"Close the database:"+this.getClass().getName());
     		db.close();
     		_open = false;
         	DBHelper.close();
-    	}
-    	else
-    	{
-    		if(DEBUG)Log.d(TAG,"Database was already open, leave it open");
-    	}
+//    	}
+//    	else
+//    	{
+//    		if(DEBUG)Log.d(TAG,"Database was already open, leave it open");
+//    	}
     }
     
     public boolean isOpen()

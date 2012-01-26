@@ -30,7 +30,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	private FrSkyServer server;
 	
 	private Model _model;
-	private long _modelId;
+	private int _modelId;
 	
 	private Button btnSave,btnAddChannel;
 	private LinearLayout llChannelsLayout;
@@ -47,27 +47,11 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		
 		///TODO: Use intent to get initial Model object?
 		Intent launcherIntent = getIntent();
-		_modelId = launcherIntent.getLongExtra("modelId", -1);
+		_modelId = launcherIntent.getIntExtra("modelId", -1);
 		if(DEBUG) Log.d(TAG,"Editing the model with id:"+_modelId);
 //		Log.d(TAG, "Channel Id is: "+_channelId);
 		
-		if(_modelId==-1)
-		{
-			if(DEBUG) Log.d(TAG,"Configure new Model object");
-			_model = new Model(getApplicationContext());
-		}
-		else
-		{
-			if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
-			_model = new Model(getApplicationContext());
-			_model.loadFromDatabase(_modelId);
-			
-			
-//			_model = new Model(getApplicationContext());
-//			_model.loadFromSettings(_modelId);
-			//_model = Model.createFromSettings(getApplicationContext(), _modelId);
-			
-		}
+		
 		
 		// Show the form
 		setContentView(R.layout.activity_modelconfig);
@@ -96,7 +80,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	
 		
 		
-		edName.setText(_model.getName());
+		
 	}
 	
 	
@@ -127,6 +111,28 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
+			
+			
+			if(_modelId==-1)
+			{
+				if(DEBUG) Log.d(TAG,"Configure new Model object");
+				_model = new Model(getApplicationContext());
+			}
+			else
+			{
+				if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+				//_model = new Model(getApplicationContext());
+				//_model.loadFromDatabase(_modelId);
+				_model = server.dbb.getModel(_modelId);
+				
+				
+//				_model = new Model(getApplicationContext());
+//				_model.loadFromSettings(_modelId);
+				//_model = Model.createFromSettings(getApplicationContext(), _modelId);
+				
+			}
+			
+			edName.setText(_model.getName());
 			
 			//ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
 			
@@ -173,7 +179,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				// Save the model
 				_model.setName(edName.getText().toString());
 				_model.setType((String) spType.getSelectedItem());
-				_model.saveToDatabase();
+				//_model.saveToDatabase();
+				server.dbb.saveModel(_model);
 				if(_model.getId()==server.getCurrentModel().getId())
 				{
 					if(DEBUG)Log.d(TAG,"Should update the servers.currentmodel");

@@ -56,12 +56,12 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			public void onClick(View v){
 				if(DEBUG) Log.d(TAG,"User Clicked Add Model");
 				Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
-	    		i.putExtra("modelId", (long) -1);	// Should create new model
+	    		i.putExtra("modelId", (int) -1);	// Should create new model
 	    		startActivityForResult(i,MODEL_CONFIG_RETURN);
 			}
 		});
 		
-		populateModelList();
+		
         doBindService();
 	}
 	
@@ -82,8 +82,10 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			rbCurrentModel.setChecked(false);
 			rbCurrentModel = (RadioButton) findViewById(id);
 			rbCurrentModel.setChecked(true);
-			Model m = new Model(getApplicationContext());
-			m.loadFromDatabase(ii);
+			//Model m = new Model(getApplicationContext());
+			//m.loadFromDatabase(ii);
+			Model m = server.dbb.getModel(ii);
+			
 			if(server!=null)
 			{
 				server.setCurrentModel(m);
@@ -94,7 +96,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		{
 			int ii=id-1000;
 			Intent i = new Intent(this, ActivityModelConfig.class);
-    		i.putExtra("modelId", (long) ii);	// Should edit existing model
+    		i.putExtra("modelId", (int) ii);	// Should edit existing model
     		
     		startActivityForResult(i,MODEL_CONFIG_RETURN);
 		}
@@ -139,31 +141,23 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			currentModelId=server.getCurrentModel().getId();
 		}
 		
-		//TODO: Why do i do this from the database instead of from a static in Model?
-		DBAdapterModel db = new DBAdapterModel(getApplicationContext());
-		db.open();
-		Cursor c = db.getAllModels();
+		//
+		//DBAdapterModel db = new DBAdapterModel(getApplicationContext());
+		//db.open();
+		//Cursor c = db.getAllModels();
+		
 		int n = 0;
-		while(n < c.getCount())
+		//while(n < c.getCount())
+		for(Model m : server.dbb.getModels())
 		{
-			if(n==0)
-			{
-				c.moveToFirst();
-			}
-			else
-			{
-				c.moveToNext();
-				
-			}
-			
-			if(DEBUG)Log.d(TAG,"Add Model (id,name): "+c.getLong(0)+", "+c.getString(1));
+			if(DEBUG)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
 			LinearLayout ll = new LinearLayout(getApplicationContext());
 			
 			
-			int id = (int) c.getLong(0);
+			int id = m.getId();
 			
 			TextView tvName = new TextView(getApplicationContext());
-			tvName.setText(c.getString(1));
+			tvName.setText(m.getName());
 			tvName.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
 			
 			RadioButton rdThisModel = new RadioButton(getApplicationContext());
@@ -215,16 +209,17 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 //			//params.height = LayoutParams.WRAP_CONTENT;
 			n++;
 		}
-		c.deactivate();
-		db.close();
+//		c.deactivate();
+//		db.close();
 	}
 	
 	
 	private void showDeleteDialog(int id)
 	{
 		///TODO: Modify for deletion of models
-		final Model m = new Model(getApplicationContext());
-		m.loadFromDatabase(id);
+		//final Model m = new Model(getApplicationContext());
+		//m.loadFromDatabase(id);
+		final Model m = server.dbb.getModel(id); 
 		Log.i(TAG,"Delete model with id:"+id);
 		_deleteId = id;
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
@@ -238,13 +233,14 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             public void onClick(DialogInterface dialog, int which) {
             	//TODO: Remove, make global to class?
             	
-            	Channel.deleteChannelsForModel(getApplicationContext(),m);
-            	
-            	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
-            	db.open();
-            	db.deleteModel(_deleteId);
-            	db.close();
-            	
+            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
+            	server.dbb.deleteAllChannelsForModel(m);
+            	server.dbb.deleteModel(_deleteId);
+//            	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
+//            	db.open();
+//            	db.deleteModel(_deleteId);
+//            	db.close();
+//            	
             	populateModelList();
                 //Stop the activity
                 //server.deleteAllLogFiles();
@@ -292,6 +288,8 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
+			
+			populateModelList();
 			
 			rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
 			rbCurrentModel.setChecked(true);

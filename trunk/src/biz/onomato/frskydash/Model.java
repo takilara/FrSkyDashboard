@@ -182,27 +182,31 @@ public class Model {
 	public void setChannel(int id, Channel channel)
 	{
 		
-		if(DEBUG) Log.d(TAG,"Replacing channel at id "+id);
-		
-		if(_channels.get(id)!=null)
+		if(id<_channels.size())
 		{
-			if(DEBUG) Log.d(TAG,"Old channel existed");
+			if(DEBUG) Log.d(TAG,"Old channel existed, replacing");
 			_channels.set(id, channel);
 		}
+		else
+		{
+			if(DEBUG) Log.d(TAG,"Old did not exist, adding");
+			_channels.add(channel);
+		}
+		
 	}
 	
 	public void setChannels(ArrayList<Channel> channels)
 	{
 		for(Channel ch : channels)
 		{
-			if(_channels.get(ch.getId())!=null)	// channel exists, update it
-			{
-				_channels.set((int)ch.getId(), ch);
-			}
-			else
-			{
+//			if(_channels.get(ch.getId())!=null)	// channel exists, update it
+//			{
+//				_channels.set((int)ch.getId(), ch);
+//			}
+//			else
+//			{
 				_channels.add(ch);
-			}
+//			}
 		}
 	}
 	
@@ -228,11 +232,11 @@ public class Model {
 	// I need to be able to add alarms to this model
 	public void addAlarm(Alarm alarm)
 	{
-		if(DEBUG)Log.i(TAG,"Adding alarm: "+alarm);
+		//if(DEBUG)Log.i(TAG,"Adding alarm: "+alarm);
 		if(alarm.getAlarmType()==Alarm.ALARMTYPE_FRSKY)
 		{
 			//--> add to frSkyAlarms
-			if(DEBUG)Log.i(TAG,"FrSky alarm of type: "+alarm.getFrSkyFrameType());
+			//if(DEBUG)Log.i(TAG,"FrSky alarm of type: "+alarm.getFrSkyFrameType());
 			frSkyAlarms.put(alarm.getFrSkyFrameType(), alarm);
 		}
 		else

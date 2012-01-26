@@ -39,6 +39,9 @@ public abstract class AbstractDBAdapter {
     protected static final String KEY_SILENT = "silent";
     protected static final String KEY_MODELID = "modelid";
     
+    protected boolean _open=false;
+    protected boolean _prevOpen=false;  
+    
     private static final String DATABASE_CREATE_MODELS =
             "create table "
     		+ DATABASE_TABLE_MODELS+ "("
@@ -46,6 +49,11 @@ public abstract class AbstractDBAdapter {
             + KEY_NAME+ 			" text not null, "
             + KEY_MODELTYPE+		" text" 
             + ");";
+    
+	protected String[] MODEL_COLUMNS = {
+			KEY_ROWID,
+    		KEY_NAME,
+    		KEY_MODELTYPE};
     
     private static final String DATABASE_CREATE_CHANNELS =
             "create table "
@@ -63,6 +71,19 @@ public abstract class AbstractDBAdapter {
             + KEY_MODELID+ 			" integer DEFAULT -1"
             + ");";
     
+	protected String[] CHANNEL_COLUMNS = new String[] {
+			KEY_ROWID,
+			KEY_DESCRIPTION,
+			KEY_LONGUNIT,
+			KEY_SHORTUNIT,
+			KEY_OFFSET,
+			KEY_FACTOR,
+			KEY_PRECISION,
+			KEY_MOVINGAVERAGE,
+    		KEY_SOURCECHANNELID,
+    		KEY_SILENT,
+    		KEY_MODELID};
+
         
     protected final Context context; 
     
@@ -111,19 +132,40 @@ public abstract class AbstractDBAdapter {
     //---opens the database---
     public AbstractDBAdapter open() throws SQLException 
     {
-    	if(DEBUG)Log.d(TAG,"Open the database:"+this.getClass().getName());
-        db = DBHelper.getWritableDatabase();
+    	_prevOpen = _open;
+    	if(!_open)
+    	{
+    		if(DEBUG)Log.d(TAG,"Open the database:"+this.getClass().getName());
+        	db = DBHelper.getWritableDatabase();
+        	_open = true;
+    	}
+    	else
+    	{
+    		if(DEBUG)Log.d(TAG,"Database was already open");
+    	}
         return this;
     }
 
     //---closes the database---    
     public void close() 
     {
-    	if(DEBUG)Log.d(TAG,"Close the database:"+this.getClass().getName());
-    	db.close();
-        DBHelper.close();
+    	if(_prevOpen)
+    	{
+    		if(DEBUG)Log.d(TAG,"Close the database:"+this.getClass().getName());
+    		db.close();
+    		_open = false;
+        	DBHelper.close();
+    	}
+    	else
+    	{
+    		if(DEBUG)Log.d(TAG,"Database was already open, leave it open");
+    	}
     }
     
+    public boolean isOpen()
+    {
+    	return _open;
+    }
 
     public Cursor schema()
     {

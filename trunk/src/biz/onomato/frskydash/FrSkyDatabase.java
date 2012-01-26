@@ -7,10 +7,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
-public class DB extends AbstractDBAdapter {
+public class FrSkyDatabase extends AbstractDBAdapter {
     private static final String TAG = "Database";
     
-    public DB(Context context) 
+    public FrSkyDatabase(Context context) 
     {
         super(context);
     }

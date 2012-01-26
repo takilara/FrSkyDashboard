@@ -123,7 +123,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
-				_model = server.dbb.getModel(_modelId);
+				_model = server.database.getModel(_modelId);
 				
 				
 //				_model = new Model(getApplicationContext());
@@ -180,7 +180,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				_model.setName(edName.getText().toString());
 				_model.setType((String) spType.getSelectedItem());
 				//_model.saveToDatabase();
-				server.dbb.saveModel(_model);
+				server.database.saveModel(_model);
 				if(_model.getId()==server.getCurrentModel().getId())
 				{
 					if(DEBUG)Log.d(TAG,"Should update the servers.currentmodel");

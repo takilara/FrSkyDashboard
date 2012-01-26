@@ -112,7 +112,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     private Channel[] _sourceChannels = new Channel[4];
     
-    public DB dbb;
+    public FrSkyDatabase database;
     
     private boolean _dying=false;
 	
@@ -228,14 +228,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	//	_currentModel = new Model(context);
 		
 		// DEBUG, List all channels for the model using new databaseadapter
-		dbb = new DB(getApplicationContext());
-		_currentModel = dbb.getModel(_prevModelId);
+		database = new FrSkyDatabase(getApplicationContext());
+		_currentModel = database.getModel(_prevModelId);
 		if(_currentModel==null)
 		{
 			Log.e(TAG,"No model exists, make a new one");
 			_currentModel = new Model(context,"Model 1");
 			//_currentModel.setId(0);
-			dbb.saveModel(_currentModel);
+			database.saveModel(_currentModel);
 		}
 		
 		
@@ -259,7 +259,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
-		ArrayList<Channel> tChannels = dbb.getChannelsForModel(_currentModel);
+		ArrayList<Channel> tChannels = database.getChannelsForModel(_currentModel);
 		for(Channel c : tChannels)
 		{
 			Log.e(TAG,"\t"+c.getDescription());

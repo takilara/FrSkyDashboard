@@ -656,7 +656,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					boolean s = !c.getSilent();
 					c.setSilent(s);
 					//c.saveToDatabase();
-					server.dbb.saveChannel(c);
+					server.database.saveChannel(c);
 					if(s)
 					{
 						iv.setImageResource(android.R.drawable.ic_lock_silent_mode);

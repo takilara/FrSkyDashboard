@@ -23,7 +23,7 @@ public class DBAdapterChannel extends AbstractDBAdapter {
     
     //---insert a title into the database---
     //public long insertChannel(String description) 
-    public long insertChannel(Channel channel)
+    public int insertChannel(Channel channel)
     {
     	if(DEBUG)Log.d(TAG,"Insert into the database");
         ContentValues initialValues = new ContentValues();
@@ -40,7 +40,7 @@ public class DBAdapterChannel extends AbstractDBAdapter {
         
         
         
-        return db.insert(DATABASE_TABLE_CHANNELS, null, initialValues);
+        return (int) db.insert(DATABASE_TABLE_CHANNELS, null, initialValues);
     }
 
     //---deletes a particular title---

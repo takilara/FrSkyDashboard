@@ -213,9 +213,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		
 		//String _prevModel = "FunCub 1";
-		long _prevModelId = _settings.getLong("prevModelId", -1);
+		int _prevModelId = _settings.getInt("prevModelId", -1);
 		
-		_currentModel = new Model(context);
+	//	_currentModel = new Model(context);
+		
+		// DEBUG, List all channels for the model using new databaseadapter
+		DB dbb = new DB(getApplicationContext());
+		_currentModel = dbb.getModel(_prevModelId);
+		
+		
+		
 		if(!_currentModel.loadFromDatabase(_prevModelId))
 		{
 			Log.w(TAG,"The previous model does not exist");
@@ -231,12 +238,23 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_prevModelId = _currentModel.getId();
 		_editor.putLong("prevModelId", _prevModelId);
 		_editor.commit();
-			
+		
+		Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
+
+		
+		ArrayList<Channel> tChannels = dbb.getChannelsForModel(_currentModel);
+		for(Channel c : tChannels)
+		{
+			Log.e(TAG,"\t"+c.getDescription());
+		}
+		
+		
+		
 		initializeAlarms();
 		
 		// Save this model incase it was new...
 		
-		Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
+		
 
 		logger = new Logger(getApplicationContext(),_currentModel,true,true,true);
 		//logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);

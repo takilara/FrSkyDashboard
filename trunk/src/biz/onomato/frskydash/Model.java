@@ -26,7 +26,7 @@ public class Model {
 	
 	private String _type;
 	private String _name;
-	private long _id;
+	private int _id;
 	private Context _context;
 	public Alarm[] alarms;
 	HashMap<Integer,Alarm> frSkyAlarms;
@@ -34,7 +34,7 @@ public class Model {
 
 	
 	
-	private static DBAdapterModel db;
+	//private static DBAdapterModel db;
 	
 
 	// Constructor
@@ -43,11 +43,16 @@ public class Model {
 		_context = context;
 		_modelTypes = _context.getResources().getStringArray(R.array.model_types);
 		// create if neccessary
-		db = new DBAdapterModel(context);
+		//db = new DBAdapterModel(context);
 		
 		// FRSKY channels only for now
 		alarms = new Alarm[6];
 		frSkyAlarms = new HashMap<Integer, Alarm>();
+		
+		
+		// populate FrSky Alarms with defaults
+		initiateFrSkyAlarms();
+		
 		
 		_id = -1; 
 		setName(modelName);
@@ -63,6 +68,8 @@ public class Model {
 		//setId(-1);
 	}
 	
+
+	
 	public Model(Context context,String modelName)
 	{
 		
@@ -74,7 +81,52 @@ public class Model {
 	}
 	
 
-
+	public void initiateFrSkyAlarms()
+	{
+		//TODO: Need defaults
+		Frame alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_RSSI, 
+				Alarm.ALARMLEVEL_LOW, 
+				45, 
+				Alarm.LESSERTHAN);
+		addAlarm(new Alarm(alarmFrame));
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_RSSI, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		addAlarm(new Alarm(alarmFrame));
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD1, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		addAlarm(new Alarm(alarmFrame));
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD1, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		addAlarm(new Alarm(alarmFrame));
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD2, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		addAlarm(new Alarm(alarmFrame));
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD2, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		addAlarm(new Alarm(alarmFrame));
+		
+	}
 	
 	
 	public String getType() {
@@ -87,13 +139,13 @@ public class Model {
 		this._type = modelType;
 	}
 
-	// Should never set it, should get it from database
-//	public void setId(int id)
-//	{
-//		_id = id;
-//	}
+
+	public void setId(int id)
+	{
+		_id = id;
+	}
 	
-	public long getId()
+	public int getId()
 	{
 		return _id;
 	}
@@ -121,7 +173,8 @@ public class Model {
 	// I need to be able to delete channels from this model
 	public boolean removeChannel(Channel channel)
 	{
-		channel.deleteFromDatabase();
+		//channel.deleteFromDatabase();
+		//setDirtyFlag(true);
 		return _channels.remove(channel);
 	}
 	
@@ -135,6 +188,21 @@ public class Model {
 		{
 			if(DEBUG) Log.d(TAG,"Old channel existed");
 			_channels.set(id, channel);
+		}
+	}
+	
+	public void setChannels(ArrayList<Channel> channels)
+	{
+		for(Channel ch : channels)
+		{
+			if(_channels.get(ch.getId())!=null)	// channel exists, update it
+			{
+				_channels.set((int)ch.getId(), ch);
+			}
+			else
+			{
+				_channels.add(ch);
+			}
 		}
 	}
 	
@@ -195,51 +263,51 @@ public class Model {
 	}
 	
 	// I need to be able to save settings to file or config storage
-	public void saveToDatabase()
-	{
-		if(_id==-1)
-		{
-			if(DEBUG) Log.d(TAG,"Saving, using insert");
-			db.open();
-			long id = db.insertModel(_name,_type);
-			if(id==-1)
-			{
-				Log.e(TAG,"Insert Failed");
-			}
-			else
-			{
-				if(DEBUG) Log.d(TAG,"Insert ok, id:"+id);
-				_id = id;
-			}
-			db.close();
-			// Run insert
-		}
-		else
-		{
-			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_id+",name:"+_name+")");
-			db.open();
-			if(db.updateModel(_id, _name,_type))
-			{
-				if(DEBUG)Log.d(TAG,"Update successful");
-			}
-			else
-			{
-				if(DEBUG)Log.e(TAG,"Update failed");
-			}
-			db.close();
-			// run update
-		}
-		
-		
-		// Save the channels (using this models id)
-		for(Channel ch :getChannels())
-		{
-			if(DEBUG) Log.i(TAG,"Save channel "+ch.getDescription()+" (Dirty: "+ch.getDirtyFlag()+")");
-			ch.setModelId(_id);
-			ch.saveToDatabase();
-			
-		}
-	}
+//	public void saveToDatabase()
+//	{
+//		if(_id==-1)
+//		{
+//			if(DEBUG) Log.d(TAG,"Saving, using insert");
+//			db.open();
+//			long id = db.insertModel(_name,_type);
+//			if(id==-1)
+//			{
+//				Log.e(TAG,"Insert Failed");
+//			}
+//			else
+//			{
+//				if(DEBUG) Log.d(TAG,"Insert ok, id:"+id);
+//				_id = id;
+//			}
+//			db.close();
+//			// Run insert
+//		}
+//		else
+//		{
+//			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_id+",name:"+_name+")");
+//			db.open();
+//			if(db.updateModel(_id, _name,_type))
+//			{
+//				if(DEBUG)Log.d(TAG,"Update successful");
+//			}
+//			else
+//			{
+//				if(DEBUG)Log.e(TAG,"Update failed");
+//			}
+//			db.close();
+//			// run update
+//		}
+//		
+//		
+//		// Save the channels (using this models id)
+//		for(Channel ch :getChannels())
+//		{
+//			if(DEBUG) Log.i(TAG,"Save channel "+ch.getDescription()+" (Dirty: "+ch.getDirtyFlag()+")");
+//			ch.setModelId(_id);
+//			ch.saveToDatabase();
+//			
+//		}
+//	}
 	
 	// I need to be able to load settings from file or config storage
 	public void loadSettings()
@@ -247,95 +315,100 @@ public class Model {
 		
 	}
 	
-	public boolean loadFromDatabase(long id)
-	{
-		// False if not found
-		db.open();
-		Cursor c = db.getModel(id);
-		//startManagingCursor(c);
-		
-		if(c.getCount()==0)
-		{
-			if(DEBUG) Log.w(TAG,"Model id "+id+" does not exist.");	
-			_id= -1;
-			c.deactivate();
-			db.close();
-			
-			// no channels
-			return false;
-		}
-		else
-		{
-			if(DEBUG) Log.d(TAG,"Found the model");
-			if(DEBUG) Log.d(TAG,c.getString(1));
-			_id = c.getLong(0);
-			_name = c.getString(1);
-			_type = c.getString(2);
-			c.deactivate();
-			db.close();
-			
-			// load channels
-			
-			for(Channel ch : Channel.getChannelsForModel(_context,this))
-			{
-				if(DEBUG)Log.d(TAG,"Found and adding channel "+ch.getDescription()+" to "+_name);
-				addChannel(ch);
-			}
-			return true;
-		}
-		
-		
-	}
+//	public boolean loadFromDatabase(long id)
+//	{
+//		// False if not found
+//		db.open();
+//		Cursor c = db.getModel(id);
+//		//startManagingCursor(c);
+//		
+//		if(c.getCount()==0)
+//		{
+//			if(DEBUG) Log.w(TAG,"Model id "+id+" does not exist.");	
+//			_id= -1;
+//			c.deactivate();
+//			db.close();
+//			
+//			// no channels
+//			return false;
+//		}
+//		else
+//		{
+//			if(DEBUG) Log.d(TAG,"Found the model");
+//			if(DEBUG) Log.d(TAG,c.getString(1));
+//			_id = c.getLong(0);
+//			_name = c.getString(1);
+//			_type = c.getString(2);
+//			
+//			// update alarms with the proper ones
+//			// TODO: change this from adding defaults to add something from database
+//			initiateFrSkyAlarms();
+//			
+//			c.deactivate();
+//			db.close();
+//			
+//			// load channels
+//			
+//			for(Channel ch : Channel.getChannelsForModel(_context,this))
+//			{
+//				if(DEBUG)Log.d(TAG,"Found and adding channel "+ch.getDescription()+" to "+_name);
+//				addChannel(ch);
+//			}
+//			return true;
+//		}
+//		
+//		
+//	}
 	
-	public boolean getFirstModel()
-	{
-		db.open();
-		Cursor c = db.getAllModels();
-		if(c.getCount()>0)
-		{
-			c.moveToFirst();
-			loadFromDatabase(c.getInt(0));
-			c.deactivate();
-			db.close();
-			return true;
-		}
-		else
-		{
-			c.deactivate();
-			db.close();
-			return false;
-		}
-	}
+//	public boolean getFirstModel()
+//	{
+//		db.open();
+//		Cursor c = db.getAllModels();
+//		if(c.getCount()>0)
+//		{
+//			c.moveToFirst();
+//			loadFromDatabase(c.getInt(0));
+//			c.deactivate();
+//			db.close();
+//			return true;
+//		}
+//		else
+//		{
+//			c.deactivate();
+//			db.close();
+//			return false;
+//		}
+//	}
 	
 	
 	
 	
-	public static Model[] getAllModels(Context context)
-	{
-		if(DEBUG) Log.d(TAG,"Get all models");
-		// Needs to create the model if it does not exists
-	//	AbstractDBAdapter db = new AbstractDBAdapter(context);
-		db.open();
-		
-		Cursor c = db.getAllModels();
-		Model[] modelA = new Model[c.getCount()];
-		if(c.getCount()>0)
-		{
-			
-			
-			for(int i=0;i<c.getCount();i++)
-			{
-				modelA[i] = new Model(context);
-				long id = c.getLong(0);
-				modelA[i].loadFromDatabase(id);
-			}
-		}
-		c.deactivate();
-		db.close();
-		//m.loadFromSettings(id);
-		
-		// if not found, create it before returning it
-		return modelA;
-	}
+//	public static Model[] getAllModels(Context context)
+//	{
+//		if(DEBUG) Log.d(TAG,"Get all models");
+//		// Needs to create the model if it does not exists
+//	//	AbstractDBAdapter db = new AbstractDBAdapter(context);
+//		db.open();
+//		
+//		Cursor c = db.getAllModels();
+//		Model[] modelA = new Model[c.getCount()];
+//		if(c.getCount()>0)
+//		{
+//			
+//			
+//			for(int i=0;i<c.getCount();i++)
+//			{
+//				modelA[i] = new Model(context);
+//				long id = c.getLong(0);
+//				modelA[i].loadFromDatabase(id);
+//			}
+//		}
+//		c.deactivate();
+//		db.close();
+//		//m.loadFromSettings(id);
+//		
+//		// if not found, create it before returning it
+//		return modelA;
+//	}
 
 }

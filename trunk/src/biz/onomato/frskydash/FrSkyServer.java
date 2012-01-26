@@ -93,7 +93,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private MyStack fpsTxStack;
 	private static final int FRAMES_FOR_FPS_CALC=2;
     
-    private FrskyDatabase channelDb;
+    
     
     private Logger logger;
     private Model _currentModel;

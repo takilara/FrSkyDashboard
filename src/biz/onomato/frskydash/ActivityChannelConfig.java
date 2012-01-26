@@ -156,7 +156,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	int separatorPos = n;
 	        	
 	        	//for(Channel c : Channel.getChannelsForModel(getApplicationContext(),channel.getModelId()))
-	        	for(Channel c : server.dbb.getChannelsForModel(channel.getModelId()))
+	        	for(Channel c : server.database.getChannelsForModel(channel.getModelId()))
 	        	{
 	        		if(DEBUG)Log.i(TAG,String.format("Comparing '%s' to '%s'",channel.getDescription(),c.getDescription()));
 	        		if(c.getId()!=channel.getId())
@@ -317,7 +317,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		{
 			if(DEBUG) Log.d(TAG,"This is an existing model, feel free to save");
 			//channel.saveToDatabase();
-			server.dbb.saveChannel(channel);
+			server.database.saveChannel(channel);
 		}
 		else
 		{

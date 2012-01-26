@@ -84,7 +84,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			rbCurrentModel.setChecked(true);
 			//Model m = new Model(getApplicationContext());
 			//m.loadFromDatabase(ii);
-			Model m = server.dbb.getModel(ii);
+			Model m = server.database.getModel(ii);
 			
 			if(server!=null)
 			{
@@ -148,7 +148,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		
 		int n = 0;
 		//while(n < c.getCount())
-		for(Model m : server.dbb.getModels())
+		for(Model m : server.database.getModels())
 		{
 			if(DEBUG)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
 			LinearLayout ll = new LinearLayout(getApplicationContext());
@@ -219,7 +219,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		///TODO: Modify for deletion of models
 		//final Model m = new Model(getApplicationContext());
 		//m.loadFromDatabase(id);
-		final Model m = server.dbb.getModel(id); 
+		final Model m = server.database.getModel(id); 
 		Log.i(TAG,"Delete model with id:"+id);
 		_deleteId = id;
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
@@ -234,8 +234,8 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             	//TODO: Remove, make global to class?
             	
             	//Channel.deleteChannelsForModel(getApplicationContext(),m);
-            	server.dbb.deleteAllChannelsForModel(m);
-            	server.dbb.deleteModel(_deleteId);
+            	server.database.deleteAllChannelsForModel(m);
+            	server.database.deleteModel(_deleteId);
 //            	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
 //            	db.open();
 //            	db.deleteModel(_deleteId);

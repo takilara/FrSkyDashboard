@@ -112,7 +112,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     private Channel[] _sourceChannels = new Channel[4];
     
-    public FrSkyDatabase database;
+    public static FrSkyDatabase database;
     
     private boolean _dying=false;
 	

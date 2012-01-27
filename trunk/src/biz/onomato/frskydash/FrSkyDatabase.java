@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -110,7 +111,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	if(DEBUG)Log.i(TAG,"Pickup the model info from the cursor: "+cu.getColumnNames());
     	Model m = new Model(context);
     	//cu.moveToFirst();
-    	Log.i(TAG,"cursor id: "+cu.getLong(0));
+    	Log.i(TAG,"cursor id: "+cu.getInt(0));
     	
 		m.setId(cu.getInt(cu.getColumnIndexOrThrow(KEY_ROWID)));
 		m.setName(cu.getString(cu.getColumnIndexOrThrow(KEY_NAME)));
@@ -184,7 +185,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         return newId;
     }
     
-    public boolean deleteModel(long modelId) 
+    public boolean deleteModel(int modelId) 
     {
     	if(DEBUG)Log.d(TAG,"Deleting from the database");
     	
@@ -274,7 +275,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		return ch;
     }
     
-    public Channel getChannel(Long channelId)
+    public Channel getChannel(int channelId)
     {
     	if(DEBUG)Log.d(TAG,"Get one channel from the database");
     	open();
@@ -321,7 +322,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     private int insertChannel(Channel channel)
     {
-    	if(DEBUG)Log.d(TAG,"Insert into the database");
+    	if(DEBUG)Log.d(TAG,"Insert Channel into the database");
     	open();
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_DESCRIPTION, channel.getDescription());
@@ -363,7 +364,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         return result;
     }
     
-    public boolean deleteChannel(long rowId) 
+    public boolean deleteChannel(int rowId) 
     {
     	if(DEBUG)Log.d(TAG,"Deleting from the database");
     	open();
@@ -379,7 +380,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         return deleteChannel(channel.getId());
     }
     
-    public void deleteAllChannelsForModel(long modelId)
+    public void deleteAllChannelsForModel(int modelId)
     {
     	if(DEBUG)Log.d(TAG,"Deleting from the database where modelId="+modelId);
     	open();
@@ -392,6 +393,108 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	if(DEBUG)Log.d(TAG,"Deleting from the database where modelId="+model.getId());
     	open();
     	db.delete(DATABASE_TABLE_CHANNELS,KEY_MODELID+"="+model.getId(),null);
+    	close();
+    }
+    
+    
+    // ***********************************************************
+    // ********************  ALARMS  *****************************
+    // ***********************************************************
+    
+    // Strategy:
+    // Always get and change all alarms for a model at the same time
+    // UNIQUE(modelId,FrSkyFrametype), so no real need for ~id
+    
+    public HashMap<Integer,Alarm> getAlarmsForModel(Model model)
+    {
+    	return getAlarmsForModel(model.getId());
+    }
+    
+    public HashMap<Integer,Alarm> getAlarmsForModel(int modelId)
+    {
+    	// Query for this modelid
+    	open();
+		Cursor cu = db.query(DATABASE_TABLE_FRSKYALARMS, FRSKYALARM_COLUMNS, 
+				KEY_MODELID + "=" + modelId,
+	            null, null, null, null, null);
+
+		
+    	// loop getChannel(Cursor)
+		
+		HashMap<Integer,Alarm> mAlarms = new HashMap<Integer,Alarm>();
+		
+		cu.moveToFirst();
+        while(!cu.isAfterLast())
+		{
+        	Alarm a = getAlarm(cu);
+			mAlarms.put(a.getFrSkyFrameType(), a);
+			cu.moveToNext();
+		}
+		cu.deactivate();
+		close();
+		return mAlarms;
+    }
+    
+    public Alarm getAlarm(Cursor cursor)
+    {
+    	Alarm a = new Alarm(Alarm.ALARMTYPE_FRSKY);
+    	a.setModelId(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_MODELID)));
+    	a.setFrSkyFrameType(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_FRAMETYPE)));
+    	a.setThreshold(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_THRESHOLD)));
+    	a.setGreaterThan(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_GREATERTHAN)));
+    	a.setAlarmLevel(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ALARMLEVEL)));
+    	a.setSourceChannel(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_UNITSOURCECHANNEL)));
+		
+		if(DEBUG) Log.d(TAG,"Loaded alarm '"+a+"' from database");
+		return a;
+    }
+    
+    public boolean setAlarmsForModel(Model model)
+    {
+    	return setAlarmsForModel(model.getId(),model.getFrSkyAlarms());
+    }
+    
+    public boolean setAlarmsForModel(int modelId,HashMap<Integer,Alarm> alarmMap)
+    {
+    	// delete all the existing alarms
+    	deleteAlarmsForModel(modelId);
+ 	
+    	for(Alarm a : alarmMap.values())
+    	{
+    		insertAlarm(a);
+    	}
+    	// insert the new alarms
+    	
+    	return false;
+    }
+    
+    public int insertAlarm(Alarm alarm)
+    {
+    	if(DEBUG)Log.d(TAG,"Insert Alarm into the database: ");
+    	open();
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_MODELID, alarm.getModelId());
+        initialValues.put(KEY_FRAMETYPE, alarm.getFrSkyFrameType());
+        initialValues.put(KEY_THRESHOLD, alarm.getThreshold());
+        initialValues.put(KEY_GREATERTHAN, alarm.getGreaterThan());
+        initialValues.put(KEY_ALARMLEVEL, alarm.getAlarmLevel());
+        initialValues.put(KEY_UNITSOURCECHANNEL, alarm.getSourceChannel());
+        
+        int id = (int) db.insert(DATABASE_TABLE_FRSKYALARMS, null, initialValues);
+        close();
+        return id;
+    }
+    
+    public void deleteAlarmsForModel(Model model)
+    {
+    	deleteAlarmsForModel(model.getId());
+    }
+    
+    public void deleteAlarmsForModel(int modelId)
+    {
+
+    	open();
+    	db.delete(DATABASE_TABLE_FRSKYALARMS,KEY_MODELID+"="+modelId,null);
     	close();
     }
     

@@ -20,16 +20,28 @@ public class Alarm {
 	private int _type;
 	private int _frSkyFrameType;
 	private int _level;
+	private int _modelId=-1;
 	private int _greaterthan;
-	private Channel _sourceChannel;
+	//private Channel _sourceChannel;
+
+	
 	private int _minThreshold=-1;
 	private int _maxThreshold=-1;
+	
+	private int _sourceChannelId=-1;
+	private String _sourceChannelUnit="";
+	private float _sourceChannelOffset=0;
+	private float _sourceChannelFactor=1;
 	
 	private static final int MINIMUM_THRESHOLD_RSSI=20;
 	private static final int MAXIMUM_THRESHOLD_RSSI=110;
 	private static final int MINIMUM_THRESHOLD_AD=1;
 	private static final int MAXIMUM_THRESHOLD_AD=255;
 	
+	public Alarm(int alarmtype)
+	{
+		_type = alarmtype;
+	}
 	
 	public Alarm(int alarmtype,int alarmlevel,int alarmgreaterthan,int alarmthreshold)
 	{
@@ -49,7 +61,7 @@ public class Alarm {
 		_greaterthan = frame.alarmGreaterThan;
 		_threshold = frame.alarmThreshold;
 		_frSkyFrameType = frame.frameHeaderByte;
-		_sourceChannel = null;
+		
 		if((_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD1) || 
 				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_AD1) || 
 				(_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD2) ||
@@ -66,12 +78,56 @@ public class Alarm {
 		}
 	}
 	
+	public Frame toFrame()
+	{
+		Frame frame = Frame.AlarmFrame(
+				_frSkyFrameType, 
+				_level, 
+				_threshold, 
+				_greaterthan);
+		return frame;
+	}
+	
 	public String toString()
 	{
 		return String.format("Type: %s, Level: %s, Threshold: %s, Greaterthan: %s",_type,_level,_threshold,_greaterthan);
 		
 		
 	}
+	
+	public void setGreaterThan(int greaterThan)
+	{
+		_greaterthan = greaterThan;
+	}
+	public int getGreaterThan()
+	{
+		return _greaterthan;
+	}
+	
+	public void setAlarmLevel(int alarmLevel)
+	{
+		_level = alarmLevel;
+	}
+	public int getAlarmLevel()
+	{
+		return _level;
+	}
+	
+	public void setModelId(Model model)
+	{
+		setModelId(model.getId());
+	}
+	
+	public void setModelId(int modelId)
+	{
+		_modelId = modelId;
+	}
+	
+	public int getModelId()
+	{
+		return _modelId;
+	}
+	
 	
 	public int getAlarmType()
 	{
@@ -87,34 +143,62 @@ public class Alarm {
 		return _frSkyFrameType;
 	}
 	
-	public void setSourceChannel(Channel channel)
+	public int getSourceChannel()
 	{
-		_sourceChannel = channel;
+		return _sourceChannelId;
 	}
 	
-	public Channel getSourceChannel()
+	public void setSourceChannel(int channelId)
 	{
-		return _sourceChannel;
+		Channel ch = FrSkyServer.database.getChannel(channelId);
+		setSourceChannel(ch);
+	}
+	
+	
+	
+	
+	public void setSourceChannel(Channel channel)
+	{
+		_sourceChannelId = channel.getId();
+		_sourceChannelFactor = channel.getFactor();
+		_sourceChannelOffset = channel.getOffset();
+		_sourceChannelUnit = channel.getShortUnit();
+	}
+	
+//	public Channel getSourceChannel()
+//	{
+//		return _sourceChannel;
+//	}
+	
+	
+	public void setThreshold(int threshold)
+	{
+		_threshold = threshold;
+		if(_threshold<0) _threshold=0;
+		if(_threshold>255) _threshold=255;
+	}
+	
+	public int getThreshold()
+	{
+		return _threshold;
 	}
 	
 	public String getThresholdEng()
 	{
-		if(_sourceChannel==null)
+		if(_sourceChannelId==-1)
 		{
 			return String.valueOf(_threshold);
 		}
 		else
 		{
-			Float f = _sourceChannel.getFactor();
-			Float o = _sourceChannel.getOffset();
-			Float val = (_threshold*f)+o;
-			return String.format("%s %s", val,_sourceChannel.getShortUnit());
+			Float val = (_threshold*_sourceChannelFactor)+_sourceChannelOffset;
+			return String.format("%s %s", val,_sourceChannelUnit);
 		}
 	}
 	
 	public String[] getThresholds()
 	{
-		if(_sourceChannel==null)
+		if(_sourceChannelId==-1)
 		{
 			String[] out = new String[_maxThreshold-_minThreshold];
 			for(int i=_minThreshold;i<_maxThreshold;i++)
@@ -128,7 +212,7 @@ public class Alarm {
 			String[] out = new String[_maxThreshold-_minThreshold];
 			for(int i=_minThreshold;i<_maxThreshold;i++)
 			{
-				out[i] = String.valueOf((i*_sourceChannel.getFactor())+_sourceChannel.getOffset());
+				out[i] = String.format("%s %s",((i*_sourceChannelFactor)+_sourceChannelOffset),_sourceChannelUnit);
 			}
 			return out;
 		}

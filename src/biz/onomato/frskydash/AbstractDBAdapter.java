@@ -17,13 +17,24 @@ public abstract class AbstractDBAdapter {
     private static final String TAG = "AbstractDBAdapter";
     
     private static final String DATABASE_NAME = "frsky";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     
     
     protected static final String DATABASE_TABLE_MODELS = "models";
     protected static final String KEY_ROWID = "_id";
     protected static final String KEY_NAME = "name";
     protected static final String KEY_MODELTYPE = "type";
+    
+    protected static final String DATABASE_TABLE_FRSKYALARMS = "alarmsfrsky";
+    //protected static final String KEY_ROWID = "_id";
+    protected static final String KEY_MODELID = "modelid";
+    protected static final String KEY_FRAMETYPE = "frskyframetype";
+    protected static final String KEY_THRESHOLD = "threshold";
+    protected static final String KEY_GREATERTHAN = "greaterthan";
+    protected static final String KEY_ALARMLEVEL = "alarmlevel";
+    protected static final String KEY_UNITSOURCECHANNEL = "unitsourcechannel";
+    
+    //
     
     
     
@@ -37,7 +48,7 @@ public abstract class AbstractDBAdapter {
     protected static final String KEY_MOVINGAVERAGE = "movingaverage";
     protected static final String KEY_SOURCECHANNELID = "sourcechannelid";
     protected static final String KEY_SILENT = "silent";
-    protected static final String KEY_MODELID = "modelid";
+    //protected static final String KEY_MODELID = "modelid";
     
     protected boolean _open=false;
     protected boolean _prevOpen=false;  
@@ -47,13 +58,37 @@ public abstract class AbstractDBAdapter {
     		+ DATABASE_TABLE_MODELS+ "("
     		+ KEY_ROWID+			" integer primary key autoincrement, "
             + KEY_NAME+ 			" text not null, "
-            + KEY_MODELTYPE+		" text" 
+            + KEY_MODELTYPE+		" text"
+            
             + ");";
     
 	protected String[] MODEL_COLUMNS = {
 			KEY_ROWID,
     		KEY_NAME,
     		KEY_MODELTYPE};
+	
+	private static final String DATABASE_CREATE_FRSKYALARMS =
+            "create table "
+    		+ DATABASE_TABLE_FRSKYALARMS+ "("
+    		+ KEY_ROWID+			" integer primary key autoincrement, "
+            + KEY_MODELID+ 			" integer, "
+            + KEY_FRAMETYPE+		" integer, " 
+            + KEY_THRESHOLD+		" integer, "
+            + KEY_GREATERTHAN+		" integer, "
+            + KEY_ALARMLEVEL+		" integer, "
+            + KEY_UNITSOURCECHANNEL+" integer, "
+            + "UNIQUE ("+KEY_MODELID+","+KEY_FRAMETYPE+") ON CONFLICT REPLACE"
+            + ");";
+	
+	protected String[] FRSKYALARM_COLUMNS = {
+			KEY_ROWID,
+			KEY_MODELID,
+			KEY_FRAMETYPE,
+			KEY_THRESHOLD,
+			KEY_GREATERTHAN,
+			KEY_ALARMLEVEL,
+			KEY_UNITSOURCECHANNEL};
+	
     
     private static final String DATABASE_CREATE_CHANNELS =
             "create table "
@@ -109,6 +144,7 @@ public abstract class AbstractDBAdapter {
         	if(DEBUG)Log.d(TAG,"Creating the database");
             db.execSQL(DATABASE_CREATE_MODELS);
             db.execSQL(DATABASE_CREATE_CHANNELS);
+            db.execSQL(DATABASE_CREATE_FRSKYALARMS);
         }
 
         @Override
@@ -122,8 +158,9 @@ public abstract class AbstractDBAdapter {
 //            db.execSQL("DROP TABLE IF EXISTS titles");
 //            onCreate(db);
         	
-        	db.execSQL("DROP table IF EXISTS channels");
-        	db.execSQL("DROP table IF EXISTS models");
+        	db.execSQL("DROP table IF EXISTS "+DATABASE_TABLE_CHANNELS);
+        	db.execSQL("DROP table IF EXISTS "+DATABASE_TABLE_MODELS);
+        	db.execSQL("DROP table IF EXISTS "+DATABASE_TABLE_FRSKYALARMS);
             onCreate(db);
         	
         }

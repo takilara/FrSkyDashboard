@@ -36,7 +36,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	private Button btnAddModel;
 	private RadioButton rbCurrentModel;
 	private boolean DEBUG=true;
-	private long _deleteId=-1;
+	private int _deleteId=-1;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

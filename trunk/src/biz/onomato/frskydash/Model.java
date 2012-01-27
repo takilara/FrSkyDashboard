@@ -28,7 +28,7 @@ public class Model {
 	private String _name;
 	private int _id;
 	private Context _context;
-	public Alarm[] alarms;
+	//public Alarm[] alarms;
 	HashMap<Integer,Alarm> frSkyAlarms;
 	public int alarmCount = 0;
 
@@ -46,7 +46,7 @@ public class Model {
 		//db = new DBAdapterModel(context);
 		
 		// FRSKY channels only for now
-		alarms = new Alarm[6];
+		//alarms = new Alarm[6];
 		frSkyAlarms = new HashMap<Integer, Alarm>();
 		
 		
@@ -251,14 +251,30 @@ public class Model {
 		return frSkyAlarms;
 	}
 	
-	//TODO: Should compare the alarms before setting them
-	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
+	public void setFrSkyAlarms(HashMap<Integer,Alarm> alarmMap)
 	{
-		
-		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
-		alarmCount += 1;
-		//setDirtyFlag(true);
+		if(alarmMap.size()>0)
+		{
+			for(Alarm a:alarmMap.values())
+			{
+				addAlarm(a);
+			//	alarmCount += 1;
+			}
+		}
+		else
+		{
+			initiateFrSkyAlarms();
+		}
 	}
+	
+	//TODO: Should compare the alarms before setting them
+//	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
+//	{
+//		
+//		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
+//		alarmCount += 1;
+//		//setDirtyFlag(true);
+//	}
 
 	// I need to be able to delete alarms from this model
 	public void deleteAlarm(Alarm alarm)

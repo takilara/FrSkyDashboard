@@ -267,7 +267,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 		
-		initializeAlarms();
+		//initializeAlarms();
 		
 		// Save this model incase it was new...
 		
@@ -1272,6 +1272,8 @@ private final Handler mHandlerBT = new Handler() {
 		//_prevModelId = _currentModel.getId();
 		_editor.putInt("prevModelId", _currentModel.getId());
 		_editor.commit();
+		
+		_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		//logger.stop();		// SetModel will stop current Logger
 		
 

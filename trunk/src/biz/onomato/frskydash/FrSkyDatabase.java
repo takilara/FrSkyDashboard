@@ -116,10 +116,16 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		m.setId(cu.getInt(cu.getColumnIndexOrThrow(KEY_ROWID)));
 		m.setName(cu.getString(cu.getColumnIndexOrThrow(KEY_NAME)));
 		m.setType(cu.getString(cu.getColumnIndexOrThrow(KEY_MODELTYPE)));
-		
+
+		// Add Channels to the model
 		ArrayList<Channel> channelList = getChannelsForModel(m.getId());
 		if(DEBUG)Log.i(TAG,"Found "+channelList.size()+" channels for model with id "+m.getId());
 		m.setChannels(channelList);
+		
+		// Add Alarms to the model
+		HashMap<Integer,Alarm> alarmMap = getAlarmsForModel(m.getId());
+		m.setFrSkyAlarms(alarmMap);
+		
 		return m;
     }
     
@@ -147,13 +153,18 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     			result = false;
     		}
     	}
-    	if(model.getId()!=-1)
+    	if(model.getId()!=-1) // Insert/update did not fail
     	{
     		// Update the channels
     		for(Channel ch:model.getChannels())
     		{
     			saveChannel(ch);
     		}
+    		
+    		// Update the alarms
+    		if(DEBUG)Log.i(TAG,"Saving alarms");
+    		setAlarmsForModel(model);
+    		
     	}
     }
     
@@ -277,7 +288,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public Channel getChannel(int channelId)
     {
-    	if(DEBUG)Log.d(TAG,"Get one channel from the database");
+    	if(DEBUG)Log.d(TAG,"Get one channel from the database (channelid: "+channelId+")");
     	open();
         Cursor cu = db.query(true, DATABASE_TABLE_CHANNELS, CHANNEL_COLUMNS, 
                 		KEY_ROWID + "=" + channelId, 
@@ -421,12 +432,17 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		
     	// loop getChannel(Cursor)
 		
+		if(DEBUG)Log.d(TAG,"Loading alarms for modelid: "+modelId);
+		if(DEBUG)Log.d(TAG,"  found: "+cu.getCount()+" alarms");
+		
 		HashMap<Integer,Alarm> mAlarms = new HashMap<Integer,Alarm>();
 		
 		cu.moveToFirst();
-        while(!cu.isAfterLast())
+		int len = cu.getCount();
+        for(int i=0;i<len;i++)
 		{
         	Alarm a = getAlarm(cu);
+        	a.setModelId(modelId);
 			mAlarms.put(a.getFrSkyFrameType(), a);
 			cu.moveToNext();
 		}
@@ -470,7 +486,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public int insertAlarm(Alarm alarm)
     {
-    	if(DEBUG)Log.d(TAG,"Insert Alarm into the database: ");
+    	if(DEBUG)Log.d(TAG,"Insert Alarm into the database: (ModelId,Frskyframe) ("+alarm.getModelId()+","+alarm.getFrSkyFrameType()+")");
     	open();
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_MODELID, alarm.getModelId());
@@ -482,6 +498,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         
         int id = (int) db.insert(DATABASE_TABLE_FRSKYALARMS, null, initialValues);
         close();
+        if(DEBUG)Log.d(TAG,"  This alarm got the id: "+id);
         return id;
     }
     
@@ -494,6 +511,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     {
 
     	open();
+    	if(DEBUG)Log.d(TAG,"Delete alarms for model "+modelId+" from database");
     	db.delete(DATABASE_TABLE_FRSKYALARMS,KEY_MODELID+"="+modelId,null);
     	close();
     }

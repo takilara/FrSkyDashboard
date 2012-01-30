@@ -110,7 +110,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int CHANNEL_INDEX_RSSIRX = 2;
     public static final int CHANNEL_INDEX_RSSITX = 3;
     
-    private Channel[] _sourceChannels = new Channel[4];
+    private static Channel[] _sourceChannels = new Channel[4];
     
     public static FrSkyDatabase database;
     
@@ -234,10 +234,17 @@ public class FrSkyServer extends Service implements OnInitListener {
 		{
 			Log.e(TAG,"No model exists, make a new one");
 			_currentModel = new Model(context,"Model 1");
+			
+			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
 			//_currentModel.setId(0);
 			database.saveModel(_currentModel);
 		}
 		
+		if(_currentModel.getFrSkyAlarms().size()==0)
+		{
+			Log.e(TAG,"No alarms exists, setup with defaults");
+			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
+		}
 		
 		
 //		if(!_currentModel.loadFromDatabase(_prevModelId))
@@ -259,11 +266,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
-		ArrayList<Channel> tChannels = database.getChannelsForModel(_currentModel);
-		for(Channel c : tChannels)
-		{
-			Log.e(TAG,"\t"+c.getDescription());
-		}
+//		ArrayList<Channel> tChannels = database.getChannelsForModel(_currentModel);
+//		for(Channel c : tChannels)
+//		{
+//			Log.e(TAG,"\t"+c.getDescription());
+//		}
 		
 		
 		
@@ -438,16 +445,85 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 
-	public Channel getSourceChannel(int index)
+	public static Channel getSourceChannel(int index)
 	{
 		return _sourceChannels[index];
 	}
 	
-	public Channel[] getSourceChannels()
+	public static Channel[] getSourceChannels()
 	{
 		return _sourceChannels;
 	}
 	
+	
+	public HashMap<Integer,Alarm> initializeFrSkyAlarms()
+	{
+		HashMap<Integer,Alarm> aMap = new HashMap<Integer,Alarm>();
+		Frame alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_RSSI, 
+				Alarm.ALARMLEVEL_LOW, 
+				45, 
+				Alarm.LESSERTHAN);
+		Alarm a = new Alarm(alarmFrame);
+		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
+		a.setModelId(_currentModel);
+		aMap.put(a.getFrSkyFrameType(), a);
+		
+		
+		
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_RSSI, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		
+		a = new Alarm(alarmFrame);
+		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
+		a.setModelId(_currentModel);
+		aMap.put(a.getFrSkyFrameType(), a);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD1, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		a = new Alarm(alarmFrame);
+		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
+		a.setModelId(_currentModel);
+		aMap.put(a.getFrSkyFrameType(), a);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD1, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		a = new Alarm(alarmFrame);
+		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
+		a.setModelId(_currentModel);
+		aMap.put(a.getFrSkyFrameType(), a);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD2, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		a = new Alarm(alarmFrame);
+		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
+		a.setModelId(_currentModel);
+		aMap.put(a.getFrSkyFrameType(), a);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD2, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		a = new Alarm(alarmFrame);
+		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
+		a.setModelId(_currentModel);
+		aMap.put(a.getFrSkyFrameType(), a);
+		return aMap;
+	}
 	
     private void showNotification() {
     	 CharSequence text = "FrSkyServer Started";
@@ -1273,7 +1349,7 @@ private final Handler mHandlerBT = new Handler() {
 		_editor.putInt("prevModelId", _currentModel.getId());
 		_editor.commit();
 		
-		_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
+		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		//logger.stop();		// SetModel will stop current Logger
 		
 

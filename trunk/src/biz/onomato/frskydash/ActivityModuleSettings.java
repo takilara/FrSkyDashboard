@@ -13,11 +13,14 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ActivityModuleSettings extends Activity implements OnItemSelectedListener, OnClickListener {
+public class ActivityModuleSettings extends Activity implements OnItemSelectedListener, OnClickListener, OnSeekBarChangeListener {
 
 	private static final String TAG = "FrSky-Settings";
 	private FrSkyServer server;
@@ -26,9 +29,12 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
     
 	Spinner RSSIalarm1LevelSpinner,RSSIalarm2LevelSpinner,AD1alarm1LevelSpinner,AD1alarm2LevelSpinner,AD2alarm1LevelSpinner,AD2alarm2LevelSpinner;
 	Spinner RSSIalarm1RelSpinner,RSSIalarm2RelSpinner,AD1alarm1RelSpinner,AD1alarm2RelSpinner,AD2alarm1RelSpinner,AD2alarm2RelSpinner;
-	Spinner RSSIalarm1ValueSpinner,RSSIalarm2ValueSpinner,AD1alarm1ValueSpinner,AD1alarm2ValueSpinner,AD2alarm1ValueSpinner,AD2alarm2ValueSpinner;
+	//Spinner RSSIalarm1ValueSpinner,RSSIalarm2ValueSpinner,AD1alarm1ValueSpinner,AD1alarm2ValueSpinner,AD2alarm1ValueSpinner,AD2alarm2ValueSpinner;
 	
-	private View btnRSSI1Send,btnRSSI2Send,btnAD1_1_Send,btnAD1_2_Send,btnAD2_1_Send,btnAD2_2_Send;
+	SeekBar RSSIalarm1ValueSb,RSSIalarm2ValueSb,AD1alarm1ValueSb,AD1alarm2ValueSb,AD2alarm1ValueSb,AD2alarm2ValueSb;
+	
+	//private View btnRSSI1Send,btnRSSI2Send,btnAD1_1_Send,btnAD1_2_Send,btnAD2_1_Send,btnAD2_2_Send;
+	private Button btnSend,btnSave;
 	private TextView tvAD1_1_human,tvAD1_2_human,tvRSSI_1_human,tvRSSI_2_human,tvAD2_1_human,tvAD2_2_human;
 	
 	int minThresholdRSSI=20;
@@ -36,7 +42,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	int minThresholdAD=1;
 	int maxThresholdAD=255;
 	
-	ArrayAdapter<String> AD1alarmValueAdapter;
+	//ArrayAdapter<String> AD1alarmValueAdapter;
 	
 	
 	@Override
@@ -47,99 +53,62 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		
 		setContentView(R.layout.activity_modulesettings);
 		
-		//stringlist for values
-		
-		// RSSI Alarm 1
-		//minThresholdRSSI = 20;
-		//maxThresholdRSSI = 110;
-		String[] valuesRSSI = new String[maxThresholdRSSI-minThresholdRSSI+1];
-		for(int i=minThresholdRSSI;i<=maxThresholdRSSI;i++)
-		{
-			valuesRSSI[i-minThresholdRSSI]=Integer.toString(i);
-		}
-		
-		//minThresholdAD = 1;
-		//maxThresholdAD = 255;
-		String[] valuesAD1 = new String[maxThresholdAD-minThresholdAD+1];
-//		float f = server.AD1.getFactor();
-//		float o = server.AD1.getOffset();
-//		String u = server.AD1.getLongUnit();
-//		int p = server.AD1.getPrecision();
-		for(int i=minThresholdAD;i<=maxThresholdAD;i++)
-		{
-			valuesAD1[i-minThresholdAD]=Integer.toString(i);
-		}
-		
-		String[] valuesAD2 = new String[maxThresholdAD-minThresholdAD+1];
-		for(int i=minThresholdAD;i<=maxThresholdAD;i++)
-		{
-			valuesAD2[i-minThresholdAD]=Integer.toString(i);
-		}
-		
-		
 		// Spinner contents
 		// Alarm Level, Off, Low, Mid, High
 		ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
 		// Alarm relativity: Greater than, Lower than
 		ArrayAdapter<CharSequence> alarmRelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_relative, android.R.layout.simple_spinner_item );
-		// Alarm thresholds, 1-255 for ADx.x, 20-110 for RSSIx
-		ArrayAdapter<String> RSSIalarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item,valuesRSSI );
-		//ArrayAdapter<String> AD1alarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item,valuesAD1 );
-		//AD1alarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item,valuesAD1 );
-		ArrayAdapter<String> AD2alarmValueAdapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item,valuesAD2 );
-		
-		
 		
 		// Setup "spinner design"
 		alarmRelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
 		alarmLevelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
-		//AD1alarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		AD2alarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		RSSIalarmValueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		
-		
-		
-		
 		
 		// Find UI components
+		
+		// Save button
+		btnSave = (Button) findViewById(R.id.FrSkySettings_save);
+		
+		// Send Button
+		btnSend = (Button) findViewById(R.id.FrSkySettings_send);
+		
 		// RSSI - Alarm 1
+		RSSIalarm1ValueSb = (SeekBar) findViewById(R.id.FrSkySettings_RSSI1_seekbar_value);
 		RSSIalarm1LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI1_spinner_level );
 		RSSIalarm1RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI1_spinner_relative );
-		RSSIalarm1ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI1_spinner_value );
 		tvRSSI_1_human = (TextView) findViewById(R.id.tvRSSI_1_human);
-		btnRSSI1Send = findViewById(R.id.FrSkySettings_RSSI1_send);
+		
 		// RSSI - Alarm 2
+		RSSIalarm2ValueSb = (SeekBar) findViewById(R.id.FrSkySettings_RSSI2_seekbar_value);
 		RSSIalarm2LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI2_spinner_level );
 		RSSIalarm2RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI2_spinner_relative );
-		RSSIalarm2ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_RSSI2_spinner_value );
 		tvRSSI_2_human = (TextView) findViewById(R.id.tvRSSI_2_human);
-		btnRSSI2Send = findViewById(R.id.FrSkySettings_RSSI2_send);
+		
 		
 		// AD1 - Alarm 1
+		AD1alarm1ValueSb = (SeekBar) findViewById(R.id.FrSkySettings_AD1_1_seekbar_value);
 		AD1alarm1LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_1_spinner_level );
 		AD1alarm1RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_1_spinner_relative );
-		AD1alarm1ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_1_spinner_value );
 		tvAD1_1_human = (TextView) findViewById(R.id.tvAD1_1_human);
-		btnAD1_1_Send = findViewById(R.id.FrSkySettings_AD1_1_send);
+		
 		// AD1 - Alarm 2
+		AD1alarm2ValueSb = (SeekBar) findViewById(R.id.FrSkySettings_AD1_2_seekbar_value);
 		AD1alarm2LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_2_spinner_level );
 		AD1alarm2RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_2_spinner_relative );
-		AD1alarm2ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD1_2_spinner_value );
 		tvAD1_2_human = (TextView) findViewById(R.id.tvAD1_2_human);
-		btnAD1_2_Send = findViewById(R.id.FrSkySettings_AD1_2_send);
+		
 		
 		// AD2 - Alarm 1
+		AD2alarm1ValueSb = (SeekBar) findViewById(R.id.FrSkySettings_AD2_1_seekbar_value);
 		AD2alarm1LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD2_1_spinner_level );
 		AD2alarm1RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD2_1_spinner_relative );
-		AD2alarm1ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD2_1_spinner_value );
 		tvAD2_1_human = (TextView) findViewById(R.id.tvAD2_1_human);
-		btnAD2_1_Send = findViewById(R.id.FrSkySettings_AD2_1_send);
+		
 		// AD2 - Alarm 2		
+		AD2alarm2ValueSb = (SeekBar) findViewById(R.id.FrSkySettings_AD2_2_seekbar_value);
 		AD2alarm2LevelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD2_2_spinner_level );
 		AD2alarm2RelSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD2_2_spinner_relative );
-		AD2alarm2ValueSpinner = (Spinner) findViewById( R.id.FrSkySettings_AD2_2_spinner_value );
 		tvAD2_2_human = (TextView) findViewById(R.id.tvAD2_2_human);
-		btnAD2_2_Send = findViewById(R.id.FrSkySettings_AD2_2_send);
+		
 		
 		
 		// Setup Adapters
@@ -172,9 +141,9 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		
 		
 		// Setup Click Listeners
-		///TODO: Can possibly be removed, since parsing of content is handled by send button
-		///TODO: Might need to be in place to enable engineering unit string like:
-		///      "Fire when Cell voltage lower than 3.4 Volt" 
+		btnSave.setOnClickListener(this);
+		btnSend.setOnClickListener(this);
+
 		RSSIalarm1LevelSpinner.setOnItemSelectedListener(this);
 		RSSIalarm2LevelSpinner.setOnItemSelectedListener(this);
 		AD1alarm1LevelSpinner.setOnItemSelectedListener(this);
@@ -189,19 +158,13 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		AD2alarm1RelSpinner.setOnItemSelectedListener(this);
 		AD2alarm2RelSpinner.setOnItemSelectedListener(this);
 		
-		RSSIalarm1ValueSpinner.setOnItemSelectedListener(this);		
-		RSSIalarm2ValueSpinner.setOnItemSelectedListener(this);
-		AD1alarm1ValueSpinner.setOnItemSelectedListener(this);
-		AD1alarm2ValueSpinner.setOnItemSelectedListener(this);
-		AD2alarm1ValueSpinner.setOnItemSelectedListener(this);
-		AD2alarm2ValueSpinner.setOnItemSelectedListener(this);
-		
-	    btnRSSI1Send.setOnClickListener(this);
-	    btnRSSI2Send.setOnClickListener(this);
-	    btnAD1_1_Send.setOnClickListener(this);
-	    btnAD1_2_Send.setOnClickListener(this);
-	    btnAD2_1_Send.setOnClickListener(this);
-	    btnAD2_2_Send.setOnClickListener(this);
+	    RSSIalarm1ValueSb.setOnSeekBarChangeListener(this);
+	    RSSIalarm2ValueSb.setOnSeekBarChangeListener(this);
+	    AD1alarm1ValueSb.setOnSeekBarChangeListener(this);
+	    AD1alarm2ValueSb.setOnSeekBarChangeListener(this);
+	    AD2alarm1ValueSb.setOnSeekBarChangeListener(this);
+	    AD2alarm2ValueSb.setOnSeekBarChangeListener(this);
+	    
 	    
 				
 		doBindService();
@@ -251,22 +214,13 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			if(server.getConnectionState()==BluetoothSerialService.STATE_CONNECTED)
 			{
 				boolean setToWhenConnected=true;
-				btnRSSI1Send.setEnabled(setToWhenConnected);
-				btnRSSI2Send.setEnabled(setToWhenConnected);
-				btnAD1_1_Send.setEnabled(setToWhenConnected);
-				btnAD1_2_Send.setEnabled(setToWhenConnected);
-				btnAD2_1_Send.setEnabled(setToWhenConnected);
-				btnAD2_2_Send.setEnabled(setToWhenConnected);
+				btnSend.setEnabled(setToWhenConnected);
+				
 			}
 			else
 			{
 				boolean setToWhenNotConnected=false;
-				btnRSSI1Send.setEnabled(setToWhenNotConnected);
-				btnRSSI2Send.setEnabled(setToWhenNotConnected);
-				btnAD1_1_Send.setEnabled(setToWhenNotConnected);
-				btnAD1_2_Send.setEnabled(setToWhenNotConnected);
-				btnAD2_1_Send.setEnabled(setToWhenNotConnected);
-				btnAD2_2_Send.setEnabled(setToWhenNotConnected);
+				btnSend.setEnabled(setToWhenNotConnected);
 			}
 			
 			Log.d(TAG,"Try to set up spinners for model: "+server.getCurrentModel().getName());
@@ -279,13 +233,34 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			
 			try
 			{
-				String[] vals = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1).getThresholds();
-				ArrayAdapter<String> ad1valueadapter  = new ArrayAdapter<String> (getApplicationContext(),android.R.layout.simple_spinner_item,vals);
-				AD1alarm1ValueSpinner.setAdapter(ad1valueadapter);
+				// TODO: Fix here
+//				Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
+//				RSSIalarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+//				RSSIalarm1ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+//				
+//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
+//				RSSIalarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+//				RSSIalarm2ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+//				
+//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1);
+//				AD1alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+//				AD1alarm1ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+//				
+//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1);
+//				AD1alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+//				AD1alarm2ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+//				
+//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2);
+//				AD2alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+//				AD2alarm1ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+//				
+//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2);
+//				AD2alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+//				AD2alarm2ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
 			}
 			catch(Exception e)
 			{
-				
+				Log.e(TAG,e.toString());
 			}
 			
 			
@@ -296,42 +271,79 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		}
 	};
 
+	
+	public void updateStrings()
+	{
+		Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
+		a.setThreshold(RSSIalarm1ValueSb.getProgress()+a.getMinThreshold());
+		a.setGreaterThan(RSSIalarm1RelSpinner.getSelectedItemPosition());
+		a.setAlarmLevel(RSSIalarm1LevelSpinner.getSelectedItemPosition());
+		tvRSSI_1_human.setText(a.toString());
+		
+		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
+		a.setThreshold(RSSIalarm2ValueSb.getProgress()+a.getMinThreshold());
+		a.setGreaterThan(RSSIalarm2RelSpinner.getSelectedItemPosition());
+		a.setAlarmLevel(RSSIalarm2LevelSpinner.getSelectedItemPosition());
+		tvRSSI_2_human.setText(a.toString());
+		
+		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1);
+		a.setThreshold(AD1alarm1ValueSb.getProgress()+a.getMinThreshold());
+		a.setGreaterThan(AD1alarm1RelSpinner.getSelectedItemPosition());
+		a.setAlarmLevel(AD1alarm1LevelSpinner.getSelectedItemPosition());
+		tvAD1_1_human.setText(a.toString());
+		
+		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1);
+		a.setThreshold(AD1alarm2ValueSb.getProgress()+a.getMinThreshold());
+		a.setGreaterThan(AD1alarm2RelSpinner.getSelectedItemPosition());
+		a.setAlarmLevel(AD1alarm2LevelSpinner.getSelectedItemPosition());
+		tvAD1_2_human.setText(a.toString());
+		
+		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2);
+		a.setThreshold(AD2alarm1ValueSb.getProgress()+a.getMinThreshold());
+		a.setGreaterThan(AD2alarm1RelSpinner.getSelectedItemPosition());
+		a.setAlarmLevel(AD2alarm1LevelSpinner.getSelectedItemPosition());
+		tvAD2_1_human.setText(a.toString());
+		
+		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2);
+		a.setThreshold(AD2alarm2ValueSb.getProgress()+a.getMinThreshold());
+		a.setGreaterThan(AD2alarm2RelSpinner.getSelectedItemPosition());
+		a.setAlarmLevel(AD2alarm2LevelSpinner.getSelectedItemPosition());
+		tvAD2_2_human.setText(a.toString());
+		
+	}
 
+
+	
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
+		// TODO Auto-generated method stub
+		
+		//String testString = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI).toString(RSSIalarm1ValueSb.getProgress());
+		if(fromUser)
+		{
+			updateStrings();
+		}
+		
+		
+		
+		
+	}
+	
+		
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		
 
-		tvRSSI_1_human.setText(String.format("%s %s %s", 
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).getDescription(),
-				RSSIalarm1RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).toEng(RSSIalarm1ValueSpinner.getSelectedItemPosition()+minThresholdRSSI,true)));
+//		tvRSSI_1_human.setText(String.format("%s %s %s", 
+//				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).getDescription(),
+//				RSSIalarm1RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
+//				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).toEng(RSSIalarm1ValueSpinner.getSelectedItemPosition()+minThresholdRSSI,true)));
 		
-		tvRSSI_2_human.setText(String.format("%s %s %s", 
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).getDescription(),
-				RSSIalarm2RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).toEng(RSSIalarm2ValueSpinner.getSelectedItemPosition()+minThresholdRSSI,true)));
+		updateStrings();
 		
-		tvAD1_1_human.setText(String.format("%s %s %s", 
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).getDescription(),
-				AD1alarm1RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).toEng(AD1alarm1ValueSpinner.getSelectedItemPosition()+minThresholdAD,true)));
-		
-		tvAD1_2_human.setText(String.format("%s %s %s", 
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).getDescription(),
-				AD1alarm2RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1).toEng(AD1alarm2ValueSpinner.getSelectedItemPosition()+minThresholdAD,true)));
-		
-		tvAD2_1_human.setText(String.format("%s %s %s", 
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).getDescription(),
-				AD2alarm1RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).toEng(AD2alarm1ValueSpinner.getSelectedItemPosition()+minThresholdAD,true)));
-		
-		tvAD2_2_human.setText(String.format("%s %s %s", 
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).getDescription(),
-				AD2alarm2RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
-				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2).toEng(AD2alarm2ValueSpinner.getSelectedItemPosition()+minThresholdAD,true)));
-		
+//		
 	}
 
 	@Override
@@ -345,67 +357,32 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		//Log.i(TAG,"Some button clicked");
 		Frame f;
     	switch (v.getId()) {
-    		case R.id.FrSkySettings_RSSI1_send:
-    			f = Frame.AlarmFrame(
-    					Frame.FRAMETYPE_ALARM1_RSSI, 
-    					RSSIalarm1LevelSpinner.getSelectedItemPosition(), 
-    					RSSIalarm1ValueSpinner.getSelectedItemPosition()+minThresholdRSSI,
-    					RSSIalarm1RelSpinner.getSelectedItemPosition());
-    			server.send(f);
+    		case R.id.FrSkySettings_send:
+    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI).toFrame());
     			// RSSI alarms frames should also be parsed outgoing.
-    			server.parseFrame(f);
+    			//server.parseFrame(f);
     			break;
-    		case R.id.FrSkySettings_RSSI2_send:
-    			f = Frame.AlarmFrame(
-    					Frame.FRAMETYPE_ALARM2_RSSI, 
-    					RSSIalarm2LevelSpinner.getSelectedItemPosition(), 
-    					RSSIalarm2ValueSpinner.getSelectedItemPosition()+minThresholdRSSI, 
-    					RSSIalarm2RelSpinner.getSelectedItemPosition());
-    			server.send(f);
+    		case R.id.FrSkySettings_save:
+    			//server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI).toFrame());
+    			server.database.saveModel(server.getCurrentModel());
     			// RSSI alarms frames should also be parsed outgoing.
-    			server.parseFrame(f);
-    			break;
-    		case R.id.FrSkySettings_AD1_1_send:
-    			f = Frame.AlarmFrame(
-    					Frame.FRAMETYPE_ALARM1_AD1, 
-    					AD1alarm1LevelSpinner.getSelectedItemPosition(), 
-    					AD1alarm1ValueSpinner.getSelectedItemPosition()+minThresholdAD, 
-    					AD1alarm1RelSpinner.getSelectedItemPosition());
-    			server.send(f);
-    			// No need to parse outgoing frames for ADx alarms
-    			//server.parseFrame(f);
-    			break;
-    		case R.id.FrSkySettings_AD1_2_send:
-    			f = Frame.AlarmFrame(
-    					Frame.FRAMETYPE_ALARM2_AD1, 
-    					AD1alarm2LevelSpinner.getSelectedItemPosition(), 
-    					AD1alarm2ValueSpinner.getSelectedItemPosition()+minThresholdAD, 
-    					AD1alarm2RelSpinner.getSelectedItemPosition());
-    			server.send(f);
-    			// No need to parse outgoing frames for ADx alarms
-    			//server.parseFrame(f);
-    			break;
-    		case R.id.FrSkySettings_AD2_1_send:
-    			f = Frame.AlarmFrame(
-    					Frame.FRAMETYPE_ALARM1_AD2, 
-    					AD2alarm1LevelSpinner.getSelectedItemPosition(), 
-    					AD2alarm1ValueSpinner.getSelectedItemPosition()+minThresholdAD, 
-    					AD2alarm1RelSpinner.getSelectedItemPosition());
-    			server.send(f);
-    			// No need to parse outgoing frames for ADx alarms
-    			//server.parseFrame(f);
-    			break;
-    		case R.id.FrSkySettings_AD2_2_send:
-    			f = Frame.AlarmFrame(
-    					Frame.FRAMETYPE_ALARM2_AD2, 
-    					AD2alarm2LevelSpinner.getSelectedItemPosition(), 
-    					AD2alarm2ValueSpinner.getSelectedItemPosition()+minThresholdAD, 
-    					AD2alarm2RelSpinner.getSelectedItemPosition());
-    			server.send(f);
-    			// No need to parse outgoing frames for ADx alarms
     			//server.parseFrame(f);
     			break;
     	}
+	}
+
+	
+
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

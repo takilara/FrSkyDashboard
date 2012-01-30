@@ -51,7 +51,7 @@ public class Model {
 		
 		
 		// populate FrSky Alarms with defaults
-		initiateFrSkyAlarms();
+		//initiateFrSkyAlarms();
 		
 		
 		_id = -1; 
@@ -81,52 +81,54 @@ public class Model {
 	}
 	
 
-	public void initiateFrSkyAlarms()
-	{
-		//TODO: Need defaults
-		Frame alarmFrame = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM1_RSSI, 
-				Alarm.ALARMLEVEL_LOW, 
-				45, 
-				Alarm.LESSERTHAN);
-		addAlarm(new Alarm(alarmFrame));
-		
-		alarmFrame = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM2_RSSI, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
-				Alarm.LESSERTHAN);
-		addAlarm(new Alarm(alarmFrame));
-		
-		alarmFrame = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM1_AD1, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
-				Alarm.LESSERTHAN);
-		addAlarm(new Alarm(alarmFrame));
-		
-		alarmFrame = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM2_AD1, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
-				Alarm.LESSERTHAN);
-		addAlarm(new Alarm(alarmFrame));
-		
-		alarmFrame = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM1_AD2, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
-				Alarm.LESSERTHAN);
-		addAlarm(new Alarm(alarmFrame));
-		
-		alarmFrame = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM2_AD2, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
-				Alarm.LESSERTHAN);
-		addAlarm(new Alarm(alarmFrame));
-		
-	}
+//	public void initiateFrSkyAlarms()
+//	{
+//		//TODO: Need defaults
+//		Frame alarmFrame = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM1_RSSI, 
+//				Alarm.ALARMLEVEL_LOW, 
+//				45, 
+//				Alarm.LESSERTHAN);
+//		//Alarm a = new Alarm(alarmFrame);
+//		
+//		addAlarm(new Alarm(alarmFrame));
+//		
+//		alarmFrame = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM2_RSSI, 
+//				Alarm.ALARMLEVEL_MID, 
+//				42, 
+//				Alarm.LESSERTHAN);
+//		addAlarm(new Alarm(alarmFrame));
+//		
+//		alarmFrame = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM1_AD1, 
+//				Alarm.ALARMLEVEL_MID, 
+//				42, 
+//				Alarm.LESSERTHAN);
+//		addAlarm(new Alarm(alarmFrame));
+//		
+//		alarmFrame = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM2_AD1, 
+//				Alarm.ALARMLEVEL_MID, 
+//				42, 
+//				Alarm.LESSERTHAN);
+//		addAlarm(new Alarm(alarmFrame));
+//		
+//		alarmFrame = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM1_AD2, 
+//				Alarm.ALARMLEVEL_MID, 
+//				42, 
+//				Alarm.LESSERTHAN);
+//		addAlarm(new Alarm(alarmFrame));
+//		
+//		alarmFrame = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM2_AD2, 
+//				Alarm.ALARMLEVEL_MID, 
+//				42, 
+//				Alarm.LESSERTHAN);
+//		addAlarm(new Alarm(alarmFrame));
+//		
+//	}
 	
 	
 	public String getType() {
@@ -263,7 +265,7 @@ public class Model {
 		}
 		else
 		{
-			initiateFrSkyAlarms();
+			//initiateFrSkyAlarms();
 		}
 	}
 	

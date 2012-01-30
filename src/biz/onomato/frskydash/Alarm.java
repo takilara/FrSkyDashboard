@@ -32,11 +32,13 @@ public class Alarm {
 	private String _sourceChannelUnit="";
 	private float _sourceChannelOffset=0;
 	private float _sourceChannelFactor=1;
+	private String _sourceChannelDescription="";
 	
 	private static final int MINIMUM_THRESHOLD_RSSI=20;
 	private static final int MAXIMUM_THRESHOLD_RSSI=110;
 	private static final int MINIMUM_THRESHOLD_AD=1;
 	private static final int MAXIMUM_THRESHOLD_AD=255;
+	private static final boolean DEBUG = true;
 	
 	public Alarm(int alarmtype)
 	{
@@ -90,10 +92,53 @@ public class Alarm {
 	
 	public String toString()
 	{
-		return String.format("Type: %s, Level: %s, Threshold: %s, Greaterthan: %s",_type,_level,_threshold,_greaterthan);
+		//return String.format("Type: %s, Level: %s, Threshold: %s, Greaterthan: %s",_type,_level,_threshold,_greaterthan);
+		String out;
+		if(_sourceChannelId!=-1)
+		{
+			out = _sourceChannelDescription+" alarm ";
+		}
+		else
+		{
+			out = "Alarm ";
+		}
+		switch(_level)
+		{
+			case ALARMLEVEL_OFF:
+				out += "off when ";
+				break;
+			case ALARMLEVEL_LOW:
+				out += "low when ";
+				break;
+			case ALARMLEVEL_MID:
+				out += "medium when ";
+				break;
+			case ALARMLEVEL_HIGH:
+				out += "high when ";
+				break;
+		}
 		
-		
+		if(_greaterthan==GREATERTHAN)
+		{
+			out += "greater than "+getThresholdEng();
+		}
+		else
+		{
+			out += "lower than "+getThresholdEng();
+		}
+		if(_sourceChannelId!=-1)
+		{
+			out += " ("+_threshold+")";
+		}
+		else
+		{
+			out = "Alarm ";
+		}
+		return out;
 	}
+	
+	
+
 	
 	public void setGreaterThan(int greaterThan)
 	{
@@ -150,8 +195,41 @@ public class Alarm {
 	
 	public void setSourceChannel(int channelId)
 	{
-		Channel ch = FrSkyServer.database.getChannel(channelId);
-		setSourceChannel(ch);
+		if(channelId>=0)
+		{
+			Channel ch = FrSkyServer.database.getChannel(channelId);
+			setSourceChannel(ch);
+		}
+		else
+		{
+			switch(_frSkyFrameType)
+			{
+				case Frame.FRAMETYPE_ALARM1_AD1:
+					//setSourceChannel()
+					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1);
+					break;
+				case Frame.FRAMETYPE_ALARM2_AD1:
+					//setSourceChannel()
+					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1);
+					break;
+				case Frame.FRAMETYPE_ALARM1_AD2:
+					//setSourceChannel()
+					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2);
+					break;
+				case Frame.FRAMETYPE_ALARM2_AD2:
+					//setSourceChannel()
+					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2);
+					break;
+				case Frame.FRAMETYPE_ALARM1_RSSI:
+					//setSourceChannel()
+					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX);
+					break;
+				case Frame.FRAMETYPE_ALARM2_RSSI:
+					//setSourceChannel()
+					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX);
+					break;
+			}
+		}
 	}
 	
 	
@@ -163,6 +241,7 @@ public class Alarm {
 		_sourceChannelFactor = channel.getFactor();
 		_sourceChannelOffset = channel.getOffset();
 		_sourceChannelUnit = channel.getShortUnit();
+		_sourceChannelDescription = channel.getDescription();
 	}
 	
 //	public Channel getSourceChannel()
@@ -183,6 +262,16 @@ public class Alarm {
 		return _threshold;
 	}
 	
+	public int getMinThreshold()
+	{
+		return _minThreshold;
+	}
+	
+	public int getMaxThreshold()
+	{
+		return _maxThreshold;
+	}
+	
 	public String getThresholdEng()
 	{
 		if(_sourceChannelId==-1)
@@ -196,24 +285,30 @@ public class Alarm {
 		}
 	}
 	
+	
+	
 	public String[] getThresholds()
 	{
+		if(DEBUG)Log.i(TAG,"get thresholds: ");
+		if(DEBUG)Log.i(TAG,"sourcechannel: "+_sourceChannelId);
 		if(_sourceChannelId==-1)
 		{
 			String[] out = new String[_maxThreshold-_minThreshold];
-			for(int i=_minThreshold;i<_maxThreshold;i++)
+			for(int i=0;i<_maxThreshold-_minThreshold;i++)
 			{
-				out[i] = String.valueOf(i);
+				out[i] = String.valueOf(i+_minThreshold);
 			}
+			if(DEBUG)Log.i(TAG,"Thresholds: "+out.toString());
 			return out;
 		}
 		else
 		{
 			String[] out = new String[_maxThreshold-_minThreshold];
-			for(int i=_minThreshold;i<_maxThreshold;i++)
+			for(int i=0;i<_maxThreshold-_minThreshold;i++)
 			{
-				out[i] = String.format("%s %s",((i*_sourceChannelFactor)+_sourceChannelOffset),_sourceChannelUnit);
+				out[i] = String.format("%s %s",(((i+_minThreshold)*_sourceChannelFactor)+_sourceChannelOffset),_sourceChannelUnit);
 			}
+			if(DEBUG)Log.i(TAG,"Thresholds: "+out.toString());
 			return out;
 		}
 	}

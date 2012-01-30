@@ -62,22 +62,11 @@ public class Alarm {
 		_level = frame.alarmLevel;
 		_greaterthan = frame.alarmGreaterThan;
 		_threshold = frame.alarmThreshold;
-		_frSkyFrameType = frame.frameHeaderByte;
+		//_frSkyFrameType = frame.frameHeaderByte;
 		
-		if((_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD1) || 
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_AD1) || 
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD2) ||
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_AD2))
-		{
-			_minThreshold = MINIMUM_THRESHOLD_AD;
-			_maxThreshold = MAXIMUM_THRESHOLD_AD;
-		}
-		else if((_frSkyFrameType==Frame.FRAMETYPE_ALARM1_RSSI) || 
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_RSSI))
-		{
-			_minThreshold = MINIMUM_THRESHOLD_RSSI;
-			_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
-		}
+		setFrSkyFrameType(frame.frameHeaderByte);
+		
+		
 	}
 	
 	public Frame toFrame()
@@ -89,6 +78,7 @@ public class Alarm {
 				_greaterthan);
 		return frame;
 	}
+	
 	
 	public String toString()
 	{
@@ -130,13 +120,8 @@ public class Alarm {
 		{
 			out += " ("+_threshold+")";
 		}
-		else
-		{
-			out = "Alarm ";
-		}
 		return out;
 	}
-	
 	
 
 	
@@ -182,6 +167,22 @@ public class Alarm {
 	public void setFrSkyFrameType(int frameType)
 	{
 		_frSkyFrameType = frameType;
+		
+		if((_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD1) || 
+				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_AD1) || 
+				(_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD2) ||
+				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_AD2))
+		{
+			_minThreshold = MINIMUM_THRESHOLD_AD;
+			_maxThreshold = MAXIMUM_THRESHOLD_AD;
+		}
+		else if((_frSkyFrameType==Frame.FRAMETYPE_ALARM1_RSSI) || 
+				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_RSSI))
+		{
+			_minThreshold = MINIMUM_THRESHOLD_RSSI;
+			_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
+		}
+		
 	}
 	public int getFrSkyFrameType()
 	{
@@ -272,6 +273,7 @@ public class Alarm {
 		return _maxThreshold;
 	}
 	
+
 	public String getThresholdEng()
 	{
 		if(_sourceChannelId==-1)

@@ -244,6 +244,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		{
 			Log.e(TAG,"No alarms exists, setup with defaults");
 			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
+			database.saveModel(_currentModel);
 		}
 		
 		
@@ -834,22 +835,22 @@ public class FrSkyServer extends Service implements OnInitListener {
     }
 	
 	
-	private void initializeAlarms()
-	{
-		// Force alarm creation/initiation
-				Frame alarmframe1 = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM1_RSSI, 
-				Alarm.ALARMLEVEL_LOW, 
-				45, 
-				Alarm.LESSERTHAN);
-				Frame alarmframe2 = Frame.AlarmFrame(
-				Frame.FRAMETYPE_ALARM2_RSSI, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
-				Alarm.LESSERTHAN);
-				parseFrame(alarmframe1,false);	// don't count in fps
-				parseFrame(alarmframe2,false);	// don't count in fps
-	}
+//	private void initializeAlarms()
+//	{
+//		// Force alarm creation/initiation
+//				Frame alarmframe1 = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM1_RSSI, 
+//				Alarm.ALARMLEVEL_LOW, 
+//				45, 
+//				Alarm.LESSERTHAN);
+//				Frame alarmframe2 = Frame.AlarmFrame(
+//				Frame.FRAMETYPE_ALARM2_RSSI, 
+//				Alarm.ALARMLEVEL_MID, 
+//				42, 
+//				Alarm.LESSERTHAN);
+//				parseFrame(alarmframe1,false);	// don't count in fps
+//				parseFrame(alarmframe2,false);	// don't count in fps
+//	}
 	
 	private void setupChannels()
 	{
@@ -1175,7 +1176,14 @@ private final Handler mHandlerBT = new Handler() {
 				Log.d(TAG,"handle inbound FrSky alarm");
 				if(_currentModel!=null)
 				{
-					_currentModel.addAlarm(new Alarm(f));
+					// don't copy the entire alarm, as that would kill off sourcechannel
+					//TODO: Compare to existing
+					//TODO: Ask to load into the alarms
+//					Alarm aIn = new Alarm(f);
+//					Alarm a = _currentModel.getFrSkyAlarms().get(aIn.getFrSkyFrameType());
+//					a.setThreshold(aIn.getThreshold());
+//					a.setGreaterThan(aIn.getGreaterThan());
+//					a.setAlarmLevel(aIn.getAlarmLevel());
 				}
 				
 				if(inBound)	_framecountTx++;
@@ -1349,6 +1357,11 @@ private final Handler mHandlerBT = new Handler() {
 		_editor.putInt("prevModelId", _currentModel.getId());
 		_editor.commit();
 		
+		if(_currentModel.getFrSkyAlarms().size()==0)
+		{
+			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
+			database.saveModel(_currentModel);
+		}
 		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		//logger.stop();		// SetModel will stop current Logger
 		

@@ -206,28 +206,28 @@ public class Alarm {
 			switch(_frSkyFrameType)
 			{
 				case Frame.FRAMETYPE_ALARM1_AD1:
-					//setSourceChannel()
-					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1);
+					
+					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1));
 					break;
 				case Frame.FRAMETYPE_ALARM2_AD1:
 					//setSourceChannel()
-					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1);
+					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1));
 					break;
 				case Frame.FRAMETYPE_ALARM1_AD2:
 					//setSourceChannel()
-					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2);
+					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2));
 					break;
 				case Frame.FRAMETYPE_ALARM2_AD2:
 					//setSourceChannel()
-					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2);
+					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2));
 					break;
 				case Frame.FRAMETYPE_ALARM1_RSSI:
 					//setSourceChannel()
-					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX);
+					setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
 					break;
 				case Frame.FRAMETYPE_ALARM2_RSSI:
 					//setSourceChannel()
-					FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX);
+					setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
 					break;
 			}
 		}

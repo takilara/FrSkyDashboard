@@ -6,11 +6,11 @@
     <string name="author">Espen Solbu</string>
     
     <!--  Activities -->
-	<string name="activity_module_settings">FrSky Module Settings</string>
+	<string name="activity_module_settings">FrSky Alarms</string>
 	<string name="activity_application_settings">Application Settings</string>
 	<string name="activity_channel_settings">Channel Configuration</string>
 	<string name="activity_simulator">Simulator</string>
-	<string name="activity_model_configuration">Module Configuration</string>
+	<string name="activity_model_configuration">Model Configuration</string>
 	<string name="activity_model_management">Module Management</string>
 	<string name="activity_debug">Debug</string>
 	

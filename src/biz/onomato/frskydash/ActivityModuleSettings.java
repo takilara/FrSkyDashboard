@@ -234,29 +234,42 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			try
 			{
 				// TODO: Fix here
-//				Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
-//				RSSIalarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
-//				RSSIalarm1ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+				Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
+				RSSIalarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				RSSIalarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
+				RSSIalarm1RelSpinner.setSelection(a.getGreaterThan());
+				RSSIalarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
-//				RSSIalarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
-//				RSSIalarm2ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
+				RSSIalarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				RSSIalarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
+				RSSIalarm2RelSpinner.setSelection(a.getGreaterThan());
+				RSSIalarm2LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1);
-//				AD1alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
-//				AD1alarm1ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1);
+				AD1alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD1alarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
+				AD1alarm1RelSpinner.setSelection(a.getGreaterThan());
+				AD1alarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1);
-//				AD1alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
-//				AD1alarm2ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1);
+				AD1alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD1alarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
+				AD1alarm2RelSpinner.setSelection(a.getGreaterThan());
+				AD1alarm2LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2);
-//				AD2alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
-//				AD2alarm1ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2);
+				AD2alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD2alarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
+				AD2alarm1RelSpinner.setSelection(a.getGreaterThan());
+				AD2alarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-//				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2);
-//				AD2alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
-//				AD2alarm2ValueSb.setProgress(a.getThreshold()+a.getMinThreshold());
+				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2);
+				AD2alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD2alarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
+				AD2alarm2RelSpinner.setSelection(a.getGreaterThan());
+				AD2alarm2LevelSpinner.setSelection(a.getAlarmLevel());
+				//AD2alarm2ValueSb.
 			}
 			catch(Exception e)
 			{
@@ -274,12 +287,13 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	
 	public void updateStrings()
 	{
+		Log.d(TAG,"Update the RSSI string!");
 		Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
 		a.setThreshold(RSSIalarm1ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(RSSIalarm1RelSpinner.getSelectedItemPosition());
 		a.setAlarmLevel(RSSIalarm1LevelSpinner.getSelectedItemPosition());
 		tvRSSI_1_human.setText(a.toString());
-		
+
 		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
 		a.setThreshold(RSSIalarm2ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(RSSIalarm2RelSpinner.getSelectedItemPosition());
@@ -359,6 +373,11 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
     	switch (v.getId()) {
     		case R.id.FrSkySettings_send:
     			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI).toFrame());
+    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI).toFrame());
+    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1).toFrame());
+    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1).toFrame());
+    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2).toFrame());
+    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2).toFrame());
     			// RSSI alarms frames should also be parsed outgoing.
     			//server.parseFrame(f);
     			break;

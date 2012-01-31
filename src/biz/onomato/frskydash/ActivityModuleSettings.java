@@ -239,7 +239,8 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				//_model.loadFromDatabase(_modelId);
 				_model = FrSkyServer.database.getModel(_modelId);
 			}
-			_alarmMap = _model.getFrSkyAlarms();
+			//_alarmMap = _model.getFrSkyAlarms();
+			_alarmMap = FrSkyServer.database.getAlarmsForModel(_modelId);
 			
 			tvModelName.setText(_model.getName());
 			
@@ -420,6 +421,11 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
     			break;
     		case R.id.FrSkySettings_save:
 
+//    			for(Alarm a : _alarmMap.values())
+//    			{
+//    				_model.addAlarm(a);
+//    			}
+    			_model.setFrSkyAlarms(_alarmMap);
     			// Copy back new _alarmMap
     			FrSkyServer.database.saveModel(_model);
 

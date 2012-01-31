@@ -525,15 +525,28 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			levelSp.setAdapter(alarmLevelAdapter);
 			levelSp.setOnItemSelectedListener(this);
 			levelSp.setId(ID_ALARM_SPINNER_LEVEL+a.getFrSkyFrameType());
+			levelSp.setSelection(a.getAlarmLevel());
 			ll.addView(levelSp);
 			
 			Spinner relSp = new Spinner(this);
 			relSp.setAdapter(alarmRelAdapter);
 			relSp.setOnItemSelectedListener(this);
 			relSp.setId(ID_ALARM_SPINNER_RELATIVE+a.getFrSkyFrameType());
+			relSp.setSelection(a.getGreaterThan());
 			ll.addView(relSp);
 			
 
+			SeekBar thresholdSb = new SeekBar(this);
+			thresholdSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
+			thresholdSb.setProgress(a.getThreshold()-a.getMinThreshold());
+			//thresholdSb.setOnSeekBarChangeListener(this);
+			ll.addView(thresholdSb);
+			
+			TextView descTv = new TextView(this);
+			descTv.setText(a.toString());
+			ll.addView(descTv);
+			
+			
 			// Threshold
 			// To Text
 			// // Individual Send

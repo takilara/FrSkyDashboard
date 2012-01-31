@@ -1,17 +1,14 @@
 package biz.onomato.frskydash;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.UUID;
 
-import android.app.AlertDialog;
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,14 +17,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -169,9 +163,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
-	
-	
-	
 	
 	@Override
 	public void onCreate()
@@ -994,32 +985,35 @@ private final Handler mHandlerBT = new Handler() {
             	Log.d(TAG,"BT writing");
                 break;
                 
+            //handle receiving data from frsky 
             case MESSAGE_READ:
             	if(!_dying)
             	{
-	                byte[] readBuf = (byte[]) msg.obj;              
-	                int[] i = new int[msg.arg1];
-	                
-	                for(int n=0;n<msg.arg1;n++)
-	                {
-	                	//Log.d(TAG,n+": "+readBuf[n]);
-	                	if(readBuf[n]<0)
-	                	{
-	                		i[n]=readBuf[n]+256;
-	                	}
-	                	else
-	                	{
-	                		i[n]=readBuf[n];
-	                	}
-	                }
-	                
-	                // NEEDS to be changed!!!
-	                if(i.length<20)
-	                {
+            		//hcpl updated to handle the new int array after byte per byte read update
+//	                byte[] readBuf = (byte[]) msg.obj;
+//	                int[] i = new int[msg.arg1];
+            		int[] i = (int[])msg.obj;
+//	                
+//	                for(int n=0;n<msg.arg1;n++)
+//	                {
+//	                	//Log.d(TAG,n+": "+readBuf[n]);
+//	                	if(readBuf[n]<0)
+//	                	{
+//	                		i[n]=readBuf[n]+256;
+//	                	}
+//	                	else
+//	                	{
+//	                		i[n]=readBuf[n];
+//	                	}
+//	                }
+//	                
+//	                // NEEDS to be changed!!!
+//	                if(i.length<20)
+//	                {
 	                	Frame f = new Frame(i);
 	                	//Log.i(TAG,f.toHuman());
 	                	parseFrame(f);
-	                }
+//	                }
 	            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
             	}
                 break;
@@ -1142,8 +1136,14 @@ private final Handler mHandlerBT = new Handler() {
 		}
 	}
 	
-	
-	public boolean parseFrame(Frame f,boolean inBound)
+	/**
+	 * parse this frame
+	 * 
+	 * @param f
+	 * @param inBound
+	 * @return
+	 */
+	public boolean parseFrame(Frame f, boolean inBound)
 	{
 		//int [] frame = f.toInts(); 
 		boolean ok=true;
@@ -1208,6 +1208,11 @@ private final Handler mHandlerBT = new Handler() {
 //				}
 				
 				break;
+			case Frame.FRAMETYPE_USER_DATA:
+				// hcpl add handling user data frames!!
+				extractUserDataBytes(f.toEncodedInts());
+				//TODO framecounter, ???
+				break;
 			default:
 				Log.i(TAG,"Frametype currently not supported");
 				Log.i(TAG,"Frame: "+f.toHuman());
@@ -1216,6 +1221,243 @@ private final Handler mHandlerBT = new Handler() {
 		return ok;
 		
 	}
+	
+	// hcpl: these are class members now since we have to collect the data over
+	// several method executions since the bytes could be spread over several
+	// telemetry 11 bytes frames
+
+	/**
+	 * the current user frame we are working on. This is used to pass data
+	 * between incompletes frames.
+	 */
+	private static int[] userFrame = new int[Frame.SIZE_USER_FRAME];
+
+	/**
+	 * index of the current user frame. If set to -1 no user frame is under
+	 * construction.
+	 */
+	private static int currentUserFrameIndex = -1;
+
+	/**
+	 * if on previous byte the XOR byte was found or not
+	 */
+	private static boolean xor = false;
+	
+	/**
+	 * Extract user data bytes from telemetry data frame. This subframe is
+	 * delimited by the 0x5E byte, included in the frame argument for this
+	 * method. A single call can contain incomplete user data frames so need to
+	 * keep track of previous frame also.
+	 * 
+	 * @param frame
+	 */
+	private void extractUserDataBytes(int[] frame) {
+		// init
+		int b;
+		// iterate elements in frame
+		// for (int b : frame) {
+		// don't handle all the bytes, skip header (0), prim(1), size(2),
+		// unused(3) and end but(10)
+		for (int i = 4; i < Frame.SIZE_TELEMETRY_FRAME - 1; i++) {
+			b = frame[i];
+			// handle byte stuffing first
+			if (b == Frame.STUFFING_USER_DATA_FRAME) {
+				xor = true;
+				// drop this byte
+				continue;
+			}
+			if (xor) {
+				b ^= Frame.XOR_USER_DATA_FRAME;
+				xor = false;
+			}
+			// if we encounter a start byte we need to indicate we're in a
+			// frame or if at the end handle the frame and continue
+			if (b == Frame.START_STOP_USER_FRAME) {
+				// if currentFrameIndex is not set we have to start a new
+				// frame here
+				if (currentUserFrameIndex < 0) {
+					// init current frame index at beginning
+					currentUserFrameIndex = 0;
+					// and copy this first byte in the frame
+					userFrame[currentUserFrameIndex++] = b;
+				}
+				// otherwise we were already collecting a frame so this
+				// indicates we are at the end now. At this point a frame is
+				// available that we can send over.
+				else if (currentUserFrameIndex == Frame.SIZE_USER_FRAME - 1) {
+					// just complete the frame we were collecting
+					userFrame[currentUserFrameIndex] = b;
+					// this way the length is confirmed
+					handleUserDataFrame(userFrame);
+					// once information is handled we can reset the frame
+					userFrame = new int[Frame.SIZE_USER_FRAME];
+					currentUserFrameIndex = 0;
+					userFrame[currentUserFrameIndex++] = b;
+				}
+				// if for some reason we got 2 0x5e bytes after each other
+				// or the size of the frame was different we can't do
+				// anything with the previous collected information. We can
+				// log a debug message and drop the frame to start over
+				// again.
+				else {
+					// log debug info here
+					Log.d(TAG, "Start/stop byte user frame at wrong position: 0x"
+									+ Integer.toHexString(b)
+									+ " current frame so far: "
+									+ Arrays.toString(frame)
+									+ ". Frame was reset and this start/stop counted as start.");
+					currentUserFrameIndex = 0;
+					userFrame = new int[Frame.SIZE_USER_FRAME];
+					userFrame[currentUserFrameIndex++] = b;
+				}
+			}
+			// otherwise we are handling a valid byte that has to be put in
+			// the frame we are collecting. But only when we are currently
+			// working on a frame!
+			else if (currentUserFrameIndex >= 0
+					&& currentUserFrameIndex < Frame.SIZE_USER_FRAME - 1) {
+				userFrame[currentUserFrameIndex++] = b;
+			}
+			// finally it's possible that we receive bytes without being in
+			// a frame, just discard them for now
+			else {
+				// log debug info here
+				Log.d(TAG, "Received data while not in user frame recording mode, dropped byte: 0x"
+								+ Integer.toHexString(b));
+			}
+		}
+	}
+
+	/**
+	 * once we extracted the user data frames these can be handled by checking
+	 * their data ID
+	 * 
+	 * @param frame
+	 */
+	private void handleUserDataFrame(int[] frame) {
+		// some validation first
+		// all frames are delimited by the 0x5e start and end byte and should be
+		// 5 bytes long. We can validate this before doing any parsing
+		if (frame.length != Frame.SIZE_USER_FRAME
+				|| frame[0] != Frame.START_STOP_USER_FRAME
+				|| frame[Frame.SIZE_USER_FRAME - 1] != Frame.START_STOP_USER_FRAME) {
+			// log exception here
+			Log.d(TAG, "Wrong user frame format: "
+					+ Arrays.toString(frame));
+			return;
+		}
+		// check data ID and update correct channel
+		// FIXME CHECK HOW TO PARSE DATA, NOT ALWAYS FRAME IDX 2 USED, UNITS,
+		// ...?
+		switch (frame[1]) {
+		case 0x01:
+			updateChannel(Channels.gps_altitude_before, frame[2]);
+			break;
+		case 0x01 + 8:
+			updateChannel(Channels.gps_altitude_after, frame[2]);
+			break;
+		case 0x02:
+			updateChannel(Channels.temp1, frame[2]);
+			break;
+		case 0x03:
+			updateChannel(Channels.rpm, frame[2] * 60);
+			break;
+		case 0x04:
+			updateChannel(Channels.fuel, frame[2]);
+			break;
+		case 0x05:
+			updateChannel(Channels.temp2, frame[2]);
+		case 0x06:
+			// FIXME cell & voltage in this one value
+			updateChannel(Channels.volt, frame[2]);
+			break;
+		case 0x10:
+			updateChannel(Channels.altitude, frame[2]);
+			break;
+		case 0x11:
+			updateChannel(Channels.gps_speed_before, frame[2]);
+			break;
+		case 0x11 + 8:
+			updateChannel(Channels.gps_speed_after, frame[2]);
+			break;
+		case 0x12:
+			updateChannel(Channels.longitude_before, frame[2]);
+			break;
+		case 0x12 + 8:
+			updateChannel(Channels.longitude_after, frame[2]);
+			break;
+		case 0x1A + 8:
+			updateChannel(Channels.ew, frame[2]);
+			break;
+		case 0x13:
+			updateChannel(Channels.latitude_before, frame[2]);
+			break;
+		case 0x13 + 8:
+			updateChannel(Channels.latitude_after, frame[2]);
+			break;
+		case 0x1B + 8:
+			updateChannel(Channels.ns, frame[2]);
+			break;
+		case 0x14:
+			updateChannel(Channels.course_before, frame[2]);
+			break;
+		case 0x14 + 8:
+			updateChannel(Channels.course_after, frame[2]);
+			break;
+		case 0x15:
+			updateChannel(Channels.day, frame[2]);
+			updateChannel(Channels.month, frame[3]);
+			break;
+		case 0x16:
+			updateChannel(Channels.year, 2000 + frame[2]);
+			break;
+		case 0x17:
+			updateChannel(Channels.hour, frame[2]);
+			updateChannel(Channels.minute, frame[3]);
+			break;
+		case 0x18:
+			updateChannel(Channels.second, frame[2]);
+			break;
+		case 0x24:
+			updateChannel(Channels.acc_x, frame[2] / 1000);
+			break;
+		case 0x25:
+			updateChannel(Channels.acc_y, frame[2] / 1000);
+			break;
+		case 0x26:
+			updateChannel(Channels.acc_z, frame[2] / 1000);
+			break;
+			default:
+				Log.d(TAG, "Unknown sensor type for frame: "+Arrays.toString(frame));
+		}
+	}
+
+	/**
+	 * update a single channel with a single value
+	 * 
+	 * @param channel
+	 * @param value
+	 */
+	private void updateChannel(Channels channel, int value) {
+		// TODO create a channel here for the correct type of information and
+		// broadcast channel so GUI can update this value
+		Log.d(TAG, "Data received for channel: "+channel+", value: "+value);
+	}
+
+	/**
+	 * possible channels for sensor hub data
+	 * 
+	 */
+	public enum Channels {
+		gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude, gps_speed_before, gps_speed_after, longitude_before, longitude_after, ew, latitude_before, latitude_after, ns, course_before, course_after, day, month, year, hour, minute, second, acc_x, acc_y, acc_z
+	}
+	
+	/**
+	 * wrapper to parse frames that are inbound so they get logged
+	 * 
+	 * @param f
+	 * @return
+	 */
 	public boolean parseFrame(Frame f)
 	{
 		return parseFrame(f,true);

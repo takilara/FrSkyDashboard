@@ -49,8 +49,17 @@
             		android:layout_height="wrap_content"
             		android:text="@string/modelConf_addChannel" />
                 
+                <Button
+            		android:id="@+id/modConf_btnFrSkyAlarms"
+            		android:layout_width="match_parent"
+            		android:layout_height="wrap_content"
+            		android:text="@string/modelConf_frSkyAlarms" />
                 
-                <Button android:text="@string/save" android:layout_width="match_parent" android:id="@+id/modConf_btnSave" android:layout_height="wrap_content"></Button>
+                <Button 
+                    android:id="@+id/modConf_btnSave"
+                    android:text="@string/save" 
+                    android:layout_width="match_parent" 
+                    android:layout_height="wrap_content" />
                 
             </LinearLayout>
         </ScrollView>

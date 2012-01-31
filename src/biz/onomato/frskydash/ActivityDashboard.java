@@ -69,6 +69,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private static final int MY_DATA_CHECK_CODE = 7;
     private static final int CHANNEL_CONFIG_RETURN = 1;
     private static final int MODEL_CONFIG_RETURN = 8;
+    private static final int MODULE_CONFIG_RETURN = 9;
     
     
     // Used for unique id's
@@ -829,6 +830,19 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        	
 	        	populateChannelList();
 	        	break;
+            case MODULE_CONFIG_RETURN:		// User edited a model, or swapped current model
+	        	switch(resultCode)
+	        	{
+	        		case RESULT_OK:
+	        			Log.i(TAG,"User saved new alarms for the model");
+	        			break;
+	        		case RESULT_CANCELED:
+	        			Log.i(TAG,"User cancelled with back");
+	        			break;
+	        	}
+	        	
+	        	populateChannelList();
+	        	break;
         }
         	
         // --
@@ -965,7 +979,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     			Log.i(TAG,"User clicked on Module Settings");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			Intent mIntent = new Intent(this,ActivityModuleSettings.class);
-    			startActivity(mIntent);
+    			mIntent.putExtra("modelId", (int) server.getCurrentModel().getId());	// Should edit current model
+    			startActivityForResult(mIntent,MODULE_CONFIG_RETURN);
     			break;
     		case R.id.model_management:
     			Log.i(TAG,"User clicked on Manage models");

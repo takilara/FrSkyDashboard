@@ -108,6 +108,8 @@
     <string name="modelConf_ModelType">Model Type</string>
     <string name="modelConf_Channels">Channels</string>
     <string name="modelConf_addChannel">Add Channel</string>
+    <string name="modelConf_frSkyAlarms">FrSky Alarms</string>
+    
     <string-array name="model_types">	<!-- Translators, note that the order is important -->
 		<item>Other</item>
 		<item>Helicopter</item>

@@ -27,12 +27,13 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ModelConfig";
 	private static final boolean DEBUG=true;
 	private static final int CHANNEL_CONFIG_RETURN = 1;
+	private static final int MODULE_CONFIG_RETURN = 2;
 	private FrSkyServer server;
 	
 	private Model _model;
 	private int _modelId;
 	
-	private Button btnSave,btnAddChannel;
+	private Button btnSave,btnAddChannel,btnFrSkyAlarms;
 	private LinearLayout llChannelsLayout;
 	private EditText edName;
 	private Spinner spType;
@@ -59,6 +60,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		// Find all form elements
 		btnSave				= (Button) findViewById(R.id.modConf_btnSave);
 		btnAddChannel		= (Button) findViewById(R.id.modConf_btnAddChannel);
+		btnFrSkyAlarms		= (Button) findViewById(R.id.modConf_btnFrSkyAlarms);
 		edName				= (EditText) findViewById(R.id.modConf_edName);
 		llChannelsLayout	= (LinearLayout) findViewById(R.id.llChannelsLayout);
 		spType 				= (Spinner) findViewById(R.id.modConf_spType);
@@ -77,7 +79,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		// Set Listeners
 		btnSave.setOnClickListener(this);
 		btnAddChannel.setOnClickListener(this);
-	
+		btnFrSkyAlarms.setOnClickListener(this);
 		
 		
 		
@@ -204,6 +206,11 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				_model.addChannel(c);
 				populateChannelList();
 				break;
+			case R.id.modConf_btnFrSkyAlarms:
+				Intent i = new Intent(this,ActivityModuleSettings.class);
+				i.putExtra("modelId", (int) _model.getId());	// Should edit existing model
+				startActivityForResult(i,MODULE_CONFIG_RETURN);
+				break;
 		}
 	}
 	
@@ -294,6 +301,10 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            	}
 	            	
 	            	populateChannelList();
+	            	break;
+	            case MODULE_CONFIG_RETURN:
+	            	if(DEBUG) Log.d(TAG,"Done editing FrSky alarms");
+	            	
 	            	break;
 	    	}
 	    }

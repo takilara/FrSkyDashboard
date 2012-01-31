@@ -235,37 +235,37 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			{
 				// TODO: Fix here
 				Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
-				RSSIalarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				RSSIalarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				RSSIalarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				RSSIalarm1RelSpinner.setSelection(a.getGreaterThan());
 				RSSIalarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
 				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
-				RSSIalarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				RSSIalarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				RSSIalarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				RSSIalarm2RelSpinner.setSelection(a.getGreaterThan());
 				RSSIalarm2LevelSpinner.setSelection(a.getAlarmLevel());
 //				
 				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1);
-				AD1alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD1alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD1alarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD1alarm1RelSpinner.setSelection(a.getGreaterThan());
 				AD1alarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
 				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1);
-				AD1alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD1alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD1alarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD1alarm2RelSpinner.setSelection(a.getGreaterThan());
 				AD1alarm2LevelSpinner.setSelection(a.getAlarmLevel());
 //				
 				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2);
-				AD2alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD2alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD2alarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD2alarm1RelSpinner.setSelection(a.getGreaterThan());
 				AD2alarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
 				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2);
-				AD2alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold());
+				AD2alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD2alarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD2alarm2RelSpinner.setSelection(a.getGreaterThan());
 				AD2alarm2LevelSpinner.setSelection(a.getAlarmLevel());

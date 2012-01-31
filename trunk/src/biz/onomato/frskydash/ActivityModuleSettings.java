@@ -38,7 +38,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	
 	//private View btnRSSI1Send,btnRSSI2Send,btnAD1_1_Send,btnAD1_2_Send,btnAD2_1_Send,btnAD2_2_Send;
 	private Button btnSend,btnSave;
-	private TextView tvAD1_1_human,tvAD1_2_human,tvRSSI_1_human,tvRSSI_2_human,tvAD2_1_human,tvAD2_2_human;
+	private TextView tvAD1_1_human,tvAD1_2_human,tvRSSI_1_human,tvRSSI_2_human,tvAD2_1_human,tvAD2_2_human,tvModelName;
 	
 	int minThresholdRSSI=20;
 	int maxThresholdRSSI=110;
@@ -77,6 +77,9 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		
 		// Find UI components
 		
+		// Model Name
+		tvModelName = (TextView) findViewById(R.id.tv_FrSkySettings_modelName);
+		tvModelName.setText("");
 		// Save button
 		btnSave = (Button) findViewById(R.id.FrSkySettings_save);
 		
@@ -238,6 +241,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			}
 			_alarmMap = _model.getFrSkyAlarms();
 			
+			tvModelName.setText(_model.getName());
 			
 			// only enable send buttons if Bluetooth is connected
 			if(server.getConnectionState()==BluetoothSerialService.STATE_CONNECTED)

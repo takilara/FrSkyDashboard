@@ -1,6 +1,10 @@
 package biz.onomato.frskydash;
 
-import java.util.HashMap;
+import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeMap;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -16,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
@@ -27,18 +32,22 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	private static final String TAG = "FrSky-Settings";
 	protected static final boolean DEBUG = true;
 	private FrSkyServer server;
-	
+	private static final int ID_ALARM_SPINNER_RELATIVE = 5000;
+	private static final int ID_ALARM_SPINNER_LEVEL = 6000;
 	
     
-	Spinner RSSIalarm1LevelSpinner,RSSIalarm2LevelSpinner,AD1alarm1LevelSpinner,AD1alarm2LevelSpinner,AD2alarm1LevelSpinner,AD2alarm2LevelSpinner;
-	Spinner RSSIalarm1RelSpinner,RSSIalarm2RelSpinner,AD1alarm1RelSpinner,AD1alarm2RelSpinner,AD2alarm1RelSpinner,AD2alarm2RelSpinner;
+	private Spinner RSSIalarm1LevelSpinner,RSSIalarm2LevelSpinner,AD1alarm1LevelSpinner,AD1alarm2LevelSpinner,AD2alarm1LevelSpinner,AD2alarm2LevelSpinner;
+	private Spinner RSSIalarm1RelSpinner,RSSIalarm2RelSpinner,AD1alarm1RelSpinner,AD1alarm2RelSpinner,AD2alarm1RelSpinner,AD2alarm2RelSpinner;
 	//Spinner RSSIalarm1ValueSpinner,RSSIalarm2ValueSpinner,AD1alarm1ValueSpinner,AD1alarm2ValueSpinner,AD2alarm1ValueSpinner,AD2alarm2ValueSpinner;
 	
-	SeekBar RSSIalarm1ValueSb,RSSIalarm2ValueSb,AD1alarm1ValueSb,AD1alarm2ValueSb,AD2alarm1ValueSb,AD2alarm2ValueSb;
+	private SeekBar RSSIalarm1ValueSb,RSSIalarm2ValueSb,AD1alarm1ValueSb,AD1alarm2ValueSb,AD2alarm1ValueSb,AD2alarm2ValueSb;
 	
 	//private View btnRSSI1Send,btnRSSI2Send,btnAD1_1_Send,btnAD1_2_Send,btnAD2_1_Send,btnAD2_2_Send;
 	private Button btnSend,btnSave;
 	private TextView tvAD1_1_human,tvAD1_2_human,tvRSSI_1_human,tvRSSI_2_human,tvAD2_1_human,tvAD2_2_human,tvModelName;
+	private LinearLayout ll;
+	private ArrayAdapter<CharSequence> alarmLevelAdapter;
+	private ArrayAdapter<CharSequence> alarmRelAdapter;
 	
 	int minThresholdRSSI=20;
 	int maxThresholdRSSI=110;
@@ -46,7 +55,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	int maxThresholdAD=255;
 	private int _modelId = -1;
 	private Model _model=null;
-	private HashMap<Integer,Alarm> _alarmMap;
+	private TreeMap<Integer,Alarm> _alarmMap;
 	
 	//ArrayAdapter<String> AD1alarmValueAdapter;
 	
@@ -63,13 +72,15 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		
 		setContentView(R.layout.activity_modulesettings);
 		
-		_alarmMap = new HashMap<Integer,Alarm>();
+		//_alarmMap = new TreeMap<Integer,Alarm>(Collections.reverseOrder());
 		
 		// Spinner contents
 		// Alarm Level, Off, Low, Mid, High
-		ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
+		//ArrayAdapter<CharSequence> 
+		alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
 		// Alarm relativity: Greater than, Lower than
-		ArrayAdapter<CharSequence> alarmRelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_relative, android.R.layout.simple_spinner_item );
+		//ArrayAdapter<CharSequence> 
+		alarmRelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_relative, android.R.layout.simple_spinner_item );
 		
 		// Setup "spinner design"
 		alarmRelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
@@ -77,9 +88,13 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		
 		// Find UI components
 		
+		ll = (LinearLayout) findViewById(R.id.linearLayoutFrSkyModuleSettings);
+		
 		// Model Name
 		tvModelName = (TextView) findViewById(R.id.tv_FrSkySettings_modelName);
 		tvModelName.setText("");
+		
+		
 		// Save button
 		btnSave = (Button) findViewById(R.id.FrSkySettings_save);
 		
@@ -240,7 +255,9 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				_model = FrSkyServer.database.getModel(_modelId);
 			}
 			//_alarmMap = _model.getFrSkyAlarms();
-			_alarmMap = FrSkyServer.database.getAlarmsForModel(_modelId);
+			_alarmMap = new TreeMap<Integer,Alarm>(Collections.reverseOrder());
+			_alarmMap.putAll(FrSkyServer.database.getAlarmsForModel(_modelId));
+			//_alarmMap = FrSkyServer.database.getAlarmsForModel(_modelId);
 			
 			tvModelName.setText(_model.getName());
 			
@@ -314,6 +331,7 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				Log.e(TAG,e.toString());
 			}
 			
+			populateGUI();
 			
 		}
 
@@ -393,7 +411,20 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 //				RSSIalarm1RelSpinner.getSelectedItem().toString().replaceFirst("Value ", ""),
 //				server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).toEng(RSSIalarm1ValueSpinner.getSelectedItemPosition()+minThresholdRSSI,true)));
 		
-		updateStrings();
+		if((view.getId()>ID_ALARM_SPINNER_LEVEL)&& (view.getId()<ID_ALARM_SPINNER_LEVEL+255))
+		{
+			Log.i(TAG,"selected a Level spinner");
+		}
+		else if ((view.getId()>ID_ALARM_SPINNER_RELATIVE)&& (view.getId()<ID_ALARM_SPINNER_RELATIVE+255))
+		{
+			Log.i(TAG,"selected a relative spinner");
+		}
+		else
+		{
+			updateStrings();
+		}
+		
+		
 		
 //		
 	}
@@ -436,7 +467,78 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
     	}
 	}
 
-	
+	public void populateGUI()
+	{
+		//ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
+		// Alarm relativity: Greater than, Lower than
+		//ArrayAdapter<CharSequence> alarmRelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_relative, android.R.layout.simple_spinner_item );
+		
+		// Setup "spinner design"
+		//alarmRelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
+		//alarmLevelAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
+
+		
+		Iterator<Alarm> i = _alarmMap.values().iterator();
+		//for(Alarm a : _alarmMap.values())
+		while(i.hasNext())
+		{
+			Alarm a = i.next();
+			if(DEBUG)Log.d(TAG,"Creating GUI components for alarm "+a.getFrSkyFrameType());
+			// Line 1
+			//LinearLayout line1 = new LinearLayout(getApplicationContext());
+			TextView tvTitle = new TextView(getApplicationContext());
+			String title = "";
+			
+			
+			switch(a.getFrSkyFrameType())
+			{
+				case Frame.FRAMETYPE_ALARM1_AD1:
+					title = "AD1 - Alarm 1";
+					break;
+				case Frame.FRAMETYPE_ALARM2_AD1:
+					title = "AD1 - Alarm 2";
+					break;
+				case Frame.FRAMETYPE_ALARM1_AD2:
+					title = "AD2 - Alarm 1";
+					break;
+				case Frame.FRAMETYPE_ALARM2_AD2:
+					title = "AD2 - Alarm 2";
+					break;
+				case Frame.FRAMETYPE_ALARM1_RSSI:
+					title = "RSSI - Alarm 1";
+					break;
+				case Frame.FRAMETYPE_ALARM2_RSSI:
+					title = "RSSI - Alarm 2";
+					break;
+			}
+			tvTitle.setText(title);
+			tvTitle.setBackgroundColor(0xff909090);
+			tvTitle.setTextColor(0xffffffff);
+			ll.addView(tvTitle);
+			
+			
+			// // Source channel
+			
+			//ArrayAdapter<CharSequence> lvlAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
+			//Spinner levelSp = new Spinner(getApplicationContext());
+			Spinner levelSp = new Spinner(this);
+			levelSp.setAdapter(alarmLevelAdapter);
+			levelSp.setOnItemSelectedListener(this);
+			levelSp.setId(ID_ALARM_SPINNER_LEVEL+a.getFrSkyFrameType());
+			ll.addView(levelSp);
+			
+			Spinner relSp = new Spinner(this);
+			relSp.setAdapter(alarmRelAdapter);
+			relSp.setOnItemSelectedListener(this);
+			relSp.setId(ID_ALARM_SPINNER_RELATIVE+a.getFrSkyFrameType());
+			ll.addView(relSp);
+			
+
+			// Threshold
+			// To Text
+			// // Individual Send
+		}
+	}
 
 	@Override
 	public void onStartTrackingTouch(SeekBar seekBar) {

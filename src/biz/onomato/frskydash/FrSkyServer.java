@@ -3,6 +3,7 @@ package biz.onomato.frskydash;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
@@ -457,9 +458,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 	
-	public HashMap<Integer,Alarm> initializeFrSkyAlarms()
+	public TreeMap<Integer,Alarm> initializeFrSkyAlarms()
 	{
-		HashMap<Integer,Alarm> aMap = new HashMap<Integer,Alarm>();
+		TreeMap<Integer,Alarm> aMap = new TreeMap<Integer,Alarm>();
 		Frame alarmFrame = Frame.AlarmFrame(
 				Frame.FRAMETYPE_ALARM1_RSSI, 
 				Alarm.ALARMLEVEL_LOW, 

@@ -2,6 +2,7 @@ package biz.onomato.frskydash;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -29,7 +30,7 @@ public class Model {
 	private int _id;
 	private Context _context;
 	//public Alarm[] alarms;
-	HashMap<Integer,Alarm> frSkyAlarms;
+	TreeMap<Integer,Alarm> frSkyAlarms;
 	public int alarmCount = 0;
 
 	
@@ -47,7 +48,7 @@ public class Model {
 		
 		// FRSKY channels only for now
 		//alarms = new Alarm[6];
-		frSkyAlarms = new HashMap<Integer, Alarm>();
+		frSkyAlarms = new TreeMap<Integer, Alarm>();
 		
 		
 		// populate FrSky Alarms with defaults
@@ -248,12 +249,12 @@ public class Model {
 		}
 
 	}
-	public HashMap<Integer,Alarm> getFrSkyAlarms()
+	public TreeMap<Integer,Alarm> getFrSkyAlarms()
 	{
 		return frSkyAlarms;
 	}
 	
-	public void setFrSkyAlarms(HashMap<Integer,Alarm> alarmMap)
+	public void setFrSkyAlarms(TreeMap<Integer,Alarm> alarmMap)
 	{
 		if(alarmMap.size()>0)
 		{

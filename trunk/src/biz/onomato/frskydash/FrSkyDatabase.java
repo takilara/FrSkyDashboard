@@ -1,7 +1,7 @@
 package biz.onomato.frskydash;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -123,7 +123,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		m.setChannels(channelList);
 		
 		// Add Alarms to the model
-		HashMap<Integer,Alarm> alarmMap = getAlarmsForModel(m.getId());
+		TreeMap<Integer,Alarm> alarmMap = getAlarmsForModel(m.getId());
 		m.setFrSkyAlarms(alarmMap);
 		
 		return m;
@@ -416,12 +416,12 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     // Always get and change all alarms for a model at the same time
     // UNIQUE(modelId,FrSkyFrametype), so no real need for ~id
     
-    public HashMap<Integer,Alarm> getAlarmsForModel(Model model)
+    public TreeMap<Integer,Alarm> getAlarmsForModel(Model model)
     {
     	return getAlarmsForModel(model.getId());
     }
     
-    public HashMap<Integer,Alarm> getAlarmsForModel(int modelId)
+    public TreeMap<Integer, Alarm> getAlarmsForModel(int modelId)
     {
     	// Query for this modelid
     	open();
@@ -435,7 +435,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		if(DEBUG)Log.d(TAG,"Loading alarms for modelid: "+modelId);
 		if(DEBUG)Log.d(TAG,"  found: "+cu.getCount()+" alarms");
 		
-		HashMap<Integer,Alarm> mAlarms = new HashMap<Integer,Alarm>();
+		TreeMap<Integer,Alarm> mAlarms = new TreeMap<Integer,Alarm>();
 		
 		cu.moveToFirst();
 		int len = cu.getCount();
@@ -470,7 +470,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	return setAlarmsForModel(model.getId(),model.getFrSkyAlarms());
     }
     
-    public boolean setAlarmsForModel(int modelId,HashMap<Integer,Alarm> alarmMap)
+    public boolean setAlarmsForModel(int modelId,TreeMap<Integer,Alarm> alarmMap)
     {
     	// delete all the existing alarms
     	deleteAlarmsForModel(modelId);

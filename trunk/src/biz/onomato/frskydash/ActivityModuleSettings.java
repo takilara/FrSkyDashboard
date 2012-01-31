@@ -1,5 +1,7 @@
 package biz.onomato.frskydash;
 
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 public class ActivityModuleSettings extends Activity implements OnItemSelectedListener, OnClickListener, OnSeekBarChangeListener {
 
 	private static final String TAG = "FrSky-Settings";
+	protected static final boolean DEBUG = true;
 	private FrSkyServer server;
 	
 	
@@ -41,17 +44,26 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	int maxThresholdRSSI=110;
 	int minThresholdAD=1;
 	int maxThresholdAD=255;
+	private int _modelId = -1;
+	private Model _model=null;
+	private HashMap<Integer,Alarm> _alarmMap;
 	
 	//ArrayAdapter<String> AD1alarmValueAdapter;
 	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
+		Intent launcherIntent = getIntent();
+		_modelId = launcherIntent.getIntExtra("modelId", -1);
+		
 		super.onCreate(savedInstanceState);
 		
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		
 		setContentView(R.layout.activity_modulesettings);
+		
+		_alarmMap = new HashMap<Integer,Alarm>();
 		
 		// Spinner contents
 		// Alarm Level, Off, Low, Mid, High
@@ -210,6 +222,23 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 			
+			
+			if(_modelId==-1)
+			{
+				if(DEBUG) Log.d(TAG,"Configure new Model object");
+				//_model = new Model(getApplicationContext());
+				_model = server.getCurrentModel();
+			}
+			else
+			{
+				if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+				//_model = new Model(getApplicationContext());
+				//_model.loadFromDatabase(_modelId);
+				_model = FrSkyServer.database.getModel(_modelId);
+			}
+			_alarmMap = _model.getFrSkyAlarms();
+			
+			
 			// only enable send buttons if Bluetooth is connected
 			if(server.getConnectionState()==BluetoothSerialService.STATE_CONNECTED)
 			{
@@ -223,48 +252,52 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 				btnSend.setEnabled(setToWhenNotConnected);
 			}
 			
-			Log.d(TAG,"Try to set up spinners for model: "+server.getCurrentModel().getName());
-			Log.d(TAG,"This model has this many alarms: "+server.getCurrentModel().getFrSkyAlarms().size());
-			for(int key : server.getCurrentModel().getFrSkyAlarms().keySet())
+			Log.d(TAG,"Try to set up spinners for model: "+_model.getName());
+			Log.d(TAG,"This model has this many alarms: "+_alarmMap.size());
+			if(_alarmMap.size()==0)
 			{
-				Log.d(TAG,"\t"+key+"= "+server.getCurrentModel().getFrSkyAlarms().get(key));
+				_alarmMap = server.initializeFrSkyAlarms();
+			}
+			for(int key : _alarmMap.keySet())
+			{
+				Log.d(TAG,"\t"+key+"= "+_alarmMap.get(key));
 			}
 
 			
 			try
 			{
 				// TODO: Fix here
-				Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
+				Alarm a = _alarmMap.get(Frame.FRAMETYPE_ALARM1_RSSI);
 				RSSIalarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				RSSIalarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				RSSIalarm1RelSpinner.setSelection(a.getGreaterThan());
 				RSSIalarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
+				a = _alarmMap.get(Frame.FRAMETYPE_ALARM2_RSSI);
 				RSSIalarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				RSSIalarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				RSSIalarm2RelSpinner.setSelection(a.getGreaterThan());
 				RSSIalarm2LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1);
+				a = _alarmMap.get(Frame.FRAMETYPE_ALARM1_AD1);
 				AD1alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD1alarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD1alarm1RelSpinner.setSelection(a.getGreaterThan());
 				AD1alarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1);
+				a = _alarmMap.get(Frame.FRAMETYPE_ALARM2_AD1);
 				AD1alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD1alarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD1alarm2RelSpinner.setSelection(a.getGreaterThan());
 				AD1alarm2LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2);
+				a = _alarmMap.get(Frame.FRAMETYPE_ALARM1_AD2);
 				AD2alarm1ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD2alarm1ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD2alarm1RelSpinner.setSelection(a.getGreaterThan());
 				AD2alarm1LevelSpinner.setSelection(a.getAlarmLevel());
 //				
-				a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2);
+				a = _alarmMap.get(Frame.FRAMETYPE_ALARM2_AD2);
 				AD2alarm2ValueSb.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
 				AD2alarm2ValueSb.setProgress(a.getThreshold()-a.getMinThreshold());
 				AD2alarm2RelSpinner.setSelection(a.getGreaterThan());
@@ -288,37 +321,37 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 	public void updateStrings()
 	{
 		Log.d(TAG,"Update the RSSI string!");
-		Alarm a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI);
+		Alarm a = _alarmMap.get(Frame.FRAMETYPE_ALARM1_RSSI);
 		a.setThreshold(RSSIalarm1ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(RSSIalarm1RelSpinner.getSelectedItemPosition());
 		a.setAlarmLevel(RSSIalarm1LevelSpinner.getSelectedItemPosition());
 		tvRSSI_1_human.setText(a.toString());
 
-		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI);
+		a = _alarmMap.get(Frame.FRAMETYPE_ALARM2_RSSI);
 		a.setThreshold(RSSIalarm2ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(RSSIalarm2RelSpinner.getSelectedItemPosition());
 		a.setAlarmLevel(RSSIalarm2LevelSpinner.getSelectedItemPosition());
 		tvRSSI_2_human.setText(a.toString());
 		
-		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1);
+		a = _alarmMap.get(Frame.FRAMETYPE_ALARM1_AD1);
 		a.setThreshold(AD1alarm1ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(AD1alarm1RelSpinner.getSelectedItemPosition());
 		a.setAlarmLevel(AD1alarm1LevelSpinner.getSelectedItemPosition());
 		tvAD1_1_human.setText(a.toString());
 		
-		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1);
+		a = _alarmMap.get(Frame.FRAMETYPE_ALARM2_AD1);
 		a.setThreshold(AD1alarm2ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(AD1alarm2RelSpinner.getSelectedItemPosition());
 		a.setAlarmLevel(AD1alarm2LevelSpinner.getSelectedItemPosition());
 		tvAD1_2_human.setText(a.toString());
 		
-		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2);
+		a = _alarmMap.get(Frame.FRAMETYPE_ALARM1_AD2);
 		a.setThreshold(AD2alarm1ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(AD2alarm1RelSpinner.getSelectedItemPosition());
 		a.setAlarmLevel(AD2alarm1LevelSpinner.getSelectedItemPosition());
 		tvAD2_1_human.setText(a.toString());
 		
-		a = server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2);
+		a = _alarmMap.get(Frame.FRAMETYPE_ALARM2_AD2);
 		a.setThreshold(AD2alarm2ValueSb.getProgress()+a.getMinThreshold());
 		a.setGreaterThan(AD2alarm2RelSpinner.getSelectedItemPosition());
 		a.setAlarmLevel(AD2alarm2LevelSpinner.getSelectedItemPosition());
@@ -372,20 +405,23 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 		Frame f;
     	switch (v.getId()) {
     		case R.id.FrSkySettings_send:
-    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_RSSI).toFrame());
-    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI).toFrame());
-    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD1).toFrame());
-    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD1).toFrame());
-    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM1_AD2).toFrame());
-    			server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_AD2).toFrame());
+    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_RSSI).toFrame());
+    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_RSSI).toFrame());
+    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_AD1).toFrame());
+    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_AD1).toFrame());
+    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_AD2).toFrame());
+    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_AD2).toFrame());
     			// RSSI alarms frames should also be parsed outgoing.
     			//server.parseFrame(f);
     			break;
     		case R.id.FrSkySettings_save:
-    			//server.send(server.getCurrentModel().getFrSkyAlarms().get(Frame.FRAMETYPE_ALARM2_RSSI).toFrame());
-    			server.database.saveModel(server.getCurrentModel());
-    			// RSSI alarms frames should also be parsed outgoing.
-    			//server.parseFrame(f);
+
+    			// Copy back new _alarmMap
+    			FrSkyServer.database.saveModel(_model);
+
+    			this.setResult(RESULT_OK);
+				this.finish();
+
     			break;
     	}
 	}

@@ -1,5 +1,6 @@
 package biz.onomato.frskydash;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import android.util.Log;
@@ -17,6 +18,12 @@ public class Frame {
 	public static final int FRAMETYPE_ALARM2_AD1=0xfb;
 	public static final int FRAMETYPE_ALARM1_AD2=0xfa;
 	public static final int FRAMETYPE_ALARM2_AD2=0xf9;
+
+	/**
+	 * User data frame type. Second byte in frames for user data (telemetry
+	 * sensor hub data) are indicated with 0xFD at index 1 (pos 2)
+	 */
+	public static final int FRAMETYPE_USER_DATA = 0xFD;
 	
 	
 	// these need to correspond real deal
@@ -42,19 +49,57 @@ public class Frame {
 	
 	
 	public int ad1,ad2,rssirx,rssitx = 0;
+
+	//hcpl: some parameters for the new byte per byte reading of frames from input stream
+	/**
+	 * delimiter byte for telemetry frames (start & stop byte)
+	 */
+	public static final int START_STOP_TELEMETRY_FRAME = 0x7E;
 	
+	/**
+	 * xor byte for telemetry frames
+	 */
+	public static final int XOR_TELEMETRY_FRAME = 0x20;
+	
+	/**
+	 * byt stuffing indicator for telementry frames
+	 */
+	public static final int STUFFING_TELEMETRY_FRAME = 0x7D;
+	
+	/**
+	 * size for telemetry frames
+	 */
+	public static final int SIZE_TELEMETRY_FRAME = 11;
+	
+	/**
+	 * def ctor using an array of integers as the 11 bytes for a single frame
+	 * 
+	 * @param frame
+	 */
 	public Frame(int[] frame)
 	{
-		if((frame.length>10) && (frame.length<30))
-		{
+		//hcpl: reviewed frame length validation
+		//TODO move these params to Frame
+		if (frame.length != Frame.SIZE_TELEMETRY_FRAME
+				|| frame[0] != Frame.START_STOP_TELEMETRY_FRAME
+				|| frame[Frame.SIZE_TELEMETRY_FRAME - 1] != Frame.START_STOP_TELEMETRY_FRAME) {
+			//drop frame and log information
+			Log.d(TAG, "Invalid frame format received: "+Arrays.toString(frame));
+			return;
+		}
+		
+		//if((frame.length>10) && (frame.length<30))
+		//{
 			timestamp = new Date();
 			//Log.i(TAG,"Constructor");
 			_frameRaw = frame;
 			// fix bytestuffing
-			if(frame.length>11)
-			{
-				frame = frameDecode(frame);
-			}
+		// FIXME this is now done on SerialService level but it needs to be
+		// reviewed!
+			//if(frame.length>11)
+			//{
+			//	frame = frameDecode(frame);
+			//}
 			
 			_frame = frame;
 			
@@ -109,6 +154,11 @@ public class Frame {
 					alarmChannel = Channel.CHANNELTYPE_RSSI;
 					alarmNumber = 1;
 					break;
+				case FRAMETYPE_USER_DATA:
+					//hcpl handle sensor hub information
+					frametype=FRAMETYPE_USER_DATA;
+					//parsing is done in parseFrame method using Frame object and 
+					break;
 				default:
 					frametype=FRAMETYPE_UNDEFINED;
 					
@@ -140,11 +190,44 @@ public class Frame {
 				
 				
 			}
-		}
+		//}
 	}
 	
+	// hcpl user data frame parameters
+	/**
+	 * size for user data frames
+	 */
+	public static final int SIZE_USER_FRAME = 5;
 	
+	/**
+	 * delimiter byte for user data frames
+	 */
+	public static final int START_STOP_USER_FRAME = 0x5E;
 	
+	/**
+	 * stuffing indicator for the user data frames
+	 */
+	public static final int STUFFING_USER_DATA_FRAME = 0x5D;
+	
+	/**
+	 * first byte after stuffing indicator should be XORed with this value
+	 */
+	public static final int XOR_USER_DATA_FRAME = 0x60;
+
+	/**
+	 * Handle byte stuffing in case frame has more then 11 bytes
+	 * 
+	 * @param frame
+	 *            integer array
+	 * @return the frame with stuffed bytes replaced so length matches 11 bytes.
+	 * @deprecated Original method for handling byte stuffing. Now done on the
+	 *             level of {@link BluetoothSerialService}. I deprecated this
+	 *             one since it was giving indesoutofboundsexception on longer
+	 *             frames then 11. Didn't debug into detail but I believe the
+	 *             counter for the outFrame was also incremented when a stuffed
+	 *             byte was dropped resulting in an index great than the 11 size 
+	 *             frame restriction.
+	 */
 	private int[] frameDecode(int[] frame)
 	{
 		if(frame.length>11)
@@ -181,6 +264,10 @@ public class Frame {
 		}	
 	}
 	
+	/**
+	 * this ctor will only create an empty Frame object with 11 frames with no
+	 * data.
+	 */
 	public Frame()
 	{
 		this(new int[11]);
@@ -273,7 +360,7 @@ public class Frame {
 		StringBuffer buf = new StringBuffer();
 		
 		//Log.i(TAG,"Create human raedable string with "+frame.length+" bytes");
-		int xor = 0x00;
+		//int xor = 0x00;
 		for(int n=0;n<frame.length;n++)
 		{
 			String hex ="";
@@ -346,5 +433,6 @@ public class Frame {
 		}
 		return buf;
 	}
+	
 	
 }

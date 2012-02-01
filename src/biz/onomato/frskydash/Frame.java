@@ -25,13 +25,11 @@ public class Frame {
 	 */
 	public static final int FRAMETYPE_USER_DATA = 0xFD;
 	
-	
 	// these need to correspond real deal
 	//public static final int ALARMLEVEL_OFF=0;
 	//public static final int ALARMLEVEL_LOW=1;
 	//public static final int ALARMLEVEL_MID=2;
 	//public static final int ALARMLEVEL_HIGH=3;
-	
 	
 	public int frametype;
 	public int frameHeaderByte;
@@ -46,7 +44,6 @@ public class Frame {
 	public String alarmGreaterThanString;
 	public String humanFrame;
 	public Date timestamp;
-	
 	
 	public int ad1,ad2,rssirx,rssitx = 0;
 
@@ -193,26 +190,26 @@ public class Frame {
 		//}
 	}
 	
-	// hcpl user data frame parameters
+	// hcpl sensor hub data frame parameters
 	/**
 	 * size for user data frames
 	 */
-	public static final int SIZE_USER_FRAME = 5;
+	public static final int SIZE_HUB_FRAME = 5;
 	
 	/**
 	 * delimiter byte for user data frames
 	 */
-	public static final int START_STOP_USER_FRAME = 0x5E;
+	public static final int START_STOP_HUB_FRAME = 0x5E;
 	
 	/**
 	 * stuffing indicator for the user data frames
 	 */
-	public static final int STUFFING_USER_DATA_FRAME = 0x5D;
+	public static final int STUFFING_HUB_FRAME = 0x5D;
 	
 	/**
 	 * first byte after stuffing indicator should be XORed with this value
 	 */
-	public static final int XOR_USER_DATA_FRAME = 0x60;
+	public static final int XOR_HUB_FRAME = 0x60;
 
 	/**
 	 * Handle byte stuffing in case frame has more then 11 bytes

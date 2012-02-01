@@ -360,15 +360,15 @@ public class BluetoothSerialService {
 
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
-            //byte[] buffer = new byte[1024];
-            //byte[] framebuffer = new byte[1024];
+            byte[] buffer = new byte[1024];
             //List  b = new LinkedList();
             //ArrayList<Byte> b = new ArrayList<Byte>();
             //int ptr=0;
             //int endpos = 0;
             //int startpos = 0;
+            int bytes = 0;
            
-            //hcpl modified to read single bytes
+            //hcpl modified to read single bytes from buffer
             int b;
             // the frame we are going to send over once complete
             int[] frame = new int[Frame.SIZE_TELEMETRY_FRAME];
@@ -381,101 +381,104 @@ public class BluetoothSerialService {
             while (true) {
                 try {
 					// Read from the InputStream
-					// bytes = mmInStream.read(buffer);
-					b = mmInStream.read();
+					bytes = mmInStream.read(buffer);
 					// start parsing input stream byte per byte
-					// handle byte stuffing first
-					// FIXME bytestuffing not working?
-					if (b == Frame.STUFFING_TELEMETRY_FRAME) {
-						// indicate we need to xor the next one
-						xor = true;
-						// and drop this byte
-						continue;
-					}
-					// we encountered a byte stuff indicator in previous
-					// iteration
-					if (xor) {
-						// perform xor operation
-						b ^= Frame.XOR_TELEMETRY_FRAME;
-						// disable xor flag again for next iteration
-						xor = false;
-					}
-					// if we encounter a start byte we need to indicate we're in
-					// a
-					// frame or if at the end handle the frame and continue
-					if (b == Frame.START_STOP_TELEMETRY_FRAME) {
-						// if currentFrameIndex is not set we have to start a
-						// new
-						// frame here
-						if (currentFrameIndex < 0) {
-							// init current frame index at beginning
-							currentFrameIndex = 0;
-							// and copy this first byte in the frame
+					for( int i=0 ; i< bytes ; i++){
+						// b = mmInStream.read();
+						b = buffer[i];
+						// handle byte stuffing first
+						if (b == Frame.STUFFING_TELEMETRY_FRAME) {
+							// indicate we need to xor the next one
+							xor = true;
+							// and drop this byte
+							continue;
+						}
+						// we encountered a byte stuff indicator in previous
+						// iteration so we need to XOR here to unstuff and make
+						// sure to bypass the start/stop byte detection.
+						if (xor) {
+							// perform xor operation
+							b ^= Frame.XOR_TELEMETRY_FRAME;
+							// disable xor flag again for next iteration
+							// wait to unset the xor operation flag since we'll
+							// need it in next steps to skip the start/stop byte
+							// detection
+							// xor = false;
+							Log.d(TAG, "XOR operation detected, unstuffed to "
+									+ Integer.toHexString(b));
+						} 
+						// if we encounter a start byte we need to indicate
+						// we're in a frame or if at the end handle the frame
+						// and continue
+						if (b == Frame.START_STOP_TELEMETRY_FRAME && !xor) {
+							// if currentFrameIndex is not set we have to start
+							// a new frame here
+							if (currentFrameIndex < 0) {
+								// init current frame index at beginning
+								currentFrameIndex = 0;
+								// and copy this first byte in the frame
+								frame[currentFrameIndex++] = b;
+							}
+							// otherwise we were already collecting a frame so
+							// this indicates we are at the end now. At this
+							// point a frame is available that we can send over.
+							else if (currentFrameIndex == Frame.SIZE_TELEMETRY_FRAME - 1) {
+								// just complete the frame we were collecting
+								frame[currentFrameIndex] = b;
+								// this way the length is confirmed
+								// Send the obtained bytes to the UI Activity
+								mHandler.obtainMessage(
+										ActivityDashboard.MESSAGE_READ,
+										frame.length, -1, frame).sendToTarget();
+								// once information is handled we can reset the
+								// frame
+								frame = new int[Frame.SIZE_TELEMETRY_FRAME];
+								// we can already set this start byte to the
+								// beginning of the frame here
+								currentFrameIndex = -1;
+							}
+							// if for some reason we got 2 times a 0x7e byte
+							// after each other or the size of the frame was
+							// different we can't do anything with the previous
+							// collected information. We can log a debug message
+							// and drop the frame to start over again.
+							else {
+								// log debug info here
+								Log.d(TAG,
+										"Start/stop byte telemetry frame at wrong position: 0x"
+												+ Integer.toHexString(b)
+												+ " current frame so far: "
+												+ Arrays.toString(frame)
+												+ ". Frame was reset and this start/stop counted as start.");
+								// reset frame and counts this start/stop bit as
+								// beginning
+								currentFrameIndex = 0;
+								frame = new int[Frame.SIZE_TELEMETRY_FRAME];
+								frame[currentFrameIndex++] = b;
+							}
+						}
+						// otherwise we are handling a valid byte that has to be
+						// put in the frame we are collecting. But only when we
+						// are currently working on a frame!
+						else if (currentFrameIndex >= 0
+								&& currentFrameIndex < Frame.SIZE_TELEMETRY_FRAME - 1) {
 							frame[currentFrameIndex++] = b;
 						}
-						// otherwise we were already collecting a frame so this
-						// indicates we are at the end now. At this point a
-						// frame is
-						// available that we can send over.
-						else if (currentFrameIndex == Frame.SIZE_TELEMETRY_FRAME - 1) {
-							// just complete the frame we were collecting
-							frame[currentFrameIndex] = b;
-							// this way the length is confirmed
-							// Send the obtained bytes to the UI Activity
-							mHandler.obtainMessage(
-									ActivityDashboard.MESSAGE_READ,
-									frame.length, -1, frame).sendToTarget();
-							// once information is handled we can reset the
-							// frame
-							frame = new int[Frame.SIZE_TELEMETRY_FRAME];
-							// we can already set this start byte to the
-							// beginning
-							// of the frame here
-							currentFrameIndex = -1;
-						}
-						// if for some reason we got 2 times a 0x7e byte after
-						// each other
-						// or the size of the frame was different we can't do
-						// anything with the previous collected information. We
-						// can
-						// log a debug message and drop the frame to start over
-						// again.
+						// finally it's possible that we receive bytes without
+						// being in a frame, just discard them for now. These
+						// are probably from missing frames etc
 						else {
 							// log debug info here
 							Log.d(TAG,
-									"Start/stop byte telemetry frame at wrong position: 0x"
-											+ Integer.toHexString(b)
-											+ " current frame so far: "
-											+ Arrays.toString(frame)
-											+ ". Frame was reset and this start/stop counted as start.");
-							// reset frame and counts this start/stop bit as
-							// beginning
-							currentFrameIndex = 0;
-							frame = new int[Frame.SIZE_TELEMETRY_FRAME];
-							frame[currentFrameIndex++] = b;
+									"Received data while not in telemetry frame recording mode, dropped byte: 0x"
+											+ Integer.toHexString(b));
 						}
+						//don't forget to unset the xor flag so we can continue normal byte operation on next iteration
+						xor = false;
 					}
-					// otherwise we are handling a valid byte that has to be put
-					// in
-					// the frame we are collecting. But only when we are
-					// currently
-					// working on a frame!
-					else if (currentFrameIndex >= 0
-							&& currentFrameIndex < Frame.SIZE_TELEMETRY_FRAME - 1) {
-						frame[currentFrameIndex++] = b;
-					}
-					// finally it's possible that we receive bytes without being
-					// in
-					// a frame, just discard them for now. These are probably
-					// from missing frames etc
-					else {
-						// log debug info here
-						Log.d(TAG,
-								"received data while not in telemetry frame recording mode, dropped byte: 0x"
-										+ Integer.toHexString(b));
-					}  	
+					//hcpl oringinal logic
                     
-                    //Log.i(TAG,"Read "+bytes+" new bytes.");
+					//Log.i(TAG,"Read "+bytes+" new bytes.");
 
                     //mEmulatorView.write(buffer, bytes);
                     // Send the obtained bytes to the UI Activity
@@ -565,6 +568,7 @@ public class BluetoothSerialService {
 //
 //                    String a = buffer.toString();
 //                    a = "";
+						
                 } catch (IOException e) {
                     //Log.e(TAG, "disconnected", e);
                     connectionLost();

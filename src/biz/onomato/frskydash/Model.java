@@ -338,6 +338,28 @@ public class Model {
 		
 	}
 	
+	public ArrayList<Channel> getAllowedSourceChannels()
+	{
+		ArrayList<Channel> sourceChannels = new ArrayList<Channel>();
+		
+		// Add all server channels
+		for(Channel c : FrSkyServer.getSourceChannels())
+		{
+			//sourceChannels[n] = c;
+			sourceChannels.add(c);
+		}
+		
+		// Add channels from this model
+	
+		//for(Channel c : FrSkyServer.database.getChannelsForModel(getId())) 	// Gets from database		
+		for(Channel c : getChannels())											// Gets from instance
+		{
+				sourceChannels.add(c);
+		}
+		return sourceChannels;
+	}
+	
+	
 //	public boolean loadFromDatabase(long id)
 //	{
 //		// False if not found

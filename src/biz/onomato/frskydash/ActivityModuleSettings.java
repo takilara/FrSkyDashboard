@@ -518,6 +518,12 @@ public class ActivityModuleSettings extends Activity implements OnItemSelectedLi
 			
 			
 			// // Source channel
+			Spinner sourceSp = new Spinner(this);
+			sourceSp.setAdapter(alarmLevelAdapter);
+			sourceSp.setOnItemSelectedListener(this);
+			sourceSp.setId(ID_ALARM_SPINNER_LEVEL+a.getFrSkyFrameType());
+			sourceSp.setSelection(a.getAlarmLevel());
+			ll.addView(sourceSp);
 			
 			//ArrayAdapter<CharSequence> lvlAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
 			//Spinner levelSp = new Spinner(getApplicationContext());

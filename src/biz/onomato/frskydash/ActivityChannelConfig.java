@@ -27,6 +27,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private static final boolean DEBUG=true;
 	private long _channelId = -1;
 	private int _idInModel = -1;
+	private int _modelId=-1;
+	private Model _model;
 	private FrSkyServer server;
 	SharedPreferences settings;
 	SharedPreferences.Editor editor;
@@ -57,6 +59,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			Log.d(TAG,"channel context is: "+channel.getContext());
 			channel.setContext(getApplicationContext());
 			Log.d(TAG,"channel context is: "+channel.getContext());
+
 		}
 		catch(Exception e)
 		{
@@ -64,6 +67,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			channel = null;
 			_channelId = launcherIntent.getIntExtra("channelId", -1);
 		}
+		
+		_modelId = launcherIntent.getIntExtra("modelId", -1);
 		
 		Log.d(TAG, "Channel Id is: "+_channelId);
 		
@@ -121,6 +126,21 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			settings = server.getSettings();
 	        editor = settings.edit();
 	        
+	        
+	        if(_modelId==-1)
+			{
+				if(DEBUG) Log.d(TAG,"Configure new Model object");
+				//_model = new Model(getApplicationContext());
+				_model = server.getCurrentModel();
+			}
+			else
+			{
+				if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+				//_model = new Model(getApplicationContext());
+				//_model.loadFromDatabase(_modelId);
+				_model = FrSkyServer.database.getModel(_modelId);
+			}
+	        
 			// Show a particular channel
 
 //	        if((_channelId>-1) && (channel==null))
@@ -133,49 +153,57 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        {
 				// Get configuration from config store
 
-	        	//Channel[] sourceChannels = new Channel[server.getSourceChannels().length+server.getCurrentModel().getChannels().size()];
-	        	ArrayList<Channel> sourceChannels = new ArrayList<Channel>();
+	        	//ArrayList<Channel> sourceChannels = new ArrayList<Channel>();
+	        	ArrayList<Channel> sourceChannels = _model.getAllowedSourceChannels();
 	        	
 	        	int n =0;
 	        	
-	        	// Add all server channels
-	        	for(Channel c : server.getSourceChannels())
-	        	{
-	        		//sourceChannels[n] = c;
-	        		sourceChannels.add(c);
-	        		n++;
-	        	}
-	        	
-	        	// Add channels from this model
-	        	//Channel.getChannelsForModel(context, model)
-	        	//TODO: Need to get channels for another model than currentmodel
-	        	
-	        	//for(Channel c : server.getCurrentModel().getChannels())
+	        	// eso channels list gotten from model instead, still need to "remove" this channel before giving it to spinner
+	        	//FIXME: Delete self from soureChannels 
+//	        	for(Channel c : sourceChannels)
+//	        	{
+//	        		if(c.getId()==channel.getId())
+//	        	}
 	        	
 	        	
-	        	int separatorPos = n;
-	        	
-	        	//for(Channel c : Channel.getChannelsForModel(getApplicationContext(),channel.getModelId()))
-	        	for(Channel c : server.database.getChannelsForModel(channel.getModelId()))
-	        	{
-	        		if(DEBUG)Log.i(TAG,String.format("Comparing '%s' to '%s'",channel.getDescription(),c.getDescription()));
-	        		if(c.getId()!=channel.getId())
-	        		{
-	        			//Log.e(TAG,channel+" is different from "+c);
-	        			//Log.e(TAG,channel.getId()+" is different from "+c.getId());
-
-	        			// Channel is different
-	        			//sourceChannels[n] = c;
-	        			sourceChannels.add(c);
-		        		n++;
-	        		}
-	        		else
-	        		{
-	        			// Channel is the same, ignore it
-	        			if(DEBUG)Log.i(TAG,channel+" is same as "+c+", ignore it");
-	        		}
-	        		
-	        	}
+//	        	// Add all server channels
+//	        	for(Channel c : server.getSourceChannels())
+//	        	{
+//	        		//sourceChannels[n] = c;
+//	        		sourceChannels.add(c);
+//	        		n++;
+//	        	}
+//	        	
+//	        	// Add channels from this model
+//	        	//Channel.getChannelsForModel(context, model)
+//	        	//TODO: Need to get channels for another model than currentmodel
+//	        	
+//	        	//for(Channel c : server.getCurrentModel().getChannels())
+//	        	
+//	        	
+//	        	int separatorPos = n;
+//	        	
+//	        	//for(Channel c : Channel.getChannelsForModel(getApplicationContext(),channel.getModelId()))
+//	        	for(Channel c : server.database.getChannelsForModel(channel.getModelId()))
+//	        	{
+//	        		if(DEBUG)Log.i(TAG,String.format("Comparing '%s' to '%s'",channel.getDescription(),c.getDescription()));
+//	        		if(c.getId()!=channel.getId())
+//	        		{
+//	        			//Log.e(TAG,channel+" is different from "+c);
+//	        			//Log.e(TAG,channel.getId()+" is different from "+c.getId());
+//
+//	        			// Channel is different
+//	        			//sourceChannels[n] = c;
+//	        			sourceChannels.add(c);
+//		        		n++;
+//	        		}
+//	        		else
+//	        		{
+//	        			// Channel is the same, ignore it
+//	        			if(DEBUG)Log.i(TAG,channel+" is same as "+c+", ignore it");
+//	        		}
+//	        		
+//	        	}
 	        	
 	        	
 				

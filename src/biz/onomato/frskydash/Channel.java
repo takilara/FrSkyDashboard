@@ -12,11 +12,12 @@ import android.os.Parcelable;
 import android.util.Log;
 import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 
-public class Channel implements Parcelable  {
+public class Channel implements Parcelable, Comparator<Channel>  {
 	private static final String TAG = "Channel";
 	
 	
@@ -581,9 +582,44 @@ public class Channel implements Parcelable  {
 		return sb.toString();
 	}
 	
+
+	// ==========================================================================================
+	// ====                        COMPAREABLE                                              =====
+	// ==========================================================================================
+
+
+	@Override
+	public int compare(Channel lhs, Channel rhs) {
+		// TODO Auto-generated method stub
+		
+		if(lhs.getId()==rhs.getId()) return 0;
+		if(lhs.getId()<rhs.getId()) return -1;
+		else return 1;
+	}
+
 	
+	@Override public boolean equals(Object o) {
+		if (this == o) {
+		   return true;
+		}
 
-
+	    // Return false if the other object has the wrong type.
+	    // This type may be an interface depending on the interface's specification.
+	    if (!(o instanceof Channel)) {
+	       return false;
+	    }
+		Channel channel = (Channel) o;
+	    if(this.getId()==channel.getId())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+		
+	}
 	
 	// ==========================================================================================
 	// ====                        PARCELABLE                                               =====
@@ -646,6 +682,7 @@ public class Channel implements Parcelable  {
 	                return new Channel[size];
 	            }
 	        };
+	
 
     
     

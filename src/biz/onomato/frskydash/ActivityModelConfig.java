@@ -251,6 +251,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
 					i.putExtra("channel", _model.getChannels().get(v.getId()-1000));
+					i.putExtra("modelId", (int) _model.getId());	// Should edit existing model
 					i.putExtra("idInModel", v.getId()-1000);
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}

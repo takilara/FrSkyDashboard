@@ -22,17 +22,19 @@ public class Alarm {
 	private int _level;
 	private int _modelId=-1;
 	private int _greaterthan;
+	private String _name="";
 	//private Channel _sourceChannel;
 
 	
 	private int _minThreshold=-1;
 	private int _maxThreshold=-1;
 	
-	private int _sourceChannelId=-1;
-	private String _sourceChannelUnit="";
-	private float _sourceChannelOffset=0;
-	private float _sourceChannelFactor=1;
-	private String _sourceChannelDescription="";
+	private int _unitChannelId=-1;
+	private String _unitChannelUnit="";
+	private float _unitChannelOffset=0;
+	private float _unitChannelFactor=1;
+	private String _unitChannelDescription="";
+	private int _unitChannelPrecision=0;
 	
 	private static final int MINIMUM_THRESHOLD_RSSI=20;
 	private static final int MAXIMUM_THRESHOLD_RSSI=110;
@@ -83,46 +85,44 @@ public class Alarm {
 	public String toString()
 	{
 		//return String.format("Type: %s, Level: %s, Threshold: %s, Greaterthan: %s",_type,_level,_threshold,_greaterthan);
-		String out;
-		if(_sourceChannelId!=-1)
-		{
-			out = _sourceChannelDescription+" alarm ";
-		}
-		else
-		{
-			out = "Alarm ";
-		}
+		String out = _name+": ";
+
 		switch(_level)
 		{
 			case ALARMLEVEL_OFF:
-				out += "off when ";
+				out += "off ";
 				break;
 			case ALARMLEVEL_LOW:
-				out += "low when ";
+				out += "low ";
 				break;
 			case ALARMLEVEL_MID:
-				out += "medium when ";
+				out += "medium ";
 				break;
 			case ALARMLEVEL_HIGH:
-				out += "high when ";
+				out += "high ";
 				break;
 		}
+		out +="when value is ";
 		
 		if(_greaterthan==GREATERTHAN)
 		{
-			out += "greater than "+getThresholdEng();
+			out += "greater than "+_threshold;
 		}
 		else
 		{
-			out += "lower than "+getThresholdEng();
+			out += "lower than "+_threshold;
 		}
-		if(_sourceChannelId!=-1)
+		if(_unitChannelId!=-1)
 		{
-			out += " ("+_threshold+")";
+			out += " ("+getThresholdEng()+")";
 		}
 		return out;
 	}
 	
+	public String getName()
+	{
+		return _name;
+	}
 
 	
 	public void setGreaterThan(int greaterThan)
@@ -167,67 +167,75 @@ public class Alarm {
 	public void setFrSkyFrameType(int frameType)
 	{
 		_frSkyFrameType = frameType;
-		
-		if((_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD1) || 
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_AD1) || 
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM1_AD2) ||
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_AD2))
+		switch(_frSkyFrameType)
 		{
-			_minThreshold = MINIMUM_THRESHOLD_AD;
-			_maxThreshold = MAXIMUM_THRESHOLD_AD;
+			case Frame.FRAMETYPE_ALARM1_AD1:
+				_minThreshold = MINIMUM_THRESHOLD_AD;
+				_maxThreshold = MAXIMUM_THRESHOLD_AD;
+				_name = "AD1 - Alarm 1";
+				break;
+			case Frame.FRAMETYPE_ALARM2_AD1:
+				_minThreshold = MINIMUM_THRESHOLD_AD;
+				_maxThreshold = MAXIMUM_THRESHOLD_AD;
+				_name = "AD1 - Alarm 2";
+				break;
+			case Frame.FRAMETYPE_ALARM1_AD2:
+				_minThreshold = MINIMUM_THRESHOLD_AD;
+				_maxThreshold = MAXIMUM_THRESHOLD_AD;
+				_name = "AD2 - Alarm 1";
+				break;
+			case Frame.FRAMETYPE_ALARM2_AD2:
+				_minThreshold = MINIMUM_THRESHOLD_AD;
+				_maxThreshold = MAXIMUM_THRESHOLD_AD;
+				_name = "AD2 - Alarm 2";
+				break;
+			case Frame.FRAMETYPE_ALARM1_RSSI:
+				_minThreshold = MINIMUM_THRESHOLD_RSSI;
+				_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
+				_name = "RSSI - Alarm 1";
+				break;
+			case Frame.FRAMETYPE_ALARM2_RSSI:
+				_minThreshold = MINIMUM_THRESHOLD_RSSI;
+				_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
+				_name = "RSSI - Alarm 2";
+				break;
 		}
-		else if((_frSkyFrameType==Frame.FRAMETYPE_ALARM1_RSSI) || 
-				(_frSkyFrameType==Frame.FRAMETYPE_ALARM2_RSSI))
-		{
-			_minThreshold = MINIMUM_THRESHOLD_RSSI;
-			_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
-		}
-		
 	}
+	
 	public int getFrSkyFrameType()
 	{
 		return _frSkyFrameType;
 	}
 	
-	public int getSourceChannel()
+	public int getUnitChannelId()
 	{
-		return _sourceChannelId;
+		return _unitChannelId;
 	}
 	
-	public void setSourceChannel(int channelId)
+	public void setUnitChannel(int channelId)
 	{
 		if(channelId>=0)
 		{
 			Channel ch = FrSkyServer.database.getChannel(channelId);
-			setSourceChannel(ch);
+			setUnitChannel(ch);
 		}
 		else
 		{
-			switch(_frSkyFrameType)
+			switch(_frSkyFrameType)	//only RSSI alarms should have default (and locked) unitchannel
 			{
 				case Frame.FRAMETYPE_ALARM1_AD1:
-					
-					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1));
 					break;
 				case Frame.FRAMETYPE_ALARM2_AD1:
-					//setSourceChannel()
-					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD1));
 					break;
 				case Frame.FRAMETYPE_ALARM1_AD2:
-					//setSourceChannel()
-					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2));
 					break;
 				case Frame.FRAMETYPE_ALARM2_AD2:
-					//setSourceChannel()
-					//setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_AD2));
 					break;
 				case Frame.FRAMETYPE_ALARM1_RSSI:
-					//setSourceChannel()
-					setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
+					setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
 					break;
 				case Frame.FRAMETYPE_ALARM2_RSSI:
-					//setSourceChannel()
-					setSourceChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
+					setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
 					break;
 			}
 		}
@@ -236,19 +244,15 @@ public class Alarm {
 	
 	
 	
-	public void setSourceChannel(Channel channel)
+	public void setUnitChannel(Channel channel)
 	{
-		_sourceChannelId = channel.getId();
-		_sourceChannelFactor = channel.getFactor();
-		_sourceChannelOffset = channel.getOffset();
-		_sourceChannelUnit = channel.getShortUnit();
-		_sourceChannelDescription = channel.getDescription();
+		_unitChannelId = channel.getId();
+		_unitChannelFactor = channel.getFactor();
+		_unitChannelOffset = channel.getOffset();
+		_unitChannelUnit = channel.getShortUnit();
+		_unitChannelDescription = channel.getDescription();
+		_unitChannelPrecision = channel.getPrecision();
 	}
-	
-//	public Channel getSourceChannel()
-//	{
-//		return _sourceChannel;
-//	}
 	
 	
 	public void setThreshold(int threshold)
@@ -276,14 +280,14 @@ public class Alarm {
 
 	public String getThresholdEng()
 	{
-		if(_sourceChannelId==-1)
+		if(_unitChannelId==-1)
 		{
 			return String.valueOf(_threshold);
 		}
 		else
 		{
-			Float val = (_threshold*_sourceChannelFactor)+_sourceChannelOffset;
-			return String.format("%s %s", val,_sourceChannelUnit);
+			Float val = (_threshold*_unitChannelFactor)+_unitChannelOffset;
+			return String.format("%."+_unitChannelPrecision+"f %s", val,_unitChannelUnit);
 		}
 	}
 	
@@ -292,8 +296,8 @@ public class Alarm {
 	public String[] getThresholds()
 	{
 		if(DEBUG)Log.i(TAG,"get thresholds: ");
-		if(DEBUG)Log.i(TAG,"sourcechannel: "+_sourceChannelId);
-		if(_sourceChannelId==-1)
+		if(DEBUG)Log.i(TAG,"sourcechannel: "+_unitChannelId);
+		if(_unitChannelId==-1)
 		{
 			String[] out = new String[_maxThreshold-_minThreshold];
 			for(int i=0;i<_maxThreshold-_minThreshold;i++)
@@ -308,7 +312,7 @@ public class Alarm {
 			String[] out = new String[_maxThreshold-_minThreshold];
 			for(int i=0;i<_maxThreshold-_minThreshold;i++)
 			{
-				out[i] = String.format("%s %s",(((i+_minThreshold)*_sourceChannelFactor)+_sourceChannelOffset),_sourceChannelUnit);
+				out[i] = String.format("%s %s",(((i+_minThreshold)*_unitChannelFactor)+_unitChannelOffset),_unitChannelUnit);
 			}
 			if(DEBUG)Log.i(TAG,"Thresholds: "+out.toString());
 			return out;

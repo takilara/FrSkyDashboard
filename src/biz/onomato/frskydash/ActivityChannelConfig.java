@@ -141,91 +141,24 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				_model = FrSkyServer.database.getModel(_modelId);
 			}
 	        
-			// Show a particular channel
-
-//	        if((_channelId>-1) && (channel==null))
-//			{
-//				// Get the Channel instance
-//				channel = server.getChannelById((int) _channelId);
-//			}
 			
 	        if(channel!=null)
 	        {
-				// Get configuration from config store
-
-	        	//ArrayList<Channel> sourceChannels = new ArrayList<Channel>();
 	        	ArrayList<Channel> sourceChannels = _model.getAllowedSourceChannels();
 	        	
 	        	int n =0;
 	        	
-	        	// eso channels list gotten from model instead, still need to "remove" this channel before giving it to spinner
-	        	//FIXME: Delete self from soureChannels 
-//	        	for(Channel c : sourceChannels)
-//	        	{
-//	        		if(c.equals(channel))
-//	        	}
-	        	
+   	
+	        	// eso: remove self from list
 	        	sourceChannels.remove(channel);
-	        	
-	        	
-//	        	// Add all server channels
-//	        	for(Channel c : server.getSourceChannels())
-//	        	{
-//	        		//sourceChannels[n] = c;
-//	        		sourceChannels.add(c);
-//	        		n++;
-//	        	}
-//	        	
-//	        	// Add channels from this model
-//	        	//Channel.getChannelsForModel(context, model)
-//	        	//TODO: Need to get channels for another model than currentmodel
-//	        	
-//	        	//for(Channel c : server.getCurrentModel().getChannels())
-//	        	
-//	        	
-//	        	int separatorPos = n;
-//	        	
-//	        	//for(Channel c : Channel.getChannelsForModel(getApplicationContext(),channel.getModelId()))
-//	        	for(Channel c : server.database.getChannelsForModel(channel.getModelId()))
-//	        	{
-//	        		if(DEBUG)Log.i(TAG,String.format("Comparing '%s' to '%s'",channel.getDescription(),c.getDescription()));
-//	        		if(c.getId()!=channel.getId())
-//	        		{
-//	        			//Log.e(TAG,channel+" is different from "+c);
-//	        			//Log.e(TAG,channel.getId()+" is different from "+c.getId());
-//
-//	        			// Channel is different
-//	        			//sourceChannels[n] = c;
-//	        			sourceChannels.add(c);
-//		        		n++;
-//	        		}
-//	        		else
-//	        		{
-//	        			// Channel is the same, ignore it
-//	        			if(DEBUG)Log.i(TAG,channel+" is same as "+c+", ignore it");
-//	        		}
-//	        		
-//	        	}
-	        	
-	        	
-				
+
 	        	ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,sourceChannels);
-	        	
-	        	//ChannelListAdapter channelDescriptionAdapter  = new ChannelListAdapter (getApplicationContext(),android.R.layout.simple_spinner_item,sourceChannels);
-	        	
-	        	
-//				for(Channel c : server.getCurrentModel().getChannels())
-//				{
-//					channelDescriptionAdapter.add(c);
-//				}
 				channelDescriptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				
 				
 				spSourceChannel.setAdapter(channelDescriptionAdapter);
 				
 				
-				
-				//TODO: set correct startup source channel
+				// eso: set correct startup channel
 				long len = channelDescriptionAdapter.getCount();
 				for(int i=0;i<len;i++)
 				{
@@ -233,17 +166,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 					if(c.getId()==channel.getSourceChannelId())
 					{
 						spSourceChannel.setSelection(i);
+						break;
 					}
 				}
 				
-				
-								
-
-				// Name is common from configstore and server
-				//tvName.setText(channel.getName());
-				
-				
-				// Use config from Server
 				edDesc.setText(channel.getDescription());
 				edUnit.setText(channel.getLongUnit());
 				edShortUnit.setText(channel.getShortUnit());
@@ -253,10 +179,6 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				edPrecision.setText(Integer.toString(channel.getPrecision()));
 				edMovingAverage.setText(Integer.toString(channel.getMovingAverage()));
 				chkSpeechEnabled.setChecked(channel.getSpeechEnabled());
-				
-				// Use config from config store
-				//edShortUnit.setText(cShortUnit);
-				
 			}
 		}
 
@@ -353,59 +275,5 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		{
 			if(DEBUG) Log.d(TAG,"This is a new model, delay saving");
 		}
-		//}
-		
-		
 	}
-	
-
-	// Attempt at adding separators
-//	class ChannelListAdapter extends ArrayAdapter<Object>  {
-//		ChannelListAdapter(Context context, int resource, int textViewResourceId, List<Object> objects) {
-//            super(context, resource, textViewResourceId, objects);
-//        }
-//
-//		ChannelListAdapter(Context context, int resource, int textViewResourceId, Object[] objects) {
-//            super(context, resource, textViewResourceId, objects);
-//        }
-//
-//		ChannelListAdapter(Context context, int resource, int textViewResourceId) {
-//            super(context, resource, textViewResourceId);
-//        }
-//
-//		ChannelListAdapter(Context context, int textViewResourceId, List<Object> objects) {
-//            super(context, textViewResourceId, objects);
-//        }
-//
-//		ChannelListAdapter(Context context, int textViewResourceId, Object[] objects) {
-//            super(context, textViewResourceId, objects);
-//        }
-//
-//		ChannelListAdapter(Context context, int textViewResourceId) {
-//            super(context, textViewResourceId);
-//        }
-//
-//        @Override
-//        public boolean isEnabled(int position) {
-//            // return false if position == position you want to disable
-//        	
-//        	if(getItem(position) instanceof Channel)
-//        	{
-//        		return true;
-//        	}
-//        	else
-//        	{
-//        		return false;
-//        	}
-//        }
-//
-//        @Override
-//        public boolean areAllItemsEnabled () {
-//        	return false;
-//        }
-//        
-//
-//
-//        	
-//	}
 }

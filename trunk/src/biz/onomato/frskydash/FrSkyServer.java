@@ -3,11 +3,8 @@ package biz.onomato.frskydash;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Timer;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -36,27 +33,27 @@ import android.widget.Toast;
 public class FrSkyServer extends Service implements OnInitListener {
 	    
 	private static final String TAG="FrSkyServerService";
-	private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+	//private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
 	private AudioManager _audiomanager;
-	private boolean _scoConnected = false;
+	//private boolean _scoConnected = false;
 	
 	// Things for Bluetooth
-	private static final int REQUEST_ENABLE_BT = 2;
+	//private static final int REQUEST_ENABLE_BT = 2;
 	private IntentFilter mIntentFilterBt;
 	private boolean bluetoothEnabledAtStart;
 	private boolean _connecting=false;
     private BluetoothAdapter mBluetoothAdapter = null;
 	
-    private int MY_DATA_CHECK_CODE;
+    //private int MY_DATA_CHECK_CODE;
     private SharedPreferences _settings=null;
 	//SharedPreferences settings;
 	private SharedPreferences.Editor _editor;
 
 	
-	private Long counter = 0L; 
+	//private Long counter = 0L; 
 	private NotificationManager nm;
-	private Timer timer = new Timer();
+	//private Timer timer = new Timer();
 	private final Calendar time = Calendar.getInstance();
 	
 	public static final int CMD_KILL_SERVICE	=	9999;
@@ -87,8 +84,6 @@ public class FrSkyServer extends Service implements OnInitListener {
     private MyStack fpsRxStack;
 	private MyStack fpsTxStack;
 	private static final int FRAMES_FOR_FPS_CALC=2;
-    
-    
     
     private Logger logger;
     private Model _currentModel;
@@ -126,8 +121,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	//private HashMap<String,Channel> _serverChannels;
 	
-	
-	private int MAX_CHANNELS=4;
+	//private int MAX_CHANNELS=4;
 
 	private int _framecount=0;
 	private int _framecountRx=0;
@@ -145,21 +139,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 //	private double[] hFactor;
 //	private String[] hUnit;
 //	private String[] hLongUnit;
-	private int channels=0;
+	//private int channels=0;
 	
 //	private Channel[] objs; //TODO: Deprecate
 	
-	
-	private HashMap<String, String> _myAudibleStreamMap;
-	
-
-	
+	//private HashMap<String, String> _myAudibleStreamMap;
 	
 	//public Channel AD1,AD2,RSSIrx,RSSItx;
 	
 	//public Model currentModel;
-	
-	
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
@@ -1230,7 +1218,7 @@ private final Handler mHandlerBT = new Handler() {
 	 * the current user frame we are working on. This is used to pass data
 	 * between incompletes frames.
 	 */
-	private static int[] userFrame = new int[Frame.SIZE_USER_FRAME];
+	private static int[] userFrame = new int[Frame.SIZE_HUB_FRAME];
 
 	/**
 	 * index of the current user frame. If set to -1 no user frame is under
@@ -1261,18 +1249,22 @@ private final Handler mHandlerBT = new Handler() {
 		for (int i = 4; i < Frame.SIZE_TELEMETRY_FRAME - 1; i++) {
 			b = frame[i];
 			// handle byte stuffing first
-			if (b == Frame.STUFFING_USER_DATA_FRAME) {
+			if (b == Frame.STUFFING_HUB_FRAME) {
 				xor = true;
 				// drop this byte
 				continue;
 			}
 			if (xor) {
-				b ^= Frame.XOR_USER_DATA_FRAME;
-				xor = false;
+				b ^= Frame.XOR_HUB_FRAME;
+				// don't unset the xor flag yet since we'll have to check on
+				// this for start/stop bit detection
+				// xor = false;
+				Log.d(TAG, "XOR operation detected, unstuffed to "
+						+ Integer.toHexString(b));
 			}
 			// if we encounter a start byte we need to indicate we're in a
 			// frame or if at the end handle the frame and continue
-			if (b == Frame.START_STOP_USER_FRAME) {
+			if (b == Frame.START_STOP_HUB_FRAME && !xor) {
 				// if currentFrameIndex is not set we have to start a new
 				// frame here
 				if (currentUserFrameIndex < 0) {
@@ -1284,13 +1276,13 @@ private final Handler mHandlerBT = new Handler() {
 				// otherwise we were already collecting a frame so this
 				// indicates we are at the end now. At this point a frame is
 				// available that we can send over.
-				else if (currentUserFrameIndex == Frame.SIZE_USER_FRAME - 1) {
+				else if (currentUserFrameIndex == Frame.SIZE_HUB_FRAME - 1) {
 					// just complete the frame we were collecting
 					userFrame[currentUserFrameIndex] = b;
 					// this way the length is confirmed
 					handleUserDataFrame(userFrame);
 					// once information is handled we can reset the frame
-					userFrame = new int[Frame.SIZE_USER_FRAME];
+					userFrame = new int[Frame.SIZE_HUB_FRAME];
 					currentUserFrameIndex = 0;
 					userFrame[currentUserFrameIndex++] = b;
 				}
@@ -1307,7 +1299,7 @@ private final Handler mHandlerBT = new Handler() {
 									+ Arrays.toString(frame)
 									+ ". Frame was reset and this start/stop counted as start.");
 					currentUserFrameIndex = 0;
-					userFrame = new int[Frame.SIZE_USER_FRAME];
+					userFrame = new int[Frame.SIZE_HUB_FRAME];
 					userFrame[currentUserFrameIndex++] = b;
 				}
 			}
@@ -1315,7 +1307,7 @@ private final Handler mHandlerBT = new Handler() {
 			// the frame we are collecting. But only when we are currently
 			// working on a frame!
 			else if (currentUserFrameIndex >= 0
-					&& currentUserFrameIndex < Frame.SIZE_USER_FRAME - 1) {
+					&& currentUserFrameIndex < Frame.SIZE_HUB_FRAME - 1) {
 				userFrame[currentUserFrameIndex++] = b;
 			}
 			// finally it's possible that we receive bytes without being in
@@ -1325,6 +1317,8 @@ private final Handler mHandlerBT = new Handler() {
 				Log.d(TAG, "Received data while not in user frame recording mode, dropped byte: 0x"
 								+ Integer.toHexString(b));
 			}
+			//make sure to unset the xor flag at this point
+			xor = false;
 		}
 	}
 
@@ -1338,9 +1332,9 @@ private final Handler mHandlerBT = new Handler() {
 		// some validation first
 		// all frames are delimited by the 0x5e start and end byte and should be
 		// 5 bytes long. We can validate this before doing any parsing
-		if (frame.length != Frame.SIZE_USER_FRAME
-				|| frame[0] != Frame.START_STOP_USER_FRAME
-				|| frame[Frame.SIZE_USER_FRAME - 1] != Frame.START_STOP_USER_FRAME) {
+		if (frame.length != Frame.SIZE_HUB_FRAME
+				|| frame[0] != Frame.START_STOP_HUB_FRAME
+				|| frame[Frame.SIZE_HUB_FRAME - 1] != Frame.START_STOP_HUB_FRAME) {
 			// log exception here
 			Log.d(TAG, "Wrong user frame format: "
 					+ Arrays.toString(frame));

@@ -162,8 +162,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	//FIXME: Delete self from soureChannels 
 //	        	for(Channel c : sourceChannels)
 //	        	{
-//	        		if(c.getId()==channel.getId())
+//	        		if(c.equals(channel))
 //	        	}
+	        	
+	        	sourceChannels.remove(channel);
 	        	
 	        	
 //	        	// Add all server channels

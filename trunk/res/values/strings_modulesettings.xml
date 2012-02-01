@@ -15,10 +15,10 @@
     <string name="FrSkySettings_Alarm_meaning">Alarm meaning</string>
     
     <string-array name="alarm_level">
-	<item>Alarm: Off</item>
-	<item>Alarm: Low</item>
-	<item>Alarm: Mid</item>
-	<item>Alarm: High</item>
+	<item>Off</item>
+	<item>Low</item>
+	<item>Mid</item>
+	<item>High</item>
 	</string-array>
 	
     <string-array name="alarm_threshold">

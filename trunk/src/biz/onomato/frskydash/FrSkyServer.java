@@ -446,7 +446,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				45, 
 				Alarm.LESSERTHAN);
 		Alarm a = new Alarm(alarmFrame);
-		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
+		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -460,7 +460,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Alarm.LESSERTHAN);
 		
 		a = new Alarm(alarmFrame);
-		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
+		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -470,7 +470,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				42, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
+		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -480,7 +480,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				42, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
+		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -490,7 +490,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				42, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
+		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -500,7 +500,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				42, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setSourceChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
+		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		return aMap;

@@ -459,7 +459,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	a.setThreshold(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_THRESHOLD)));
     	a.setGreaterThan(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_GREATERTHAN)));
     	a.setAlarmLevel(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ALARMLEVEL)));
-    	a.setSourceChannel(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_UNITSOURCECHANNEL)));
+    	a.setUnitChannel(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_UNITSOURCECHANNEL)));
 		
 		if(DEBUG) Log.d(TAG,"Loaded alarm '"+a+"' from database");
 		return a;
@@ -494,7 +494,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         initialValues.put(KEY_THRESHOLD, alarm.getThreshold());
         initialValues.put(KEY_GREATERTHAN, alarm.getGreaterThan());
         initialValues.put(KEY_ALARMLEVEL, alarm.getAlarmLevel());
-        initialValues.put(KEY_UNITSOURCECHANNEL, alarm.getSourceChannel());
+        initialValues.put(KEY_UNITSOURCECHANNEL, alarm.getUnitChannelId());
         
         int id = (int) db.insert(DATABASE_TABLE_FRSKYALARMS, null, initialValues);
         close();

@@ -1218,13 +1218,13 @@ private final Handler mHandlerBT = new Handler() {
 	 * the current user frame we are working on. This is used to pass data
 	 * between incompletes frames.
 	 */
-	private static int[] userFrame = new int[Frame.SIZE_HUB_FRAME];
+	private static int[] hubFrame = new int[Frame.SIZE_HUB_FRAME];
 
 	/**
 	 * index of the current user frame. If set to -1 no user frame is under
 	 * construction.
 	 */
-	private static int currentUserFrameIndex = -1;
+	private static int currentHubFrameIndex = -1;
 
 	/**
 	 * if on previous byte the XOR byte was found or not
@@ -1267,24 +1267,24 @@ private final Handler mHandlerBT = new Handler() {
 			if (b == Frame.START_STOP_HUB_FRAME && !xor) {
 				// if currentFrameIndex is not set we have to start a new
 				// frame here
-				if (currentUserFrameIndex < 0) {
+				if (currentHubFrameIndex < 0) {
 					// init current frame index at beginning
-					currentUserFrameIndex = 0;
+					currentHubFrameIndex = 0;
 					// and copy this first byte in the frame
-					userFrame[currentUserFrameIndex++] = b;
+					hubFrame[currentHubFrameIndex++] = b;
 				}
 				// otherwise we were already collecting a frame so this
 				// indicates we are at the end now. At this point a frame is
 				// available that we can send over.
-				else if (currentUserFrameIndex == Frame.SIZE_HUB_FRAME - 1) {
+				else if (currentHubFrameIndex == Frame.SIZE_HUB_FRAME - 1) {
 					// just complete the frame we were collecting
-					userFrame[currentUserFrameIndex] = b;
+					hubFrame[currentHubFrameIndex] = b;
 					// this way the length is confirmed
-					handleUserDataFrame(userFrame);
+					handleHubDataFrame(hubFrame);
 					// once information is handled we can reset the frame
-					userFrame = new int[Frame.SIZE_HUB_FRAME];
-					currentUserFrameIndex = 0;
-					userFrame[currentUserFrameIndex++] = b;
+					hubFrame = new int[Frame.SIZE_HUB_FRAME];
+					currentHubFrameIndex = 0;
+					hubFrame[currentHubFrameIndex++] = b;
 				}
 				// if for some reason we got 2 0x5e bytes after each other
 				// or the size of the frame was different we can't do
@@ -1298,17 +1298,17 @@ private final Handler mHandlerBT = new Handler() {
 									+ " current frame so far: "
 									+ Arrays.toString(frame)
 									+ ". Frame was reset and this start/stop counted as start.");
-					currentUserFrameIndex = 0;
-					userFrame = new int[Frame.SIZE_HUB_FRAME];
-					userFrame[currentUserFrameIndex++] = b;
+					currentHubFrameIndex = 0;
+					hubFrame = new int[Frame.SIZE_HUB_FRAME];
+					hubFrame[currentHubFrameIndex++] = b;
 				}
 			}
 			// otherwise we are handling a valid byte that has to be put in
 			// the frame we are collecting. But only when we are currently
 			// working on a frame!
-			else if (currentUserFrameIndex >= 0
-					&& currentUserFrameIndex < Frame.SIZE_HUB_FRAME - 1) {
-				userFrame[currentUserFrameIndex++] = b;
+			else if (currentHubFrameIndex >= 0
+					&& currentHubFrameIndex < Frame.SIZE_HUB_FRAME - 1) {
+				hubFrame[currentHubFrameIndex++] = b;
 			}
 			// finally it's possible that we receive bytes without being in
 			// a frame, just discard them for now
@@ -1328,7 +1328,7 @@ private final Handler mHandlerBT = new Handler() {
 	 * 
 	 * @param frame
 	 */
-	private void handleUserDataFrame(int[] frame) {
+	private void handleHubDataFrame(int[] frame) {
 		// some validation first
 		// all frames are delimited by the 0x5e start and end byte and should be
 		// 5 bytes long. We can validate this before doing any parsing
@@ -1336,7 +1336,7 @@ private final Handler mHandlerBT = new Handler() {
 				|| frame[0] != Frame.START_STOP_HUB_FRAME
 				|| frame[Frame.SIZE_HUB_FRAME - 1] != Frame.START_STOP_HUB_FRAME) {
 			// log exception here
-			Log.d(TAG, "Wrong user frame format: "
+			Log.d(TAG, "Wrong hub frame format: "
 					+ Arrays.toString(frame));
 			return;
 		}

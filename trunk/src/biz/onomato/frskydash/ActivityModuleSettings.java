@@ -39,6 +39,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	private static final int ID_ALARM_SEEKBAR_THRESHOLD = 9000;
 	private static final int ID_ALARM_BUTTON_SEND = 10000;
 	
+	private boolean _btSendButtonsEnabled = false;
+	
 	private Button btnSend,btnSave;
 	private TextView tvModelName;
 	private LinearLayout ll;
@@ -166,17 +168,23 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			tvModelName.setText(_model.getName());
 			
 			// only enable send buttons if Bluetooth is connected
+			
 			if(server.getConnectionState()==BluetoothSerialService.STATE_CONNECTED)
 			{
-				boolean setToWhenConnected=true;
-				btnSend.setEnabled(setToWhenConnected);
+				//boolean setToWhenConnected=true;
+				_btSendButtonsEnabled = true;
+//				btnSend.setEnabled(setToWhenConnected);
 				
 			}
 			else
 			{
-				boolean setToWhenNotConnected=false;
-				btnSend.setEnabled(setToWhenNotConnected);
+				_btSendButtonsEnabled = false;
+//				boolean setToWhenNotConnected=false;
+//				btnSend.setEnabled(setToWhenNotConnected);
 			}
+			
+			btnSend.setEnabled(_btSendButtonsEnabled);
+
 			
 			Log.d(TAG,"Try to set up spinners for model: "+_model.getName());
 			Log.d(TAG,"This model has this many alarms: "+_alarmMap.size());
@@ -404,11 +412,12 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 				
 			});
 			
-			Button sendBtn = new Button(this);
-			sendBtn.setText("Send");
-			sendBtn.setId(ID_ALARM_BUTTON_SEND+a.getFrSkyFrameType());
-			sendBtn.setEnabled(false);
-			sendBtn.setOnClickListener(new OnClickListener(){
+			Button sendABtn = new Button(this);
+			sendABtn.setText("Send");
+			sendABtn.setId(ID_ALARM_BUTTON_SEND+a.getFrSkyFrameType());
+			sendABtn.setEnabled(_btSendButtonsEnabled);
+			
+			sendABtn.setOnClickListener(new OnClickListener(){
 
 				@Override
 				public void onClick(View v) {
@@ -456,7 +465,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			ll.addView(descTv);
 			
 			
-			ll.addView(sendBtn);
+			ll.addView(sendABtn);
 			
 			
 			// Threshold

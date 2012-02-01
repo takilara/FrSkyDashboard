@@ -385,7 +385,9 @@ public class BluetoothSerialService {
 					// start parsing input stream byte per byte
 					for( int i=0 ; i< bytes ; i++){
 						// b = mmInStream.read();
-						b = buffer[i];
+						// use & 0xff to properly convert from byte to 0-255 int
+						// value (java only knows signed bytes)
+						b = buffer[i] & 0xff;
 						// handle byte stuffing first
 						if (b == Frame.STUFFING_TELEMETRY_FRAME) {
 							// indicate we need to xor the next one
@@ -404,7 +406,7 @@ public class BluetoothSerialService {
 							// need it in next steps to skip the start/stop byte
 							// detection
 							// xor = false;
-							Log.d(TAG, "XOR operation detected, unstuffed to "
+							Log.d(TAG, "XOR operation, unstuffed to "
 									+ Integer.toHexString(b));
 						} 
 						// if we encounter a start byte we need to indicate
@@ -445,11 +447,10 @@ public class BluetoothSerialService {
 							else {
 								// log debug info here
 								Log.d(TAG,
-										"Start/stop byte telemetry frame at wrong position: 0x"
+										"Start/stop byte at wrong position: 0x"
 												+ Integer.toHexString(b)
-												+ " current frame so far: "
-												+ Arrays.toString(frame)
-												+ ". Frame was reset and this start/stop counted as start.");
+												+ " frame so far: "
+												+ Arrays.toString(frame));
 								// reset frame and counts this start/stop bit as
 								// beginning
 								currentFrameIndex = 0;
@@ -470,7 +471,7 @@ public class BluetoothSerialService {
 						else {
 							// log debug info here
 							Log.d(TAG,
-									"Received data while not in telemetry frame recording mode, dropped byte: 0x"
+									"Received data outside frame, dropped byte: 0x"
 											+ Integer.toHexString(b));
 						}
 						//don't forget to unset the xor flag so we can continue normal byte operation on next iteration

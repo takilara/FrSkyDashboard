@@ -1259,7 +1259,7 @@ private final Handler mHandlerBT = new Handler() {
 				// don't unset the xor flag yet since we'll have to check on
 				// this for start/stop bit detection
 				// xor = false;
-				Log.d(TAG, "XOR operation detected, unstuffed to "
+				Log.d(TAG, "XOR operation, unstuffed to "
 						+ Integer.toHexString(b));
 			}
 			// if we encounter a start byte we need to indicate we're in a
@@ -1293,11 +1293,10 @@ private final Handler mHandlerBT = new Handler() {
 				// again.
 				else {
 					// log debug info here
-					Log.d(TAG, "Start/stop byte user frame at wrong position: 0x"
+					Log.d(TAG, "Start/stop byte at wrong position: 0x"
 									+ Integer.toHexString(b)
-									+ " current frame so far: "
-									+ Arrays.toString(frame)
-									+ ". Frame was reset and this start/stop counted as start.");
+									+ " frame so far: "
+									+ Arrays.toString(frame));
 					currentHubFrameIndex = 0;
 					hubFrame = new int[Frame.SIZE_HUB_FRAME];
 					hubFrame[currentHubFrameIndex++] = b;
@@ -1314,7 +1313,7 @@ private final Handler mHandlerBT = new Handler() {
 			// a frame, just discard them for now
 			else {
 				// log debug info here
-				Log.d(TAG, "Received data while not in user frame recording mode, dropped byte: 0x"
+				Log.d(TAG, "Received data outside frame, dropped byte: 0x"
 								+ Integer.toHexString(b));
 			}
 			//make sure to unset the xor flag at this point
@@ -1421,8 +1420,9 @@ private final Handler mHandlerBT = new Handler() {
 		case 0x26:
 			updateChannel(Channels.acc_z, frame[2] / 1000);
 			break;
-			default:
-				Log.d(TAG, "Unknown sensor type for frame: "+Arrays.toString(frame));
+		default:
+			Log.d(TAG,
+					"Unknown sensor type for frame: " + Arrays.toString(frame));
 		}
 	}
 

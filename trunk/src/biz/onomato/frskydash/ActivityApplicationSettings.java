@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -28,7 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
-public class ActivityApplicationSettings extends Activity implements OnClickListener, OnEditorActionListener {
+public class ActivityApplicationSettings extends Activity implements OnClickListener, OnEditorActionListener, OnFocusChangeListener {
 
 	private static final String TAG = "Application-Settings";
 	private FrSkyServer server;
@@ -70,6 +71,8 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		edCyclicInterval.setOnEditorActionListener(this);
 		//edCyclicInterval.setImeOptions(EditorInfo.IME_ACTION_DONE|EditorInfo.IME_ACTION_UNSPECIFIED);
 		btnSave = (Button) findViewById(R.id.btnSave);
+		//eso: as long as all components forces a save, and navigating out forces a save, i dont need a save btn
+		btnSave.setVisibility(View.GONE);
 		
 		// Add listeners
 		Log.i(TAG,"Add Listeners");
@@ -84,6 +87,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkBtAutoSendAlarms.setOnClickListener(this);
 		btnSave.setOnClickListener(this);
 		//edCyclicSpeakerInterval.addTextChangedListener(this);
+		edCyclicInterval.setOnFocusChangeListener(this);
 		
 		
 		// Load settings
@@ -97,6 +101,15 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	public void onResume()
 	{
 		super.onResume();
+		
+		//test.setText(oAd1.toString());
+	}
+	
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+		save();
 		
 		//test.setText(oAd1.toString());
 	}
@@ -175,6 +188,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 			server.setAutoSetVolume(chkAutoSetVolume.isChecked());
 			server.setMinimumVolume(sbInitialMinimumVolume.getProgress());
 			server.setCyclicSpeechInterval(Integer.parseInt(edCyclicInterval.getText().toString()));
+			server.setAutoSendAlarms(chkBtAutoSendAlarms.isChecked());
 			
 			//getApplicationContext();
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -279,6 +293,12 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 			save();
 		}
 		return true;
+	}
+
+	@Override
+	public void onFocusChange(View v, boolean hasFocus) {
+		// TODO Auto-generated method stub
+		save();
 	}
 	
 }

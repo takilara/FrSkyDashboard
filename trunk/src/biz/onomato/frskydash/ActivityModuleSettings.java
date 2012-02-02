@@ -7,8 +7,12 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -48,6 +52,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	private int _modelId = -1;
 	private Model _model=null;
 	private TreeMap<Integer,Alarm> _alarmMap;
+	private IntentFilter mIntentFilter;
 	
 	//ArrayAdapter<String> AD1alarmValueAdapter;
 	
@@ -85,6 +90,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		
 		// Get Alarms from module button
 		btnGetAlarmsFromModule = (Button) findViewById(R.id.FrSkySettings_btnGetFromModule);
+		
 		
 		
 		
@@ -141,6 +147,10 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
+			mIntentFilter = new IntentFilter();
+		    mIntentFilter.addAction(FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE);
+		    mIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);			// listen for bt messages
+		    
 			Log.i(TAG,"Bound to Service");
 			
 			
@@ -188,7 +198,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			}
 			
 			btnSend.setEnabled(_btSendButtonsEnabled);
-
+			btnGetAlarmsFromModule.setEnabled(_btSendButtonsEnabled);
 			
 			Log.d(TAG,"Try to set up spinners for model: "+_model.getName());
 			Log.d(TAG,"This model has this many alarms: "+_alarmMap.size());
@@ -199,7 +209,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			
 			
 			populateGUI();
-			
+			setStateBtButtons(_btSendButtonsEnabled);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -207,6 +217,16 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		}
 	};
 
+	private void setStateBtButtons(boolean state)
+	{
+		btnSend.setEnabled(state);
+		btnGetAlarmsFromModule.setEnabled(state);
+		for(Alarm a : _alarmMap.values())
+		{
+			Button btn = (Button) findViewById(ID_ALARM_BUTTON_SEND+a.getFrSkyFrameType());
+			btn.setEnabled(state);
+		}
+	}
 	
 	public void updateAlarmDescription(int alarmId)
 	{
@@ -244,7 +264,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     			break;
     		case R.id.FrSkySettings_btnGetFromModule:
     			if(DEBUG)Log.d(TAG,"Try to fetch alarms from the module");
-    			server.getAlarmsFromModule();
+    			registerReceiver(mIntentReceiver, mIntentFilter);
+    			server.recordAlarmsFromModule();
     			// register a listener for a full update
     			break;
     	}
@@ -483,6 +504,57 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		}
 	}
 
+	private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	String msg = intent.getAction();
+        	Bundle extras = intent.getExtras();
+        	Log.i(TAG,"Received Broadcast: '"+msg+"'");
+        	Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE+"'");
+        	if(msg.equals(FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE))
+        	{
+        		for(Alarm a : _alarmMap.values())
+        		{
+        			if(server!=null)
+        			{
+        				try
+        				{
+	        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
+	        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
+	        				a.setGreaterThan(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getGreaterThan());
+	        				updateAlarmDescription(a.getFrSkyFrameType());
+        				}
+        				catch(Exception e)
+        				{
+        					Log.e(TAG,"Failed to get alarms from the server..");
+        					Log.e(TAG,e.getMessage());
+        				}
+        			}
+        		}
+        		//registerReceiver(mIntentReceiver, mIntentFilter);
+        		//unregisterReceiver(mIntentReceiver);
+        		unregisterReceiver(this);
+        	}
+        	else if(msg.equals(BluetoothAdapter.ACTION_STATE_CHANGED))
+        	{
+        		if(server.getConnectionState()==BluetoothSerialService.STATE_CONNECTED)
+    			{
+    				//boolean setToWhenConnected=true;
+    				_btSendButtonsEnabled = true;
+//    				btnSend.setEnabled(setToWhenConnected);
+    				
+    			}
+    			else
+    			{
+    				_btSendButtonsEnabled = false;
+//    				boolean setToWhenNotConnected=false;
+//    				btnSend.setEnabled(setToWhenNotConnected);
+    			}
+    			setStateBtButtons(_btSendButtonsEnabled);
+        	}
+
+        }
+    };
 	
 }
 

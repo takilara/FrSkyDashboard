@@ -71,6 +71,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_TOAST = 5;
     
+    
     public static final String DEVICE_NAME = "device_name";
     private String mConnectedDeviceName = null;
     public static final String TOAST = "toast";
@@ -155,7 +156,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
-
+	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
 	
 	@Override
 	public void onCreate()
@@ -820,7 +821,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     }
 	
 	
-	public void getAlarmsFromModule()
+	public void recordAlarmsFromModule()
 	{
 		// empty the map, allowing others to monitor it for becoming full again
 		_recordingAlarms = true;
@@ -828,6 +829,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		send(Frame.InputRequestAll());
 	}
 	
+	public TreeMap<Integer,Alarm> getRecordedAlarmMap()
+	{
+		return _alarmMap;
+	}
 	
 	private void setupChannels()
 	{
@@ -1185,6 +1190,9 @@ private final Handler mHandlerBT = new Handler() {
 							if(DEBUG)Log.i(TAG,"recording completed");
 							_recordingAlarms = false;
 							//FIXME: send broadcast to allow GUI to update
+							Intent i = new Intent();
+							i.setAction(MESSAGE_ALARM_RECORDING_COMPLETE);
+							sendBroadcast(i);
 						}
 					}
 				}

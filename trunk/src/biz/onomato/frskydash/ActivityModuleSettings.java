@@ -41,7 +41,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	
 	private boolean _btSendButtonsEnabled = false;
 	
-	private Button btnSend,btnSave;
+	private Button btnSend,btnSave,btnGetAlarmsFromModule;
 	private TextView tvModelName;
 	private LinearLayout ll;
 	
@@ -83,12 +83,16 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		// Send Button
 		btnSend = (Button) findViewById(R.id.FrSkySettings_send);
 		
+		// Get Alarms from module button
+		btnGetAlarmsFromModule = (Button) findViewById(R.id.FrSkySettings_btnGetFromModule);
+		
 		
 		
 		
 		// Setup Click Listeners
 		btnSave.setOnClickListener(this);
 		btnSend.setOnClickListener(this);
+		btnGetAlarmsFromModule.setOnClickListener(this);
 
 
 	    
@@ -237,6 +241,11 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     			this.setResult(RESULT_OK);
 				this.finish();
 
+    			break;
+    		case R.id.FrSkySettings_btnGetFromModule:
+    			if(DEBUG)Log.d(TAG,"Try to fetch alarms from the module");
+    			server.getAlarmsFromModule();
+    			// register a listener for a full update
     			break;
     	}
 	}

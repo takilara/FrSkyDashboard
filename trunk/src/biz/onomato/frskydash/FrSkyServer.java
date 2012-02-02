@@ -33,6 +33,7 @@ import android.widget.Toast;
 public class FrSkyServer extends Service implements OnInitListener {
 	    
 	private static final String TAG="FrSkyServerService";
+	private static final boolean DEBUG = true;
 	//private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
 	private AudioManager _audiomanager;
@@ -130,6 +131,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private boolean _btAutoConnect;
 	private int _minimumVolumeLevel;
 	private boolean _autoSetVolume;
+	
+	private TreeMap<Integer,Alarm> _alarmMap;
+	private boolean _recordingAlarms = false;
 
 //	private int[] hRaw;
 //	private double[] hVal;
@@ -151,6 +155,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
+
 	
 	@Override
 	public void onCreate()
@@ -160,7 +165,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		context = getApplicationContext();
 		//_serverChannels = new HashMap<String,Channel>();
 		
-		
+		_alarmMap = new TreeMap<Integer,Alarm>();
 		
 		
 		_audiomanager = 
@@ -815,22 +820,14 @@ public class FrSkyServer extends Service implements OnInitListener {
     }
 	
 	
-//	private void initializeAlarms()
-//	{
-//		// Force alarm creation/initiation
-//				Frame alarmframe1 = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM1_RSSI, 
-//				Alarm.ALARMLEVEL_LOW, 
-//				45, 
-//				Alarm.LESSERTHAN);
-//				Frame alarmframe2 = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM2_RSSI, 
-//				Alarm.ALARMLEVEL_MID, 
-//				42, 
-//				Alarm.LESSERTHAN);
-//				parseFrame(alarmframe1,false);	// don't count in fps
-//				parseFrame(alarmframe2,false);	// don't count in fps
-//	}
+	public void getAlarmsFromModule()
+	{
+		// empty the map, allowing others to monitor it for becoming full again
+		_recordingAlarms = true;
+		_alarmMap.clear();
+		send(Frame.InputRequestAll());
+	}
+	
 	
 	private void setupChannels()
 	{
@@ -1168,33 +1165,29 @@ private final Handler mHandlerBT = new Handler() {
 					// don't copy the entire alarm, as that would kill off sourcechannel
 					//TODO: Compare to existing
 					//TODO: Ask to load into the alarms
-//					Alarm aIn = new Alarm(f);
 //					Alarm a = _currentModel.getFrSkyAlarms().get(aIn.getFrSkyFrameType());
-//					a.setThreshold(aIn.getThreshold());
-//					a.setGreaterThan(aIn.getGreaterThan());
-//					a.setAlarmLevel(aIn.getAlarmLevel());
+//					aIn.setThreshold(aIn.getThreshold());
+//					aIn.setGreaterThan(aIn.getGreaterThan());
+//					aIn.setAlarmLevel(aIn.getAlarmLevel());
 				}
 				
-				if(inBound)	_framecountTx++;
-//				switch(f.alarmChannel)
-//				{
-//				case Channel.CHANNELTYPE_AD1:
-//					//_sourceChannels[CHANNEL_INDEX_AD1].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-//					getCurrentModel().setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-//					break;
-//				case Channel.CHANNELTYPE_AD2:
-//					//_sourceChannels[CHANNEL_INDEX_AD2].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-//					getCurrentModel().setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-//					break;
-//				case Channel.CHANNELTYPE_RSSI:
-//					//_sourceChannels[CHANNEL_INDEX_RSSITX].setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-//					getCurrentModel().setFrSkyAlarm(f.alarmNumber, f.alarmThreshold, f.alarmGreaterThan, f.alarmLevel);
-//					break;
-//				default:
-//					Log.i(TAG,"Unsupported FrSky alarm?");
-//					Log.i(TAG,"Frame: "+f.toHuman());
-//				}
-				
+				if(inBound)	
+				{
+					_framecountTx++;
+					
+					if(_recordingAlarms)
+					{
+						// store alarms for future use
+						Alarm aIn = new Alarm(f);
+						_alarmMap.put(aIn.getFrSkyFrameType(), aIn);
+						if(_alarmMap.size()>=4)
+						{
+							if(DEBUG)Log.i(TAG,"recording completed");
+							_recordingAlarms = false;
+							//FIXME: send broadcast to allow GUI to update
+						}
+					}
+				}
 				break;
 			case Frame.FRAMETYPE_USER_DATA:
 				// hcpl add handling user data frames!!

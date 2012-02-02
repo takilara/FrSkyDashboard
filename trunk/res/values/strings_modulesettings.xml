@@ -13,6 +13,8 @@
     <string name="FrSkySettings_Alarm_2">Alarm 2</string>
     <string name="FrSkySettings_Alarm_Level">Alarm Level</string>
     <string name="FrSkySettings_Alarm_meaning">Alarm meaning</string>
+    <string name="FrSkySettings_GetFromModule">Get Alarms from module</string>
+    
     
     <string-array name="alarm_level">
 	<item>Off</item>

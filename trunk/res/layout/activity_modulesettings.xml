@@ -31,11 +31,11 @@
         
         </LinearLayout>
         
-            
         <Button
             android:id="@+id/FrSkySettings_save"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dip"
             android:layout_weight="1"
             android:enabled="true"
             android:text="@string/FrSkySettings_Save" />
@@ -55,7 +55,7 @@
              android:layout_height="wrap_content"
              android:layout_weight="1"
              android:enabled="false"
-             android:text="@string/FrSkySettings_Send" />
+             android:text="@string/FrSkySettings_SendAll" />
            
     </LinearLayout>
     </ScrollView>

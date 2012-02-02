@@ -346,7 +346,10 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 					
 				}
 			});
-			
+			if((a.getFrSkyFrameType()==Frame.FRAMETYPE_ALARM1_RSSI)||(a.getFrSkyFrameType()==Frame.FRAMETYPE_ALARM1_RSSI))
+			{
+				sourceSp.setEnabled(false);
+			}
 			//sourceSp.setSelection(a.getAlarmLevel());
 			
 			
@@ -443,7 +446,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			});
 			
 			Button sendABtn = new Button(this);
-			sendABtn.setText("Send");
+			sendABtn.setText("Send "+a.getName());
 			sendABtn.setId(ID_ALARM_BUTTON_SEND+a.getFrSkyFrameType());
 			sendABtn.setEnabled(_btSendButtonsEnabled);
 			

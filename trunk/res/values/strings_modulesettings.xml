@@ -5,8 +5,8 @@
     <string name="FrSkySettings_RSSI">Tx - RSSI</string>
     <string name="FrSkySettings_AD1">Analog channel 1 (AD1)</string>
     <string name="FrSkySettings_AD2">Analog channel 2 (AD2)</string>
-    <string name="FrSkySettings_Send">Send</string>
-    <string name="FrSkySettings_Save">Save</string>
+    <string name="FrSkySettings_SendAll">Send All Alarms</string>
+    <string name="FrSkySettings_Save">Save alarms</string>
     <string name="FrSkySettings_Value">Value</string>
     <string name="FrSkySettings_Than">Than</string>
     <string name="FrSkySettings_Alarm_1">Alarm 1</string>

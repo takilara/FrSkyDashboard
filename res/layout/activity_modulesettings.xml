@@ -40,6 +40,15 @@
             android:enabled="true"
             android:text="@string/FrSkySettings_Save" />
         
+        <Button
+            android:id="@+id/FrSkySettings_btnGetFromModule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="true"
+            android:text="@string/FrSkySettings_GetFromModule" />
+        
+        
          <Button
              android:id="@+id/FrSkySettings_send"
              android:layout_width="match_parent"

@@ -31,6 +31,7 @@
             <TextView android:background="#333333" android:id="@+id/tv_Bt_Settings" android:layout_height="wrap_content" android:text="@string/btSettings" android:layout_width="match_parent" android:gravity="center"></TextView>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoEnable" android:layout_height="wrap_content" android:text="@string/btAutoEnable"></CheckBox>
             <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoConnect" android:layout_height="wrap_content" android:text="@string/btAutoConnect"></CheckBox>    
+            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoSendAlarms" android:layout_height="wrap_content" android:text="@string/btAutoSendAlarms"></CheckBox>
             <TextView android:background="#333333" android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/commands" android:layout_width="match_parent" android:gravity="center"></TextView>
             <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="match_parent" android:id="@+id/btnSave"></Button>
             <!-- <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/button1" android:text="@string/defaults"></Button> -->

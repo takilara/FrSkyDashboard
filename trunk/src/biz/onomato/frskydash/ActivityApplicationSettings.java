@@ -43,6 +43,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	private CheckBox chkBtAutoEnable;
 	private CheckBox chkBtAutoConnect;
 	private CheckBox chkAutoSetVolume;
+	private CheckBox chkBtAutoSendAlarms;
 	private EditText edCyclicInterval;
 	private Button btnSave;
     private SeekBar sbInitialMinimumVolume;
@@ -62,6 +63,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkLogToHuman = (CheckBox) findViewById(R.id.chkLogToHuman); 
 		chkBtAutoEnable = (CheckBox) findViewById(R.id.chkBtAutoEnable);
 		chkBtAutoConnect = (CheckBox) findViewById(R.id.chkBtAutoConnect);
+		chkBtAutoSendAlarms = (CheckBox) findViewById(R.id.chkBtAutoSendAlarms);
 		chkAutoSetVolume = (CheckBox) findViewById(R.id.chkAutoSetVolume);
 		sbInitialMinimumVolume = (SeekBar) findViewById(R.id.sbInitialMinimumVolume);
 		edCyclicInterval = (EditText) findViewById(R.id.edCyclicSpeakerInterval);
@@ -79,6 +81,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		chkBtAutoEnable.setOnClickListener(this);
 		chkBtAutoConnect.setOnClickListener(this);
 		chkAutoSetVolume.setOnClickListener(this);
+		chkBtAutoSendAlarms.setOnClickListener(this);
 		btnSave.setOnClickListener(this);
 		//edCyclicSpeakerInterval.addTextChangedListener(this);
 		
@@ -147,6 +150,9 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				//editor.commit();
 				server.setAutoSetVolume(((CheckBox) v).isChecked());
 				sbInitialMinimumVolume.setEnabled(((CheckBox) v).isChecked());
+				break;
+			case R.id.chkBtAutoSendAlarms:
+				server.setAutoSendAlarms(((CheckBox) v).isChecked());
 				break;
 			case R.id.btnSave:
 				Log.i(TAG,"Store new interval");

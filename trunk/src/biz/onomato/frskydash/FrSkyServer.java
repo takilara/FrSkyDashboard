@@ -132,6 +132,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private boolean _btAutoConnect;
 	private int _minimumVolumeLevel;
 	private boolean _autoSetVolume;
+
 	
 	private TreeMap<Integer,Alarm> _alarmMap;
 	private boolean _recordingAlarms = false;
@@ -947,7 +948,15 @@ private final Handler mHandlerBT = new Handler() {
                 	statusBt = true;
                 	
                 	_manualBtDisconnect = false;
-                	send(Frame.InputRequestAll().toInts());
+                	//send(Frame.InputRequestAll().toInts());
+                	
+                	if(getAutoSendAlarms())
+        			{
+        				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+        				{
+        					send(a.toFrame());
+        				}
+        			}
                     
                     break;
                     
@@ -1581,6 +1590,19 @@ private final Handler mHandlerBT = new Handler() {
 		return _settings.getBoolean("autoSetVolume", false);
 	}
 	
+	public void setAutoSendAlarms(boolean autoSend)
+	{
+		
+		_editor.putBoolean("autoSendAlarms", autoSend);
+		_editor.commit();
+	}
+	
+	public boolean getAutoSendAlarms()
+	{
+
+		return _settings.getBoolean("autoSendAlarms", false);
+	}
+	
 	
 	public Model getCurrentModel()
 	{
@@ -1600,6 +1622,19 @@ private final Handler mHandlerBT = new Handler() {
 			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
 			database.saveModel(_currentModel);
 		}
+		else
+		{
+			// we already have alarms
+			// send them if user wants
+			if(getAutoSendAlarms())
+			{
+				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+				{
+					send(a.toFrame());
+				}
+			}
+		}
+		
 		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		//logger.stop();		// SetModel will stop current Logger
 		

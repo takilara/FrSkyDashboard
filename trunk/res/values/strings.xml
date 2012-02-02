@@ -62,6 +62,8 @@
     <string name="logToCsv">Log frames to CSV file</string>
     <string name="speakerSettings">Audio Settings</string>
     <string name="chkAutoSetVolume">Set minimum volume upon startup</string>
+    <string name="btAutoSendAlarms">Auto-send FrSky alarms when swapping model</string>
+    
         
         
     <string name="btnDeleteLogs">Delete all logfiles</string>

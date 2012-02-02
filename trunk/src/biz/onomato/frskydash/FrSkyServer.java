@@ -473,8 +473,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		alarmFrame = Frame.AlarmFrame(
 				Frame.FRAMETYPE_ALARM1_AD1, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
@@ -483,8 +483,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		alarmFrame = Frame.AlarmFrame(
 				Frame.FRAMETYPE_ALARM2_AD1, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
@@ -493,8 +493,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		alarmFrame = Frame.AlarmFrame(
 				Frame.FRAMETYPE_ALARM1_AD2, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
@@ -503,8 +503,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		alarmFrame = Frame.AlarmFrame(
 				Frame.FRAMETYPE_ALARM2_AD2, 
-				Alarm.ALARMLEVEL_MID, 
-				42, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD2]);

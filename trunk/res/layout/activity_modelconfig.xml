@@ -57,9 +57,9 @@
                 
                 <Button 
                     android:id="@+id/modConf_btnSave"
-                    android:text="@string/save" 
-                    android:layout_width="match_parent" 
+                    android:text="@string/save"                     android:layout_width="match_parent" 
                     android:layout_height="wrap_content" />
+                <!-- android:drawableRight="@drawable/ic_menu_save" -->
                 
             </LinearLayout>
         </ScrollView>

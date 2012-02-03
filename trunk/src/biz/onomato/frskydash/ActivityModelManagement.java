@@ -12,6 +12,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -173,13 +175,20 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			}
 			
 			
-			Button btnDelete = new Button(getApplicationContext());
-			btnDelete.setText("Delete");
+			ImageButton btnDelete = new ImageButton(getApplicationContext());
+			//btnDelete.setText("Delete");
+			btnDelete.setImageResource(R.drawable.ic_menu_delete);
+			btnDelete.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+			btnDelete.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 			btnDelete.setId(100+id); // ID for delete should be 100+channelId
 			btnDelete.setOnClickListener(this);
 			
-			Button btnEdit = new Button(getApplicationContext());
-			btnEdit.setText("...");
+			ImageButton btnEdit = new ImageButton(getApplicationContext());
+			//btnEdit.setText("...");
+			btnEdit.setImageResource(R.drawable.ic_menu_edit);
+			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 			btnEdit.setId(1000+id);// ID for delete should be 100+channelId
 			btnEdit.setOnClickListener(this);
 			

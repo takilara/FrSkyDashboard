@@ -97,12 +97,14 @@ public class FrSkyServer extends Service implements OnInitListener {
     private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
     
     // server Channels, add constants for all known source channels
-    public static final int CHANNEL_INDEX_AD1 = 0;
-    public static final int CHANNEL_INDEX_AD2 = 1;
-    public static final int CHANNEL_INDEX_RSSIRX = 2;
-    public static final int CHANNEL_INDEX_RSSITX = 3;
+    public static final int CHANNEL_INDEX_NONE = 0;
+    public static final int CHANNEL_INDEX_AD1 = 1;
+    public static final int CHANNEL_INDEX_AD2 = 2;
+    public static final int CHANNEL_INDEX_RSSIRX = 3;
+    public static final int CHANNEL_INDEX_RSSITX = 4;
     
-    private static Channel[] _sourceChannels = new Channel[4];
+    
+    private static Channel[] _sourceChannels = new Channel[5];
     
     public static FrSkyDatabase database;
     
@@ -838,6 +840,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private void setupChannels()
 	{
 		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
+		Channel none =  new Channel(context, "None", 0, 1, "", "");
+		none.setId(-1000);
+		none.setPrecision(0);
+		none.setSilent(true);
+		_sourceChannels[CHANNEL_INDEX_NONE] = none;
+		
 		
 		Channel ad1 =  new Channel(context, "AD1", 0, 1, "", "");
 		ad1.setId(-100);

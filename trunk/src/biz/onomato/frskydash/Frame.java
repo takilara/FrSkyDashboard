@@ -76,14 +76,15 @@ public class Frame {
 	public Frame(int[] frame)
 	{
 		//hcpl: reviewed frame length validation
-		//TODO move these params to Frame
-		if (frame.length != Frame.SIZE_TELEMETRY_FRAME
-				|| frame[0] != Frame.START_STOP_TELEMETRY_FRAME
-				|| frame[Frame.SIZE_TELEMETRY_FRAME - 1] != Frame.START_STOP_TELEMETRY_FRAME) {
-			//drop frame and log information
-			Log.d(TAG, "Invalid frame format received: "+Arrays.toString(frame));
-			return;
-		}
+		//eso: unsupported frames should be dealt with by FrSkyServer
+//		if (frame.length != Frame.SIZE_TELEMETRY_FRAME
+//				|| frame[0] != Frame.START_STOP_TELEMETRY_FRAME
+//				|| frame[Frame.SIZE_TELEMETRY_FRAME - 1] != Frame.START_STOP_TELEMETRY_FRAME) {
+//			//drop frame and log information
+//			Log.d(TAG, "Invalid frame format received: "+Arrays.toString(frame));
+//			Log.d(TAG, "Invalid frame format received(hex): "+Frame.frameToHuman(frame));
+//			return;
+//		}
 		
 		//if((frame.length>10) && (frame.length<30))
 		//{
@@ -93,10 +94,11 @@ public class Frame {
 			// fix bytestuffing
 		// FIXME this is now done on SerialService level but it needs to be
 		// reviewed!
-			//if(frame.length>11)
-			//{
-			//	frame = frameDecode(frame);
-			//}
+			// eso: temporary fix to allow frames "that are still longer than 11" (from simulator) to get destuffed
+			if(frame.length>11)
+			{
+				frame = frameDecode(frame);
+			}
 			
 			_frame = frame;
 			
@@ -214,6 +216,9 @@ public class Frame {
 	/**
 	 * Handle byte stuffing in case frame has more then 11 bytes
 	 * 
+	 * eso: Method is needed to parse Simulator frames, as they also are bytestuffed, and not handled by {@link BluetoothSerialService}
+	 * Method would probably throw exception if a frame is still longer than 11 bytes after decoding..
+	 * 
 	 * @param frame
 	 *            integer array
 	 * @return the frame with stuffed bytes replaced so length matches 11 bytes.
@@ -224,15 +229,18 @@ public class Frame {
 	 *             counter for the outFrame was also incremented when a stuffed
 	 *             byte was dropped resulting in an index great than the 11 size 
 	 *             frame restriction.
+	 *             
+	 *             
 	 */
 	private int[] frameDecode(int[] frame)
 	{
 		if(frame.length>11)
 		{
-			int[] outFrame = new int[11];
+			int[] outFrameInitial = new int[frame.length];
 			
-			outFrame[0] = frame[0];
-			outFrame[1] = frame[1];
+			
+			outFrameInitial[0] = frame[0];
+			outFrameInitial[1] = frame[1];
 			int xor = 0x00;
 			int i = 2;
 			
@@ -240,7 +248,7 @@ public class Frame {
 			{
 				if(frame[n]!=0x7d)
 				{
-					outFrame[i] = frame[n]^xor;
+					outFrameInitial[i] = frame[n]^xor;
 					i++;
 					xor = 0x00;
 				}
@@ -248,6 +256,13 @@ public class Frame {
 				{
 					xor = 0x20;
 				}
+			}
+			
+			// make new array with the new length
+			int[] outFrame = new int[i];
+			for(int n=0;n<i;n++)
+			{
+				outFrame[n]=outFrameInitial[n];
 			}
 			
 			Log.i("FRAME decode","Pre:  "+frameToHuman(frame));

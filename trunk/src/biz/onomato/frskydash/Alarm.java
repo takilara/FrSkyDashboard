@@ -30,6 +30,7 @@ public class Alarm {
 	private int _maxThreshold=-1;
 	
 	private int _unitChannelId=-1;
+	private int _sourceChannelId = -1;
 	private String _unitChannelUnit="";
 	private float _unitChannelOffset=0;
 	private float _unitChannelFactor=1;
@@ -173,31 +174,37 @@ public class Alarm {
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD1 - Alarm 1";
+				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD1;
 				break;
 			case Frame.FRAMETYPE_ALARM2_AD1:
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD1 - Alarm 2";
+				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD1;
 				break;
 			case Frame.FRAMETYPE_ALARM1_AD2:
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD2 - Alarm 1";
+				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD2;
 				break;
 			case Frame.FRAMETYPE_ALARM2_AD2:
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD2 - Alarm 2";
+				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD2;
 				break;
 			case Frame.FRAMETYPE_ALARM1_RSSI:
 				_minThreshold = MINIMUM_THRESHOLD_RSSI;
 				_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
 				_name = "RSSI - Alarm 1";
+				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_RSSIRX;
 				break;
 			case Frame.FRAMETYPE_ALARM2_RSSI:
 				_minThreshold = MINIMUM_THRESHOLD_RSSI;
 				_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
 				_name = "RSSI - Alarm 2";
+				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_RSSIRX;
 				break;
 		}
 	}
@@ -210,6 +217,11 @@ public class Alarm {
 	public int getUnitChannelId()
 	{
 		return _unitChannelId;
+	}
+	
+	public int getSourceChannelId()
+	{
+		return _sourceChannelId;
 	}
 	
 	public void setUnitChannel(int channelId)

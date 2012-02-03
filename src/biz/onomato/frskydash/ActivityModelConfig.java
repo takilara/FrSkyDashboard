@@ -14,10 +14,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -33,7 +36,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	private Model _model;
 	private int _modelId;
 	
-	private Button btnSave,btnAddChannel,btnFrSkyAlarms;
+	private Button btnAddChannel,btnFrSkyAlarms;
+	private Button btnSave;
 	private LinearLayout llChannelsLayout;
 	private EditText edName;
 	private Spinner spType;
@@ -230,8 +234,12 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			tvDesc.setText(c.getDescription());
 			tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
 			
-			Button btnDelete = new Button(getApplicationContext());
-			btnDelete.setText("Delete");
+			ImageButton btnDelete = new ImageButton(getApplicationContext());
+			btnDelete.setImageResource(R.drawable.ic_menu_delete);
+			btnDelete.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+			btnDelete.setLayoutParams(new LinearLayout.LayoutParams(height,height));
+			//btnDelete.setText("Delete");
 			btnDelete.setId(10000+n);
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
@@ -240,8 +248,12 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				}
 			});
 			
-			Button btnEdit = new Button(getApplicationContext());
-			btnEdit.setText("...");
+			ImageButton btnEdit = new ImageButton(getApplicationContext());
+			//btnEdit.setText("...");
+			btnEdit.setImageResource(R.drawable.ic_menu_edit);
+			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,height));
+
 			btnEdit.setId(1000+n);// ID for delete should be 100+channelId
 			//btnEdit.setOnClickListener(this);
 			btnEdit.setOnClickListener(new OnClickListener(){

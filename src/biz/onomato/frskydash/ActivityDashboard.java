@@ -589,8 +589,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			llDashboardChannels.addView(tvDesc);
 			
 			// btn
-			Button btnEdit = new Button(getApplicationContext());
-			btnEdit.setText("...");
+			ImageButton btnEdit = new ImageButton(getApplicationContext());
+			//btnEdit.setText("...");
+			btnEdit.setImageResource(R.drawable.ic_menu_edit);
+			
+			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics());
+			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,height));
+			
+			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			btnEdit.setId(ID_CHANNEL_BUTTON_EDIT+n);// ID for delete should be 100+channelId
 
 			btnEdit.setOnClickListener(new OnClickListener(){
@@ -641,11 +647,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			//speakerV.setBackgroundResource(android.R.drawable.ic_lock_silent_mode);
 			if(c.getSilent())
 			{
-				speakerV.setImageResource(android.R.drawable.ic_lock_silent_mode);
+				//speakerV.setImageResource(android.R.drawable.ic_lock_silent_mode);
+				speakerV.setImageResource(R.drawable.ic_lock_silent_mode);
 			}
 			else
 			{
-				speakerV.setImageResource(android.R.drawable.ic_lock_silent_mode_off);
+				speakerV.setImageResource(R.drawable.ic_lock_silent_mode_off);
 				speakerV.setColorFilter(0xff00ff00);
 			}
 			speakerV.setClickable(true);
@@ -663,13 +670,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					server.database.saveChannel(c);
 					if(s)
 					{
-						iv.setImageResource(android.R.drawable.ic_lock_silent_mode);
+						iv.setImageResource(R.drawable.ic_lock_silent_mode);
 						//iv.setColorFilter(0xff00ff00);
 						iv.clearColorFilter();
 					}
 					else
 					{
-						iv.setImageResource(android.R.drawable.ic_lock_silent_mode_off);
+						iv.setImageResource(R.drawable.ic_lock_silent_mode_off);
 						iv.setColorFilter(0xff00ff00);
 					}
 				

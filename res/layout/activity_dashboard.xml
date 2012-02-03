@@ -113,7 +113,7 @@
 	             android:scaleType="centerCrop"
 	             android:layout_gravity="center_vertical"
 	             android:layout_margin="0dp"
-	             android:src="@android:drawable/ic_menu_edit" />
+	             android:src="@drawable/ic_menu_edit" />
 
 	         
 
@@ -133,7 +133,8 @@
 	             android:layout_height="40dp"
 	              android:layout_gravity="center_vertical"
 	              android:layout_margin="0dp"
-	             android:src="@android:drawable/ic_lock_idle_alarm"
+	              android:scaleType="centerCrop"
+	             android:src="@drawable/ic_popup_reminder"
 	             android:tint="#ff848484" />
 
 	     </LinearLayout>

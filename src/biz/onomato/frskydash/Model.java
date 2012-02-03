@@ -340,21 +340,42 @@ public class Model {
 	
 	public ArrayList<Channel> getAllowedSourceChannels()
 	{
+		return getAllowedSourceChannels(null);
+	}
+	public ArrayList<Channel> getAllowedSourceChannels(Alarm alarm)
+	{
 		ArrayList<Channel> sourceChannels = new ArrayList<Channel>();
-		
-		// Add all server channels
-		for(Channel c : FrSkyServer.getSourceChannels())
+		if(alarm==null)
 		{
-			//sourceChannels[n] = c;
-			sourceChannels.add(c);
-		}
-		
-		// Add channels from this model
-	
-		//for(Channel c : FrSkyServer.database.getChannelsForModel(getId())) 	// Gets from database		
-		for(Channel c : getChannels())											// Gets from instance
-		{
+			
+			
+			// Add all server channels
+			for(Channel c : FrSkyServer.getSourceChannels())
+			{
+				//sourceChannels[n] = c;
 				sourceChannels.add(c);
+			}
+			
+			// Add channels from this model
+		
+			//for(Channel c : FrSkyServer.database.getChannelsForModel(getId())) 	// Gets from database		
+			for(Channel c : getChannels())											// Gets from instance
+			{
+					sourceChannels.add(c);
+			}
+		}
+		else
+		{
+			// Add the None channel
+			sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_NONE));
+			// Add the single server channel
+			sourceChannels.add(FrSkyServer.getSourceChannel(alarm.getSourceChannelId()));
+			// Add any model channels that has this source Channel
+			for(Channel c : getChannels())											// Gets from instance
+			{
+				if(c.getSourceChannelId()==alarm.getSourceChannelId())
+					sourceChannels.add(c);
+			}
 		}
 		return sourceChannels;
 	}

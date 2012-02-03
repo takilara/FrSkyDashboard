@@ -1,6 +1,7 @@
 package biz.onomato.frskydash;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -289,12 +290,16 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			
 			
 			// // Source channel
-			ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,_model.getAllowedSourceChannels());
+			ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,_model.getAllowedSourceChannels(a));
+			
 			channelDescriptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			
 			// Spinner contents
 			// Alarm Level, Off, Low, Mid, High
 			//ArrayAdapter<CharSequence> 
+			
+
+			
 			ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.alarm_level, android.R.layout.simple_spinner_item );
 			// Alarm relativity: Greater than, Lower than
 			//ArrayAdapter<CharSequence> 

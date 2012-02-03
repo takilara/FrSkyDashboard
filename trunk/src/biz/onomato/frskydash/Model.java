@@ -367,16 +367,25 @@ public class Model {
 		else
 		{
 			// Add the None channel
-			sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_NONE));
+			
+			
 			// Add the single server channel
 			// eso: no point..
-			//sourceChannels.add(FrSkyServer.getSourceChannel(alarm.getSourceChannelId()));
-			// Add any model channels that has this source Channel
-			for(Channel c : getChannels())											// Gets from instance
+			if(alarm.getUnitChannelId()==FrSkyServer.CHANNEL_ID_RSSIRX)
 			{
-				if(c.getSourceChannelId()==alarm.getSourceChannelId())
-					sourceChannels.add(c);
+				sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
 			}
+			else
+			{
+				sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_NONE));
+				// Add any model channels that has this source Channel
+				for(Channel c : getChannels())											// Gets from instance
+				{
+					if(c.getSourceChannelId()==alarm.getSourceChannelId())
+						sourceChannels.add(c);
+				}
+			}
+			
 		}
 		return sourceChannels;
 	}

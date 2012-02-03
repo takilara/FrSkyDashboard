@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -90,7 +91,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private TableLayout tlChannelsTable;
     private ScrollView svDashboard;
     private ToggleButton btnTglSpeak;
-    private Button btnConfigCurrentModel;
+    private ImageButton btnConfigCurrentModel,btnConfigCurrentModelsAlarms;
     private TextToSpeech mTts;
     
     private IntentFilter mIntentFilter;
@@ -180,7 +181,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         View btnEditChannel1 = findViewById(R.id.dash_btnEditChannel1);
         btnTglSpeak = (ToggleButton) findViewById(R.id.dash_tglSpeak);
 
-        btnConfigCurrentModel = (Button) findViewById(R.id.dash_btnConfigCurrentModel);
+        btnConfigCurrentModel = (ImageButton) findViewById(R.id.dash_btnConfigCurrentModel);
+        btnConfigCurrentModelsAlarms = (ImageButton) findViewById(R.id.dash_btnConfigCurrentModelsAlarms);
 
         
         // dynamic content:
@@ -195,6 +197,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         btnEditChannel1.setOnClickListener(this);
         btnTglSpeak.setOnClickListener(this);
         btnConfigCurrentModel.setOnClickListener(this);
+        btnConfigCurrentModelsAlarms.setOnClickListener(this);
 
         // Code to update GUI cyclic
         tickHandler = new Handler();
@@ -740,6 +743,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    		Intent iii = new Intent(this, ActivityModelConfig.class);
 	    		iii.putExtra("modelId", server.getCurrentModel().getId());
 	    		startActivityForResult(iii,MODEL_CONFIG_RETURN);
+	    		break;
+	    	case R.id.dash_btnConfigCurrentModelsAlarms:
+	    		Intent iiii = new Intent(this,ActivityModuleSettings.class);
+    			iiii.putExtra("modelId", (int) server.getCurrentModel().getId());	// Should edit current model
+    			startActivityForResult(iiii,MODULE_CONFIG_RETURN);
 	    		break;
     	}
     }

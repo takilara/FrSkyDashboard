@@ -5,7 +5,7 @@
 		android:alphabeticShortcut="@string/settings_shortcut" />
 	
 	<item android:id="@+id/module_settings"
-		android:title="@string/module_settings_label" />
+		android:title="@string/setFrSkyAlarms" />
 
 	<item android:id="@+id/connect_bluetooth"
 		android:title="@string/connect_bluetooth_label" />

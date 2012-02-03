@@ -38,8 +38,8 @@
     <string name="settings_shortcut">s</string>
         
         
-    <string name="module_settings_label">Module Settings...</string>
-    <string name="module_settings_title">Module Settings</string>
+    <string name="setFrSkyAlarms">Set FrSky Alarms</string>
+    
     
     <string name="menu_choose_simulator_label">Simulator...</string>
     

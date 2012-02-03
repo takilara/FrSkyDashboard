@@ -103,7 +103,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int CHANNEL_INDEX_RSSIRX = 3;
     public static final int CHANNEL_INDEX_RSSITX = 4;
     
-    public static final int CHANNEL_ID_NONE = -1000;
+    public static final int CHANNEL_ID_NONE = -1;
     public static final int CHANNEL_ID_AD1 = -100;
     public static final int CHANNEL_ID_AD2 = -101;
     public static final int CHANNEL_ID_RSSIRX = -102;
@@ -849,6 +849,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
 		Channel none =  new Channel(context, "None", 0, 1, "", "");
 		none.setId(CHANNEL_ID_NONE);
+		
 		none.setPrecision(0);
 		none.setSilent(true);
 		_sourceChannels[CHANNEL_INDEX_NONE] = none;

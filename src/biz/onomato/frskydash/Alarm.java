@@ -174,37 +174,37 @@ public class Alarm {
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD1 - Alarm 1";
-				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD1;
+				_sourceChannelId = FrSkyServer.CHANNEL_ID_AD1;
 				break;
 			case Frame.FRAMETYPE_ALARM2_AD1:
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD1 - Alarm 2";
-				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD1;
+				_sourceChannelId = FrSkyServer.CHANNEL_ID_AD1;
 				break;
 			case Frame.FRAMETYPE_ALARM1_AD2:
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD2 - Alarm 1";
-				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD2;
+				_sourceChannelId = FrSkyServer.CHANNEL_ID_AD2;
 				break;
 			case Frame.FRAMETYPE_ALARM2_AD2:
 				_minThreshold = MINIMUM_THRESHOLD_AD;
 				_maxThreshold = MAXIMUM_THRESHOLD_AD;
 				_name = "AD2 - Alarm 2";
-				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_AD2;
+				_sourceChannelId = FrSkyServer.CHANNEL_ID_AD2;
 				break;
 			case Frame.FRAMETYPE_ALARM1_RSSI:
 				_minThreshold = MINIMUM_THRESHOLD_RSSI;
 				_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
 				_name = "RSSI - Alarm 1";
-				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_RSSIRX;
+				_sourceChannelId = FrSkyServer.CHANNEL_ID_RSSIRX;
 				break;
 			case Frame.FRAMETYPE_ALARM2_RSSI:
 				_minThreshold = MINIMUM_THRESHOLD_RSSI;
 				_maxThreshold = MAXIMUM_THRESHOLD_RSSI;
 				_name = "RSSI - Alarm 2";
-				_sourceChannelId = FrSkyServer.CHANNEL_INDEX_RSSIRX;
+				_sourceChannelId = FrSkyServer.CHANNEL_ID_RSSIRX;
 				break;
 		}
 	}

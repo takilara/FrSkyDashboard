@@ -369,7 +369,8 @@ public class Model {
 			// Add the None channel
 			sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_NONE));
 			// Add the single server channel
-			sourceChannels.add(FrSkyServer.getSourceChannel(alarm.getSourceChannelId()));
+			// eso: no point..
+			//sourceChannels.add(FrSkyServer.getSourceChannel(alarm.getSourceChannelId()));
 			// Add any model channels that has this source Channel
 			for(Channel c : getChannels())											// Gets from instance
 			{

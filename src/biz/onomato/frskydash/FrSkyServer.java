@@ -103,6 +103,13 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int CHANNEL_INDEX_RSSIRX = 3;
     public static final int CHANNEL_INDEX_RSSITX = 4;
     
+    public static final int CHANNEL_ID_NONE = -1000;
+    public static final int CHANNEL_ID_AD1 = -100;
+    public static final int CHANNEL_ID_AD2 = -101;
+    public static final int CHANNEL_ID_RSSIRX = -102;
+    public static final int CHANNEL_ID_RSSITX = -103;
+    
+    
     
     private static Channel[] _sourceChannels = new Channel[5];
     
@@ -841,27 +848,27 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
 		Channel none =  new Channel(context, "None", 0, 1, "", "");
-		none.setId(-1000);
+		none.setId(CHANNEL_ID_NONE);
 		none.setPrecision(0);
 		none.setSilent(true);
 		_sourceChannels[CHANNEL_INDEX_NONE] = none;
 		
 		
 		Channel ad1 =  new Channel(context, "AD1", 0, 1, "", "");
-		ad1.setId(-100);
+		ad1.setId(CHANNEL_ID_AD1);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
 		_sourceChannels[CHANNEL_INDEX_AD1] = ad1;
 		
 		
 		Channel ad2 =  new Channel(context,"AD2", 0, 1, "", "");
-		ad2.setId(-101);
+		ad2.setId(CHANNEL_ID_AD2);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
 		_sourceChannels[CHANNEL_INDEX_AD2] = ad2;
 
 		Channel rssirx =  new Channel(context, "RSSIrx", 0, 1, "", "");
-		rssirx.setId(-102);
+		rssirx.setId(CHANNEL_ID_RSSIRX);
 		rssirx.setPrecision(0);
 		rssirx.setMovingAverage(-1);
 		rssirx.setLongUnit("dBm");
@@ -870,7 +877,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_sourceChannels[CHANNEL_INDEX_RSSIRX] = rssirx;
 		
 		Channel rssitx =  new Channel(context, "RSSItx", 0, 1, "", "");
-		rssitx.setId(-103);
+		rssitx.setId(CHANNEL_ID_RSSITX);
 		rssitx.setPrecision(0);
 		rssitx.setMovingAverage(-1);
 		rssitx.setLongUnit("dBm");

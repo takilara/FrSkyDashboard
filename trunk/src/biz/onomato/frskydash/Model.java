@@ -184,7 +184,6 @@ public class Model {
 	// I need to be able to set a given channel for this model
 	public void setChannel(int id, Channel channel)
 	{
-		
 		if(id<_channels.size())
 		{
 			if(DEBUG) Log.d(TAG,"Old channel existed, replacing");

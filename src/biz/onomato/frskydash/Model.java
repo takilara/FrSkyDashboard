@@ -350,7 +350,7 @@ public class Model {
 			
 			
 			// Add all server channels
-			for(Channel c : FrSkyServer.getSourceChannels())
+			for(Channel c : FrSkyServer.getSourceChannels().values())
 			{
 				//sourceChannels[n] = c;
 				sourceChannels.add(c);
@@ -373,11 +373,11 @@ public class Model {
 			// eso: no point..
 			if(alarm.getUnitChannelId()==FrSkyServer.CHANNEL_ID_RSSIRX)
 			{
-				sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
+				sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX));
 			}
 			else
 			{
-				sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_NONE));
+				sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_NONE));
 				// Add any model channels that has this source Channel
 				for(Channel c : getChannels())											// Gets from instance
 				{

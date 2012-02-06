@@ -90,6 +90,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     private Logger logger;
     private Model _currentModel;
+    
+    private boolean _watchdogEnabled = true;
 	
 	private TextToSpeech mTts;
 	private int _speakDelay;
@@ -417,7 +419,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 			{
 				// Send get all alarms frame to force frames from Tx
 				// only do this if not receiving anything from Rx side
-				if((statusRx==false) && (statusBt==true))	send(Frame.InputRequestAll().toInts());
+				if(_watchdogEnabled)
+				{
+					if((statusRx==false) && (statusBt==true))	send(Frame.InputRequestAll().toInts());
+				}
 				
 				watchdogHandler.removeCallbacks(runnableWatchdog);
 				watchdogHandler.postDelayed(this,500);
@@ -439,6 +444,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 
+	public void setWatchdogEnabled(boolean state)
+	{
+		_watchdogEnabled = state;
+	}
+	public boolean getWatchdogEnabled()
+	{
+		return _watchdogEnabled;
+	}
+	
 	public static Channel getSourceChannel(int id)
 	{
 		return _sourceChannelMap.get(id);

@@ -28,6 +28,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Export DB to sdcard" />
+
+        <ToggleButton
+            android:id="@+id/debug_watchdogEnabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Watchdog to Tx" />
+
     </LinearLayout>
     </ScrollView>
 </LinearLayout>

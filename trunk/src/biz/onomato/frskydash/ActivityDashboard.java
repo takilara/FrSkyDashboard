@@ -296,8 +296,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	if(server!=null)
 		{
     		// "Hard Channels"
-	    	tv_rssitx.setText("RSSItx: "+server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSITX).toValueString());
-	    	tv_rssirx.setText("RSSIrx: "+server.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX).toValueString());
+	    	tv_rssitx.setText("RSSItx: "+FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSITX).toValueString());
+	    	tv_rssirx.setText("RSSIrx: "+FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX).toValueString());
 	    	tv_fps.setText("FPS: "+server.getFps());
 	    	
 	    	int len = server.getCurrentModel().getChannels().size();

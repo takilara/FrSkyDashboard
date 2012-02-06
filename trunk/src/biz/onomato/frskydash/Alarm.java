@@ -244,10 +244,10 @@ public class Alarm {
 				case Frame.FRAMETYPE_ALARM2_AD2:
 					break;
 				case Frame.FRAMETYPE_ALARM1_RSSI:
-					setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
+					setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX));
 					break;
 				case Frame.FRAMETYPE_ALARM2_RSSI:
-					setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_INDEX_RSSIRX));
+					setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX));
 					break;
 			}
 		}

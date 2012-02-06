@@ -97,12 +97,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
     
     // server Channels, add constants for all known source channels
-    public static final int CHANNEL_INDEX_NONE = 0;
-    public static final int CHANNEL_INDEX_AD1 = 1;
-    public static final int CHANNEL_INDEX_AD2 = 2;
-    public static final int CHANNEL_INDEX_RSSIRX = 3;
-    public static final int CHANNEL_INDEX_RSSITX = 4;
-    
+//eso: refactor to ChannelMap
     public static final int CHANNEL_ID_NONE = -1;
     public static final int CHANNEL_ID_AD1 = -100;
     public static final int CHANNEL_ID_AD2 = -101;
@@ -110,8 +105,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int CHANNEL_ID_RSSITX = -103;
     
     
-    
-    private static Channel[] _sourceChannels = new Channel[5];
+//eso: refactor to ChannelMap    
+    private static TreeMap<Integer,Channel> _sourceChannelMap;
     
     public static FrSkyDatabase database;
     
@@ -177,6 +172,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//_serverChannels = new HashMap<String,Channel>();
 		
 		_alarmMap = new TreeMap<Integer,Alarm>();
+		_sourceChannelMap = new TreeMap<Integer,Channel>();
 		
 		
 		_audiomanager = 
@@ -442,14 +438,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 
-	public static Channel getSourceChannel(int index)
+	public static Channel getSourceChannel(int id)
 	{
-		return _sourceChannels[index];
+		return _sourceChannelMap.get(id);
 	}
 	
-	public static Channel[] getSourceChannels()
+	public static TreeMap<Integer,Channel> getSourceChannels()
 	{
-		return _sourceChannels;
+		return _sourceChannelMap;
 	}
 	
 	
@@ -462,7 +458,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				45, 
 				Alarm.LESSERTHAN);
 		Alarm a = new Alarm(alarmFrame);
-		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
+		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_RSSIRX));
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -476,7 +472,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Alarm.LESSERTHAN);
 		
 		a = new Alarm(alarmFrame);
-		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_RSSIRX]);
+		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_RSSIRX));
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -486,7 +482,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
+		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD1));
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -496,7 +492,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD1]);
+		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD1));
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -506,7 +502,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
+		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD2));
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
@@ -516,7 +512,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				200, 
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
-		a.setUnitChannel(_sourceChannels[CHANNEL_INDEX_AD2]);
+		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD2));
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		return aMap;
@@ -852,21 +848,21 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		none.setPrecision(0);
 		none.setSilent(true);
-		_sourceChannels[CHANNEL_INDEX_NONE] = none;
+		_sourceChannelMap.put(CHANNEL_ID_NONE, none);
 		
 		
 		Channel ad1 =  new Channel(context, "AD1", 0, 1, "", "");
 		ad1.setId(CHANNEL_ID_AD1);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
-		_sourceChannels[CHANNEL_INDEX_AD1] = ad1;
+		_sourceChannelMap.put(CHANNEL_ID_AD1, ad1);
 		
 		
 		Channel ad2 =  new Channel(context,"AD2", 0, 1, "", "");
 		ad2.setId(CHANNEL_ID_AD2);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
-		_sourceChannels[CHANNEL_INDEX_AD2] = ad2;
+		_sourceChannelMap.put(CHANNEL_ID_AD2, ad2);
 
 		Channel rssirx =  new Channel(context, "RSSIrx", 0, 1, "", "");
 		rssirx.setId(CHANNEL_ID_RSSIRX);
@@ -875,7 +871,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssirx.setLongUnit("dBm");
 		rssirx.setShortUnit("dBm");
 		rssirx.setSilent(true);
-		_sourceChannels[CHANNEL_INDEX_RSSIRX] = rssirx;
+		_sourceChannelMap.put(CHANNEL_ID_RSSIRX, rssirx);
 		
 		Channel rssitx =  new Channel(context, "RSSItx", 0, 1, "", "");
 		rssitx.setId(CHANNEL_ID_RSSITX);
@@ -884,7 +880,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssitx.setLongUnit("dBm");
 		rssitx.setShortUnit("dBm");
 		rssitx.setSilent(true);
-		_sourceChannels[CHANNEL_INDEX_RSSITX] = rssitx;
+		_sourceChannelMap.put(CHANNEL_ID_RSSITX, rssitx);
 		
 		
 		
@@ -894,11 +890,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private void resetChannels()
 	{
-		for(int n=0;n<_sourceChannels.length;n++)
+		for(Channel c : _sourceChannelMap.values())
 		{
-			_sourceChannels[n].setRaw(0);
-			//getChannelById(n).setRaw(0);
+			c.setRaw(0);
 		}
+		
 	}
 	
 	
@@ -919,10 +915,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public void wasDisconnected(String source)
 	{
-    	_sourceChannels[CHANNEL_INDEX_AD1].reset();
-    	_sourceChannels[CHANNEL_INDEX_AD2].reset();
-    	_sourceChannels[CHANNEL_INDEX_RSSIRX].reset();
-    	_sourceChannels[CHANNEL_INDEX_RSSITX].reset();
+    	//eso: TODO: what is reset vs channel.setRaw(0) (used in resetChannels) 
+    	for(Channel c: _sourceChannelMap.values())
+    	{
+    		c.reset();
+    	}
     	
     	
     	// speak warning
@@ -1172,12 +1169,10 @@ private final Handler mHandlerBT = new Handler() {
 			// Analog values
 			case Frame.FRAMETYPE_ANALOG:
 				// get AD1, AD2 etc from frame
-				_sourceChannels[CHANNEL_INDEX_AD1].setRaw(f.ad1);
-				_sourceChannels[CHANNEL_INDEX_AD2].setRaw(f.ad2);
-				_sourceChannels[CHANNEL_INDEX_RSSIRX].setRaw(f.rssirx);
-				_sourceChannels[CHANNEL_INDEX_RSSITX].setRaw(f.rssitx);
-				
-
+				_sourceChannelMap.get(CHANNEL_ID_AD1).setRaw(f.ad1);
+				_sourceChannelMap.get(CHANNEL_ID_AD2).setRaw(f.ad2);
+				_sourceChannelMap.get(CHANNEL_ID_RSSIRX).setRaw(f.rssirx);
+				_sourceChannelMap.get(CHANNEL_ID_RSSITX).setRaw(f.rssitx);
 				
 				
 				if(inBound)	

@@ -489,6 +489,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		}
 		else
 		{
+			_sourceChannelId = channelId;
+			
 			try
 			{
 				_context.unregisterReceiver(mChannelUpdateReceiver);

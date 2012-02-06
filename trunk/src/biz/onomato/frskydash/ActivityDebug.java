@@ -26,6 +26,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 public class ActivityDebug extends Activity implements OnClickListener {
 	private static final String TAG = "DebugActivity";
@@ -33,6 +34,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	private FrSkyServer server;
 	
 	private Button btnSchema,btnChannels,btnModels,btnExportDb;
+	private ToggleButton btnWatchdogEnabled;
 	
 	
 	//chConf_edVoice
@@ -51,12 +53,15 @@ public class ActivityDebug extends Activity implements OnClickListener {
 		btnChannels			= (Button) findViewById(R.id.debug_btnChannels);
 		btnModels			= (Button) findViewById(R.id.debug_btnModels);
 		btnExportDb			= (Button) findViewById(R.id.debug_btnExportDb);
+		btnWatchdogEnabled  = (ToggleButton) findViewById(R.id.debug_watchdogEnabled);
+		
 		
 		
 		btnSchema.setOnClickListener(this);
 		btnChannels.setOnClickListener(this);
 		btnModels.setOnClickListener(this);
 		btnExportDb.setOnClickListener(this);
+		btnWatchdogEnabled.setOnClickListener(this);
 		
 	
 	}
@@ -90,7 +95,8 @@ public class ActivityDebug extends Activity implements OnClickListener {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Log.i(TAG,"Bound to Service");
 	        // ADD stuff here
-			
+			btnWatchdogEnabled.setChecked(server.getWatchdogEnabled());
+			//server.setWatchdogEnabled(btnWatchdogEnabled.isChecked());
 			// Enable server buttons
 		}
 
@@ -102,6 +108,12 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch(v.getId()){
+			case R.id.debug_watchdogEnabled:
+				if(server!=null)
+				{
+					server.setWatchdogEnabled(btnWatchdogEnabled.isChecked());
+				}
+				break;
 			case R.id.debug_btnSchema:
 				Log.i(TAG,"Display database schema");
 //				DBAdapterModel db = new DBAdapterModel(getApplicationContext());

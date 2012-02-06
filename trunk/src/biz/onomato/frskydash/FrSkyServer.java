@@ -3,6 +3,7 @@ package biz.onomato.frskydash;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -172,7 +173,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//_serverChannels = new HashMap<String,Channel>();
 		
 		_alarmMap = new TreeMap<Integer,Alarm>();
-		_sourceChannelMap = new TreeMap<Integer,Channel>();
+		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
 		
 		
 		_audiomanager = 

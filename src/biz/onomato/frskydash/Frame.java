@@ -1,6 +1,5 @@
 package biz.onomato.frskydash;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import android.util.Log;
@@ -219,61 +218,108 @@ public class Frame {
 	 * eso: Method is needed to parse Simulator frames, as they also are bytestuffed, and not handled by {@link BluetoothSerialService}
 	 * Method would probably throw exception if a frame is still longer than 11 bytes after decoding..
 	 * 
+	 * hcpl: reviewed
+	 * 
 	 * @param frame
 	 *            integer array
 	 * @return the frame with stuffed bytes replaced so length matches 11 bytes.
-	 * @deprecated Original method for handling byte stuffing. Now done on the
-	 *             level of {@link BluetoothSerialService}. I deprecated this
-	 *             one since it was giving indesoutofboundsexception on longer
-	 *             frames then 11. Didn't debug into detail but I believe the
-	 *             counter for the outFrame was also incremented when a stuffed
-	 *             byte was dropped resulting in an index great than the 11 size 
-	 *             frame restriction.
 	 *             
 	 *             
 	 */
 	private int[] frameDecode(int[] frame)
 	{
-		if(frame.length>11)
-		{
-			int[] outFrameInitial = new int[frame.length];
-			
-			
-			outFrameInitial[0] = frame[0];
-			outFrameInitial[1] = frame[1];
-			int xor = 0x00;
-			int i = 2;
-			
-			for(int n=2;n<frame.length;n++)
-			{
-				if(frame[n]!=0x7d)
-				{
-					outFrameInitial[i] = frame[n]^xor;
-					i++;
-					xor = 0x00;
-				}
-				else
-				{
-					xor = 0x20;
-				}
-			}
-			
-			// make new array with the new length
-			int[] outFrame = new int[i];
-			for(int n=0;n<i;n++)
-			{
-				outFrame[n]=outFrameInitial[n];
-			}
-			
-			Log.i("FRAME decode","Pre:  "+frameToHuman(frame));
-			Log.i("FRAME decode","Post: "+frameToHuman(outFrame));
-			
-			return outFrame;
-		}
-		else
-		{
+		// only for frames longer than the required 11 bits
+		if (frame.length == Frame.SIZE_TELEMETRY_FRAME)
 			return frame;
-		}	
+		// otherwise we need to handle the bytestuffing here
+		// a new frame in proper size for the decode bytes
+		int[] decodedFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+		// set delimiters in decodedFrame, these are fixed
+		decodedFrame[0] = frame[0];
+		decodedFrame[Frame.SIZE_TELEMETRY_FRAME - 1] = frame[frame.length - 1];
+		// index for decoded frame, start at 1
+		int di = 1;
+		// current byte
+		int b = 0;
+		// flag for XOR operation
+		boolean xor = false;
+		// iterate byte per byte of original frame, only count without start and
+		// stop bytes already transferred
+		for (int i = 1; i < frame.length - 1; i++) {
+			// watch that we stay within the expected frame size, don't count
+			// the start and stop bytes
+			if (di >= Frame.SIZE_TELEMETRY_FRAME - 1) {
+				// inform about this issues
+				Log.e(TAG, "Invalid frame length, can't decode frame: " + frameToHuman(frame));
+				// no need to continue here, this will return a wrong formatted
+				// frame now... Maybe best to replace the stop bit with this out
+				// of range byte so we can detect this problem later on
+				decodedFrame[di] = b;
+				break;
+			}
+			// get current byte
+			b = frame[i];
+			// check if this is a stuffed byte
+			if (b == Frame.STUFFING_TELEMETRY_FRAME) {
+				// set xor flag
+				xor = true;
+				// drop this byte
+				continue;
+			}
+			// check the xor flag
+			if (xor) {
+				// copy the byte after xor operation
+				decodedFrame[di++] = b ^ Frame.XOR_TELEMETRY_FRAME;
+				// always disable xor at this point
+				xor = false;
+			}
+			// otherwis regular copy of byte
+			else {
+				decodedFrame[di++] = b;
+			}
+		}
+		// return result
+		return decodedFrame;
+		
+		// hcpl: original code
+//			int[] outFrameInitial = new int[frame.length];
+//			
+//			
+//			outFrameInitial[0] = frame[0];
+//			outFrameInitial[1] = frame[1];
+//			int xor = 0x00;
+//			int i = 2;
+//			
+//			for(int n=2;n<frame.length;n++)
+//			{
+//				if(frame[n]!=0x7d)
+//				{
+//					outFrameInitial[i] = frame[n]^xor;
+//					i++;
+//					xor = 0x00;
+//				}
+//				else
+//				{
+//					xor = 0x20;
+//				}
+//			}
+//			
+//			// make new array with the new length
+//			int[] outFrame = new int[i];
+//			for(int n=0;n<i;n++)
+//			{
+//				outFrame[n]=outFrameInitial[n];
+//			}
+//			
+//			Log.i("FRAME decode","Pre:  "+frameToHuman(frame));
+//			Log.i("FRAME decode","Post: "+frameToHuman(outFrame));
+//			
+//			return outFrame;
+//		}
+//		else
+//		{
+//			return frame;
+//		}	
 	}
 	
 	/**

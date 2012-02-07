@@ -2,7 +2,6 @@ package biz.onomato.frskydash;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -32,10 +31,17 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import android.widget.Toast;
+import biz.onomato.frskydash.hub.FrSkyHub;
 
+/**
+ * The FrSkyServer is receives the buffer from the
+ * {@link BluetoothSerialService} and starts by parsing this buffer into
+ * individual decoded {@link Frame} objects.
+ * 
+ */
 public class FrSkyServer extends Service implements OnInitListener {
 	    
-	private static final String TAG="FrSkyServerService";
+	public static final String TAG="FrSkyServerService";
 	private static final boolean DEBUG = true;
 	//private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
@@ -56,7 +62,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	
 	//private Long counter = 0L; 
-	private NotificationManager nm;
+	//private NotificationManager nm;
 	//private Timer timer = new Timer();
 	private final Calendar time = Calendar.getInstance();
 	
@@ -172,40 +178,24 @@ public class FrSkyServer extends Service implements OnInitListener {
 	// hcpl: these are class members now since we have to collect the data over
 	// several method executions since the bytes could be spread over several
 	// telemetry 11 bytes frames
-
-	/**
-	 * the current user frame we are working on. This is used to pass data
-	 * between incompletes frames.
-	 */
-	private static int[] hubFrame = new int[Frame.SIZE_HUB_FRAME];
-
-	/**
-	 * index of the current user frame. If set to -1 no user frame is under
-	 * construction.
-	 */
-	private static int currentHubFrameIndex = -1;
-
-	/**
-	 * if on previous byte the XOR byte was found or not
-	 */
-	private static boolean hubXOR = false;
 	
 	/**
 	 * the current user frame we are working on. This is used to pass data
 	 * between incompletes frames.
 	 */
-	private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-
-	/**
-	 * index of the current user frame. If set to -1 no user frame is under
-	 * construction.
-	 */
-	private static int currentFrSkyFrameIndex = -1;
-
-	/**
-	 * if on previous byte the XOR byte was found or not
-	 */
-	private static boolean frSkyXOR = false;
+	private List<Integer> frSkyFrame = new ArrayList<Integer>(Frame.SIZE_TELEMETRY_FRAME);
+//	private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+//
+//	/**
+//	 * index of the current user frame. If set to -1 no user frame is under
+//	 * construction.
+//	 */
+//	private static int currentFrSkyFrameIndex = -1;
+//
+//	/**
+//	 * if on previous byte the XOR byte was found or not
+//	 */
+//	private static boolean frSkyXOR = false;
 	
 	@Override
 	public void onCreate()
@@ -233,7 +223,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 		
-        nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
 		
 		Log.i(TAG,"Try to load settings");
@@ -1162,107 +1152,139 @@ public class FrSkyServer extends Service implements OnInitListener {
 			// use & 0xff to properly convert from byte to 0-255 int
 			// value (java only knows signed bytes)
 			b = buffer[i] & 0xff;
-			// handle byte stuffing first
-			if (b == Frame.STUFFING_TELEMETRY_FRAME) {
-				// indicate we need to xor the next one
-				frSkyXOR = true;
-				// and drop this byte
-				continue;
-			}
-			// we encountered a byte stuff indicator in previous
-			// iteration so we need to XOR here to unstuff and make
-			// sure to bypass the start/stop byte detection.
-			if (frSkyXOR) {
-				// perform xor operation
-				b ^= Frame.XOR_TELEMETRY_FRAME;
-				// disable xor flag again for next iteration
-				// wait to unset the xor operation flag since we'll
-				// need it in next steps to skip the start/stop byte
-				// detection
-				// xor = false;
-				Log.d(TAG, "XOR operation, unstuffed to "
-						+ Integer.toHexString(b));
+			// no decoding at this point, just parse the frames from this buffer
+			// on start stop byte we need to pass alon the collected frame and 
+			// clean up so we can start collecting another frame
+			if( b==Frame.START_STOP_TELEMETRY_FRAME){
+				// we already have content so we were working on a valid frame
+				if( !frSkyFrame.isEmpty()){
+					// complete this frame with the stop bit
+					frSkyFrame.add(b);
+					// pass along
+					handleFrame(frSkyFrame);
+					// clean up
+					frSkyFrame.clear();
+				} 
+				// otherwise this is a start bit so just register
+				else 
+					frSkyFrame.add(b);
 			} 
-			// if we encounter a start byte we need to indicate
-			// we're in a frame or if at the end handle the frame
-			// and continue
-			if (b == Frame.START_STOP_TELEMETRY_FRAME && !frSkyXOR) {
-				// if currentFrameIndex is not set we have to start
-				// a new frame here
-				if (currentFrSkyFrameIndex < 0) {
-					// init current frame index at beginning
-					currentFrSkyFrameIndex = 0;
-					// and copy this first byte in the frame
-					frSkyFrame[currentFrSkyFrameIndex++] = b;
-				}
-				// otherwise we were already collecting a frame so
-				// this indicates we are at the end now. At this
-				// point a frame is available that we can send over.
-				else if (currentFrSkyFrameIndex == Frame.SIZE_TELEMETRY_FRAME - 1) {
-					// just complete the frame we were collecting
-					frSkyFrame[currentFrSkyFrameIndex] = b;
-					// this way the length is confirmed
-					// Send the obtained bytes to the UI Activity
-					//mHandler.obtainMessage(
-					//		ActivityDashboard.MESSAGE_READ,
-					//		frame.length, -1, frame).sendToTarget();
-					// handle a single frame
-                	handleFrame(frSkyFrame);
-
-					// once information is handled we can reset the
-					// frame
-					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-					// we can already set this start byte to the
-					// beginning of the frame here
-					currentFrSkyFrameIndex = -1;
-				}
-				// if for some reason we got 2 times a 0x7e byte
-				// after each other or the size of the frame was
-				// different we can't do anything with the previous
-				// collected information. We can log a debug message
-				// and drop the frame to start over again.
-				else {
-					// log debug info here, only warn when actually something was lost
-					if( currentFrSkyFrameIndex != 1)
-						Log.d(TAG,
-							"Start/stop byte at wrong position: 0x"
-									+ Integer.toHexString(b)
-									+ " frame so far: "
-									+ Arrays.toString(frSkyFrame));
-					// reset frame and counts this start/stop bit as
-					// beginning
-					currentFrSkyFrameIndex = 0;
-					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-					frSkyFrame[currentFrSkyFrameIndex++] = b;
-				}
-			}
-			// otherwise we are handling a valid byte that has to be
-			// put in the frame we are collecting. But only when we
-			// are currently working on a frame!
-			else if (currentFrSkyFrameIndex >= 0
-					&& currentFrSkyFrameIndex < Frame.SIZE_TELEMETRY_FRAME - 1) {
-				frSkyFrame[currentFrSkyFrameIndex++] = b;
-			}
-			// finally it's possible that we receive bytes without
-			// being in a frame, just discard them for now. These
-			// are probably from missing frames etc
+			// otherwise just add to the current frame were working on
 			else {
-				// log debug info here
-				Log.d(TAG,
-						"Received data outside frame, dropped byte: 0x"
-								+ Integer.toHexString(b));
+				frSkyFrame.add(b);
 			}
-			//don't forget to unset the xor flag so we can continue normal byte operation on next iteration
-			frSkyXOR = false;
+//			// handle byte stuffing first
+//			if (b == Frame.STUFFING_TELEMETRY_FRAME) {
+//				// indicate we need to xor the next one
+//				frSkyXOR = true;
+//				// and drop this byte
+//				continue;
+//			}
+//			// we encountered a byte stuff indicator in previous
+//			// iteration so we need to XOR here to unstuff and make
+//			// sure to bypass the start/stop byte detection.
+//			if (frSkyXOR) {
+//				// perform xor operation
+//				b ^= Frame.XOR_TELEMETRY_FRAME;
+//				// disable xor flag again for next iteration
+//				// wait to unset the xor operation flag since we'll
+//				// need it in next steps to skip the start/stop byte
+//				// detection
+//				// xor = false;
+//				Log.d(TAG, "XOR operation, unstuffed to "
+//						+ Integer.toHexString(b));
+//			} 
+//			// if we encounter a start byte we need to indicate
+//			// we're in a frame or if at the end handle the frame
+//			// and continue
+//			if (b == Frame.START_STOP_TELEMETRY_FRAME && !frSkyXOR) {
+//				// if currentFrameIndex is not set we have to start
+//				// a new frame here
+//				if (currentFrSkyFrameIndex < 0) {
+//					// init current frame index at beginning
+//					currentFrSkyFrameIndex = 0;
+//					// and copy this first byte in the frame
+//					frSkyFrame[currentFrSkyFrameIndex++] = b;
+//				}
+//				// otherwise we were already collecting a frame so
+//				// this indicates we are at the end now. At this
+//				// point a frame is available that we can send over.
+//				else if (currentFrSkyFrameIndex == Frame.SIZE_TELEMETRY_FRAME - 1) {
+//					// just complete the frame we were collecting
+//					frSkyFrame[currentFrSkyFrameIndex] = b;
+//					// this way the length is confirmed
+//					// Send the obtained bytes to the UI Activity
+//					//mHandler.obtainMessage(
+//					//		ActivityDashboard.MESSAGE_READ,
+//					//		frame.length, -1, frame).sendToTarget();
+//					// handle a single frame
+//                	handleFrame(frSkyFrame);
+//
+//					// once information is handled we can reset the
+//					// frame
+//					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+//					// we can already set this start byte to the
+//					// beginning of the frame here
+//					currentFrSkyFrameIndex = -1;
+//				}
+//				// if for some reason we got 2 times a 0x7e byte
+//				// after each other or the size of the frame was
+//				// different we can't do anything with the previous
+//				// collected information. We can log a debug message
+//				// and drop the frame to start over again.
+//				else {
+//					// log debug info here, only warn when actually something was lost
+//					if( currentFrSkyFrameIndex != 1)
+//						Log.d(TAG,
+//							"Start/stop byte at wrong position: 0x"
+//									+ Integer.toHexString(b)
+//									+ " frame so far: "
+//									+ Arrays.toString(frSkyFrame));
+//					// reset frame and counts this start/stop bit as
+//					// beginning
+//					currentFrSkyFrameIndex = 0;
+//					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+//					frSkyFrame[currentFrSkyFrameIndex++] = b;
+//				}
+//			}
+//			// otherwise we are handling a valid byte that has to be
+//			// put in the frame we are collecting. But only when we
+//			// are currently working on a frame!
+//			else if (currentFrSkyFrameIndex >= 0
+//					&& currentFrSkyFrameIndex < Frame.SIZE_TELEMETRY_FRAME - 1) {
+//				frSkyFrame[currentFrSkyFrameIndex++] = b;
+//			}
+//			// finally it's possible that we receive bytes without
+//			// being in a frame, just discard them for now. These
+//			// are probably from missing frames etc
+//			else {
+//				// log debug info here
+//				Log.d(TAG,
+//						"Received data outside frame, dropped byte: 0x"
+//								+ Integer.toHexString(b));
+//			}
+//			//don't forget to unset the xor flag so we can continue normal byte operation on next iteration
+//			frSkyXOR = false;
 		}
     }
 	
 	/**
 	 * Handle a single parsed frame. This frame is expected to be exactly 11 bytes long and in proper format.
-	 * @param frame
+	 * @param list
 	 */
-	public void handleFrame(int[] frame){
-		Frame f = new Frame(frSkyFrame);
+//	public void handleFrame(int[] frame){
+	public void handleFrame(List<Integer> list){
+		// first convert 
+		int[] ints = new int[list.size()];
+		//index
+		int i=0;
+		// iterate
+		for(int li : list){
+			ints[i++] = li;
+		}
+		//then pass to ctor Frame
+		Frame f = new Frame(ints);
+		// TODO adapt for encoding and accepting all lengths
     	parseFrame(f);
 	}
 	
@@ -1440,8 +1462,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			case Frame.FRAMETYPE_USER_DATA:
 				// hcpl add handling user data frames!!
 				Log.d(TAG,"Frametype User Data");
-				extractUserDataBytes(f.toEncodedInts());
-				//TODO framecounter, ???
+				FrSkyHub.getInstance().extractUserDataBytes(f.toEncodedInts());
 				break;
 			case Frame.FRAMETYPE_INPUT_REQUEST_ALL:
 				//Log.d(TAG,"Frametype Request all alarms");
@@ -1453,226 +1474,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		return ok;
 		
-	}
-	
-	/**
-	 * Extract user data bytes from telemetry data frame. This subframe is
-	 * delimited by the 0x5E byte, included in the frame argument for this
-	 * method. A single call can contain incomplete user data frames so need to
-	 * keep track of previous frame also.
-	 * 
-	 * @param frame
-	 */
-	private void extractUserDataBytes(int[] frame) {
-		// init
-		int b;
-		// iterate elements in frame
-		// for (int b : frame) {
-		// don't handle all the bytes, skip header (0), prim(1), size(2),
-		// unused(3) and end but(10)
-		for (int i = 4; i < Frame.SIZE_TELEMETRY_FRAME - 1; i++) {
-			b = frame[i];
-			// handle byte stuffing first
-			if (b == Frame.STUFFING_HUB_FRAME) {
-				hubXOR = true;
-				// drop this byte
-				continue;
-			}
-			if (hubXOR) {
-				b ^= Frame.XOR_HUB_FRAME;
-				// don't unset the xor flag yet since we'll have to check on
-				// this for start/stop bit detection
-				// xor = false;
-				Log.d(TAG, "XOR operation, unstuffed to "
-						+ Integer.toHexString(b));
-			}
-			// if we encounter a start byte we need to indicate we're in a
-			// frame or if at the end handle the frame and continue
-			if (b == Frame.START_STOP_HUB_FRAME && !hubXOR) {
-				// if currentFrameIndex is not set we have to start a new
-				// frame here
-				if (currentHubFrameIndex < 0) {
-					// init current frame index at beginning
-					currentHubFrameIndex = 0;
-					// and copy this first byte in the frame
-					hubFrame[currentHubFrameIndex++] = b;
-				}
-				// otherwise we were already collecting a frame so this
-				// indicates we are at the end now. At this point a frame is
-				// available that we can send over.
-				else if (currentHubFrameIndex == Frame.SIZE_HUB_FRAME - 1) {
-					// just complete the frame we were collecting
-					hubFrame[currentHubFrameIndex] = b;
-					// this way the length is confirmed
-					handleHubDataFrame(hubFrame);
-					// once information is handled we can reset the frame
-					hubFrame = new int[Frame.SIZE_HUB_FRAME];
-					currentHubFrameIndex = 0;
-					// unlike the telemetry frames where 126 is on each side of
-					// the frame (126, x, y, 126, 126, x, y, 126) the 94 bit of
-					// the hub frame is only a single bit in between (94, x, y, 
-					// 94, x, y, 94) so we need to reuse that last 94 bit 
-					// encountered as the beginning of our next frame
-					hubFrame[currentHubFrameIndex++] = b;
-				}
-				// if for some reason we got 2 0x5e bytes after each other
-				// or the size of the frame was different we can't do
-				// anything with the previous collected information. We can
-				// log a debug message and drop the frame to start over
-				// again.
-				else {
-					// log debug info here
-					Log.d(TAG, "Start/stop byte at wrong position: 0x"
-									+ Integer.toHexString(b)
-									+ " frame so far: "
-									+ Arrays.toString(hubFrame));
-					currentHubFrameIndex = 0;
-					hubFrame = new int[Frame.SIZE_HUB_FRAME];
-					hubFrame[currentHubFrameIndex++] = b;
-				}
-			}
-			// otherwise we are handling a valid byte that has to be put in
-			// the frame we are collecting. But only when we are currently
-			// working on a frame!
-			else if (currentHubFrameIndex >= 0
-					&& currentHubFrameIndex < Frame.SIZE_HUB_FRAME - 1) {
-				hubFrame[currentHubFrameIndex++] = b;
-			}
-			// finally it's possible that we receive bytes without being in
-			// a frame, just discard them for now
-			else {
-				// log debug info here
-				Log.d(TAG, "Received data outside frame, dropped byte: 0x"
-								+ Integer.toHexString(b));
-			}
-			//make sure to unset the xor flag at this point
-			hubXOR = false;
-		}
-	}
-
-	/**
-	 * once we extracted the user data frames these can be handled by checking
-	 * their data ID
-	 * 
-	 * @param frame
-	 */
-	private void handleHubDataFrame(int[] frame) {
-		// some validation first
-		// all frames are delimited by the 0x5e start and end byte and should be
-		// 5 bytes long. We can validate this before doing any parsing
-		if (frame.length != Frame.SIZE_HUB_FRAME
-				|| frame[0] != Frame.START_STOP_HUB_FRAME
-				|| frame[Frame.SIZE_HUB_FRAME - 1] != Frame.START_STOP_HUB_FRAME) {
-			// log exception here
-			Log.d(TAG, "Wrong hub frame format: "
-					+ Arrays.toString(frame));
-			return;
-		}
-		// check data ID and update correct channel
-		// FIXME CHECK HOW TO PARSE DATA, NOT ALWAYS FRAME IDX 2 USED, UNITS,
-		// ...?
-		switch (frame[1]) {
-		case 0x01:
-			updateChannel(Channels.gps_altitude_before, frame[2]);
-			break;
-		case 0x01 + 8:
-			updateChannel(Channels.gps_altitude_after, frame[2]);
-			break;
-		case 0x02:
-			updateChannel(Channels.temp1, frame[2]);
-			break;
-		case 0x03:
-			updateChannel(Channels.rpm, frame[2] * 60);
-			break;
-		case 0x04:
-			updateChannel(Channels.fuel, frame[2]);
-			break;
-		case 0x05:
-			updateChannel(Channels.temp2, frame[2]);
-		case 0x06:
-			// FIXME cell & voltage in this one value
-			updateChannel(Channels.volt, frame[2]);
-			break;
-		case 0x10:
-			updateChannel(Channels.altitude, frame[2]);
-			break;
-		case 0x11:
-			updateChannel(Channels.gps_speed_before, frame[2]);
-			break;
-		case 0x11 + 8:
-			updateChannel(Channels.gps_speed_after, frame[2]);
-			break;
-		case 0x12:
-			updateChannel(Channels.longitude_before, frame[2]);
-			break;
-		case 0x12 + 8:
-			updateChannel(Channels.longitude_after, frame[2]);
-			break;
-		case 0x1A + 8:
-			updateChannel(Channels.ew, frame[2]);
-			break;
-		case 0x13:
-			updateChannel(Channels.latitude_before, frame[2]);
-			break;
-		case 0x13 + 8:
-			updateChannel(Channels.latitude_after, frame[2]);
-			break;
-		case 0x1B + 8:
-			updateChannel(Channels.ns, frame[2]);
-			break;
-		case 0x14:
-			updateChannel(Channels.course_before, frame[2]);
-			break;
-		case 0x14 + 8:
-			updateChannel(Channels.course_after, frame[2]);
-			break;
-		case 0x15:
-			updateChannel(Channels.day, frame[2]);
-			updateChannel(Channels.month, frame[3]);
-			break;
-		case 0x16:
-			updateChannel(Channels.year, 2000 + frame[2]);
-			break;
-		case 0x17:
-			updateChannel(Channels.hour, frame[2]);
-			updateChannel(Channels.minute, frame[3]);
-			break;
-		case 0x18:
-			updateChannel(Channels.second, frame[2]);
-			break;
-		case 0x24:
-			updateChannel(Channels.acc_x, frame[2] / 1000);
-			break;
-		case 0x25:
-			updateChannel(Channels.acc_y, frame[2] / 1000);
-			break;
-		case 0x26:
-			updateChannel(Channels.acc_z, frame[2] / 1000);
-			break;
-		default:
-			Log.d(TAG,
-					"Unknown sensor type for frame: " + Arrays.toString(frame));
-		}
-	}
-
-	/**
-	 * update a single channel with a single value
-	 * 
-	 * @param channel
-	 * @param value
-	 */
-	private void updateChannel(Channels channel, int value) {
-		// TODO create a channel here for the correct type of information and
-		// broadcast channel so GUI can update this value
-		Log.d(TAG, "Data received for channel: "+channel+", value: "+value);
-	}
-
-	/**
-	 * possible channels for sensor hub data
-	 * 
-	 */
-	public enum Channels {
-		undefined, gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude, gps_speed_before, gps_speed_after, longitude_before, longitude_after, ew, latitude_before, latitude_after, ns, course_before, course_after, day, month, year, hour, minute, second, acc_x, acc_y, acc_z
 	}
 	
 	/**
@@ -1708,11 +1509,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
 	}
-	 
-	
-	
-	
-	
 	
 	// Settings setters and getters
 	///TODO: Have setters and getters work with settings store

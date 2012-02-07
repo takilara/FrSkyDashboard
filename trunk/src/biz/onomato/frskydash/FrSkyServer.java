@@ -1,9 +1,11 @@
 package biz.onomato.frskydash;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -71,7 +73,6 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_TOAST = 5;
-    
     
     public static final String DEVICE_NAME = "device_name";
     private String mConnectedDeviceName = null;
@@ -167,6 +168,44 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static final String MESSAGE_BLUETOOTH_STATE_CHANGED = "biz.onomato.frskydash.intent.action.BLUETOOTH_STATE_CHANGED";
 	
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
+	
+	// hcpl: these are class members now since we have to collect the data over
+	// several method executions since the bytes could be spread over several
+	// telemetry 11 bytes frames
+
+	/**
+	 * the current user frame we are working on. This is used to pass data
+	 * between incompletes frames.
+	 */
+	private static int[] hubFrame = new int[Frame.SIZE_HUB_FRAME];
+
+	/**
+	 * index of the current user frame. If set to -1 no user frame is under
+	 * construction.
+	 */
+	private static int currentHubFrameIndex = -1;
+
+	/**
+	 * if on previous byte the XOR byte was found or not
+	 */
+	private static boolean hubXOR = false;
+	
+	/**
+	 * the current user frame we are working on. This is used to pass data
+	 * between incompletes frames.
+	 */
+	private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+
+	/**
+	 * index of the current user frame. If set to -1 no user frame is under
+	 * construction.
+	 */
+	private static int currentFrSkyFrameIndex = -1;
+
+	/**
+	 * if on previous byte the XOR byte was found or not
+	 */
+	private static boolean frSkyXOR = false;
 	
 	@Override
 	public void onCreate()
@@ -708,17 +747,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 	}
 	
-	
 	public void die()
 	{
 		Log.i(TAG,"Die, perform cleanup");
 
 		stopSelf();
 	}
-	
-
-
-
 	
 	@Override
 	public void onDestroy()
@@ -958,13 +992,9 @@ public class FrSkyServer extends Service implements OnInitListener {
     	 
     	}
     	
-    
-    	
-
-    	
 	}
 	
-private final Handler mHandlerBT = new Handler() {
+	private final Handler mHandlerBT = new Handler() {
     	
         @Override
         public void handleMessage(Message msg) {        	
@@ -980,7 +1010,6 @@ private final Handler mHandlerBT = new Handler() {
                 	Log.d(TAG,"BT connected");
                 	setConnecting(false);
                 	statusBt = true;
-                	
                 	
                 	_manualBtDisconnect = false;
                 	//send(Frame.InputRequestAll().toInts());
@@ -1023,30 +1052,31 @@ private final Handler mHandlerBT = new Handler() {
             case MESSAGE_READ:
             	if(!_dying)
             	{
-
+            		//hcpl updated to handle the new int array after byte per byte read update
 	                byte[] readBuf = (byte[]) msg.obj;
-	                int[] i = new int[msg.arg1];
-//            		int[] i = (int[])msg.obj;
+//	                int[] i = new int[msg.arg1];
+            		//int[] i = (int[])msg.obj;
+            		handleByteBuffer(readBuf);
 //	                
-	                for(int n=0;n<msg.arg1;n++)
-	                {
-	                	//Log.d(TAG,n+": "+readBuf[n]);
-	                	if(readBuf[n]<0)
-	                	{
-	                		i[n]=readBuf[n]+256;
-	                	}
-	                	else
-	                	{
-	                		i[n]=readBuf[n];
-	                	}
-	                }
+//	                for(int n=0;n<msg.arg1;n++)
+//	                {
+//	                	//Log.d(TAG,n+": "+readBuf[n]);
+//	                	if(readBuf[n]<0)
+//	                	{
+//	                		i[n]=readBuf[n]+256;
+//	                	}
+//	                	else
+//	                	{
+//	                		i[n]=readBuf[n];
+//	                	}
+//	                }
 //	                
 //	                // NEEDS to be changed!!!
 //	                if(i.length<20)
 //	                {
-	                	Frame f = new Frame(i);
+	                	//Frame f = new Frame(i);
 	                	//Log.i(TAG,f.toHuman());
-	                	parseFrame(f);
+	                	//parseFrame(f);
 //	                }
 	            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
             	}
@@ -1066,7 +1096,175 @@ private final Handler mHandlerBT = new Handler() {
                 break;
             }
         }
-    };   
+    };
+  
+    /**
+     * for simulation and testing only
+     * 
+     * @param buffer
+     * @param signed
+     */
+    public void handleStringBuffer(String buffer, String separator, boolean signed){
+    	//construct an int array out of the string
+    	List<Integer> list = new ArrayList<Integer>();
+    	//parse string
+    	for(String str : buffer.split(separator)){
+    		try{
+    			list.add(Integer.decode(str.trim()));
+    		}catch(NumberFormatException nfe){
+    			Log.e(TAG, "dropped unparseable byte: "+str);
+    		}
+    	}
+    	//translate
+    	int[] ints = new int[list.size()];
+    	for(int i=0; i<list.size(); i++)
+    		ints[i] = list.get(i);
+    	//and send on
+    	handleIntBuffer(ints, signed);
+    }
+    
+    /**
+     * for simulation and testing only
+     * 
+     * @param buffer
+     * @param signed
+     */
+    public void handleIntBuffer(int[] buffer, boolean signed){
+    	//rework that int buffer into a byte buffer
+    	byte[] byteBuffer = new byte[buffer.length];
+    	for(int i =0 ; i < buffer.length ; i++){
+    		byteBuffer[i] = (byte)(signed?buffer[i]:buffer[i]-256);
+    	}
+    	//todo this requires a reset of the buffers state
+		//shouldn't be needed since it will reset properly on it's own on reaching delimiters
+    	//frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+		//currentFrSkyFrameIndex = -1;
+		//frSkyXOR = false;
+		//pass on
+    	handleByteBuffer(byteBuffer);
+    }
+    
+	/**
+	 * hcpl: This is where the bytes buffer from bluetooth connection (or any
+	 * other type of connection like test data or wired) will be handled byte
+	 * per byte.
+	 * 
+	 * @param buffer
+	 *            the buffer with bytes from the inputstream. An array of
+	 *            <code>byte</code>s is expected representing bytes with a value
+	 *            of -127 to 128.
+	 */
+	public void handleByteBuffer(byte[] buffer) {
+		// init current byte
+		int b;
+		// iterate all bytes in buffer
+		for( int i=0 ; i< buffer.length ; i++){
+			// use & 0xff to properly convert from byte to 0-255 int
+			// value (java only knows signed bytes)
+			b = buffer[i] & 0xff;
+			// handle byte stuffing first
+			if (b == Frame.STUFFING_TELEMETRY_FRAME) {
+				// indicate we need to xor the next one
+				frSkyXOR = true;
+				// and drop this byte
+				continue;
+			}
+			// we encountered a byte stuff indicator in previous
+			// iteration so we need to XOR here to unstuff and make
+			// sure to bypass the start/stop byte detection.
+			if (frSkyXOR) {
+				// perform xor operation
+				b ^= Frame.XOR_TELEMETRY_FRAME;
+				// disable xor flag again for next iteration
+				// wait to unset the xor operation flag since we'll
+				// need it in next steps to skip the start/stop byte
+				// detection
+				// xor = false;
+				Log.d(TAG, "XOR operation, unstuffed to "
+						+ Integer.toHexString(b));
+			} 
+			// if we encounter a start byte we need to indicate
+			// we're in a frame or if at the end handle the frame
+			// and continue
+			if (b == Frame.START_STOP_TELEMETRY_FRAME && !frSkyXOR) {
+				// if currentFrameIndex is not set we have to start
+				// a new frame here
+				if (currentFrSkyFrameIndex < 0) {
+					// init current frame index at beginning
+					currentFrSkyFrameIndex = 0;
+					// and copy this first byte in the frame
+					frSkyFrame[currentFrSkyFrameIndex++] = b;
+				}
+				// otherwise we were already collecting a frame so
+				// this indicates we are at the end now. At this
+				// point a frame is available that we can send over.
+				else if (currentFrSkyFrameIndex == Frame.SIZE_TELEMETRY_FRAME - 1) {
+					// just complete the frame we were collecting
+					frSkyFrame[currentFrSkyFrameIndex] = b;
+					// this way the length is confirmed
+					// Send the obtained bytes to the UI Activity
+					//mHandler.obtainMessage(
+					//		ActivityDashboard.MESSAGE_READ,
+					//		frame.length, -1, frame).sendToTarget();
+					// handle a single frame
+                	handleFrame(frSkyFrame);
+
+					// once information is handled we can reset the
+					// frame
+					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+					// we can already set this start byte to the
+					// beginning of the frame here
+					currentFrSkyFrameIndex = -1;
+				}
+				// if for some reason we got 2 times a 0x7e byte
+				// after each other or the size of the frame was
+				// different we can't do anything with the previous
+				// collected information. We can log a debug message
+				// and drop the frame to start over again.
+				else {
+					// log debug info here, only warn when actually something was lost
+					if( currentFrSkyFrameIndex != 1)
+						Log.d(TAG,
+							"Start/stop byte at wrong position: 0x"
+									+ Integer.toHexString(b)
+									+ " frame so far: "
+									+ Arrays.toString(frSkyFrame));
+					// reset frame and counts this start/stop bit as
+					// beginning
+					currentFrSkyFrameIndex = 0;
+					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+					frSkyFrame[currentFrSkyFrameIndex++] = b;
+				}
+			}
+			// otherwise we are handling a valid byte that has to be
+			// put in the frame we are collecting. But only when we
+			// are currently working on a frame!
+			else if (currentFrSkyFrameIndex >= 0
+					&& currentFrSkyFrameIndex < Frame.SIZE_TELEMETRY_FRAME - 1) {
+				frSkyFrame[currentFrSkyFrameIndex++] = b;
+			}
+			// finally it's possible that we receive bytes without
+			// being in a frame, just discard them for now. These
+			// are probably from missing frames etc
+			else {
+				// log debug info here
+				Log.d(TAG,
+						"Received data outside frame, dropped byte: 0x"
+								+ Integer.toHexString(b));
+			}
+			//don't forget to unset the xor flag so we can continue normal byte operation on next iteration
+			frSkyXOR = false;
+		}
+    }
+	
+	/**
+	 * Handle a single parsed frame. This frame is expected to be exactly 11 bytes long and in proper format.
+	 * @param frame
+	 */
+	public void handleFrame(int[] frame){
+		Frame f = new Frame(frSkyFrame);
+    	parseFrame(f);
+	}
 	
 	public TextToSpeech createSpeaker()
 	{
@@ -1257,27 +1455,6 @@ private final Handler mHandlerBT = new Handler() {
 		
 	}
 	
-	// hcpl: these are class members now since we have to collect the data over
-	// several method executions since the bytes could be spread over several
-	// telemetry 11 bytes frames
-
-	/**
-	 * the current user frame we are working on. This is used to pass data
-	 * between incompletes frames.
-	 */
-	private static int[] hubFrame = new int[Frame.SIZE_HUB_FRAME];
-
-	/**
-	 * index of the current user frame. If set to -1 no user frame is under
-	 * construction.
-	 */
-	private static int currentHubFrameIndex = -1;
-
-	/**
-	 * if on previous byte the XOR byte was found or not
-	 */
-	private static boolean xor = false;
-	
 	/**
 	 * Extract user data bytes from telemetry data frame. This subframe is
 	 * delimited by the 0x5E byte, included in the frame argument for this
@@ -1297,11 +1474,11 @@ private final Handler mHandlerBT = new Handler() {
 			b = frame[i];
 			// handle byte stuffing first
 			if (b == Frame.STUFFING_HUB_FRAME) {
-				xor = true;
+				hubXOR = true;
 				// drop this byte
 				continue;
 			}
-			if (xor) {
+			if (hubXOR) {
 				b ^= Frame.XOR_HUB_FRAME;
 				// don't unset the xor flag yet since we'll have to check on
 				// this for start/stop bit detection
@@ -1311,7 +1488,7 @@ private final Handler mHandlerBT = new Handler() {
 			}
 			// if we encounter a start byte we need to indicate we're in a
 			// frame or if at the end handle the frame and continue
-			if (b == Frame.START_STOP_HUB_FRAME && !xor) {
+			if (b == Frame.START_STOP_HUB_FRAME && !hubXOR) {
 				// if currentFrameIndex is not set we have to start a new
 				// frame here
 				if (currentHubFrameIndex < 0) {
@@ -1331,6 +1508,11 @@ private final Handler mHandlerBT = new Handler() {
 					// once information is handled we can reset the frame
 					hubFrame = new int[Frame.SIZE_HUB_FRAME];
 					currentHubFrameIndex = 0;
+					// unlike the telemetry frames where 126 is on each side of
+					// the frame (126, x, y, 126, 126, x, y, 126) the 94 bit of
+					// the hub frame is only a single bit in between (94, x, y, 
+					// 94, x, y, 94) so we need to reuse that last 94 bit 
+					// encountered as the beginning of our next frame
 					hubFrame[currentHubFrameIndex++] = b;
 				}
 				// if for some reason we got 2 0x5e bytes after each other
@@ -1343,7 +1525,7 @@ private final Handler mHandlerBT = new Handler() {
 					Log.d(TAG, "Start/stop byte at wrong position: 0x"
 									+ Integer.toHexString(b)
 									+ " frame so far: "
-									+ Arrays.toString(frame));
+									+ Arrays.toString(hubFrame));
 					currentHubFrameIndex = 0;
 					hubFrame = new int[Frame.SIZE_HUB_FRAME];
 					hubFrame[currentHubFrameIndex++] = b;
@@ -1364,7 +1546,7 @@ private final Handler mHandlerBT = new Handler() {
 								+ Integer.toHexString(b));
 			}
 			//make sure to unset the xor flag at this point
-			xor = false;
+			hubXOR = false;
 		}
 	}
 
@@ -1490,7 +1672,7 @@ private final Handler mHandlerBT = new Handler() {
 	 * 
 	 */
 	public enum Channels {
-		gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude, gps_speed_before, gps_speed_after, longitude_before, longitude_after, ew, latitude_before, latitude_after, ns, course_before, course_after, day, month, year, hour, minute, second, acc_x, acc_y, acc_z
+		undefined, gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude, gps_speed_before, gps_speed_after, longitude_before, longitude_after, ew, latitude_before, latitude_after, ns, course_before, course_after, day, month, year, hour, minute, second, acc_x, acc_y, acc_z
 	}
 	
 	/**
@@ -1791,9 +1973,7 @@ private final Handler mHandlerBT = new Handler() {
 	        }
 	    }
 	    return mBluetoothAdapter;
-    }
-    
-   
+    } 
 	
 }
 

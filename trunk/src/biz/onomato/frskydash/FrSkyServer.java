@@ -164,6 +164,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
+	public static final String MESSAGE_BLUETOOTH_STATE_CHANGED = "biz.onomato.frskydash.intent.action.BLUETOOTH_STATE_CHANGED";
+	
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
 	
 	@Override
@@ -968,12 +970,17 @@ private final Handler mHandlerBT = new Handler() {
         public void handleMessage(Message msg) {        	
             switch (msg.what) {
             case MESSAGE_STATE_CHANGE:
+            	Intent bcI = new Intent();
+        		bcI.setAction(MESSAGE_BLUETOOTH_STATE_CHANGED);
+        		sendBroadcast(bcI);
+        		
                 Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                 switch (msg.arg1) {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Log.d(TAG,"BT connected");
                 	setConnecting(false);
                 	statusBt = true;
+                	
                 	
                 	_manualBtDisconnect = false;
                 	//send(Frame.InputRequestAll().toInts());
@@ -1009,30 +1016,30 @@ private final Handler mHandlerBT = new Handler() {
                 }
                 break;
             case MESSAGE_WRITE:
-            	Log.d(TAG,"BT writing");
+            	//Log.d(TAG,"BT writing");
                 break;
                 
             //handle receiving data from frsky 
             case MESSAGE_READ:
             	if(!_dying)
             	{
-            		//hcpl updated to handle the new int array after byte per byte read update
-//	                byte[] readBuf = (byte[]) msg.obj;
-//	                int[] i = new int[msg.arg1];
-            		int[] i = (int[])msg.obj;
+
+	                byte[] readBuf = (byte[]) msg.obj;
+	                int[] i = new int[msg.arg1];
+//            		int[] i = (int[])msg.obj;
 //	                
-//	                for(int n=0;n<msg.arg1;n++)
-//	                {
-//	                	//Log.d(TAG,n+": "+readBuf[n]);
-//	                	if(readBuf[n]<0)
-//	                	{
-//	                		i[n]=readBuf[n]+256;
-//	                	}
-//	                	else
-//	                	{
-//	                		i[n]=readBuf[n];
-//	                	}
-//	                }
+	                for(int n=0;n<msg.arg1;n++)
+	                {
+	                	//Log.d(TAG,n+": "+readBuf[n]);
+	                	if(readBuf[n]<0)
+	                	{
+	                		i[n]=readBuf[n]+256;
+	                	}
+	                	else
+	                	{
+	                		i[n]=readBuf[n];
+	                	}
+	                }
 //	                
 //	                // NEEDS to be changed!!!
 //	                if(i.length<20)
@@ -1234,11 +1241,15 @@ private final Handler mHandlerBT = new Handler() {
 				break;
 			case Frame.FRAMETYPE_USER_DATA:
 				// hcpl add handling user data frames!!
+				Log.d(TAG,"Frametype User Data");
 				extractUserDataBytes(f.toEncodedInts());
 				//TODO framecounter, ???
 				break;
+			case Frame.FRAMETYPE_INPUT_REQUEST_ALL:
+				//Log.d(TAG,"Frametype Request all alarms");
+				break;
 			default:
-				Log.i(TAG,"Frametype currently not supported");
+				Log.i(TAG,"Frametype currently not supported: "+f.frametype);
 				Log.i(TAG,"Frame: "+f.toHuman());
 				break;
 		}

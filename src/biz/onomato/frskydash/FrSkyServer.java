@@ -1279,8 +1279,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//index
 		int i=0;
 		// iterate
-		for(int li : list){
-			ints[i++] = li;
+		for(int li = 0 ; li< list.size(); li++){
+			ints[i++] = list.get(li);
 		}
 		//then pass to ctor Frame
 		Frame f = new Frame(ints);

@@ -670,7 +670,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		setMovingAverage(in.readInt());
 		setPrecision(in.readInt());
 		_silent = in.readByte()==1;
-		_sourceChannelId = in.readLong();
+		//_sourceChannelId = in.readLong();
+		listenTo(in.readLong());
 		_modelId = in.readInt();
 	}
 	

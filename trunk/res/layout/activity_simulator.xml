@@ -39,9 +39,72 @@
         	android:layout_height="2dip"
         	android:background="#FF909090" 
         	android:layout_width="match_parent" />
-        <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/sim_btnSend" android:text="Send"></Button>
+		<Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/sim_btnSend" android:text="Send"></Button>
         <ToggleButton android:text="Continous" android:id="@+id/sim_tglBtn1" android:layout_width="match_parent" android:textOn="Cyclic Sim On" android:textOff="Cyclic Sim Off" android:layout_height="wrap_content"></ToggleButton>
         
-    </LinearLayout>
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="#FF909090" />
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Raw Data:" />
+
+            <EditText
+                android:id="@+id/editTextSim"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="int/hex formatted raw bytes separated by comma (,). Ex: 0, 255, 0, 255"
+                android:inputType="textMultiLine" />
+
+            <RadioGroup
+                android:id="@+id/radioGroup1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <RadioButton
+                    android:id="@+id/radio0_signed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:layout_weight="1"
+                    android:text="-128 to 127" />
+
+                <RadioButton
+                    android:id="@+id/radio1_unsigned"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0-255" />
+
+                <RadioButton
+                    android:id="@+id/radio2_hex"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0x00-0xFF" />
+            </RadioGroup>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="#FF909090" />
+
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="#FF909090" />
+            
+            <Button
+                android:id="@+id/sim_btnSend_raw"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Send RAW Data" />
+</LinearLayout>
     </ScrollView>
 </LinearLayout>

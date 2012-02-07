@@ -6,16 +6,18 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-import android.util.Log;
-import android.widget.SeekBar;
-import android.os.Handler;
-import java.lang.Runnable;
 
 public class ActivitySimulator extends Activity implements OnSeekBarChangeListener, OnClickListener {
 	private static final String TAG = "SimulatorActivity";
@@ -86,7 +88,8 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
         rssitx_raw	= 0;
         rssirx_raw 	= 0;
         
-         
+        //hcpl simulate raw frames
+        ((Button)findViewById(R.id.sim_btnSend_raw)).setOnClickListener(this);
 		
 		
 		// Code to update GUI cyclic
@@ -195,6 +198,16 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
     			}
     			*/
     			break;
+    		case R.id.sim_btnSend_raw:
+    			if( server == null )
+    				return;
+				//check input type selection
+    			boolean signed = ((RadioButton)findViewById(R.id.radio0_signed)).isChecked();
+				//pass to server
+    			server.handleStringBuffer(
+						((EditText) findViewById(R.id.editTextSim)).getText()
+								.toString(), ",", signed);
+				break;
     	}
     }
 	

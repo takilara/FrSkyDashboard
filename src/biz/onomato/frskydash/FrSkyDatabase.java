@@ -157,6 +157,19 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	{
     		// Update the channels
     		if(DEBUG)Log.i(TAG,"Saving channels");
+    		
+    		// no good
+    		//deleteAllChannelsForModel(model);
+    		for(Channel c:getChannelsForModel(model))
+    		{
+    			if(!model.getChannels().containsValue(c))
+    			{
+    				// Channel no longer in model, delete it
+    				deleteChannel(c);
+    			}
+    		}
+    		
+    		// update or add channels
     		for(Channel ch:model.getChannels().values())
     		{
     			saveChannel(ch);

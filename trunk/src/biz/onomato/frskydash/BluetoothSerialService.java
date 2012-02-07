@@ -19,7 +19,6 @@ package biz.onomato.frskydash;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
@@ -33,9 +32,13 @@ import android.util.Log;
 
 /**
  * This class does all the work for setting up and managing Bluetooth
- * connections with other devices. It has a thread that listens for
- * incoming connections, a thread for connecting with a device, and a
- * thread for performing data transmissions when connected.
+ * connections with other devices. It has a thread that listens for incoming
+ * connections, a thread for connecting with a device, and a thread for
+ * performing data transmissions when connected.
+ * 
+ * The data from this service is collected within a buffer and the buffer is
+ * passed towards the {@link FrSkyServer} class to handle parsing into valid
+ * frames.
  */
 public class BluetoothSerialService {
     // Debugging
@@ -360,23 +363,12 @@ public class BluetoothSerialService {
 
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
+            // the buffer we read in 
             byte[] buffer = new byte[1024];
-            //List  b = new LinkedList();
-            //ArrayList<Byte> b = new ArrayList<Byte>();
-            //int ptr=0;
-            //int endpos = 0;
-            //int startpos = 0;
+            // the number of bytes that were read
             int bytes = 0;
-            byte[] bufferCopy;
-           
-//            //hcpl modified to read single bytes from buffer
-//            int b;
-//            // the frame we are going to send over once complete
-//            int[] frame = new int[Frame.SIZE_TELEMETRY_FRAME];
-//            // if we need to xor the current byte or not
-//            boolean xor = false;
-//            // current position in frame
-//            int currentFrameIndex = -1;            
+            // a subset of the buffer holding only the valid bytes
+            byte[] bufferCopy;         
 
             // Keep listening to the InputStream while connected
             while (true) {
@@ -390,193 +382,6 @@ public class BluetoothSerialService {
 					mHandler.obtainMessage(
 							ActivityDashboard.MESSAGE_READ,
 							bytes, -1, bufferCopy).sendToTarget();
-					// start parsing input stream byte per byte
-//					for( int i=0 ; i< bytes ; i++){
-//						// b = mmInStream.read();
-//						// use & 0xff to properly convert from byte to 0-255 int
-//						// value (java only knows signed bytes)
-//						b = buffer[i] & 0xff;
-//						// handle byte stuffing first
-//						if (b == Frame.STUFFING_TELEMETRY_FRAME) {
-//							// indicate we need to xor the next one
-//							xor = true;
-//							// and drop this byte
-//							continue;
-//						}
-//						// we encountered a byte stuff indicator in previous
-//						// iteration so we need to XOR here to unstuff and make
-//						// sure to bypass the start/stop byte detection.
-//						if (xor) {
-//							// perform xor operation
-//							b ^= Frame.XOR_TELEMETRY_FRAME;
-//							// disable xor flag again for next iteration
-//							// wait to unset the xor operation flag since we'll
-//							// need it in next steps to skip the start/stop byte
-//							// detection
-//							// xor = false;
-//							Log.d(TAG, "XOR operation, unstuffed to "
-//									+ Integer.toHexString(b));
-//						} 
-//						// if we encounter a start byte we need to indicate
-//						// we're in a frame or if at the end handle the frame
-//						// and continue
-//						if (b == Frame.START_STOP_TELEMETRY_FRAME && !xor) {
-//							// if currentFrameIndex is not set we have to start
-//							// a new frame here
-//							if (currentFrameIndex < 0) {
-//								// init current frame index at beginning
-//								currentFrameIndex = 0;
-//								// and copy this first byte in the frame
-//								frame[currentFrameIndex++] = b;
-//							}
-//							// otherwise we were already collecting a frame so
-//							// this indicates we are at the end now. At this
-//							// point a frame is available that we can send over.
-//							else if (currentFrameIndex == Frame.SIZE_TELEMETRY_FRAME - 1) {
-//								// just complete the frame we were collecting
-//								frame[currentFrameIndex] = b;
-//								// this way the length is confirmed
-//								// Send the obtained bytes to the UI Activity
-//								mHandler.obtainMessage(
-//										ActivityDashboard.MESSAGE_READ,
-//										frame.length, -1, frame).sendToTarget();
-//								// once information is handled we can reset the
-//								// frame
-//								frame = new int[Frame.SIZE_TELEMETRY_FRAME];
-//								// we can already set this start byte to the
-//								// beginning of the frame here
-//								currentFrameIndex = -1;
-//							}
-//							// if for some reason we got 2 times a 0x7e byte
-//							// after each other or the size of the frame was
-//							// different we can't do anything with the previous
-//							// collected information. We can log a debug message
-//							// and drop the frame to start over again.
-//							else {
-//								// log debug info here
-//								Log.d(TAG,
-//										"Start/stop byte at wrong position: 0x"
-//												+ Integer.toHexString(b)
-//												+ " frame so far: "
-//												+ Arrays.toString(frame));
-//								// reset frame and counts this start/stop bit as
-//								// beginning
-//								currentFrameIndex = 0;
-//								frame = new int[Frame.SIZE_TELEMETRY_FRAME];
-//								frame[currentFrameIndex++] = b;
-//							}
-//						}
-//						// otherwise we are handling a valid byte that has to be
-//						// put in the frame we are collecting. But only when we
-//						// are currently working on a frame!
-//						else if (currentFrameIndex >= 0
-//								&& currentFrameIndex < Frame.SIZE_TELEMETRY_FRAME - 1) {
-//							frame[currentFrameIndex++] = b;
-//						}
-//						// finally it's possible that we receive bytes without
-//						// being in a frame, just discard them for now. These
-//						// are probably from missing frames etc
-//						else {
-//							// log debug info here
-//							Log.d(TAG,
-//									"Received data outside frame, dropped byte: 0x"
-//											+ Integer.toHexString(b));
-//						}
-//						//don't forget to unset the xor flag so we can continue normal byte operation on next iteration
-//						xor = false;
-//					}
-					//hcpl oringinal logic
-                    
-					//Log.i(TAG,"Read "+bytes+" new bytes.");
-
-                    //mEmulatorView.write(buffer, bytes);
-                    // Send the obtained bytes to the UI Activity
-
-                    // Fix buffer to Frame here
-                    // for each byte in current buffer, copy to framebuffer.
-                    //Log.i(TAG,"Writing bytes to framebuffer positions: "+ptr+"-"+(ptr+bytes));
-//                    for(int n=0;n<bytes;n++)
-//                    {
-//                    	b.add((byte) buffer[n]);
-//                    	//framebuffer[ptr]=buffer[n];
-//                    	ptr++;
-//                    }
-//                    //Log.i(TAG,"b now at "+b.size()+" elements.");
-//                    if(b.size()>=11)
-//                    {
-//                    	boolean containsFullFrame = true;	// assume a frame is in there
-//                    	while(containsFullFrame)
-//                    	{
-//	                    	// find first 7e
-//	                    	//Log.i(TAG,"possible complete frame");
-//	                    	startpos = b.indexOf((byte) 0x7e);
-//	                    	// need to check if next byte also is 0x7e..
-//	                    	if(b.size()>startpos)
-//	                    	{
-//		                    	if(b.get(startpos+1)==0x7e)
-//		                    	{
-//		                    		startpos++;
-//		                    	}
-//	                    	}
-//	                    	
-//	                    	
-//	                    	//Log.i(TAG,"Startpos: "+startpos);
-//	                    	// find second 7e
-//	                    	List<Byte> d = new ArrayList<Byte>();
-//	                    	d = b.subList(startpos+1, b.size());
-//	                    	//Log.i(TAG,d.toString());
-//	                    	endpos = d.indexOf((byte) 0x7e)+startpos+1;
-//	                    	//Log.i(TAG,"Endpos: "+endpos);
-//	                    	if((startpos!=-1) && (endpos!=-1) && (endpos>startpos))
-//	                    	{
-//	                    		//Log.i(TAG,"We have complete frame:");
-//	                    		List<Byte> e = new ArrayList<Byte>();
-//		                    	e = b.subList(startpos, endpos+1);
-//	                    		
-//	                    		byte[] frame = new byte[e.size()];
-//	                    		//Log.i(TAG,"Made a byte array");
-//	                    		
-//	                    		for (int n=0;n<frame.length;n++)
-//	                    		{
-//	                    			frame[n]=(byte) e.get(n);
-//	                    		}
-//	                    		//Log.i(TAG,"Removing items from b, old size:"+b.size());
-//	                    		e.clear();
-//	            
-//	                    		//mHandler.obtainMessage(Frskydash.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
-//	                    		mHandler.obtainMessage(ActivityDashboard.MESSAGE_READ, frame.length, -1, frame).sendToTarget();
-//	                    		
-//	                    		//Log.i(TAG,"recheck after transmission");
-//	                    		startpos = b.indexOf((byte) 0x7e);
-//		                    	//Log.i(TAG,"Startpos: "+startpos);
-//		                    	// find second 7e
-//		                    	endpos = b.subList(startpos+1, b.size()).indexOf((byte) 0x7e)+1;
-//		                    	//Log.i(TAG,"Endpos: "+endpos);
-//		                    	if((startpos!=-1) && (endpos!=-1) && (startpos!=endpos) && (b.size()>=11))
-//		                    	{
-//		                    		containsFullFrame=true;
-//		                    		//Log.i(TAG,"please repeat");
-//		                    	}
-//		                    	else
-//		                    	{
-//		                    		containsFullFrame=false;
-//		                    	}
-//	                    		
-//	                    		
-//	                    	}
-//	                    	else
-//	                    	{
-//	                    		containsFullFrame=false;
-//	                    		//Log.i(TAG, "not yet a complete frame (start,end,size): ("+startpos+","+endpos+","+b.size()+")");
-//	                    	}
-//                    	}
-//                    			
-//                    	
-//                    	
-//                    }
-//
-//                    String a = buffer.toString();
-//                    a = "";
 						
                 } catch (IOException e) {
                     //Log.e(TAG, "disconnected", e);

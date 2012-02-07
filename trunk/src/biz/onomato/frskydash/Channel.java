@@ -485,7 +485,10 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			
 		    mIntentFilter.addAction(bCastAction);
 		    Log.d(TAG,"Context is : "+_context);
-		    _context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
+		    if(_context!=null)
+		    {
+		    	_context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
+		    }
 		}
 		else
 		{
@@ -493,7 +496,10 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			
 			try
 			{
-				_context.unregisterReceiver(mChannelUpdateReceiver);
+				if(_context!=null)
+				{
+					_context.unregisterReceiver(mChannelUpdateReceiver);
+				}
 			}
 			catch (Exception e)
 			{
@@ -670,8 +676,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		setMovingAverage(in.readInt());
 		setPrecision(in.readInt());
 		_silent = in.readByte()==1;
-		//_sourceChannelId = in.readLong();
-		listenTo(in.readLong());
+		_sourceChannelId = in.readLong();
+		//listenTo(in.readLong());
 		_modelId = in.readInt();
 	}
 	

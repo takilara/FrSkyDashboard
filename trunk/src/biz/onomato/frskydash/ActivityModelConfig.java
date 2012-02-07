@@ -311,6 +311,9 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            		//if(idInModel>-1)
 	            		//{
 	            			//_model.setChannel(idInModel,returnChannel);
+	            			returnChannel.setContext(getApplicationContext());
+	            			returnChannel.listenTo(returnChannel.getSourceChannelId());
+	            			
 	            			_model.setChannel(returnChannel);
 	            			//populateChannelList();
 	            			

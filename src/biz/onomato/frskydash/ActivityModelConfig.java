@@ -186,7 +186,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				_model.setName(edName.getText().toString());
 				_model.setType((String) spType.getSelectedItem());
 				//_model.saveToDatabase();
-				server.database.saveModel(_model);
+				FrSkyServer.database.saveModel(_model);
 				if(_model.getId()==server.getCurrentModel().getId())
 				{
 					if(DEBUG)Log.d(TAG,"Should update the servers.currentmodel");
@@ -207,8 +207,20 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 //				c.setDescription("Description"+(_model.getChannels().length+1));
 				//c.setName(_model.getName()+"_"+(_model.getChannels().size()+1));
 				c.setDescription("Description"+(_model.getChannels().size()+1));
-				_model.addChannel(c);
-				populateChannelList();
+				c.setModelId(_model.getId());
+				c.setId(-1);
+				
+				//_model.addChannel(c);
+				
+				Intent editChannelIntent = new Intent(getApplicationContext(), ActivityChannelConfig.class);
+				editChannelIntent.putExtra("channel", c);
+				editChannelIntent.putExtra("modelId", (int) _model.getId());	// Should edit existing model
+				if(DEBUG)Log.d(TAG,"Launch channel edit with modelId: "+_model.getId());	
+				//editChannelIntent.putExtra("idInModel", v.getId()-1000);
+	    		startActivityForResult(editChannelIntent,CHANNEL_CONFIG_RETURN);
+				
+				
+				//populateChannelList();
 				break;
 			case R.id.modConf_btnFrSkyAlarms:
 				Intent i = new Intent(this,ActivityModuleSettings.class);
@@ -222,8 +234,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	{
 		if(DEBUG) Log.d(TAG,"Populate list of channels");
 		llChannelsLayout.removeAllViews();
-		int n = 0;
-		for(Channel c:_model.getChannels())
+		
+		for(Channel c:_model.getChannels().values())
 		{
 			if(DEBUG) Log.i(TAG,c.getDescription());
 			
@@ -240,7 +252,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
 			btnDelete.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 			//btnDelete.setText("Delete");
-			btnDelete.setId(10000+n);
+			btnDelete.setId(10000+c.getId());
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					if(DEBUG) Log.d(TAG,"Delete channel "+_model.getChannels().get(v.getId()-10000).getDescription());
@@ -254,7 +266,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 
-			btnEdit.setId(1000+n);// ID for delete should be 100+channelId
+			btnEdit.setId(1000+c.getId());// ID for delete should be 100+channelId
 			//btnEdit.setOnClickListener(this);
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
@@ -263,8 +275,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
 					i.putExtra("channel", _model.getChannels().get(v.getId()-1000));
-					i.putExtra("modelId", (int) _model.getId());	// Should edit existing model
-					i.putExtra("idInModel", v.getId()-1000);
+					//i.putExtra("modelId", (int) _model.getId());	// Should edit existing model
+					//i.putExtra("idInModel", v.getId()-1000);
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}
 			});
@@ -280,10 +292,6 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			
 			llChannelsLayout.addView(ll);
 			
-			n++;
-			
-			
-			
 		}
 	}
 	
@@ -298,13 +306,15 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            	try
 	            	{
 	            		returnChannel = data.getParcelableExtra("channel");
-	            		int idInModel = data.getIntExtra("idInModel",-1);
-	            		if(idInModel>-1)
-	            		{
-	            			_model.setChannel(idInModel,returnChannel);
+	            		if(DEBUG) Log.d(TAG,"   This channel has id: "+returnChannel.getId());
+	            		//int idInModel = data.getIntExtra("idInModel",-1);
+	            		//if(idInModel>-1)
+	            		//{
+	            			//_model.setChannel(idInModel,returnChannel);
+	            			_model.setChannel(returnChannel);
 	            			//populateChannelList();
 	            			
-	            		}
+	            		//}
 	            		if(DEBUG) Log.d(TAG,"Received channel from ActivityChannelConfig: channel:"+returnChannel.getDescription()+", silent: "+returnChannel.getSilent());
 	            		
 	            	}

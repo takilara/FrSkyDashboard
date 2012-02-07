@@ -360,7 +360,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Log.i(TAG,"Cyclic Speak stuff");
 				if(statusRx)
 				{
-					for(Channel c : getCurrentModel().getChannels())
+					for(Channel c : getCurrentModel().getChannels().values())
 					{
 						if(!c.getSilent()) mTts.speak(c.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					}

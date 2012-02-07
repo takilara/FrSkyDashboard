@@ -26,7 +26,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ChannelConfig";
 	private static final boolean DEBUG=true;
 	private long _channelId = -1;
-	private int _idInModel = -1;
+	//private int _idInModel = -1;
 	private int _modelId=-1;
 	private Model _model;
 	private FrSkyServer server;
@@ -53,8 +53,9 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		try
 		{
 			channel = launcherIntent.getParcelableExtra("channel");
-			_idInModel = launcherIntent.getIntExtra("idInModel", -1);
+			//_idInModel = launcherIntent.getIntExtra("idInModel", -1);
 			_channelId = channel.getId();
+			_modelId = channel.getModelId();
 			Log.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
 			Log.d(TAG,"channel context is: "+channel.getContext());
 			channel.setContext(getApplicationContext());
@@ -66,9 +67,12 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			Log.d(TAG,"Channel config launched without attached channel");
 			channel = null;
 			_channelId = launcherIntent.getIntExtra("channelId", -1);
+			_modelId = -1;
+			
 		}
 		
-		_modelId = launcherIntent.getIntExtra("modelId", -1);
+		//_modelId = launcherIntent.getIntExtra("modelId", -1);
+		//if(DEBUG)Log.d(TAG, "working model has id: "+_modelId);
 		
 		Log.d(TAG, "Channel Id is: "+_channelId);
 		
@@ -205,19 +209,20 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	    		//i.putExtra("channelId", 1);
 				Intent i = new Intent();
 				i.putExtra("channel", channel);
-				i.putExtra("idInModel",_idInModel);
+				//i.putExtra("idInModel",_idInModel);
 				
 				Log.i(TAG,"Go back to dashboard");
 				if(server.getCurrentModel().getId() == channel.getModelId())
 				{
 					if(DEBUG) Log.d(TAG,"This is the current model, please replace run setChannel ");
-					server.getCurrentModel().setChannel(_idInModel,channel);
+					//server.getCurrentModel().setChannel(_idInModel,channel);
+					server.getCurrentModel().setChannel(channel);
 				}
 				else
 				{
 					if(DEBUG) Log.d(TAG,"This is NOT the current model");
 				}
-				if(DEBUG) Log.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent()+"_idInModel:"+_idInModel);
+				if(DEBUG) Log.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
 				this.setResult(RESULT_OK,i);
 				
 				this.finish();
@@ -269,7 +274,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		{
 			if(DEBUG) Log.d(TAG,"This is an existing model, feel free to save");
 			//channel.saveToDatabase();
-			server.database.saveChannel(channel);
+			FrSkyServer.database.saveChannel(channel);
 		}
 		else
 		{

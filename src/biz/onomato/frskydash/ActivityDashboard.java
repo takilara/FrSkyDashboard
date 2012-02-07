@@ -301,9 +301,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    	tv_fps.setText("FPS: "+server.getFps());
 	    	
 	    	int len = server.getCurrentModel().getChannels().size();
-	    	for(int i=0;i<len;i++)
+	    	//for(int i=0;i<len;i++)
+	    	for(Channel c : server.getCurrentModel().getChannels().values())
 	    	{
-	    		Channel c = server.getCurrentModel().getChannels().get(i);
+	    		//Channel c = server.getCurrentModel().getChannels().get(i);
 		    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
 		    		TextView tv = (TextView) findViewById(c.getTextViewId());
 		    		tv.setText(c.toValueString());
@@ -568,7 +569,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		tv_modelName.setText(currentModel.getName());
 		int n = 0;
 		if(DEBUG) Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().size());
-		for(Channel c: currentModel.getChannels())
+		for(Channel c: currentModel.getChannels().values())
 		{
 			if(DEBUG) Log.i(TAG,c.getDescription());
 			if(DEBUG) Log.i(TAG,"Precicion: "+c.getPrecision());
@@ -597,7 +598,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 			
 			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
-			btnEdit.setId(ID_CHANNEL_BUTTON_EDIT+n);// ID for delete should be 100+channelId
+			btnEdit.setId(ID_CHANNEL_BUTTON_EDIT+c.getId());// ID for delete should be 100+channelId
 
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
@@ -607,7 +608,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
 					i.putExtra("channel", currentModel.getChannels().get(v.getId()-ID_CHANNEL_BUTTON_EDIT));
-					i.putExtra("idInModel", v.getId()-ID_CHANNEL_BUTTON_EDIT);
+					//i.putExtra("idInModel", v.getId()-ID_CHANNEL_BUTTON_EDIT);
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}
 			});

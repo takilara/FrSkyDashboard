@@ -22,7 +22,8 @@ public class Model {
 	
 	private static final boolean DEBUG=true;
 	
-	private ArrayList<Channel> _channels;
+	//private ArrayList<Channel> _channels;
+	private TreeMap<Integer,Channel> channelMap;
 	private String[] _modelTypes;
 	
 	private String _type;
@@ -49,6 +50,7 @@ public class Model {
 		// FRSKY channels only for now
 		//alarms = new Alarm[6];
 		frSkyAlarms = new TreeMap<Integer, Alarm>();
+		channelMap = new TreeMap<Integer,Channel>();
 		
 		
 		// populate FrSky Alarms with defaults
@@ -65,7 +67,7 @@ public class Model {
 		{
 			setType(modelType);
 		}
-		_channels = new ArrayList<Channel>();
+		//_channels = new ArrayList<Channel>();
 		//setId(-1);
 	}
 	
@@ -166,69 +168,74 @@ public class Model {
 	// I need to be able to add channels to this model
 	public void addChannel(Channel channel)
 	{
-		if(!_channels.contains(channel))
-		{
-			_channels.add(channel);
-			channel.setModelId(_id);
-		}
+		channelMap.put(channel.getId(), channel);
+//		if(!_channels.contains(channel))
+//		{
+//			_channels.add(channel);
+//			channel.setModelId(_id);
+//		}
 	}
 	
 	// I need to be able to delete channels from this model
 	public boolean removeChannel(Channel channel)
 	{
-		//channel.deleteFromDatabase();
-		//setDirtyFlag(true);
-		return _channels.remove(channel);
+		channelMap.remove(channel.getId());
+		return true;
+		//return _channels.remove(channel);
 	}
 	
 	// I need to be able to set a given channel for this model
-	public void setChannel(int id, Channel channel)
+	//public void setChannel(int id, Channel channel)
+	public void setChannel(Channel channel)
 	{
-		if(id<_channels.size())
-		{
-			if(DEBUG) Log.d(TAG,"Old channel existed, replacing");
-			_channels.set(id, channel);
-		}
-		else
-		{
-			if(DEBUG) Log.d(TAG,"Old did not exist, adding");
-			_channels.add(channel);
-		}
+		addChannel(channel);
+//		if((_channels.contains(channel)) && (channel.getId()!=-1))
+//		{
+//			_channels.set(_channels.indexOf(channel), channel);
+//		}
+//		else
+//		{
+//			
+//			_channels.add(channel);
+//			
+//		}
+		
+//		if(id<_channels.size())
+//		{
+//			if(DEBUG) Log.d(TAG,"Old channel existed, replacing");
+//			_channels.set(id, channel);
+//		}
+//		else
+//		{
+//			if(DEBUG) Log.d(TAG,"Old did not exist, adding");
+//			_channels.add(channel);
+//		}
 		
 	}
 	
 	public void setChannels(ArrayList<Channel> channels)
 	{
-		for(Channel ch : channels)
+		for(Channel c : channels)
 		{
-//			if(_channels.get(ch.getId())!=null)	// channel exists, update it
-//			{
-//				_channels.set((int)ch.getId(), ch);
-//			}
-//			else
-//			{
-				_channels.add(ch);
-//			}
+			addChannel(c);
 		}
 	}
 	
-	// I need to be able to return list of channels from this model
-	public ArrayList<Channel> getChannels()
+	public void setChannels(TreeMap<Integer,Channel> channels)
 	{
-		//Channel[] outChannels = new Channel[_channels.size()];
-		//int i=0;
-		//TODO for each is ineficcient for arraylists!
-//		int n=0;
-//		
-//		for(Channel ch:_channels)
+		channelMap = channels;
+//		for(Channel ch : channels.values())
 //		{
-//			outChannels[i]=ch;
-//			i++;
+//			addChannel(ch);
 //		}
-		//return outChannels;
-		//if(DEBUG)Log.d(TAG,"return all channels: "+_channels);
-//		return _channels.toArray(Channel[]);
-		return _channels;
+	}
+	
+	// I need to be able to return list of channels from this model
+	//public ArrayList<Channel> getChannels()
+	public TreeMap<Integer,Channel> getChannels()
+	{
+		return channelMap;
+		//return _channels;
 	}
 	
 	// I need to be able to add alarms to this model
@@ -358,7 +365,7 @@ public class Model {
 			// Add channels from this model
 		
 			//for(Channel c : FrSkyServer.database.getChannelsForModel(getId())) 	// Gets from database		
-			for(Channel c : getChannels())											// Gets from instance
+			for(Channel c : channelMap.values())											// Gets from instance
 			{
 					sourceChannels.add(c);
 			}
@@ -378,7 +385,7 @@ public class Model {
 			{
 				sourceChannels.add(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_NONE));
 				// Add any model channels that has this source Channel
-				for(Channel c : getChannels())											// Gets from instance
+				for(Channel c : channelMap.values())											// Gets from instance
 				{
 					if(c.getSourceChannelId()==alarm.getSourceChannelId())
 						sourceChannels.add(c);

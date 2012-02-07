@@ -165,16 +165,17 @@ public class Logger {
 		
 		
 		//for(Channel ch : channels)
-		for(int i=0;i<len;i++)
+		//for(int i=0;i<len;i++)
+		for(Channel c : _model.getChannels().values())
 		{
 			
-			if(!_model.getChannels().get(i).getLongUnit().equals(""))
+			if(!c.getLongUnit().equals(""))
 			{
-				sb.append("\""+_model.getChannels().get(i).getDescription()+" ("+_model.getChannels().get(i).getLongUnit()+")\""+Channel.delim);
+				sb.append("\""+c.getDescription()+" ("+c.getLongUnit()+")\""+Channel.delim);
 			}
 			else
 			{
-				sb.append("\""+_model.getChannels().get(i).getDescription()+"\""+Channel.delim);
+				sb.append("\""+c.getDescription()+"\""+Channel.delim);
 			}
 			//sb.append("\""+channels.get(i).getDescription()+" ("+channels.get(i).getLongUnit()+") (Avg)\""+Channel.delim);
 			
@@ -184,6 +185,11 @@ public class Logger {
 	
 	
 	// ALWAYS logs average, user need to add non averaged channel if he wants this..
+	/**
+	 * Trigger a CSV write action
+	 * 
+	 */
+
 	public void logCsv()
 	{
 		if(mExternalStorageWriteable)
@@ -204,7 +210,11 @@ public class Logger {
 	}
 	
 	
-	
+	/**
+	 * Log the frame to raw and ascii files
+	 * 
+	 * @param f frame to log
+	 */
 	public void logFrame(Frame f)
 	{
 		if(mExternalStorageWriteable)
@@ -415,7 +425,7 @@ public class Logger {
 					
 					
 					// Add Channel data:
-					for(Channel c : _model.getChannels())
+					for(Channel c : _model.getChannels().values())
 					{
 						sb.append("// Channel '"+c.getDescription()+"', Averaged over "+c.getMovingAverage()+" sample(s), shown with a precision of "+c.getPrecision()+" decimals");
 						sb.append(Logger.crlf);

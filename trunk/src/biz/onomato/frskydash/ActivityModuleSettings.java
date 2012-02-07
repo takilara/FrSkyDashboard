@@ -150,7 +150,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			mIntentFilter = new IntentFilter();
 		    mIntentFilter.addAction(FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE);
-		    mIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);			// listen for bt messages
+		    mIntentFilter.addAction(FrSkyServer.MESSAGE_BLUETOOTH_STATE_CHANGED);			// listen for bt messages
+		    registerReceiver(mIntentReceiver, mIntentFilter);
 		    
 			Log.i(TAG,"Bound to Service");
 			
@@ -265,7 +266,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     			break;
     		case R.id.FrSkySettings_btnGetFromModule:
     			if(DEBUG)Log.d(TAG,"Try to fetch alarms from the module");
-    			registerReceiver(mIntentReceiver, mIntentFilter);
+    			
     			server.recordAlarmsFromModule();
     			// register a listener for a full update
     			break;
@@ -543,7 +544,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
         		//unregisterReceiver(mIntentReceiver);
         		unregisterReceiver(this);
         	}
-        	else if(msg.equals(BluetoothAdapter.ACTION_STATE_CHANGED))
+        	else if(msg.equals(FrSkyServer.MESSAGE_BLUETOOTH_STATE_CHANGED))
         	{
         		if(server.getConnectionState()==BluetoothSerialService.STATE_CONNECTED)
     			{

@@ -156,7 +156,8 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	if(model.getId()!=-1) // Insert/update did not fail
     	{
     		// Update the channels
-    		for(Channel ch:model.getChannels())
+    		if(DEBUG)Log.i(TAG,"Saving channels");
+    		for(Channel ch:model.getChannels().values())
     		{
     			saveChannel(ch);
     		}
@@ -310,6 +311,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	if(channel.getId()==-1)
     	{
     		// save using insert
+    		Log.d(TAG,"Save channel using insert");
     		int id = insertChannel(channel);
     		if(id!=-1)
     		{

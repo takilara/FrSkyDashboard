@@ -120,7 +120,18 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 
 	}
 	
-	
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+		try
+		{
+			unregisterReceiver(mIntentReceiver);
+		}
+		catch(Exception e)
+		{}
+		
+	}
 
 	void doBindService() {
 		Log.i(TAG,"Start the server service if it is not already started");

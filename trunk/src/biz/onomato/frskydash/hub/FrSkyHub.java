@@ -55,15 +55,16 @@ public class FrSkyHub {
 	 * 
 	 * @param frame
 	 */
-	public void extractUserDataBytes(int[] frame) {
+	public void extractUserDataBytes(Frame frame) {
 		// init
 		int b;
+		int[] ints = frame.toInts();
 		// iterate elements in frame
 		// for (int b : frame) {
 		// don't handle all the bytes, skip header (0), prim(1), size(2),
 		// unused(3) and end but(10)
 		for (int i = 4; i < Frame.SIZE_TELEMETRY_FRAME - 1; i++) {
-			b = frame[i];
+			b = ints[i];
 			// handle byte stuffing first
 			if (b == Frame.STUFFING_HUB_FRAME) {
 				hubXOR = true;

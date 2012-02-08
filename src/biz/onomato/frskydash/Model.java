@@ -166,7 +166,7 @@ public class Model {
 
 	public void initializeDefaultChannels()
 	{
-		Channel ad1raw = new Channel(_context);
+		Channel ad1raw = new Channel();
 		ad1raw.setDescription("AD1 raw");
 		ad1raw.setModelId(_id);
 		ad1raw.listenTo(FrSkyServer.CHANNEL_ID_AD1);
@@ -180,7 +180,7 @@ public class Model {
 		FrSkyServer.database.saveChannel(ad1raw);
 		addChannel(ad1raw);
 		
-		Channel ad2raw = new Channel(_context);
+		Channel ad2raw = new Channel();
 		ad2raw.setDescription("AD2 raw");
 		ad2raw.setModelId(_id);
 		ad2raw.listenTo(FrSkyServer.CHANNEL_ID_AD2);

@@ -127,7 +127,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private WakeLock wl;
 	private boolean _cyclicSpeechEnabled;
 	//private MyApp globals;
-	private Context context;
+	private static Context context;
 	
 	public Simulator sim;
 
@@ -500,6 +500,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static TreeMap<Integer,Channel> getSourceChannels()
 	{
 		return _sourceChannelMap;
+	}
+	public static Context getContext()
+	{
+		//Log.e(TAG,"Someone asked me for context!");
+		return context;
 	}
 	
 	
@@ -892,7 +897,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private void setupChannels()
 	{
 		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
-		Channel none =  new Channel(context, "None", 0, 1, "", "");
+		Channel none =  new Channel("None", 0, 1, "", "");
 		none.setId(CHANNEL_ID_NONE);
 		
 		none.setPrecision(0);
@@ -900,20 +905,20 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_sourceChannelMap.put(CHANNEL_ID_NONE, none);
 		
 		
-		Channel ad1 =  new Channel(context, "AD1", 0, 1, "", "");
+		Channel ad1 =  new Channel("AD1", 0, 1, "", "");
 		ad1.setId(CHANNEL_ID_AD1);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_AD1, ad1);
 		
 		
-		Channel ad2 =  new Channel(context,"AD2", 0, 1, "", "");
+		Channel ad2 =  new Channel("AD2", 0, 1, "", "");
 		ad2.setId(CHANNEL_ID_AD2);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_AD2, ad2);
 
-		Channel rssirx =  new Channel(context, "RSSIrx", 0, 1, "", "");
+		Channel rssirx =  new Channel("RSSIrx", 0, 1, "", "");
 		rssirx.setId(CHANNEL_ID_RSSIRX);
 		rssirx.setPrecision(0);
 		rssirx.setMovingAverage(-1);
@@ -922,7 +927,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssirx.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_RSSIRX, rssirx);
 		
-		Channel rssitx =  new Channel(context, "RSSItx", 0, 1, "", "");
+		Channel rssitx =  new Channel("RSSItx", 0, 1, "", "");
 		rssitx.setId(CHANNEL_ID_RSSITX);
 		rssitx.setPrecision(0);
 		rssitx.setMovingAverage(-1);

@@ -46,7 +46,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	private float _offset;
 	private float _factor;
 	private int _precision;
-	private Context _context;
+	//private Context _context;
 	private int _textViewId=-1;
 	
 	private IntentFilter mIntentFilter;
@@ -74,19 +74,20 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	//SharedPreferences _settings;
 	//SharedPreferences.Editor editor;
 
-	public Channel(Context context)
+	public Channel()
 	{
-		this(context,"description",(float)0,(float)1,"Symbol","UnitName");
+		this("description",(float)0,(float)1,"Symbol","UnitName");
 	}
 	
 	public Channel(Parcel in)
 	{
 		readFromParcel(in);
+		//_context = FrSkyServer.getContext();
 	}
 	
 	
 	
-	public Channel(Context context,String description,float offset,float factor,String unit,String longUnit)
+	public Channel(String description,float offset,float factor,String unit,String longUnit)
 	{
 		// instanciate listeners list
 		//_listeners = new ArrayList<OnChannelListener> ();
@@ -102,7 +103,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		_shortUnit = unit;
 		_longUnit = longUnit;
 		//_mc = new MathContext(2);
-		_context = context;
+		//_context = context;
+		//_context = FrSkyServer.getContext();
 		setMovingAverage(0);
 		
 		setDirtyFlag(true);
@@ -310,13 +312,16 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 
 	public Context getContext()
 	{
-		return _context;
+		
+		return FrSkyServer.getContext();
+		//return FrSkyDash.getContext();
+		//return _context;
 	}
 	
-	public void setContext(Context context)
-	{
-		_context = context;
-	}
+//	public void setContext(Context context)
+//	{
+//		_context = context;
+//	}
 	
 	
 	// ==========================================================================================
@@ -349,7 +354,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 //		}
 		
 		// send to broadcast receivers
-		if((_context!=null) && (_channelId!=-1))
+		//if((_context!=null) && (_channelId!=-1))
+		if(_channelId!=-1)
 		{
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+_channelId;
 			//Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
@@ -357,7 +363,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			Intent i = new Intent();
 			i.setAction(bCastAction);
 			i.putExtra("channelValue", outVal);
-			_context.sendBroadcast(i);
+			FrSkyServer.getContext().sendBroadcast(i);
 		}
 		return outVal;
 	}
@@ -481,14 +487,14 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			mIntentFilter = new IntentFilter();
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
 			_sourceChannelId = channelId;
-			Log.d(TAG,"Listens for broadcast of values to on context "+_context+", with message: "+bCastAction);
+			Log.d(TAG,"Listens for broadcast of values to on context "+FrSkyServer.getContext()+", with message: "+bCastAction);
 			
 		    mIntentFilter.addAction(bCastAction);
-		    Log.d(TAG,"Context is : "+_context);
-		    if(_context!=null)
-		    {
-		    	_context.registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
-		    }
+		    Log.d(TAG,"Context is : "+FrSkyServer.getContext());
+//		    if(_context!=null)
+//		    {
+		    FrSkyServer.getContext().registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
+//		    }
 		}
 		else
 		{
@@ -496,10 +502,10 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			
 			try
 			{
-				if(_context!=null)
-				{
-					_context.unregisterReceiver(mChannelUpdateReceiver);
-				}
+				//if(_context!=null)
+				//{
+				FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
+				//}
 			}
 			catch (Exception e)
 			{

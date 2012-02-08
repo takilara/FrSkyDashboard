@@ -280,7 +280,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public Channel getChannel(Cursor c)
     {
-    	Channel ch = new Channel(context);
+    	Channel ch = new Channel();
     	ch.setId(c.getInt(c.getColumnIndexOrThrow(KEY_ROWID)));
     	ch.setDescription(c.getString(c.getColumnIndexOrThrow(KEY_DESCRIPTION)));
     	ch.setLongUnit(c.getString(c.getColumnIndexOrThrow(KEY_LONGUNIT)));

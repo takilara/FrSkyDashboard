@@ -58,7 +58,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			_modelId = channel.getModelId();
 			Log.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
 			Log.d(TAG,"channel context is: "+channel.getContext());
-			channel.setContext(getApplicationContext());
+			//channel.setContext(getApplicationContext());
 			Log.d(TAG,"channel context is: "+channel.getContext());
 
 		}

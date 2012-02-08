@@ -198,7 +198,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				break;
 			case R.id.modConf_btnAddChannel:
 				if(DEBUG) Log.d(TAG,"Add a channel");
-				Channel c = new Channel(getApplicationContext());
+				Channel c = new Channel();
 //				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
 //				c.setDescription("Description"+(_model.getChannels().length+1));
 				//c.setName(_model.getName()+"_"+(_model.getChannels().size()+1));
@@ -307,7 +307,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            		//if(idInModel>-1)
 	            		//{
 	            			//_model.setChannel(idInModel,returnChannel);
-	            			returnChannel.setContext(getApplicationContext());
+	            			//returnChannel.setContext(getApplicationContext());
 	            			returnChannel.listenTo(returnChannel.getSourceChannelId());
 	            			
 	            			_model.setChannel(returnChannel);

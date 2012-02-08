@@ -109,7 +109,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     public Model getModel(Cursor cu)
     {
     	if(DEBUG)Log.i(TAG,"Pickup the model info from the cursor: "+cu.getColumnNames());
-    	Model m = new Model(context);
+    	Model m = new Model();
     	//cu.moveToFirst();
     	Log.i(TAG,"cursor id: "+cu.getInt(0));
     	

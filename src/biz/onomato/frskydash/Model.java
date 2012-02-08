@@ -29,7 +29,7 @@ public class Model {
 	private String _type;
 	private String _name;
 	private int _id;
-	private Context _context;
+	//private Context _context;
 	//public Alarm[] alarms;
 	TreeMap<Integer,Alarm> frSkyAlarms;
 	public int alarmCount = 0;
@@ -40,10 +40,10 @@ public class Model {
 	
 
 	// Constructor
-	public Model(Context context, String modelName,String modelType)
+	public Model(String modelName,String modelType)
 	{
-		_context = context;
-		_modelTypes = _context.getResources().getStringArray(R.array.model_types);
+		//_context = context;
+		_modelTypes = FrSkyServer.getContext().getResources().getStringArray(R.array.model_types);
 		// create if neccessary
 		//db = new DBAdapterModel(context);
 		
@@ -73,14 +73,14 @@ public class Model {
 	
 
 	
-	public Model(Context context,String modelName)
+	public Model(String modelName)
 	{
 		
-		this(context,modelName,"");
+		this(modelName,"");
 	}
-	public Model(Context context)
+	public Model()
 	{
-		this(context,"Model 1","");
+		this("Model 1","");
 	}
 	
 
@@ -306,67 +306,14 @@ public class Model {
 		}
 	}
 	
-	//TODO: Should compare the alarms before setting them
-//	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
-//	{
-//		
-//		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
-//		alarmCount += 1;
-//		//setDirtyFlag(true);
-//	}
-
+	
 	// I need to be able to delete alarms from this model
 	public void deleteAlarm(Alarm alarm)
 	{
 		
 	}
 	
-	// I need to be able to save settings to file or config storage
-//	public void saveToDatabase()
-//	{
-//		if(_id==-1)
-//		{
-//			if(DEBUG) Log.d(TAG,"Saving, using insert");
-//			db.open();
-//			long id = db.insertModel(_name,_type);
-//			if(id==-1)
-//			{
-//				Log.e(TAG,"Insert Failed");
-//			}
-//			else
-//			{
-//				if(DEBUG) Log.d(TAG,"Insert ok, id:"+id);
-//				_id = id;
-//			}
-//			db.close();
-//			// Run insert
-//		}
-//		else
-//		{
-//			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_id+",name:"+_name+")");
-//			db.open();
-//			if(db.updateModel(_id, _name,_type))
-//			{
-//				if(DEBUG)Log.d(TAG,"Update successful");
-//			}
-//			else
-//			{
-//				if(DEBUG)Log.e(TAG,"Update failed");
-//			}
-//			db.close();
-//			// run update
-//		}
-//		
-//		
-//		// Save the channels (using this models id)
-//		for(Channel ch :getChannels())
-//		{
-//			if(DEBUG) Log.i(TAG,"Save channel "+ch.getDescription()+" (Dirty: "+ch.getDirtyFlag()+")");
-//			ch.setModelId(_id);
-//			ch.saveToDatabase();
-//			
-//		}
-//	}
+	
 	
 	// I need to be able to load settings from file or config storage
 	public void loadSettings()
@@ -427,100 +374,4 @@ public class Model {
 	}
 	
 	
-//	public boolean loadFromDatabase(long id)
-//	{
-//		// False if not found
-//		db.open();
-//		Cursor c = db.getModel(id);
-//		//startManagingCursor(c);
-//		
-//		if(c.getCount()==0)
-//		{
-//			if(DEBUG) Log.w(TAG,"Model id "+id+" does not exist.");	
-//			_id= -1;
-//			c.deactivate();
-//			db.close();
-//			
-//			// no channels
-//			return false;
-//		}
-//		else
-//		{
-//			if(DEBUG) Log.d(TAG,"Found the model");
-//			if(DEBUG) Log.d(TAG,c.getString(1));
-//			_id = c.getLong(0);
-//			_name = c.getString(1);
-//			_type = c.getString(2);
-//			
-//			// update alarms with the proper ones
-//			// TODO: change this from adding defaults to add something from database
-//			initiateFrSkyAlarms();
-//			
-//			c.deactivate();
-//			db.close();
-//			
-//			// load channels
-//			
-//			for(Channel ch : Channel.getChannelsForModel(_context,this))
-//			{
-//				if(DEBUG)Log.d(TAG,"Found and adding channel "+ch.getDescription()+" to "+_name);
-//				addChannel(ch);
-//			}
-//			return true;
-//		}
-//		
-//		
-//	}
-	
-//	public boolean getFirstModel()
-//	{
-//		db.open();
-//		Cursor c = db.getAllModels();
-//		if(c.getCount()>0)
-//		{
-//			c.moveToFirst();
-//			loadFromDatabase(c.getInt(0));
-//			c.deactivate();
-//			db.close();
-//			return true;
-//		}
-//		else
-//		{
-//			c.deactivate();
-//			db.close();
-//			return false;
-//		}
-//	}
-	
-	
-	
-	
-//	public static Model[] getAllModels(Context context)
-//	{
-//		if(DEBUG) Log.d(TAG,"Get all models");
-//		// Needs to create the model if it does not exists
-//	//	AbstractDBAdapter db = new AbstractDBAdapter(context);
-//		db.open();
-//		
-//		Cursor c = db.getAllModels();
-//		Model[] modelA = new Model[c.getCount()];
-//		if(c.getCount()>0)
-//		{
-//			
-//			
-//			for(int i=0;i<c.getCount();i++)
-//			{
-//				modelA[i] = new Model(context);
-//				long id = c.getLong(0);
-//				modelA[i].loadFromDatabase(id);
-//			}
-//		}
-//		c.deactivate();
-//		db.close();
-//		//m.loadFromSettings(id);
-//		
-//		// if not found, create it before returning it
-//		return modelA;
-//	}
-
 }

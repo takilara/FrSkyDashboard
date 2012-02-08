@@ -259,7 +259,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		if(_currentModel==null)
 		{
 			Log.e(TAG,"No model exists, make a new one");
-			_currentModel = new Model(context,"Model 1");
+			_currentModel = new Model("Model 1");
 			// Saving to get id
 			database.saveModel(_currentModel);
 			

@@ -68,18 +68,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		edName				= (EditText) findViewById(R.id.modConf_edName);
 		llChannelsLayout	= (LinearLayout) findViewById(R.id.llChannelsLayout);
 		spType 				= (Spinner) findViewById(R.id.modConf_spType);
-//		tvName 				= (TextView) findViewById(R.id.chConf_tvName);
-//		edDesc 				= (EditText) findViewById(R.id.chConf_edDescription);
-//		edUnit 				= (EditText) findViewById(R.id.chConf_edUnit);
-//		edShortUnit			= (EditText) findViewById(R.id.chConf_edShortUnit);
-//		edOffset 			= (EditText) findViewById(R.id.chConf_edOffset);
-//		edFactor 			= (EditText) findViewById(R.id.chConf_edFactor);
-//		edPrecision 		= (EditText) findViewById(R.id.chConf_edPrecision);
-//		edMovingAverage 	= (EditText) findViewById(R.id.chConf_edMovingAverage);
-//		chkSpeechEnabled 	= (CheckBox) findViewById(R.id.chConf_chkSpeechEnabled);
-//		
-//		btnSave				= (Button) findViewById(R.id.chConf_btnSave);
-//		
+
 		// Set Listeners
 		btnSave.setOnClickListener(this);
 		btnAddChannel.setOnClickListener(this);
@@ -123,13 +112,20 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			{
 				if(DEBUG) Log.d(TAG,"Configure new Model object");
 				_model = new Model(getApplicationContext());
+				// save, to get id
+				FrSkyServer.database.saveModel(_model);
+				
+				_model.initializeDefaultChannels();
+				// save again to persist
+				FrSkyServer.database.saveModel(_model);
+				
 			}
 			else
 			{
 				if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
-				_model = server.database.getModel(_modelId);
+				_model = FrSkyServer.database.getModel(_modelId);
 				
 				
 //				_model = new Model(getApplicationContext());

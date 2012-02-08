@@ -86,7 +86,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			rbCurrentModel.setChecked(true);
 			//Model m = new Model(getApplicationContext());
 			//m.loadFromDatabase(ii);
-			Model m = server.database.getModel(ii);
+			Model m = FrSkyServer.database.getModel(ii);
 			
 			if(server!=null)
 			{
@@ -150,7 +150,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		
 		int n = 0;
 		//while(n < c.getCount())
-		for(Model m : server.database.getModels())
+		for(Model m : FrSkyServer.database.getModels())
 		{
 			if(DEBUG)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
 			LinearLayout ll = new LinearLayout(getApplicationContext());

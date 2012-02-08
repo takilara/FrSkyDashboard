@@ -260,8 +260,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 		{
 			Log.e(TAG,"No model exists, make a new one");
 			_currentModel = new Model(context,"Model 1");
+			// Saving to get id
+			database.saveModel(_currentModel);
 			
 			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
+			// Create Default model channels.
+			_currentModel.initializeDefaultChannels();
+			
+			
+			//_model.addChannel(c);
+			
 			//_currentModel.setId(0);
 			database.saveModel(_currentModel);
 		}

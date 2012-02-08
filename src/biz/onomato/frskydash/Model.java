@@ -164,6 +164,36 @@ public class Model {
 		this._name = modelName;
 	}
 
+	public void initializeDefaultChannels()
+	{
+		Channel ad1raw = new Channel(_context);
+		ad1raw.setDescription("AD1 raw");
+		ad1raw.setModelId(_id);
+		ad1raw.listenTo(FrSkyServer.CHANNEL_ID_AD1);
+		ad1raw.setId(-1);
+		ad1raw.setSilent(true);
+		ad1raw.setLongUnit("");
+		ad1raw.setShortUnit("");
+		ad1raw.setPrecision(0);
+		ad1raw.setMovingAverage(0);
+		// save to force id update
+		FrSkyServer.database.saveChannel(ad1raw);
+		addChannel(ad1raw);
+		
+		Channel ad2raw = new Channel(_context);
+		ad2raw.setDescription("AD2 raw");
+		ad2raw.setModelId(_id);
+		ad2raw.listenTo(FrSkyServer.CHANNEL_ID_AD2);
+		ad2raw.setId(-1);
+		ad2raw.setSilent(true);
+		ad2raw.setLongUnit("");
+		ad2raw.setShortUnit("");
+		ad2raw.setPrecision(0);
+		ad2raw.setMovingAverage(0);
+		// save to force id update		
+		FrSkyServer.database.saveChannel(ad2raw);
+		addChannel(ad2raw);
+	}
 
 	// I need to be able to add channels to this model
 	public void addChannel(Channel channel)

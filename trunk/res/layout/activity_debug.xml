@@ -5,23 +5,6 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
     <LinearLayout android:id="@+id/linearLayout1" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
-
-        <Button
-            android:id="@+id/debug_btnSchema"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Database Schema->Log.d" />
-        
-        <Button
-            android:id="@+id/debug_btnChannels"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select * from channels -> Log" />    
-        <Button
-            android:id="@+id/debug_btnModels"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select * from models -> Log" />
         
         <Button
             android:id="@+id/debug_btnExportDb"
@@ -33,7 +16,8 @@
             android:id="@+id/debug_watchdogEnabled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Watchdog to Tx" />
+            android:textOn="Watchdog to Tx enabled" 
+        	android:textOff="Watchdog to Tx disabled" />
 
     </LinearLayout>
     </ScrollView>

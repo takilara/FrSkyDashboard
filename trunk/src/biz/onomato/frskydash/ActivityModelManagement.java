@@ -182,8 +182,13 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
 			btnDelete.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 			btnDelete.setId(100+id); // ID for delete should be 100+channelId
-			btnDelete.setOnClickListener(this);
-			
+			//btnDelete.setOnClickListener(this);
+			btnDelete.setOnClickListener(new OnClickListener(){
+				public void onClick(View v){
+					if(FrSkyServer.D) Log.d(TAG,"Delete model with id:"+(v.getId()-100));
+					showDeleteDialog(v.getId()-100);
+				}
+			});
 			ImageButton btnEdit = new ImageButton(getApplicationContext());
 			//btnEdit.setText("...");
 			btnEdit.setImageResource(R.drawable.ic_menu_edit);
@@ -243,8 +248,19 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             	//TODO: Remove, make global to class?
             	
             	//Channel.deleteChannelsForModel(getApplicationContext(),m);
-            	server.database.deleteAllChannelsForModel(m);
-            	server.database.deleteModel(_deleteId);
+            	int delModelId = m.getId();
+            	
+            	
+            	FrSkyServer.database.deleteAllChannelsForModel(m);
+            	FrSkyServer.database.deleteAlarmsForModel(m);
+            	FrSkyServer.database.deleteModel(_deleteId);
+            	
+            	if(delModelId==server.getCurrentModel().getId())
+            	{
+            		// we deleted the current model
+            		server.setCurrentModel(FrSkyServer.database.getModel());
+            	}
+            	
 //            	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
 //            	db.open();
 //            	db.deleteModel(_deleteId);

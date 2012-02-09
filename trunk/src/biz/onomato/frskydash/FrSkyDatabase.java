@@ -86,6 +86,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     {
     	// Get the first model
     	if(FrSkyServer.D)Log.i(TAG,"Try to get first model");
+    	open();
     	Cursor cu =
                 db.query(true, DATABASE_TABLE_MODELS, MODEL_COLUMNS,           		 
                 		null,null,null,null,KEY_ROWID,"1");
@@ -101,6 +102,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		m = null;
     	}
     	cu.deactivate();
+    	close();
     	return m;
     }
     

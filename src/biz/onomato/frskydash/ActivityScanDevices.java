@@ -41,7 +41,7 @@ public class ActivityScanDevices extends Activity {
 				        // Add the name and address to an array adapter to show in a ListView
 				        //mArrayAdapter.add(device.getName() +  "\n" + device.getAddress());
 				        //device.
-				        Log.i(TAG,device.getAddress()+":"+device.getName());
+				    	if(FrSkyServer.D)Log.i(TAG,device.getAddress()+":"+device.getName());
 				        if(device.getName()=="FrSky1")
 				        {
 				        	Toast.makeText(this, "MAC: "+device.getAddress(), Toast.LENGTH_LONG).show();

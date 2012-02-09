@@ -74,7 +74,7 @@ public class Logger {
 		_logHuman = LogHuman;
 		_context = Context;
 		//_path = _context.getExternalFilesDir(null); 
-		Log.i(TAG,"STorage dir: "+_path);
+		if(FrSkyServer.D)Log.i(TAG,"STorage dir: "+_path);
 		
 		_prefix = makePrefix();  
 
@@ -234,7 +234,7 @@ public class Logger {
 	
 	public void stop()
 	{
-		Log.i(TAG,"Stopping any running loggers");
+		if(FrSkyServer.D)Log.i(TAG,"Stopping any running loggers");
 		// Cancel (wait for) any pending writes
 //		try {rawTask.cancel(false);} catch (Exception e){}
 //		try {humanTask.cancel(false);} catch (Exception e){}
@@ -307,7 +307,7 @@ public class Logger {
 		void consume(Frame f) {
 			if(_fileHuman==null || !_fileHuman.canWrite())
 			{
-				Log.d(TAG,"NOT Allowed to write to file, make new file/stream (ASC)");
+				if(FrSkyServer.D)Log.d(TAG,"NOT Allowed to write to file, make new file/stream (ASC)");
 				openFile(makePrefix(),f.timestamp);
 			}
 		   
@@ -322,7 +322,7 @@ public class Logger {
 				}
 				catch (IOException e)
 				{
-					Log.w(TAG, "failure to write");
+					if(FrSkyServer.D)Log.w(TAG, "failure to write");
 				}
 			}
 		}
@@ -364,7 +364,7 @@ public class Logger {
 		void consume(Frame f) {
 			if(_fileRaw==null || !_fileRaw.canWrite())
 			{
-				Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+				if(FrSkyServer.D)Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
 				openFile(makePrefix());
 			}
 		   
@@ -376,7 +376,7 @@ public class Logger {
 				}
 				catch (IOException e)
 				{
-					Log.w(TAG, "failure to write");
+					if(FrSkyServer.D)Log.w(TAG, "failure to write");
 				}
 			}
 		}
@@ -455,7 +455,7 @@ public class Logger {
 		void consume(String line) {
 			if(_fileCsv==null || !_fileCsv.canWrite())
 			{
-				Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+				if(FrSkyServer.D)Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
 				openFile(makePrefix());
 			}
 		   
@@ -473,7 +473,7 @@ public class Logger {
 				}
 				catch (IOException e)
 				{
-					Log.w(TAG, "failure to write");
+					if(FrSkyServer.D)Log.w(TAG, "failure to write");
 				}
 			}
 		}

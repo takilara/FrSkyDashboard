@@ -37,7 +37,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
 	private RadioButton rbCurrentModel;
-	private boolean DEBUG=true;
+	//private boolean DEBUG=true;
 	private int _deleteId=-1;
 	
 	@Override
@@ -47,16 +47,16 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		setContentView(R.layout.activity_modelmanagement);
 
 		// Setup components from screen
-		if(DEBUG) Log.i(TAG,"Setup widgets");
+		if(FrSkyServer.D) Log.i(TAG,"Setup widgets");
 		llModelsLayout = (LinearLayout) findViewById(R.id.llModelsLayout);
 		btnAddModel = (Button) findViewById(R.id.btnAddModel);
 		
 		// Add listeners
-		if(DEBUG) Log.i(TAG,"Add Listeners");
+		if(FrSkyServer.D) Log.i(TAG,"Add Listeners");
 		//btnAddModel.setOnClickListener(this);
 		btnAddModel.setOnClickListener(new OnClickListener() {
 			public void onClick(View v){
-				if(DEBUG) Log.d(TAG,"User Clicked Add Model");
+				if(FrSkyServer.D) Log.d(TAG,"User Clicked Add Model");
 				Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
 	    		i.putExtra("modelId", (int) -1);	// Should create new model
 	    		startActivityForResult(i,MODEL_CONFIG_RETURN);
@@ -105,7 +105,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		else if(id>100) // DELETE
 		{
 			int ii=id-100;
-			if(DEBUG) Log.d(TAG,"Delete model with id:"+ii);
+			if(FrSkyServer.D) Log.d(TAG,"Delete model with id:"+ii);
 			showDeleteDialog(ii);
 			
 		}
@@ -152,7 +152,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		//while(n < c.getCount())
 		for(Model m : FrSkyServer.database.getModels())
 		{
-			if(DEBUG)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
+			if(FrSkyServer.D)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
 			LinearLayout ll = new LinearLayout(getApplicationContext());
 			
 			
@@ -229,7 +229,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		//final Model m = new Model(getApplicationContext());
 		//m.loadFromDatabase(id);
 		final Model m = server.database.getModel(id); 
-		Log.i(TAG,"Delete model with id:"+id);
+		if(FrSkyServer.D)Log.i(TAG,"Delete model with id:"+id);
 		_deleteId = id;
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
 		dialog.setTitle("Delete "+m.getName()+"?");
@@ -263,7 +263,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
                 //Stop the activity
             	_deleteId=-1;
-                Log.i(TAG,"Cancel Deletion");
+            	if(FrSkyServer.D)Log.i(TAG,"Cancel Deletion");
             }
 
         });
@@ -271,9 +271,9 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	}
 	
 	void doBindService() {
-		Log.i(TAG,"Start the server service if it is not already started");
+		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		Log.i(TAG,"Try to bind to the service");
+		if(FrSkyServer.D)Log.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -296,7 +296,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			Log.i(TAG,"Bound to Service");
+			if(FrSkyServer.D)Log.i(TAG,"Bound to Service");
 			
 			populateModelList();
 			
@@ -319,10 +319,10 @@ public class ActivityModelManagement extends Activity implements OnClickListener
     			switch(resultCode)
 	        	{
 	        		case RESULT_OK:
-	        			if(DEBUG) Log.i(TAG,"User saved new settings");
+	        			if(FrSkyServer.D) Log.i(TAG,"User saved new settings");
 	        			break;
 	        		case RESULT_CANCELED:
-	        			if(DEBUG) Log.i(TAG,"User cancelled with back");
+	        			if(FrSkyServer.D) Log.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
     			break;

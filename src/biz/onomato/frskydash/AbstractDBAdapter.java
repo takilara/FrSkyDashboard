@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public abstract class AbstractDBAdapter {
-	protected static final boolean DEBUG=true;
+	//protected static final boolean DEBUG=true;
 	
 //    public static final String KEY_TYPE = "type";
     
@@ -141,7 +141,7 @@ public abstract class AbstractDBAdapter {
         @Override
         public void onCreate(SQLiteDatabase db) 
         {
-        	if(DEBUG)Log.d(TAG,"Creating the database");
+        	if(FrSkyServer.D)Log.d(TAG,"Creating the database");
             db.execSQL(DATABASE_CREATE_MODELS);
             db.execSQL(DATABASE_CREATE_CHANNELS);
             db.execSQL(DATABASE_CREATE_FRSKYALARMS);
@@ -150,7 +150,7 @@ public abstract class AbstractDBAdapter {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) 
         {
-        	if(DEBUG)Log.d(TAG,"Upgrade the database");
+        	if(FrSkyServer.D)Log.d(TAG,"Upgrade the database");
         	// Should perform alter table statements..
 //            Log.w(TAG, "Upgrading database from version " + oldVersion 
 //                    + " to "
@@ -172,7 +172,7 @@ public abstract class AbstractDBAdapter {
 //    	_prevOpen = _open;
 //    	if(!_open)
 //    	{
-    		if(DEBUG)Log.d(TAG,"Open the database:"+this.getClass().getName());
+    		if(FrSkyServer.D)Log.d(TAG,"Open the database:"+this.getClass().getName());
         	db = DBHelper.getWritableDatabase();
         	_open = true;
 //    	}
@@ -188,7 +188,7 @@ public abstract class AbstractDBAdapter {
     {
 //    	if(_prevOpen)
 //    	{
-    		if(DEBUG)Log.d(TAG,"Close the database:"+this.getClass().getName());
+    		if(FrSkyServer.D)Log.d(TAG,"Close the database:"+this.getClass().getName());
     		db.close();
     		_open = false;
         	DBHelper.close();
@@ -206,7 +206,7 @@ public abstract class AbstractDBAdapter {
 
     public Cursor schema()
     {
-    	Log.d(TAG,"DATABASE SCHEMA");
+    	if(FrSkyServer.D)Log.d(TAG,"DATABASE SCHEMA");
     	try
     	{
     		Cursor cursor = DBHelper.getReadableDatabase().rawQuery("SELECT type,tbl_name,sql from sqlite_master;",null);
@@ -214,7 +214,7 @@ public abstract class AbstractDBAdapter {
     	}
     	catch(Exception e)
     	{
-    		Log.e(TAG,e.toString());
+    		if(FrSkyServer.D)Log.e(TAG,e.toString());
     		return null;
     	}
     	

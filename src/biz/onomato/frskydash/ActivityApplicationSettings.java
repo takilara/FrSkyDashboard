@@ -56,7 +56,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		setContentView(R.layout.activity_applicationsettings);
 
 		// Setup components from screen
-		Log.i(TAG,"Setup widgets");
+		if(FrSkyServer.D)Log.i(TAG,"Setup widgets");
 		btnDeleteLogs = findViewById(R.id.btnDeleteLogs);
 		chkCyclicSpeakerEnabled = (CheckBox) findViewById(R.id.chkCyclicSpeakerEnabled);
 		chkLogToRaw = (CheckBox) findViewById(R.id.chkLogToRaw); 
@@ -75,7 +75,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		btnSave.setVisibility(View.GONE);
 		
 		// Add listeners
-		Log.i(TAG,"Add Listeners");
+		if(FrSkyServer.D)Log.i(TAG,"Add Listeners");
 		btnDeleteLogs.setOnClickListener(this);
 		chkCyclicSpeakerEnabled.setOnClickListener(this);
 		chkLogToRaw.setOnClickListener(this);
@@ -168,7 +168,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				server.setAutoSendAlarms(((CheckBox) v).isChecked());
 				break;
 			case R.id.btnSave:
-				Log.i(TAG,"Store new interval");
+				if(FrSkyServer.D)Log.i(TAG,"Store new interval");
 				save();
 				break;
 		}
@@ -176,7 +176,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	
 	private void save()
 	{
-		Log.i(TAG,"Save current settings");
+		if(FrSkyServer.D)Log.i(TAG,"Save current settings");
 		try
 		{
 			server.setCyclicSpeechEnabledAtStartup(chkCyclicSpeakerEnabled.isChecked());
@@ -204,7 +204,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	
 	private void showDeleteDialog()
 	{
-		Log.i(TAG,"Delete all logs please");
+		if(FrSkyServer.D)Log.i(TAG,"Delete all logs please");
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
 		dialog.setTitle("Delete Logs");
 
@@ -226,7 +226,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
             public void onClick(DialogInterface dialog, int which) {
 
                 //Stop the activity
-                Log.i(TAG,"Cancel Deletion");
+            	if(FrSkyServer.D)Log.i(TAG,"Cancel Deletion");
             }
 
         });
@@ -234,9 +234,9 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	}
 	
 	void doBindService() {
-		Log.i(TAG,"Start the server service if it is not already started");
+		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		Log.i(TAG,"Try to bind to the service");
+		if(FrSkyServer.D)Log.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -259,11 +259,11 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			Log.i(TAG,"Bound to Service");
+			if(FrSkyServer.D)Log.i(TAG,"Bound to Service");
 			
 	        int interval = server.getCyclicSpeechInterval();
-	        Log.i(TAG,"Set interval to +"+interval);
-	        Log.i(TAG,"Edit field currently at +"+edCyclicInterval.getText().toString());
+	        if(FrSkyServer.D)Log.i(TAG,"Set interval to +"+interval);
+	        if(FrSkyServer.D)Log.i(TAG,"Edit field currently at +"+edCyclicInterval.getText().toString());
 	        edCyclicInterval.setText(String.valueOf(interval));
 	        //edCyclicInterval.setText(interval);
 	        chkCyclicSpeakerEnabled.setChecked(server.getCyclicSpeechEnabledAtStartup());

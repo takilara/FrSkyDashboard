@@ -24,7 +24,7 @@ public class Simulator {
 	{
 		//context = (FrSkyServer) cnt;
 		server = (FrSkyServer) srv;
-		Log.i(TAG,"constructor");
+		if(FrSkyServer.D)Log.i(TAG,"constructor");
 		running = false;
 		_ad1 = 0;
 		_ad2 = 0;
@@ -69,7 +69,7 @@ public class Simulator {
 	}
 	
 	public void start(){
-		Log.i(TAG,"Starting sim thread");
+		if(FrSkyServer.D)Log.i(TAG,"Starting sim thread");
 		simHandler.removeCallbacks(runnableSimulator);
 		simHandler.postDelayed(runnableSimulator, 30);
 		running = true;
@@ -77,7 +77,7 @@ public class Simulator {
 	}
 	
 	public void stop(){
-		Log.i(TAG,"Stopping sim thread");
+		if(FrSkyServer.D)Log.i(TAG,"Stopping sim thread");
 		try
 		{
 			simHandler.removeCallbacks(runnableSimulator);
@@ -121,14 +121,14 @@ public class Simulator {
 				buf[i]=0x7d;
 				buf[i+1]=0x5e;
 				i++;
-				Log.i(TAG,"Bytestuffing 7E to 7d 5e");
+				if(FrSkyServer.D)Log.i(TAG,"Bytestuffing 7E to 7d 5e");
 			}
 			else if (inBuf[n]==0x7d)
 			{
 				buf[i]=0x7d;
 				buf[i+1]=0x5d;
 				i++;
-				Log.i(TAG,"Bytestuffing 7D to 7d 5d");
+				if(FrSkyServer.D)Log.i(TAG,"Bytestuffing 7D to 7d 5d");
 			}
 			else
 			{

@@ -42,7 +42,7 @@ import biz.onomato.frskydash.hub.FrSkyHub;
 public class FrSkyServer extends Service implements OnInitListener {
 	    
 	public static final String TAG="FrSkyServerService";
-	private static final boolean DEBUG = true;
+	public static boolean D = true;
 	//private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
 	private AudioManager _audiomanager;
@@ -200,7 +200,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	@Override
 	public void onCreate()
 	{
-		Log.i(TAG,"onCreate");
+		if(D)Log.i(TAG,"onCreate");
 		super.onCreate();
 		context = getApplicationContext();
 		//_serverChannels = new HashMap<String,Channel>();
@@ -226,7 +226,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
 		
-		Log.i(TAG,"Try to load settings");
+		if(D)Log.i(TAG,"Try to load settings");
         _settings = context.getSharedPreferences("FrSkyDash",MODE_PRIVATE);
         _editor = _settings.edit();
         
@@ -250,7 +250,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			_prevModelId = -1;
 		}
 		
-		Log.i(TAG,"Previous ModelId was: "+_prevModelId);
+		if(D)Log.i(TAG,"Previous ModelId was: "+_prevModelId);
 	//	_currentModel = new Model(context);
 		
 		// DEBUG, List all channels for the model using new databaseadapter
@@ -258,7 +258,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_currentModel = database.getModel(_prevModelId);
 		if(_currentModel==null)
 		{
-			Log.e(TAG,"No model exists, make a new one");
+			if(D)Log.e(TAG,"No model exists, make a new one");
 			_currentModel = new Model("Model 1");
 			// Saving to get id
 			database.saveModel(_currentModel);
@@ -276,7 +276,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		if(_currentModel.getFrSkyAlarms().size()==0)
 		{
-			Log.e(TAG,"No alarms exists, setup with defaults");
+			if(D)Log.e(TAG,"No alarms exists, setup with defaults");
 			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
 			database.saveModel(_currentModel);
 		}
@@ -298,7 +298,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
 		
-		Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
+		if(D)Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
 //		ArrayList<Channel> tChannels = database.getChannelsForModel(_currentModel);
@@ -331,7 +331,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
 		
 		
-		Log.i(TAG,"Broadcast that i've started");
+		if(D)Log.i(TAG,"Broadcast that i've started");
 		Intent i = new Intent();
 		i.setAction(MESSAGE_STARTED);
 		sendBroadcast(i);
@@ -365,7 +365,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				//Log.d(TAG,"isSpeakerphoneOn:"+am.isSpeakerphoneOn());
 				
 				
-				Log.i(TAG,"Cyclic Speak stuff");
+				if(D)Log.i(TAG,"Cyclic Speak stuff");
 				if(statusRx)
 				{
 					for(Channel c : getCurrentModel().getChannels().values())
@@ -477,7 +477,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	@Override
 	public IBinder onBind(Intent arg0) {
 		// TODO Auto-generated method stub
-		Log.i(TAG,"Something tries to bind to me");
+		if(D)Log.i(TAG,"Something tries to bind to me");
 		return mBinder;
 		//return null;
 	}
@@ -614,7 +614,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setCyclicSpeechInterval(int interval)
 	{
-		Log.i(TAG,"Set new interval to "+interval+" seconds");
+		if(D)Log.i(TAG,"Set new interval to "+interval+" seconds");
 		_editor.putInt("cyclicSpeakerInterval",interval);
 		_editor.commit();
 		if(interval>0)
@@ -698,7 +698,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
-		Log.i(TAG,"Receieved startCommand or intent ");
+		if(D)Log.i(TAG,"Receieved startCommand or intent ");
 		handleIntent(intent);
 		return START_STICKY;
 	}
@@ -708,42 +708,42 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		if(!wl.isHeld())
 		{
-			Log.i(TAG,"Acquire wakelock");
+			if(D)Log.i(TAG,"Acquire wakelock");
 			wl.acquire();
 		}
 		else
 		{
-			Log.i(TAG,"Wakelock already acquired");
+			if(D)Log.i(TAG,"Wakelock already acquired");
 		}
 	}
 	
 	public void handleIntent(Intent intent)
 	{
 		int cmd = intent.getIntExtra("command",CMD_IGNORE);
-		Log.i(TAG,"CMD: "+cmd);
+		if(D)Log.i(TAG,"CMD: "+cmd);
 		switch(cmd) {
 			case CMD_START_SIM:
-				Log.i(TAG,"Start Simulator");
+				if(D)Log.i(TAG,"Start Simulator");
 				break;
 			case CMD_STOP_SIM:
-				Log.i(TAG,"Stop Simulator");
+				if(D)Log.i(TAG,"Stop Simulator");
 				break;
 			case CMD_START_SPEECH:
-				Log.i(TAG,"Start Speaker");
+				if(D)Log.i(TAG,"Start Speaker");
 				
 				break;
 			case CMD_STOP_SPEECH:
-				Log.i(TAG,"Stop Speaker");
+				if(D)Log.i(TAG,"Stop Speaker");
 				break;	
 			case CMD_KILL_SERVICE:
-				Log.i(TAG,"Killing myself");
+				if(D)Log.i(TAG,"Killing myself");
 				die();
 				break;
 			case CMD_IGNORE:
 				//Log.i(TAG,"No command, skipping");
 				break;
 			default:
-				Log.i(TAG,"Command "+cmd+" not implemented. Skipping");
+				if(D)Log.i(TAG,"Command "+cmd+" not implemented. Skipping");
 				break;
 			
 		}
@@ -752,7 +752,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public void die()
 	{
-		Log.i(TAG,"Die, perform cleanup");
+		if(D)Log.i(TAG,"Die, perform cleanup");
 
 		stopSelf();
 	}
@@ -762,7 +762,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		_dying=true;
 		
-		Log.i(TAG,"onDestroy");
+		if(D)Log.i(TAG,"onDestroy");
 		
 //		AudioManager audioManager = 
 //        	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -780,20 +780,20 @@ public class FrSkyServer extends Service implements OnInitListener {
     	{
     		if(mBluetoothAdapter!=null) mBluetoothAdapter.disable();	// only do this if bluetooth feature exists
     	}
-		Log.i(TAG,"Releasing Wakelock");
+    	if(D)Log.i(TAG,"Releasing Wakelock");
 		if(wl.isHeld())
 		{
 			wl.release();
 		}
 		stopCyclicSpeaker();
-		Log.i(TAG,"Shutdown mTts");
+		if(D)Log.i(TAG,"Shutdown mTts");
 		
 		try{
 			mTts.shutdown();
 		}
 		catch (Exception e) {}
 		
-		Log.i(TAG,"Stop BT service if neccessary");
+		if(D)Log.i(TAG,"Stop BT service if neccessary");
 		if(mSerialService.getState()!=BluetoothSerialService.STATE_NONE)
 		{
 			try
@@ -806,13 +806,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// Disable BT
 		
 		
-		Log.i(TAG,"Stop FPS counter");
+		if(D)Log.i(TAG,"Stop FPS counter");
 		fpsHandler.removeCallbacks(runnableFps);
 		
-		Log.i(TAG,"Reset channels");
+		if(D)Log.i(TAG,"Reset channels");
 		resetChannels();
 		
-		Log.i(TAG,"Stop Logger");
+		if(D)Log.i(TAG,"Stop Logger");
 		try{
 			logger.stop();
 		}
@@ -823,13 +823,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		//stopCyclicSpeaker();
 		
-		Log.i(TAG,"Remove from foreground");
+		if(D)Log.i(TAG,"Remove from foreground");
 		try{
 			stopForeground(true);
 		}
 		catch (Exception e)
 		{
-			Log.d(TAG,"Exeption during stopForeground");
+			if(D)Log.d(TAG,"Exeption during stopForeground");
 		}
 		
 		try
@@ -838,7 +838,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		catch (Exception e)
 		{
-			Log.d(TAG,"Exeption during super.onDestroy");
+			if(D)Log.d(TAG,"Exeption during super.onDestroy");
 		}
 		try
 		{
@@ -846,19 +846,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		catch (Exception e)
 		{
-			Log.d(TAG,"Exeption during last toast");
+			if(D)Log.d(TAG,"Exeption during last toast");
 		}
 	}
 	
 	public void onInit(int status) {
-    	Log.i(TAG,"TTS initialized");
+		if(D)Log.i(TAG,"TTS initialized");
     	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
     	if (status == TextToSpeech.SUCCESS) {
     	int result = mTts.setLanguage(Locale.US);
     	if (result == TextToSpeech.LANG_MISSING_DATA ||
     	result == TextToSpeech.LANG_NOT_SUPPORTED) {
     	// Lanuage data is missing or the language is not supported.
-    	Log.e(TAG, "Language is not available.");
+    		if(D)Log.e(TAG, "Language is not available.");
     	} else {
     	// Check the documentation for other possible result codes.
     	// For example, the language may be available for the locale,
@@ -875,8 +875,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     	}
     	} else {
     	// Initialization failed.
-    	Log.i(TAG,"Something wrong with TTS");
-    	Log.e(TAG, "Could not initialize TextToSpeech.");
+    		if(D)Log.i(TAG,"Something wrong with TTS");
+    		if(D)Log.e(TAG, "Could not initialize TextToSpeech.");
     	}
     }
 	
@@ -1007,10 +1007,10 @@ public class FrSkyServer extends Service implements OnInitListener {
         		bcI.setAction(MESSAGE_BLUETOOTH_STATE_CHANGED);
         		sendBroadcast(bcI);
         		
-                Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+        		if(D)Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                 switch (msg.arg1) {
                 case BluetoothSerialService.STATE_CONNECTED:
-                	Log.d(TAG,"BT connected");
+                	if(D)Log.d(TAG,"BT connected");
                 	setConnecting(false);
                 	statusBt = true;
                 	
@@ -1028,15 +1028,15 @@ public class FrSkyServer extends Service implements OnInitListener {
                     break;
                     
                 case BluetoothSerialService.STATE_CONNECTING:
-                	Log.d(TAG,"BT connecting");
+                	if(D)Log.d(TAG,"BT connecting");
                 	setConnecting(true);
                 	 //mTitle.setText(R.string.title_connecting);
                     break;
                     
                 case BluetoothSerialService.STATE_LISTEN:
-                	Log.d(TAG,"BT listening");
+                	if(D)Log.d(TAG,"BT listening");
                 case BluetoothSerialService.STATE_NONE:
-                	Log.d(TAG,"BT state changed to NONE");
+                	if(D)Log.d(TAG,"BT state changed to NONE");
                 	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
                 	setConnecting(false);
                 	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
@@ -1091,7 +1091,7 @@ public class FrSkyServer extends Service implements OnInitListener {
                 setBtLastConnectedToAddress(_device.getAddress());
                 Toast.makeText(getApplicationContext(), "Connected to "
                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                Log.d(TAG,"BT connected to...");
+                if(D)Log.d(TAG,"BT connected to...");
                 break;
             case MESSAGE_TOAST:
                 Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
@@ -1186,98 +1186,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			else {
 				frSkyFrame.add(b);
 			}
-//			// handle byte stuffing first
-//			if (b == Frame.STUFFING_TELEMETRY_FRAME) {
-//				// indicate we need to xor the next one
-//				frSkyXOR = true;
-//				// and drop this byte
-//				continue;
-//			}
-//			// we encountered a byte stuff indicator in previous
-//			// iteration so we need to XOR here to unstuff and make
-//			// sure to bypass the start/stop byte detection.
-//			if (frSkyXOR) {
-//				// perform xor operation
-//				b ^= Frame.XOR_TELEMETRY_FRAME;
-//				// disable xor flag again for next iteration
-//				// wait to unset the xor operation flag since we'll
-//				// need it in next steps to skip the start/stop byte
-//				// detection
-//				// xor = false;
-//				Log.d(TAG, "XOR operation, unstuffed to "
-//						+ Integer.toHexString(b));
-//			} 
-//			// if we encounter a start byte we need to indicate
-//			// we're in a frame or if at the end handle the frame
-//			// and continue
-//			if (b == Frame.START_STOP_TELEMETRY_FRAME && !frSkyXOR) {
-//				// if currentFrameIndex is not set we have to start
-//				// a new frame here
-//				if (currentFrSkyFrameIndex < 0) {
-//					// init current frame index at beginning
-//					currentFrSkyFrameIndex = 0;
-//					// and copy this first byte in the frame
-//					frSkyFrame[currentFrSkyFrameIndex++] = b;
-//				}
-//				// otherwise we were already collecting a frame so
-//				// this indicates we are at the end now. At this
-//				// point a frame is available that we can send over.
-//				else if (currentFrSkyFrameIndex == Frame.SIZE_TELEMETRY_FRAME - 1) {
-//					// just complete the frame we were collecting
-//					frSkyFrame[currentFrSkyFrameIndex] = b;
-//					// this way the length is confirmed
-//					// Send the obtained bytes to the UI Activity
-//					//mHandler.obtainMessage(
-//					//		ActivityDashboard.MESSAGE_READ,
-//					//		frame.length, -1, frame).sendToTarget();
-//					// handle a single frame
-//                	handleFrame(frSkyFrame);
-//
-//					// once information is handled we can reset the
-//					// frame
-//					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-//					// we can already set this start byte to the
-//					// beginning of the frame here
-//					currentFrSkyFrameIndex = -1;
-//				}
-//				// if for some reason we got 2 times a 0x7e byte
-//				// after each other or the size of the frame was
-//				// different we can't do anything with the previous
-//				// collected information. We can log a debug message
-//				// and drop the frame to start over again.
-//				else {
-//					// log debug info here, only warn when actually something was lost
-//					if( currentFrSkyFrameIndex != 1)
-//						Log.d(TAG,
-//							"Start/stop byte at wrong position: 0x"
-//									+ Integer.toHexString(b)
-//									+ " frame so far: "
-//									+ Arrays.toString(frSkyFrame));
-//					// reset frame and counts this start/stop bit as
-//					// beginning
-//					currentFrSkyFrameIndex = 0;
-//					frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-//					frSkyFrame[currentFrSkyFrameIndex++] = b;
-//				}
-//			}
-//			// otherwise we are handling a valid byte that has to be
-//			// put in the frame we are collecting. But only when we
-//			// are currently working on a frame!
-//			else if (currentFrSkyFrameIndex >= 0
-//					&& currentFrSkyFrameIndex < Frame.SIZE_TELEMETRY_FRAME - 1) {
-//				frSkyFrame[currentFrSkyFrameIndex++] = b;
-//			}
-//			// finally it's possible that we receive bytes without
-//			// being in a frame, just discard them for now. These
-//			// are probably from missing frames etc
-//			else {
-//				// log debug info here
-//				Log.d(TAG,
-//						"Received data outside frame, dropped byte: 0x"
-//								+ Integer.toHexString(b));
-//			}
-//			//don't forget to unset the xor flag so we can continue normal byte operation on next iteration
-//			frSkyXOR = false;
+
 		}
     }
 	
@@ -1303,7 +1212,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public TextToSpeech createSpeaker()
 	{
-		Log.i(TAG,"Create Speaker");
+		if(D)Log.i(TAG,"Create Speaker");
 		mTts = new TextToSpeech(this, this);
 		return mTts;
 	}
@@ -1312,7 +1221,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		
 		
-		Log.i(TAG,"Speak something");
+		if(D)Log.i(TAG,"Speak something");
 		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
 		//mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, myAudibleStreamMap);
 	}
@@ -1320,7 +1229,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public void startCyclicSpeaker()
 	{
 		// Stop it before starting it
-		Log.i(TAG,"Start Cyclic Speaker");
+		if(D)Log.i(TAG,"Start Cyclic Speaker");
 		speakHandler.removeCallbacks(runnableSpeaker);
 		speakHandler.post(runnableSpeaker);
 		_cyclicSpeechEnabled = true;
@@ -1331,7 +1240,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	public void stopCyclicSpeaker()
 	{
-		Log.i(TAG,"Stop Cyclic Speaker");
+		if(D)Log.i(TAG,"Stop Cyclic Speaker");
 		try
 		{
 			speakHandler.removeCallbacks(runnableSpeaker);
@@ -1353,7 +1262,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public void setCyclicSpeechEnabledAtStartup(boolean state)
 	{
-		Log.i(TAG,"Setting Cyclic speech to: "+state);
+		if(D)Log.i(TAG,"Setting Cyclic speech to: "+state);
 		_editor.putBoolean("cyclicSpeakerEnabledAtStartup", state);
 		_editor.commit();
 		//_cyclicSpeechEnabled = state;
@@ -1380,13 +1289,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public void simStart()
 	{
-		Log.i(TAG,"Sim Start");
+		if(D)Log.i(TAG,"Sim Start");
 		sim.start();
 	}
 	
 	public void simStop()
 	{
-		Log.i(TAG,"Sim Stop");
+		if(D)Log.i(TAG,"Sim Stop");
 		sim.reset();
 	}
 	
@@ -1439,7 +1348,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				}
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
-				Log.d(TAG,"handle inbound FrSky alarm");
+				if(D)Log.d(TAG,"handle inbound FrSky alarm");
 				if(_currentModel!=null)
 				{
 					// don't copy the entire alarm, as that would kill off sourcechannel
@@ -1462,7 +1371,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 						_alarmMap.put(aIn.getFrSkyFrameType(), aIn);
 						if(_alarmMap.size()>=4)
 						{
-							if(DEBUG)Log.i(TAG,"recording completed");
+							if(D)Log.i(TAG,"recording completed");
 							_recordingAlarms = false;
 							//FIXME: send broadcast to allow GUI to update
 							Intent i = new Intent();
@@ -1474,15 +1383,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 				break;
 			case Frame.FRAMETYPE_USER_DATA:
 				// hcpl add handling user data frames!!
-				Log.d(TAG,"Frametype User Data");
+				if(D)Log.d(TAG,"Frametype User Data");
 				FrSkyHub.getInstance().extractUserDataBytes(f);
 				break;
 			case Frame.FRAMETYPE_INPUT_REQUEST_ALL:
 				//Log.d(TAG,"Frametype Request all alarms");
 				break;
 			default:
-				Log.i(TAG,"Frametype currently not supported: "+f.frametype);
-				Log.i(TAG,"Frame: "+f.toHuman());
+				if(D)Log.i(TAG,"Frametype currently not supported: "+f.frametype);
+				if(D)Log.i(TAG,"Frame: "+f.toHuman());
 				break;
 		}
 		return ok;
@@ -1507,7 +1416,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public void deleteAllLogFiles()
 	{
-		Log.i(TAG,"Really delete all log files");
+		if(D)Log.i(TAG,"Really delete all log files");
 		// Make logger stop logging, and close files
 		logger.stop();
 		
@@ -1517,7 +1426,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		for(int i=0;i<files.length;i++)
 		{
 			File f = new File(getExternalFilesDir(null), files[i]);
-			Log.i(TAG,"Delete: "+f.getAbsolutePath());
+			if(D)Log.i(TAG,"Delete: "+f.getAbsolutePath());
 			f.delete();
 		}
 		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
@@ -1686,45 +1595,45 @@ public class FrSkyServer extends Service implements OnInitListener {
         @Override
         public void onReceive(Context context, Intent intent) {
         	String msg = intent.getAction();
-        	Log.d(TAG,"Received Broadcast: "+msg);
+        	if(D)Log.d(TAG,"Received Broadcast: "+msg);
         	if(msg.equals(BluetoothAdapter.ACTION_STATE_CHANGED))
         	{
 	        	// does not work?
 	    		int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
-	    		Log.i(TAG,"CMD: "+cmd);
+	    		if(D)Log.i(TAG,"CMD: "+cmd);
 	    		switch(cmd) {
 	    			case BluetoothAdapter.STATE_ON:
-	    				Log.d(TAG,"Bluetooth state changed to ON");
+	    				if(D)Log.d(TAG,"Bluetooth state changed to ON");
 	    				
 	    				if(getBtAutoConnect()) 
 	    		    	{
-	    					Log.d(TAG,"Autoconnect requested");
+	    					if(D)Log.d(TAG,"Autoconnect requested");
 	    					connect();
 	    		    	}
 	    				break;
 	    			case BluetoothAdapter.STATE_OFF:
-	    				Log.d(TAG,"Blueotooth state changed to OFF");
+	    				if(D)Log.d(TAG,"Blueotooth state changed to OFF");
 	    				break;
 	    			default:
-	    				Log.d(TAG,"No information about "+msg);
+	    				if(D)Log.d(TAG,"No information about "+msg);
 	    		
 	    		}
         	}
         	else if(msg.equals(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED))
         	{
-        		Log.d(TAG,"SCO STATE CHANGED!!!"+msg);
+        		if(D)Log.d(TAG,"SCO STATE CHANGED!!!"+msg);
         		int scoState = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
         		switch(scoState) {
         			case AudioManager.SCO_AUDIO_STATE_CONNECTED:
-        				Log.i(TAG,"SCO CONNECTED!!!!");
+        				if(D)Log.i(TAG,"SCO CONNECTED!!!!");
         				//_scoConnected = true;
         				break;
         			case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
-        				Log.i(TAG,"SCO DIS-CONNECTED!!!!");
+        				if(D)Log.i(TAG,"SCO DIS-CONNECTED!!!!");
         				//_scoConnected = false;
         				break;
         			default:
-        				Log.e(TAG,"Unhandled state");
+        				if(D)Log.e(TAG,"Unhandled state");
         				//_scoConnected = false;
         				break;
         		}
@@ -1733,7 +1642,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
         	else
         	{
-        		Log.e(TAG,"Unhandled intent: "+msg);
+        		if(D)Log.e(TAG,"Unhandled intent: "+msg);
         		
         	}
         }
@@ -1744,11 +1653,11 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     public BluetoothAdapter getBluetoothAdapter()
     {
-	    Log.i(TAG,"Check for BT");
+    	if(D)Log.i(TAG,"Check for BT");
 	    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 	    if (mBluetoothAdapter == null) {
 	        // Device does not support Bluetooth
-	    	Log.i(TAG,"Device does not support Bluetooth");
+	    	if(D)Log.i(TAG,"Device does not support Bluetooth");
 	    	// Disable all BT related menu items
 	    }
 	    
@@ -1757,7 +1666,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	    {
 	        if (!mBluetoothAdapter.isEnabled()) {
 	        	bluetoothEnabledAtStart = false;
-	        	Log.d(TAG,"BT NOT enabled at start");
+	        	if(D)Log.d(TAG,"BT NOT enabled at start");
 	        	if(getBtAutoEnable())
 	        	{
 	        		mBluetoothAdapter.enable();
@@ -1765,14 +1674,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	        	}
 	        	else
 	        	{
-	        		Log.i(TAG,"Request user to enable bt");
+	        		if(D)Log.i(TAG,"Request user to enable bt");
 	        		
 	        	}
 	        }
 	        else
 	        {
 	        	bluetoothEnabledAtStart = true;
-	        	Log.d(TAG,"BT enabled at start");
+	        	if(D)Log.d(TAG,"BT enabled at start");
 
 		        //autoconnect here if autoconnect
 	        	if(getBtAutoConnect()) 

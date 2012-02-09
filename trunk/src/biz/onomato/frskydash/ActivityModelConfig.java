@@ -71,6 +71,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 
 		// Set Listeners
 		btnSave.setOnClickListener(this);
+		btnSave.setVisibility(View.GONE);
 		btnAddChannel.setOnClickListener(this);
 		btnFrSkyAlarms.setOnClickListener(this);
 		
@@ -78,6 +79,12 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		
 	}
 	
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+		saveModel();
+	}
 	
 	void doBindService() {
 		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
@@ -177,22 +184,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch(v.getId()){
 			case R.id.modConf_btnSave:
-				if(FrSkyServer.D)Log.d(TAG,"Save this model");
-
-				// Save the model
-				_model.setName(edName.getText().toString());
-				_model.setType((String) spType.getSelectedItem());
-				//_model.saveToDatabase();
-				FrSkyServer.database.saveModel(_model);
-				if(_model.getId()==server.getCurrentModel().getId())
-				{
-					if(FrSkyServer.D)Log.d(TAG,"Should update the servers.currentmodel");
-					server.setCurrentModel(_model);
-				}
-				else
-				{
-					if(FrSkyServer.D)Log.d(TAG,"This is not the current model");
-				}
+				saveModel();
 				
 				this.setResult(RESULT_OK);
 				this.finish();
@@ -224,6 +216,26 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				i.putExtra("modelId", (int) _model.getId());	// Should edit existing model
 				startActivityForResult(i,MODULE_CONFIG_RETURN);
 				break;
+		}
+	}
+	
+	public void saveModel()
+	{
+		if(FrSkyServer.D)Log.d(TAG,"Save this model");
+
+		// Save the model
+		_model.setName(edName.getText().toString());
+		_model.setType((String) spType.getSelectedItem());
+		//_model.saveToDatabase();
+		FrSkyServer.database.saveModel(_model);
+		if(_model.getId()==server.getCurrentModel().getId())
+		{
+			if(FrSkyServer.D)Log.d(TAG,"Should update the servers.currentmodel");
+			server.setCurrentModel(_model);
+		}
+		else
+		{
+			if(FrSkyServer.D)Log.d(TAG,"This is not the current model");
 		}
 	}
 	

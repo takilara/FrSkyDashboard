@@ -41,7 +41,7 @@ public class Alarm {
 	private static final int MAXIMUM_THRESHOLD_RSSI=110;
 	private static final int MINIMUM_THRESHOLD_AD=1;
 	private static final int MAXIMUM_THRESHOLD_AD=255;
-	private static final boolean DEBUG = true;
+	
 	
 	public Alarm(int alarmtype)
 	{
@@ -55,7 +55,7 @@ public class Alarm {
 		_greaterthan = alarmgreaterthan;
 		_threshold = alarmthreshold;
 		_frSkyFrameType= -1;
-		Log.i(TAG,"Created Alarm: "+toString());
+		if(FrSkyServer.D)Log.i(TAG,"Created Alarm: "+toString());
 	}
 	
 	public Alarm(Frame frame)
@@ -307,8 +307,8 @@ public class Alarm {
 	
 	public String[] getThresholds()
 	{
-		if(DEBUG)Log.i(TAG,"get thresholds: ");
-		if(DEBUG)Log.i(TAG,"sourcechannel: "+_unitChannelId);
+		if(FrSkyServer.D)Log.i(TAG,"get thresholds: ");
+		if(FrSkyServer.D)Log.i(TAG,"sourcechannel: "+_unitChannelId);
 		if(_unitChannelId==-1)
 		{
 			String[] out = new String[_maxThreshold-_minThreshold];
@@ -316,7 +316,7 @@ public class Alarm {
 			{
 				out[i] = String.valueOf(i+_minThreshold);
 			}
-			if(DEBUG)Log.i(TAG,"Thresholds: "+out.toString());
+			if(FrSkyServer.D)Log.i(TAG,"Thresholds: "+out.toString());
 			return out;
 		}
 		else
@@ -326,7 +326,7 @@ public class Alarm {
 			{
 				out[i] = String.format("%s %s",(((i+_minThreshold)*_unitChannelFactor)+_unitChannelOffset),_unitChannelUnit);
 			}
-			if(DEBUG)Log.i(TAG,"Thresholds: "+out.toString());
+			if(FrSkyServer.D)Log.i(TAG,"Thresholds: "+out.toString());
 			return out;
 		}
 	}

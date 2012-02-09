@@ -29,7 +29,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	//public static final String crlf="\r\n";
 	public static final String delim=";";
 	
-	private static final boolean DEBUG=true;
+	
 	
 	public double raw,rawAvg;
 	public double eng,engAvg;
@@ -487,10 +487,10 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			mIntentFilter = new IntentFilter();
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
 			_sourceChannelId = channelId;
-			Log.d(TAG,"Listens for broadcast of values to on context "+FrSkyServer.getContext()+", with message: "+bCastAction);
+			if(FrSkyServer.D)Log.d(TAG,"Listens for broadcast of values to on context "+FrSkyServer.getContext()+", with message: "+bCastAction);
 			
 		    mIntentFilter.addAction(bCastAction);
-		    Log.d(TAG,"Context is : "+FrSkyServer.getContext());
+		    if(FrSkyServer.D)Log.d(TAG,"Context is : "+FrSkyServer.getContext());
 //		    if(_context!=null)
 //		    {
 		    FrSkyServer.getContext().registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
@@ -697,155 +697,4 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	                return new Channel[size];
 	            }
 	        };
-	
-
-    
-    
-    
-	// ==========================================================================================
-	// ====                        DATABASE ACCESS                                          =====
-	// ==========================================================================================
-//    public void saveToDatabase()
-//	{
-//		if(_channelId==-1)
-//		{
-//			if(DEBUG) Log.d(TAG,"Saving, using insert");
-//			db.open();
-//			int id = db.insertChannel(this);
-//			if(id==-1)
-//			{
-//				Log.e(TAG,"Insert Failed");
-//			}
-//			else
-//			{
-//				if(DEBUG) Log.d(TAG,"Insert ok, id:"+id);
-//				_channelId = id;
-//				setDirtyFlag(false);
-//			}
-//			db.close();
-//			// Run insert
-//		}
-//		else
-//		{
-//			if(DEBUG) Log.d(TAG,"Saving, using update (id:"+_channelId+",description:"+_description+", silent="+getSilent()+")");
-//			db.open();
-//			if(db.updateChannel(this))
-//			{
-//				if(DEBUG)Log.d(TAG,"Update successful");
-//				setDirtyFlag(false);
-//			}
-//			else
-//			{
-//				if(DEBUG)Log.e(TAG,"Update failed");
-//			}
-//			db.close();
-//			// run update
-//		}
-//	}
-//	
-//    public boolean loadFromDatabase(Cursor c)
-//	{
-//    	_channelId = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_ROWID));
-//		_description = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_DESCRIPTION));
-//		_longUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_LONGUNIT));
-//		_shortUnit = c.getString(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SHORTUNIT));
-//		_factor = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_FACTOR));
-//		_offset = c.getFloat(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_OFFSET));
-//		setPrecision(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_PRECISION)));
-//		setMovingAverage(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MOVINGAVERAGE)));
-//		_silent = c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SILENT))>0;
-//		_modelId = c.getLong(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_MODELID));
-//		listenTo(c.getInt(c.getColumnIndexOrThrow(DBAdapterChannel.KEY_SOURCECHANNELID)));
-//		//db.close();
-//		
-//		if(DEBUG) Log.d(TAG,"Loaded '"+getDescription()+"' from database");
-//		if(DEBUG) Log.d(TAG,"\tSilent:\t"+getSilent());
-//		setDirtyFlag(false);	// clean after loaded
-//		return true;
-//	}
-//	public boolean loadFromDatabase(long id)
-//	{
-//		// False if not found
-//		db.open();
-//		Cursor c = db.getChannel(id);
-//		
-//		if(c.getCount()==0)
-//		{
-//			if(DEBUG) Log.w(TAG,"Channel id "+id+" does not exist.");	
-//			_channelId= -1;
-//			c.deactivate();
-//			db.close();
-//			return false;
-//		}
-//		else
-//		{
-//			if(DEBUG) Log.d(TAG,"Found the channel");
-//			loadFromDatabase(c);
-//			c.deactivate();
-//			db.close();
-//			return true;
-//		}
-//	}
-//	
-//	public void deleteFromDatabase()
-//	{
-//		db.open();
-//		try
-//		{
-//			db.deleteChannel(this._channelId);
-//		}
-//		catch(Exception e)
-//		{
-//			if(DEBUG) Log.e(TAG,e.toString());
-//		}
-//		db.close();
-//	}
-//	
-//	
-//	
-//	// ==========================================================================================
-//	// ====                        STATIC METHODS                                           =====
-//	// ==========================================================================================
-//	
-//	//public static Channel[] getChannelsForModel(Context context, Model model)
-//	public static Channel[] getChannelsForModel(Context context, long modelId)
-//	{
-//		//DBAdapterChannel dbb = new DBAdapterChannel(context);
-//		if(DEBUG) Log.d(TAG,"Try to open channels database");
-//		db.open();
-//		if(DEBUG) Log.d(TAG,"Db opened, try to get all channels");
-//		Cursor c = db.getAllChannelsForModel(modelId);
-//		//dbb.close();
-//		if(DEBUG) Log.d(TAG,"Cursor count: "+c.getCount());
-//		c.moveToFirst();
-//		Channel[] channels = new Channel[c.getCount()];
-//		
-//		int n = 0;
-//		while(!c.isAfterLast())
-//		{
-//				
-//			if(DEBUG) Log.d(TAG,"Add Channel "+c.getString(1)+" to channellist");
-//				channels[n] = new Channel(context);
-//				channels[n].loadFromDatabase(c);
-//				c.moveToNext();
-//				n++;
-//		}
-//		c.deactivate();
-//		db.close();
-//		return channels;
-//	}
-//	public static Channel[] getChannelsForModel(Context context, Model model)
-//	{
-//		return getChannelsForModel(context,model.getId());
-//	}
-//	
-//	public static void deleteChannelsForModel(Context context, Model model)
-//	{
-//		//DBAdapterChannel dbb = new DBAdapterChannel(context);
-//		if(DEBUG) Log.d(TAG,"Try to open channels database");
-//		db.open();
-//		if(DEBUG) Log.d(TAG,"Db opened, try to delete all channels for model "+model.getId());
-//		db.deleteAllChannelsForModel(model.getId());
-//		db.close();
-//	}
 }

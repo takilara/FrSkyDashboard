@@ -160,7 +160,7 @@ public class Frame {
 				default:
 					frametype=FRAMETYPE_UNDEFINED;
 					
-					Log.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
+					if(FrSkyServer.D)Log.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
 					break;
 			}
 			if(frametype==FRAMETYPE_FRSKY_ALARM)
@@ -250,7 +250,7 @@ public class Frame {
 			// the start and stop bytes
 			if (di >= Frame.SIZE_TELEMETRY_FRAME - 1) {
 				// inform about this issues
-				Log.e(TAG, "Invalid frame length, can't decode frame: " + frameToHuman(frame));
+				if(FrSkyServer.D)Log.e(TAG, "Invalid frame length, can't decode frame: " + frameToHuman(frame));
 				// no need to continue here, this will return a wrong formatted
 				// frame now... Maybe best to replace the stop bit with this out
 				// of range byte so we can detect this problem later on

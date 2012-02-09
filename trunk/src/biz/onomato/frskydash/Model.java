@@ -20,7 +20,7 @@ public class Model {
 	public static final int MODEL_TYPE_MULTIROTOR=4;
 	public static final int MODEL_TYPE_UNKNOWN=-1;
 	
-	private static final boolean DEBUG=true;
+	
 	
 	//private ArrayList<Channel> _channels;
 	private TreeMap<Integer,Channel> channelMap;
@@ -84,54 +84,6 @@ public class Model {
 	}
 	
 
-//	public void initiateFrSkyAlarms()
-//	{
-//		//TODO: Need defaults
-//		Frame alarmFrame = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM1_RSSI, 
-//				Alarm.ALARMLEVEL_LOW, 
-//				45, 
-//				Alarm.LESSERTHAN);
-//		//Alarm a = new Alarm(alarmFrame);
-//		
-//		addAlarm(new Alarm(alarmFrame));
-//		
-//		alarmFrame = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM2_RSSI, 
-//				Alarm.ALARMLEVEL_MID, 
-//				42, 
-//				Alarm.LESSERTHAN);
-//		addAlarm(new Alarm(alarmFrame));
-//		
-//		alarmFrame = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM1_AD1, 
-//				Alarm.ALARMLEVEL_MID, 
-//				42, 
-//				Alarm.LESSERTHAN);
-//		addAlarm(new Alarm(alarmFrame));
-//		
-//		alarmFrame = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM2_AD1, 
-//				Alarm.ALARMLEVEL_MID, 
-//				42, 
-//				Alarm.LESSERTHAN);
-//		addAlarm(new Alarm(alarmFrame));
-//		
-//		alarmFrame = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM1_AD2, 
-//				Alarm.ALARMLEVEL_MID, 
-//				42, 
-//				Alarm.LESSERTHAN);
-//		addAlarm(new Alarm(alarmFrame));
-//		
-//		alarmFrame = Frame.AlarmFrame(
-//				Frame.FRAMETYPE_ALARM2_AD2, 
-//				Alarm.ALARMLEVEL_MID, 
-//				42, 
-//				Alarm.LESSERTHAN);
-//		addAlarm(new Alarm(alarmFrame));
-//		
-//	}
 	
 	
 	public String getType() {
@@ -140,7 +92,7 @@ public class Model {
 
 
 	public void setType(String modelType) {
-		if(DEBUG)Log.d(TAG,"Setting model type to: "+modelType);
+		if(FrSkyServer.D)Log.d(TAG,"Setting model type to: "+modelType);
 		this._type = modelType;
 	}
 
@@ -198,12 +150,9 @@ public class Model {
 	// I need to be able to add channels to this model
 	public void addChannel(Channel channel)
 	{
+		//TODO: if id == -1, save to retrieve new id
+		
 		channelMap.put(channel.getId(), channel);
-//		if(!_channels.contains(channel))
-//		{
-//			_channels.add(channel);
-//			channel.setModelId(_id);
-//		}
 	}
 	
 	// I need to be able to delete channels from this model
@@ -219,28 +168,6 @@ public class Model {
 	public void setChannel(Channel channel)
 	{
 		addChannel(channel);
-//		if((_channels.contains(channel)) && (channel.getId()!=-1))
-//		{
-//			_channels.set(_channels.indexOf(channel), channel);
-//		}
-//		else
-//		{
-//			
-//			_channels.add(channel);
-//			
-//		}
-		
-//		if(id<_channels.size())
-//		{
-//			if(DEBUG) Log.d(TAG,"Old channel existed, replacing");
-//			_channels.set(id, channel);
-//		}
-//		else
-//		{
-//			if(DEBUG) Log.d(TAG,"Old did not exist, adding");
-//			_channels.add(channel);
-//		}
-		
 	}
 	
 	public void setChannels(ArrayList<Channel> channels)
@@ -254,10 +181,6 @@ public class Model {
 	public void setChannels(TreeMap<Integer,Channel> channels)
 	{
 		channelMap = channels;
-//		for(Channel ch : channels.values())
-//		{
-//			addChannel(ch);
-//		}
 	}
 	
 	// I need to be able to return list of channels from this model

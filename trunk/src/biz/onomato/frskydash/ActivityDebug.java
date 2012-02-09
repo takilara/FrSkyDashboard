@@ -30,7 +30,7 @@ import android.widget.ToggleButton;
 
 public class ActivityDebug extends Activity implements OnClickListener {
 	private static final String TAG = "DebugActivity";
-	private static final boolean DEBUG=true;
+	//private static final boolean DEBUG=true;
 	private FrSkyServer server;
 	
 	private Button btnSchema,btnChannels,btnModels,btnExportDb;

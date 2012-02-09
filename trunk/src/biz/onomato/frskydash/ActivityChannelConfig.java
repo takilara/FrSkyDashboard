@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ChannelConfig";
-	private static final boolean DEBUG=true;
+	//private static final boolean DEBUG=true;
 	private long _channelId = -1;
 	//private int _idInModel = -1;
 	private int _modelId=-1;
@@ -56,15 +56,15 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			//_idInModel = launcherIntent.getIntExtra("idInModel", -1);
 			_channelId = channel.getId();
 			_modelId = channel.getModelId();
-			Log.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
-			Log.d(TAG,"channel context is: "+channel.getContext());
+			if(FrSkyServer.D)Log.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
+			if(FrSkyServer.D)Log.d(TAG,"channel context is: "+channel.getContext());
 			//channel.setContext(getApplicationContext());
-			Log.d(TAG,"channel context is: "+channel.getContext());
+			if(FrSkyServer.D)Log.d(TAG,"channel context is: "+channel.getContext());
 
 		}
 		catch(Exception e)
 		{
-			Log.d(TAG,"Channel config launched without attached channel");
+			if(FrSkyServer.D)Log.d(TAG,"Channel config launched without attached channel");
 			channel = null;
 			_channelId = launcherIntent.getIntExtra("channelId", -1);
 			_modelId = -1;
@@ -74,7 +74,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		//_modelId = launcherIntent.getIntExtra("modelId", -1);
 		//if(DEBUG)Log.d(TAG, "working model has id: "+_modelId);
 		
-		Log.d(TAG, "Channel Id is: "+_channelId);
+		if(FrSkyServer.D)Log.d(TAG, "Channel Id is: "+_channelId);
 		
 		// Show the form
 		setContentView(R.layout.activity_channelconfig);
@@ -99,9 +99,9 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	
 	
 	void doBindService() {
-		Log.i(TAG,"Start the server service if it is not already started");
+		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		Log.i(TAG,"Try to bind to the service");
+		if(FrSkyServer.D)Log.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -124,8 +124,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			Log.i(TAG,"Bound to Service");
-			Log.i(TAG,"Fetch channel "+_channelId+" from Server");
+			if(FrSkyServer.D)Log.i(TAG,"Bound to Service");
+			if(FrSkyServer.D)Log.i(TAG,"Fetch channel "+_channelId+" from Server");
 			
 			settings = server.getSettings();
 	        editor = settings.edit();
@@ -133,13 +133,13 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        
 	        if(_modelId==-1)
 			{
-				if(DEBUG) Log.d(TAG,"Configure new Model object");
+	        	if(FrSkyServer.D)Log.d(TAG,"Configure new Model object");
 				//_model = new Model(getApplicationContext());
 				_model = server.getCurrentModel();
 			}
 			else
 			{
-				if(DEBUG) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+				if(FrSkyServer.D)Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
 				_model = FrSkyServer.database.getModel(_modelId);
@@ -211,7 +211,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				i.putExtra("channel", channel);
 				//i.putExtra("idInModel",_idInModel);
 				
-				Log.i(TAG,"Go back to dashboard");
+				if(FrSkyServer.D)Log.i(TAG,"Go back to dashboard");
 				if(server.getCurrentModel().getId() == channel.getModelId())
 				{
 					//if(DEBUG) Log.d(TAG,"This is the current model, please replace run setChannel ");
@@ -222,7 +222,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				{
 					//if(DEBUG) Log.d(TAG,"This is NOT the current model");
 				}
-				if(DEBUG) Log.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
+				if(FrSkyServer.D)Log.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
 				this.setResult(RESULT_OK,i);
 				
 				this.finish();
@@ -232,7 +232,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	
 	private void applyChannel()
 	{
-		Log.i(TAG,"Apply the settings");
+		if(FrSkyServer.D)Log.i(TAG,"Apply the settings");
 		
 		int prec = Integer.parseInt(edPrecision.getText().toString());
 		channel.setPrecision(prec);
@@ -255,7 +255,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		channel.setMovingAverage(ma);
 		
 		Channel c = (Channel) spSourceChannel.getSelectedItem();
-		if(DEBUG)Log.d(TAG,"Try to set source channel to:"+c.toString()+" (ID: "+c.getId()+")");
+		if(FrSkyServer.D)Log.d(TAG,"Try to set source channel to:"+c.toString()+" (ID: "+c.getId()+")");
 		channel.listenTo(c);
 		
 		//channel.setDirtyFlag(true);
@@ -269,16 +269,16 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 //		}
 //		else
 //		{
-		if(DEBUG) Log.d(TAG,"This is a model channel for modelId: "+channel.getModelId());
+		if(FrSkyServer.D)Log.d(TAG,"This is a model channel for modelId: "+channel.getModelId());
 		if(channel.getModelId()>-1)
 		{
-			if(DEBUG) Log.d(TAG,"This is an existing model, feel free to save");
+			if(FrSkyServer.D)Log.d(TAG,"This is an existing model, feel free to save");
 			//channel.saveToDatabase();
 			FrSkyServer.database.saveChannel(channel);
 		}
 		else
 		{
-			if(DEBUG) Log.d(TAG,"This is a new model, delay saving");
+			if(FrSkyServer.D)Log.d(TAG,"This is a new model, delay saving");
 		}
 	}
 }

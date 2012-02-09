@@ -53,8 +53,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     private static final int DIALOG_ABOUT_ID=0;
     private Dialog dlgAbout;
-    private static final boolean DEBUG=true;
-    private static boolean _enableDebugActivity=false;
+    //private static final boolean DEBUG=true;
+    //private static boolean _enableDebugActivity=false;
     
     // Used for GUI updates
     private Handler tickHandler;
@@ -129,9 +129,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG,"onCreate");
+        if(FrSkyServer.D) Log.i(TAG,"onCreate");
 
-        _enableDebugActivity=false;
+        //_enableDebugActivity=false;
         // Audio Setup
         
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -146,10 +146,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         
         // setup scale for programatically setting sizes
         scale = getApplicationContext().getResources().getDisplayMetrics().density;
-        if(DEBUG)Log.d(TAG,"Scale is: "+scale);
+        if(FrSkyServer.D) Log.d(TAG,"Scale is: "+scale);
         
         // Check for TTS
-        Log.i(TAG,"Checking for TTS");
+        if(FrSkyServer.D) Log.i(TAG,"Checking for TTS");
         Intent checkSpeakIntent = new Intent();
         checkSpeakIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(checkSpeakIntent, MY_DATA_CHECK_CODE);
@@ -322,11 +322,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     // About dialog
     protected Dialog onCreateDialog(int id) {
         Dialog dialog;
-        Log.i(TAG,"Make a dialog on context: "+this.getPackageName());
+        if(FrSkyServer.D) Log.i(TAG,"Make a dialog on context: "+this.getPackageName());
         
         switch(id) {
         case DIALOG_ABOUT_ID:
-        	Log.i(TAG,"About dialog");
+        	if(FrSkyServer.D) Log.i(TAG,"About dialog");
         	dialog = new Dialog(this);
             dialog.setContentView(R.layout.about_dialog);
             dialog.setTitle("About "+getString(R.string.app_name));
@@ -339,7 +339,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
             		_clickToDebug++;
             		if(_clickToDebug>5)
             		{
-            			Log.d(TAG,"Enable debugging");
+            			if(FrSkyServer.D) Log.d(TAG,"Enable debugging");
             			Toast.makeText(getApplicationContext(), "Debugging enabled", Toast.LENGTH_LONG).show();
             	    	//MenuItem tDebug = (MenuItem) menu.findItem(R.id.menu_debug);
             			enableDebugging();
@@ -370,17 +370,18 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     public void enableDebugging()
     {
-    	_enableDebugActivity=true;
+    	//_enableDebugActivity=true;
+    	FrSkyServer.D=true;
     }
     
     // Check for bluetooth capabilities, request if no capabilities
     public void checkForBt()
     {
-	    Log.i(TAG,"Check for BT capabilities");
+    	if(FrSkyServer.D) Log.i(TAG,"Check for BT capabilities");
 	    mBluetoothAdapter = server.getBluetoothAdapter();
 	    if (mBluetoothAdapter == null) {
 	        // Device does not support Bluetooth
-	    	Log.i(TAG,"Device does not support Bluetooth");
+	    	if(FrSkyServer.D) Log.i(TAG,"Device does not support Bluetooth");
 	    	// Disable all BT related menu items
 	    	// Display message stating only sim is available
 	    	notifyBtNotEnabled();
@@ -391,7 +392,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    {
 	        if (!mBluetoothAdapter.isEnabled() && !server.getBtAutoEnable()) {
 	        	//bluetoothEnabledAtStart = false;
-	        	Log.d(TAG,"Request BT enabling as BT not enabled and autoenable not set");
+	        	if(FrSkyServer.D) Log.d(TAG,"Request BT enabling as BT not enabled and autoenable not set");
         		Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         		startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 	        }
@@ -407,13 +408,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         public void onReceive(Context context, Intent intent) {
         	String msg = intent.getAction();
         	Bundle extras = intent.getExtras();
-        	Log.i(TAG,"Received Broadcast: '"+msg+"'");
-        	Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
+        	if(FrSkyServer.D) Log.i(TAG,"Received Broadcast: '"+msg+"'");
+        	if(FrSkyServer.D) Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
         	if(msg.equals(FrSkyServer.MESSAGE_STARTED))
-        		Log.i(TAG,"I have received BroadCast that the server has started");
+        		if(FrSkyServer.D) Log.i(TAG,"I have received BroadCast that the server has started");
         	if(msg.equals(FrSkyServer.MESSAGE_SPEAKERCHANGE))
         	{
-        		Log.i(TAG,"I have received BroadCast that cyclic speaker has toggled");
+        		if(FrSkyServer.D) Log.i(TAG,"I have received BroadCast that cyclic speaker has toggled");
         		if(server!=null)
         			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
         	}
@@ -432,17 +433,17 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
         	// does not work?
     		int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
-    		Log.i(TAG,"CMD: "+cmd);
+    		if(FrSkyServer.D) Log.i(TAG,"CMD: "+cmd);
     		switch(cmd) {
     			case BluetoothAdapter.STATE_ON:
-    				Log.d(TAG,"Bluetooth state changed to ON - try to autoconnect");
+    				if(FrSkyServer.D) Log.d(TAG,"Bluetooth state changed to ON - try to autoconnect");
     				//btAutoConnect();
     				break;
     			case BluetoothAdapter.STATE_OFF:
-    				Log.d(TAG,"Blueotooth state changed to OFF");
+    				if(FrSkyServer.D) Log.d(TAG,"Blueotooth state changed to OFF");
     				break;
     			default:
-    				Log.d(TAG,"No information about "+msg);
+    				if(FrSkyServer.D) Log.d(TAG,"No information about "+msg);
     		}
         }
     };
@@ -450,9 +451,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     void doBindService() {
     	//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
-		Log.i(TAG,"Start the server service if it is not already started");
+    	if(FrSkyServer.D) Log.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		Log.i(TAG,"Try to bind to the service");
+		if(FrSkyServer.D) Log.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
 		//bindService(new Intent(this, FrSkyServer.class), mConnection, Context.BIND_AUTO_CREATE);
     }
@@ -470,7 +471,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     private ServiceConnection mConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Log.i(TAG,"Bound to Service");
+			if(FrSkyServer.D) Log.i(TAG,"Bound to Service");
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			//server.setSettings(settings);	// Make sure server has settings available
 			
@@ -478,9 +479,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			{
 				server.createSpeaker();
 			}
-			Log.i(TAG,"Setting up dashboard");
+			if(FrSkyServer.D) Log.i(TAG,"Setting up dashboard");
 	
-			Log.d(TAG,"Cyclic speaker should be set to "+server.getCyclicSpeechEnabledAtStartup()+" at startup");
+			if(FrSkyServer.D) Log.d(TAG,"Cyclic speaker should be set to "+server.getCyclicSpeechEnabledAtStartup()+" at startup");
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabledAtStartup());
 			
 			//server.setCyclicSpeechEnabled(server.getCyclicSpeechEnabledAtStartup());
@@ -494,7 +495,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 	        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 	        double volPrc = currentVolume*100/maxVolume;
-	        Log.d(TAG,String.format("Volume is [%s/%s] (%.2f %%)",currentVolume,maxVolume,volPrc));
+	        if(FrSkyServer.D) Log.d(TAG,String.format("Volume is [%s/%s] (%.2f %%)",currentVolume,maxVolume,volPrc));
 	        if(server.getAutoSetVolume())
 	        {
 		        if(volPrc<server.getMinimumVolume())
@@ -523,18 +524,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	super.onResume();
     	
     	// enable updates
-    	Log.i(TAG,"onResume");
-    	_enableDebugActivity=false;
+    	if(FrSkyServer.D) Log.i(TAG,"onResume");
+    	//_enableDebugActivity=false;
     	if(server != null)
     	{
     		btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
-    		
-    		// TODO: might put populateChannels here?
-    		
-//    		tv_dash_ch0NameDesc.setText(server.AD1.getName()+": "+server.AD1.getDescription());
-//    		tv_dash_ch1NameDesc.setText(server.AD2.getName()+": "+server.AD2.getDescription());
-//    		tv_ad1_unit.setText(server.AD1.getShortUnit());
-//    		tv_ad2_unit.setText(server.AD2.getShortUnit());
     	}
     	tickHandler.removeCallbacks(runnableTick);
     	tickHandler.post(runnableTick);
@@ -550,7 +544,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     @Override
     public void onPause(){
     	super.onPause();
-    	Log.i(TAG,"onPause");
+    	if(FrSkyServer.D) Log.i(TAG,"onPause");
     	unregisterReceiver(mIntentReceiver);
     	unregisterReceiver(mIntentReceiverBt);
 
@@ -561,19 +555,19 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     private void populateChannelList()
 	{
-		if(DEBUG) Log.d(TAG,"Populate list of channels");
+    	if(FrSkyServer.D)  Log.d(TAG,"Populate list of channels");
 		//tlChannelsTable.removeAllViews();
 		llDashboardChannels.removeAllViews();
 		final Model currentModel = server.getCurrentModel();
 		
 		tv_modelName.setText(currentModel.getName());
 		int n = 0;
-		if(DEBUG) Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().size());
+		if(FrSkyServer.D)  Log.d(TAG,"Should add this amount of channels: "+currentModel.getChannels().size());
 		for(Channel c: currentModel.getChannels().values())
 		{
-			if(DEBUG) Log.i(TAG,c.getDescription());
-			if(DEBUG) Log.i(TAG,"Precicion: "+c.getPrecision());
-			if(DEBUG) Log.i(TAG,"Moving Average: "+c.getMovingAverage());
+			if(FrSkyServer.D)  Log.i(TAG,c.getDescription());
+			if(FrSkyServer.D)  Log.i(TAG,"Precicion: "+c.getPrecision());
+			if(FrSkyServer.D)  Log.i(TAG,"Moving Average: "+c.getMovingAverage());
 			
 			LinearLayout llLine = new LinearLayout(getApplicationContext());
 			llLine.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -603,7 +597,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					//if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
-					if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels().get(v.getId()-1000).getDescription());
+					if(FrSkyServer.D)  Log.d(TAG,"Edit channel "+currentModel.getChannels().get(v.getId()-1000).getDescription());
 					// Launch editchannel with channel attached.. 
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
@@ -617,7 +611,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			llLine.addView(btnEdit);
 
 			// Value
-			if(DEBUG) Log.d(TAG,"Add TextView for Value: "+c.getValue(true));
+			if(FrSkyServer.D)  Log.d(TAG,"Add TextView for Value: "+c.getValue(true));
 			TextView tvValue = new TextView(getApplicationContext());
 			tvValue.setText(""+c.getValue());
 			tvValue.setGravity(Gravity.RIGHT);
@@ -630,7 +624,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			//llLine.addView(tvValue);
 			
 			// Unit
-			if(DEBUG) Log.d(TAG,"Add TextView for Unit: "+c.getShortUnit());
+			if(FrSkyServer.D)  Log.d(TAG,"Add TextView for Unit: "+c.getShortUnit());
 			TextView tvUnit = new TextView(getApplicationContext());
 			tvUnit.setText(""+c.getShortUnit());
 			tvUnit.setGravity(Gravity.LEFT);
@@ -664,11 +658,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					ImageView iv = (ImageView) v;
 					Channel c = currentModel.getChannels().get(v.getId()-ID_CHANNEL_BUTTON_SILENT);
 					//if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
-					if(DEBUG) Log.d(TAG,"Toggle silent on "+c.getDescription());
+					if(FrSkyServer.D)  Log.d(TAG,"Toggle silent on "+c.getDescription());
 					boolean s = !c.getSilent();
 					c.setSilent(s);
 					//c.saveToDatabase();
-					server.database.saveChannel(c);
+					FrSkyServer.database.saveChannel(c);
 					if(s)
 					{
 						iv.setImageResource(R.drawable.ic_lock_silent_mode);
@@ -733,21 +727,21 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 				break;
 		    
 	    	case R.id.dash_btnEditChannel0:
-	    		Log.i(TAG,"Edit channel 0");
+	    		if(FrSkyServer.D) Log.i(TAG,"Edit channel 0");
 	    		Intent i = new Intent(this, ActivityChannelConfig.class);
 	    		i.putExtra("channelId", 0);
 	    		//startActivity(i);
 	    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 	    		break;
 	    	case R.id.dash_btnEditChannel1:
-	    		Log.i(TAG,"Edit channel 1");
+	    		if(FrSkyServer.D) Log.i(TAG,"Edit channel 1");
 	    		Intent ii = new Intent(this, ActivityChannelConfig.class);
 	    		ii.putExtra("channelId", 1);
 	    		startActivityForResult(ii,CHANNEL_CONFIG_RETURN);
 	    		break;
 	    		
 	    	case R.id.dash_btnConfigCurrentModel:
-	    		if(DEBUG) Log.i(TAG,"Edit current model");
+	    		if(FrSkyServer.D)  Log.i(TAG,"Edit current model");
 	    		Intent iii = new Intent(this, ActivityModelConfig.class);
 	    		iii.putExtra("modelId", server.getCurrentModel().getId());
 	    		startActivityForResult(iii,MODEL_CONFIG_RETURN);
@@ -786,7 +780,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
             case REQUEST_ENABLE_BT:
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
-                    Log.d(TAG, "BT now enabled");
+                	if(FrSkyServer.D) Log.d(TAG, "BT now enabled");
                  }
                 else
                 {
@@ -797,17 +791,17 @@ public class ActivityDashboard extends Activity implements OnClickListener {
                 }
                 break;
             case MY_DATA_CHECK_CODE:
-	        	Log.i(TAG,"Check for TTS complete");
+            	if(FrSkyServer.D) Log.i(TAG,"Check for TTS complete");
 	            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) 
 	            {
-	            	Log.i(TAG,"speech capabilities ok");
+	            	if(FrSkyServer.D) Log.i(TAG,"speech capabilities ok");
 	            	if(server!=null)
 	            	{
 	            		server.createSpeaker();
 	            	}
 	            	else
 	            	{
-	            		Log.i(TAG,"Server not ready yet, postpone");
+	            		if(FrSkyServer.D) Log.i(TAG,"Server not ready yet, postpone");
 	            		createSpeakerLater= true;
 	            	}
 	            } 
@@ -824,10 +818,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        	switch(resultCode)
 	        	{
 	        		case RESULT_OK:
-	        			Log.i(TAG,"User saved new settings");
+	        			if(FrSkyServer.D) Log.i(TAG,"User saved new settings");
 	        			break;
 	        		case RESULT_CANCELED:
-	        			Log.i(TAG,"User cancelled with back");
+	        			if(FrSkyServer.D) Log.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
 	        	
@@ -837,10 +831,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        	switch(resultCode)
 	        	{
 	        		case RESULT_OK:
-	        			Log.i(TAG,"User saved new settings for current model");
+	        			if(FrSkyServer.D) Log.i(TAG,"User saved new settings for current model");
 	        			break;
 	        		case RESULT_CANCELED:
-	        			Log.i(TAG,"User cancelled with back");
+	        			if(FrSkyServer.D) Log.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
 	        	
@@ -850,10 +844,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	        	switch(resultCode)
 	        	{
 	        		case RESULT_OK:
-	        			Log.i(TAG,"User saved new alarms for the model");
+	        			if(FrSkyServer.D) Log.i(TAG,"User saved new alarms for the model");
 	        			break;
 	        		case RESULT_CANCELED:
-	        			Log.i(TAG,"User cancelled with back");
+	        			if(FrSkyServer.D) Log.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
 	        	
@@ -866,7 +860,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     @Override
     public void onBackPressed() {
-    	Log.i(TAG,"Back pressed");
+    	if(FrSkyServer.D) Log.i(TAG,"Back pressed");
     	
     	Intent intent = new Intent(this, FrSkyServer.class);
     	stopService(intent);
@@ -889,7 +883,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     @Override
     public void onDestroy(){
     	//mTts.stop();
-    	Log.i(TAG,"onDestroy");
+    	if(FrSkyServer.D) Log.i(TAG,"onDestroy");
     	super.onDestroy();
     	doUnbindService();
     	
@@ -901,7 +895,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     public void onStop(){
     	super.onStop();
     	//mTts.stop();
-    	Log.i(TAG,"onStop");
+    	if(FrSkyServer.D) Log.i(TAG,"onStop");
     }
     
     
@@ -909,7 +903,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-    	Log.i(TAG,"Create Menu");
+    	if(FrSkyServer.D) Log.i(TAG,"Create Menu");
     	super.onCreateOptionsMenu(menu);
     	MenuInflater inflater = getMenuInflater();
     	inflater.inflate(R.menu.menu, menu);
@@ -924,7 +918,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     	MenuItem tConItem = (MenuItem)  menu.findItem(R.id.connect_bluetooth);
     	MenuItem tDisConItem = (MenuItem)  menu.findItem(R.id.disconnect_bluetooth);
     	MenuItem tDebug = (MenuItem) menu.findItem(R.id.menu_debug);
-    	if(DEBUG) Log.d(TAG,"prepare options");
+    	if(FrSkyServer.D)  Log.d(TAG,"prepare options");
     	
     	//if(mBluetoothAdapter).
     	if (mBluetoothAdapter != null)
@@ -956,7 +950,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     		tDisConItem.setVisible(true);
     	}
 	
-    	if(_enableDebugActivity)
+    	if(FrSkyServer.D)
     	{
     		tDebug.setVisible(true);
     	}
@@ -972,40 +966,40 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-    	Log.i(TAG,"User has clicked something");
+    	if(FrSkyServer.D) Log.i(TAG,"User has clicked something");
     	switch(item.getItemId()) 
     	{
 	    	case R.id.menu_debug:
-				Log.d(TAG,"Open Debug Activity");
+	    		if(FrSkyServer.D) Log.d(TAG,"Open Debug Activity");
 				Intent mIntentDebug = new Intent(this,ActivityDebug.class);
     			startActivity(mIntentDebug);
 				break;
     		case R.id.menu_about_dialog:
-    			Log.d(TAG,"Open About dialog");
+    			if(FrSkyServer.D) Log.d(TAG,"Open About dialog");
     			showDialog(DIALOG_ABOUT_ID);
     			Log.d(TAG,"Dialog now showing");
     			break;
     		case R.id.settings:
-    			Log.i(TAG,"User clicked on Settings");
+    			if(FrSkyServer.D) Log.i(TAG,"User clicked on Settings");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			Intent intent = new Intent(this,ActivityApplicationSettings.class);
     			startActivity(intent);
     			break;
     		case R.id.module_settings:
-    			Log.i(TAG,"User clicked on Module Settings");
+    			if(FrSkyServer.D) Log.i(TAG,"User clicked on Module Settings");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			Intent mIntent = new Intent(this,ActivityModuleSettings.class);
     			mIntent.putExtra("modelId", (int) server.getCurrentModel().getId());	// Should edit current model
     			startActivityForResult(mIntent,MODULE_CONFIG_RETURN);
     			break;
     		case R.id.model_management:
-    			Log.i(TAG,"User clicked on Manage models");
+    			if(FrSkyServer.D) Log.i(TAG,"User clicked on Manage models");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			//Intent mIntent = new Intent(this,ActivityModuleSettings.class);
     			startActivityForResult(new Intent(this,ActivityModelManagement.class),MODEL_CONFIG_RETURN);
     			break;
     		case R.id.menu_choose_simulator:
-    			Log.i(TAG,"User clicked on Simulator");
+    			if(FrSkyServer.D) Log.i(TAG,"User clicked on Simulator");
     			//Toast.makeText(this, "User clicked on Settings", Toast.LENGTH_LONG).show();
     			Intent sIntent = new Intent(this,ActivitySimulator.class);
     			startActivity(sIntent);

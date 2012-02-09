@@ -150,6 +150,8 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		
 		int n = 0;
 		//while(n < c.getCount())
+		
+		int modelCount = FrSkyServer.database.getModels().size();
 		for(Model m : FrSkyServer.database.getModels())
 		{
 			if(FrSkyServer.D)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
@@ -173,13 +175,15 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			{
 				rdThisModel.setChecked(false);
 			}
+
+			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());			
 			
-			
+			// only allow deletion if there is more than one model
 			ImageButton btnDelete = new ImageButton(getApplicationContext());
 			//btnDelete.setText("Delete");
 			btnDelete.setImageResource(R.drawable.ic_menu_delete);
 			btnDelete.setScaleType(ImageView.ScaleType.CENTER_CROP);
-			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+
 			btnDelete.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 			btnDelete.setId(100+id); // ID for delete should be 100+channelId
 			//btnDelete.setOnClickListener(this);
@@ -189,6 +193,17 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 					showDeleteDialog(v.getId()-100);
 				}
 			});
+
+			if(modelCount>1) 
+			{
+				btnDelete.setEnabled(true);
+			}
+			else
+			{
+				btnDelete.setEnabled(false);
+			}
+			
+			
 			ImageButton btnEdit = new ImageButton(getApplicationContext());
 			//btnEdit.setText("...");
 			btnEdit.setImageResource(R.drawable.ic_menu_edit);

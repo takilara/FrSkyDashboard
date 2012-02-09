@@ -1368,10 +1368,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 					{
 						// store alarms for future use
 						Alarm aIn = new Alarm(f);
+						Log.w(TAG,"Adding alarm to the recording buffer, alarm id: "+aIn.getFrSkyFrameType());
 						_alarmMap.put(aIn.getFrSkyFrameType(), aIn);
 						if(_alarmMap.size()>=4)
 						{
-							if(D)Log.i(TAG,"recording completed");
+							if(D)Log.w(TAG,"recording completed");
 							_recordingAlarms = false;
 							//FIXME: send broadcast to allow GUI to update
 							Intent i = new Intent();

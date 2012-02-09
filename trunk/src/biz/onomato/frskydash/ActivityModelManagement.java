@@ -1,5 +1,7 @@
 package biz.onomato.frskydash;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -36,6 +38,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	private static final int MODEL_CONFIG_RETURN=0;
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
+	private ArrayList<RadioButton> rbList;
 	private RadioButton rbCurrentModel;
 	//private boolean DEBUG=true;
 	private int _deleteId=-1;
@@ -46,6 +49,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		setContentView(R.layout.activity_modelmanagement);
 
+		rbList = new ArrayList<RadioButton>();
 		// Setup components from screen
 		if(FrSkyServer.D) Log.i(TAG,"Setup widgets");
 		llModelsLayout = (LinearLayout) findViewById(R.id.llModelsLayout);
@@ -80,8 +84,16 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		int id = v.getId();
 		if(id>10000)		// Select current Model
 		{
+			//remove check from all the radio buttons
+			for(RadioButton rb : rbList)
+			{
+				rb.setChecked(false);
+			}
+			
+			rbList.clear();
+			
 			int ii = id -10000;
-			rbCurrentModel.setChecked(false);
+			//rbCurrentModel.setChecked(false);
 			rbCurrentModel = (RadioButton) findViewById(id);
 			rbCurrentModel.setChecked(true);
 			//Model m = new Model(getApplicationContext());
@@ -166,6 +178,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			
 			RadioButton rdThisModel = new RadioButton(getApplicationContext());
 			rdThisModel.setId(10000+id);
+			rbList.add(rdThisModel);
 			rdThisModel.setOnClickListener(this);
 			if(id==currentModelId)
 			{

@@ -111,7 +111,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			if(_modelId==-1)
 			{
 				if(FrSkyServer.D) Log.d(TAG,"Configure new Model object");
-				_model = new Model();
+				int len = FrSkyServer.database.getModels().size();
+				_model = new Model("Model "+(len+1));
 				// save, to get id
 				FrSkyServer.database.saveModel(_model);
 				

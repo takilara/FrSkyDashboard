@@ -164,62 +164,65 @@ public class FrSkyHub {
 			return;
 		}
 		// check data ID and update correct channel
-		// FIXME CHECK HOW TO PARSE DATA, NOT ALWAYS FRAME IDX 2 USED, UNITS,
 		// ...?
 		switch (frame[1]) {
 		case 0x01:
-			updateChannel(Channels.gps_altitude_before, frame[2]);
+			//FIXME seems like this should be an unsigned value, test again outside
+			updateChannel(Channels.gps_altitude_before, getSigned16BitValue(frame));
 			break;
 		case 0x01 + 8:
-			updateChannel(Channels.gps_altitude_after, frame[2]);
+			updateChannel(Channels.gps_altitude_after, getUnsigned16BitValue(frame));
 			break;
 		case 0x02:
-			updateChannel(Channels.temp1, frame[2]);
+			updateChannel(Channels.temp1, getSigned16BitValue(frame));
 			break;
 		case 0x03:
-			updateChannel(Channels.rpm, frame[2] * 60);
+			updateChannel(Channels.rpm, getUnsigned16BitValue(frame) * 60);
 			break;
 		case 0x04:
-			updateChannel(Channels.fuel, frame[2]);
+			updateChannel(Channels.fuel, getUnsigned16BitValue(frame));
 			break;
 		case 0x05:
-			updateChannel(Channels.temp2, frame[2]);
+			updateChannel(Channels.temp2, getSigned16BitValue(frame));
 		case 0x06:
 			// FIXME cell & voltage in this one value
-			updateChannel(Channels.volt, frame[2]);
+			updateChannel(Channels.volt, 0);
 			break;
 		case 0x10:
-			updateChannel(Channels.altitude, frame[2]);
+			updateChannel(Channels.altitude_before, getSigned16BitValue(frame));
+			break;
+		case 0x21:
+			updateChannel(Channels.altitude_after, getUnsigned16BitValue(frame));
 			break;
 		case 0x11:
-			updateChannel(Channels.gps_speed_before, frame[2]);
+			updateChannel(Channels.gps_speed_before, getUnsigned16BitValue(frame));
 			break;
 		case 0x11 + 8:
-			updateChannel(Channels.gps_speed_after, frame[2]);
+			updateChannel(Channels.gps_speed_after, getUnsigned16BitValue(frame));
 			break;
 		case 0x12:
-			updateChannel(Channels.longitude_before, frame[2]);
+			updateChannel(Channels.longitude_before, getUnsigned16BitValue(frame));
 			break;
 		case 0x12 + 8:
-			updateChannel(Channels.longitude_after, frame[2]);
+			updateChannel(Channels.longitude_after, getUnsigned16BitValue(frame));
 			break;
 		case 0x1A + 8:
 			updateChannel(Channels.ew, frame[2]);
 			break;
 		case 0x13:
-			updateChannel(Channels.latitude_before, frame[2]);
+			updateChannel(Channels.latitude_before, getUnsigned16BitValue(frame));
 			break;
 		case 0x13 + 8:
-			updateChannel(Channels.latitude_after, frame[2]);
+			updateChannel(Channels.latitude_after, getUnsigned16BitValue(frame));
 			break;
 		case 0x1B + 8:
 			updateChannel(Channels.ns, frame[2]);
 			break;
 		case 0x14:
-			updateChannel(Channels.course_before, frame[2]);
+			updateChannel(Channels.course_before, getUnsigned16BitValue(frame));
 			break;
 		case 0x14 + 8:
-			updateChannel(Channels.course_after, frame[2]);
+			updateChannel(Channels.course_after, getUnsigned16BitValue(frame));
 			break;
 		case 0x15:
 			updateChannel(Channels.day, frame[2]);
@@ -236,19 +239,39 @@ public class FrSkyHub {
 			updateChannel(Channels.second, frame[2]);
 			break;
 		case 0x24:
-			updateChannel(Channels.acc_x, frame[2] / 1000);
+			updateChannel(Channels.acc_x, getSigned16BitValue(frame) / 1000);
 			break;
 		case 0x25:
-			updateChannel(Channels.acc_y, frame[2] / 1000);
+			updateChannel(Channels.acc_y, getSigned16BitValue(frame) / 1000);
 			break;
 		case 0x26:
-			updateChannel(Channels.acc_z, frame[2] / 1000);
+			updateChannel(Channels.acc_z, getSigned16BitValue(frame) / 1000);
 			break;
 		default:
 			Log.d(FrSkyServer.TAG,
 					"Unknown sensor type for frame: " + Arrays.toString(frame));
 		}
 	}
+	
+	private int getSigned16BitValue(int[] frame){
+//		ByteBuffer bb = ByteBuffer.allocate(2);
+//		bb.order(ByteOrder.LITTLE_ENDIAN);
+//		bb.put((byte)frame[3]);
+//		bb.put((byte)frame[2]);
+//		short shortVal = bb.getShort(0);
+//		return shortVal;
+		//return 0xFFFF - ( (frame[2] & 0xFF) + ( (frame[3] & 0xFF) * 0x100) );
+		return 0xFFFF - getUnsigned16BitValue(frame);
+	}
+	
+	private int getUnsigned16BitValue(int[] frame){
+		//return getSigned16BitValue(frame) & 0xffff;
+		return ( (frame[2] & 0xFF) + ( (frame[3] & 0xFF) * 0x100) );
+	}
+	
+//	private int getBCDValue(int[] frame){
+//		return 0;
+//	}
 
 	/**
 	 * update a single channel with a single value
@@ -256,7 +279,7 @@ public class FrSkyHub {
 	 * @param channel
 	 * @param value
 	 */
-	private void updateChannel(Channels channel, int value) {
+	private void updateChannel(Channels channel, double value) {
 		// TODO create a channel here for the correct type of information and
 		// broadcast channel so GUI can update this value
 		Log.d(FrSkyServer.TAG, "Data received for channel: " + channel
@@ -268,7 +291,7 @@ public class FrSkyHub {
 	 * 
 	 */
 	public enum Channels {
-		undefined, gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude, gps_speed_before, gps_speed_after, longitude_before, longitude_after, ew, latitude_before, latitude_after, ns, course_before, course_after, day, month, year, hour, minute, second, acc_x, acc_y, acc_z
+		undefined, gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude_before, altitude_after, gps_speed_before, gps_speed_after, longitude_before, longitude_after, ew, latitude_before, latitude_after, ns, course_before, course_after, day, month, year, hour, minute, second, acc_x, acc_y, acc_z
 	}
 
 }

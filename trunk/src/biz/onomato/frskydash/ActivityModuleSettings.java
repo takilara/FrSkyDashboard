@@ -241,6 +241,24 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		}
 	}
 	
+	public void updateAlarmVisualization(Alarm a)
+	{
+		// find the level spinner
+		Spinner splvl = (Spinner) findViewById(ID_ALARM_SPINNER_LEVEL+a.getFrSkyFrameType());
+		// update it
+		splvl.setSelection(a.getAlarmLevel());
+		
+		// find the relative spinner
+		Spinner sprel = (Spinner) findViewById(ID_ALARM_SPINNER_RELATIVE+a.getFrSkyFrameType());
+		// update it
+		sprel.setSelection(a.getGreaterThan());
+		
+		// find the threshold seekbar
+		SeekBar sbThreshold = (SeekBar) findViewById(ID_ALARM_SEEKBAR_THRESHOLD+a.getFrSkyFrameType());
+		// update it
+		sbThreshold.setMax(a.getMaxThreshold()-a.getMinThreshold()+1);
+		sbThreshold.setProgress(a.getThreshold()-a.getMinThreshold());
+	}
 	public void updateAlarmDescription(int alarmId)
 	{
 		// Get the correct TextView
@@ -277,7 +295,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     			break;
     		case R.id.FrSkySettings_btnGetFromModule:
     			if(FrSkyServer.D)Log.d(TAG,"Try to fetch alarms from the module");
-    			
+    			btnGetAlarmsFromModule.setEnabled(false);
     			server.recordAlarmsFromModule();
     			// register a listener for a full update
     			break;
@@ -537,23 +555,29 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
         		{
         			if(server!=null)
         			{
-        				try
+        				if((a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM1_RSSI) && (a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM2_RSSI))
         				{
-	        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
-	        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
-	        				a.setGreaterThan(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getGreaterThan());
-	        				updateAlarmDescription(a.getFrSkyFrameType());
-        				}
-        				catch(Exception e)
-        				{
-        					if(FrSkyServer.D)Log.e(TAG,"Failed to get alarms from the server..");
-        					if(FrSkyServer.D)Log.e(TAG,e.getMessage());
+	        				try
+	        				{
+	        					Log.w(TAG,"Got recorded alarm: "+server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
+		        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
+		        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
+		        				a.setGreaterThan(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getGreaterThan());
+		        				updateAlarmVisualization(a);
+		        				updateAlarmDescription(a.getFrSkyFrameType());
+	        				}
+	        				catch(Exception e)
+	        				{
+	        					if(FrSkyServer.D)Log.e(TAG,"Failed to get alarms from the server..");
+	        					//if(FrSkyServer.D)Log.e(TAG,e.getMessage());
+	        				}
         				}
         			}
         		}
         		//registerReceiver(mIntentReceiver, mIntentFilter);
         		//unregisterReceiver(mIntentReceiver);
-        		unregisterReceiver(this);
+        		//unregisterReceiver(this);
+        		btnGetAlarmsFromModule.setEnabled(true);
         	}
         	else if(msg.equals(FrSkyServer.MESSAGE_BLUETOOTH_STATE_CHANGED))
         	{

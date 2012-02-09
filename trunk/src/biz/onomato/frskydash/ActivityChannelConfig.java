@@ -15,6 +15,8 @@ import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.util.Log;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -39,7 +41,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private CheckBox chkSpeechEnabled;
 	private Spinner spSourceChannel;
 	private Button btnSave;
-	
+	private boolean first=true;
 	
 	//chConf_edVoice
     
@@ -173,6 +175,43 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 						break;
 					}
 				}
+				
+				spSourceChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
+				    @Override
+				    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+				        // your code here
+				    	if(first)
+				    	{
+				    		first = false;
+				    	}
+				    	else
+				    	{
+					    	if(parentView.getSelectedItem()instanceof Channel)
+					    	{
+					    		Channel channel = (Channel) parentView.getSelectedItem();
+					    		Log.e(TAG,"User selecte channel "+channel+" the units are: "+channel.getLongUnit());
+					    		String longUnit = channel.getLongUnit();
+					    		String shortUnit = channel.getShortUnit();
+					    		
+					    		if(longUnit.length()>0)
+					    		{
+					    			edUnit.setText(longUnit);
+					    		}
+					    		
+					    		if(shortUnit.length()>0)
+					    		{
+					    			edShortUnit.setText(shortUnit);
+					    		}
+					    	}
+				    	}
+				    }
+
+				    @Override
+				    public void onNothingSelected(AdapterView<?> parentView) {
+				        // your code here
+				    }
+
+				});
 				
 				edDesc.setText(channel.getDescription());
 				edUnit.setText(channel.getLongUnit());

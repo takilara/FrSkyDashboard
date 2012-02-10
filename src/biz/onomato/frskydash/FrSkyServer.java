@@ -99,6 +99,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     private Model _currentModel;
     
     private boolean _watchdogEnabled = true;
+    private static boolean _outGoingWatchdogFlag = false;
+    private static long _lastOutGoingWatchdogTime;
 	
 	private TextToSpeech mTts;
 	private int _speakDelay;
@@ -456,12 +458,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			//@Override
 			public void run()
 			{
-				// Send get all alarms frame to force frames from Tx
-				// only do this if not receiving anything from Rx side
-				if(_watchdogEnabled)
-				{
-					if((statusRx==false) && (statusBt==true))	send(Frame.InputRequestAll().toInts());
-				}
+				sendWatchdog();
 				
 				watchdogHandler.removeCallbacks(runnableWatchdog);
 				watchdogHandler.postDelayed(this,500);
@@ -471,6 +468,35 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 		
+	}
+
+	public void sendWatchdog()
+	{
+		// Send get all alarms frame to force frames from Tx
+	
+		if(_watchdogEnabled)
+		{
+			// check if we already sent one
+			if(_outGoingWatchdogFlag)
+			{
+				// How long ago?
+				if((System.currentTimeMillis()-_lastOutGoingWatchdogTime)>5000)
+				{
+					// More than 5 seconds ago, reset outgoing flag
+					_outGoingWatchdogFlag = false;
+				}
+			}
+			else // no outgoing watchdog
+			{
+				// only do this if not receiving anything from Rx side
+				if((statusRx==false) && (statusBt==true))
+				{
+					send(Frame.InputRequestAll().toInts());
+					_outGoingWatchdogFlag = true;
+					_lastOutGoingWatchdogTime = System.currentTimeMillis();
+				}
+			}
+		}
 	}
 	
 	
@@ -886,7 +912,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// empty the map, allowing others to monitor it for becoming full again
 		_recordingAlarms = true;
 		_alarmMap.clear();
-		send(Frame.InputRequestAll());
+		
+		// Only send request if Rx communication is up since we do automatic requests for alarms otherwise
+		if((statusRx==true) && (statusBt==true))
+		{
+			send(Frame.InputRequestAll());
+		}
 	}
 	
 	public TreeMap<Integer,Alarm> getRecordedAlarmMap()
@@ -1363,6 +1394,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				if(inBound)	
 				{
 					_framecountTx++;
+					_outGoingWatchdogFlag=false;
 					
 					if(_recordingAlarms)
 					{

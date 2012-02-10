@@ -1410,6 +1410,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 							Intent i = new Intent();
 							i.setAction(MESSAGE_ALARM_RECORDING_COMPLETE);
 							sendBroadcast(i);
+							
+							compareAlarms();
 						}
 					}
 				}
@@ -1431,6 +1433,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 	}
 	
+	
+	
 	/**
 	 * wrapper to parse frames that are inbound so they get logged
 	 * 
@@ -1440,6 +1444,63 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public boolean parseFrame(Frame f)
 	{
 		return parseFrame(f,true);
+	}
+	
+	public void compareAlarms()
+	{
+		boolean equal = true;
+		if(_currentModel!=null)
+		{
+			for(Alarm a: _alarmMap.values())
+			{
+				Log.w(TAG,"Checking "+a.getFrSkyFrameType());
+				if(!_currentModel.getFrSkyAlarms().containsValue(a))
+				{
+					Log.w(TAG," Not equal!");
+					equal = false;
+					break;
+				}
+				Log.w(TAG," equal");
+				// compare a to _currentModel.alarms.get(a.getFrameType)
+			}
+			
+			if(equal)
+			{
+				Log.e(TAG,"Alarm sets are equal");
+			}
+			else
+			{
+				Log.e(TAG,"Alarm sets are not equal");
+				// Take 1:
+				// Popup with:
+				// - Get new alarms
+				// - Modify Frsky alarms
+				// - Ignore
+				
+				// Take 2:
+				// Compare to other models
+				// If other model found
+				//    Popup Change Model to <newmodel>?
+				//    Yes - No
+				//    If No: Popup, update alarms:
+				//           On device
+				//           On radio
+				//           Ignore
+				
+				// Take 3:
+				// Depending on settings
+				
+				// 1. send currentmodels alarms
+				
+				// 2. Launch popup, Alarms not equal
+				// 2.1. Load alarm from FrSky
+				// 2.2. Send model alarms to FrSky
+				// 2.3. Ignore
+				// 2.4. ....
+				
+			}
+		}
+		
 	}
 	
 	public String getFps()

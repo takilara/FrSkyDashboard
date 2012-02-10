@@ -1,7 +1,9 @@
 package biz.onomato.frskydash;
 
+
+
 import android.util.Log;
-import android.widget.ArrayAdapter;
+
 
 public class Alarm {
 
@@ -330,7 +332,35 @@ public class Alarm {
 			return out;
 		}
 	}
+
 	
 	
+	@Override 
+	public boolean equals(Object o) {
+		if (this == o) {
+			   return true;
+			}
+
+		    // Return false if the other object has the wrong type.
+		    // This type may be an interface depending on the interface's specification.
+		    if (!(o instanceof Alarm)) {
+		       return false;
+		    }
+			Alarm alarm = (Alarm) o;
+			if(
+					(this._frSkyFrameType==alarm.getFrSkyFrameType()) &&
+					(this._greaterthan==alarm.getGreaterThan()) &&
+					(this._level==alarm.getAlarmLevel()) &&
+					(this._threshold==alarm.getThreshold())
+					)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+	}
 
 }

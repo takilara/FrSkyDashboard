@@ -1444,7 +1444,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public String getFps()
 	{
-		return Integer.toString(fpsRx);
+		if(statusRx)
+		{
+			return Integer.toString(fpsRx);
+		}
+		else
+		{
+			return Integer.toString(fpsTx);
+		}
 	}
 
 	public void deleteAllLogFiles()

@@ -117,7 +117,6 @@ public class FrSkyServer extends Service implements OnInitListener {
     public static final int CHANNEL_ID_RSSITX = -103;
     
     
-//eso: refactor to ChannelMap    
     private static TreeMap<Integer,Channel> _sourceChannelMap;
     
     public static FrSkyDatabase database;
@@ -152,24 +151,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private TreeMap<Integer,Alarm> _alarmMap;
 	private boolean _recordingAlarms = false;
-
-//	private int[] hRaw;
-//	private double[] hVal;
-//	private String[] hName;
-//	private String[] hDescription;
-//	private double[] hOffset;
-//	private double[] hFactor;
-//	private String[] hUnit;
-//	private String[] hLongUnit;
-	//private int channels=0;
-	
-//	private Channel[] objs; //TODO: Deprecate
-	
-	//private HashMap<String, String> _myAudibleStreamMap;
-	
-	//public Channel AD1,AD2,RSSIrx,RSSItx;
-	
-	//public Model currentModel;
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
@@ -214,16 +195,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_audiomanager = 
         	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		
-//		_myAudibleStreamMap = new HashMap();
-//		_myAudibleStreamMap.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
-//		        String.valueOf(AudioManager.STREAM_VOICE_CALL));
-//		
-//		if(_audiomanager.isBluetoothScoAvailableOffCall())
-//		{
-//			_audiomanager.startBluetoothSco();
-//		}
-		
-		
+	
 		
 		NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
@@ -236,8 +208,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		setupChannels();
 
-		//AD1.loadFromConfig(_settings);
-		//AD2.loadFromConfig(_settings);
 
 		
 		//String _prevModel = "FunCub 1";
@@ -284,18 +254,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		
 		
-//		if(!_currentModel.loadFromDatabase(_prevModelId))
-//		{
-//			Log.w(TAG,"The previous model does not exist");
-//			Log.w(TAG,"Try to get the first model");
-//			if(!_currentModel.getFirstModel())
-//			{
-//				// no models exist, 
-//				// Set defaults
-//				_currentModel.saveToDatabase();
-//				// and save it
-//			}
-//		}
 		_prevModelId = _currentModel.getId();
 		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
@@ -303,19 +261,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		if(D)Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
-//		ArrayList<Channel> tChannels = database.getChannelsForModel(_currentModel);
-//		for(Channel c : tChannels)
-//		{
-//			Log.e(TAG,"\t"+c.getDescription());
-//		}
-		
-		
-		
-		//initializeAlarms();
-		
-		// Save this model incase it was new...
-		
-		
+	
 
 		logger = new Logger(getApplicationContext(),_currentModel,true,true,true);
 		//logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
@@ -351,22 +297,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 _speakDelay = 30000;
 		
 		 
-		 
-        speakHandler = new Handler();
-		runnableSpeaker = new Runnable() {
+		
+		 // Cyclic job to "speak out" the channel values
+		 speakHandler = new Handler();
+		 runnableSpeaker = new Runnable() {
 			//@Override
 			public void run()
 			{
-			
-				AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-				//Log.d(TAG,"SCO stuff");
-				//Log.d(TAG,"isBluetoothScoOn:"+am.isBluetoothScoOn());
-				
-//				Log.d(TAG,"isBluetoothScoAvailableOffCall:"+am.isBluetoothScoAvailableOffCall());  // <-- CAUSES CRASH
-				//Log.d(TAG,"getMode:"+am.getMode());
-				//Log.d(TAG,"isSpeakerphoneOn:"+am.isSpeakerphoneOn());
-				
-				
 				if(D)Log.i(TAG,"Cyclic Speak stuff");
 				if(statusRx)
 				{
@@ -374,24 +311,22 @@ public class FrSkyServer extends Service implements OnInitListener {
 					{
 						if(!c.getSilent()) mTts.speak(c.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					}
-//					for(int n=0;n<MAX_CHANNELS;n++)
-//					{
-//						if(!getChannelById(n).getSilent()) mTts.speak(getChannelById(n).toVoiceString(), TextToSpeech.QUEUE_ADD, null);
-//					}
 				}
 				
 				speakHandler.removeCallbacks(runnableSpeaker);
 		    	speakHandler.postDelayed(this, _speakDelay);
-			}
-		};
+		 	}
+		 };
 		
+
+		 // Cyclic handler to calculate FPS, and set the various connection statuses
+		 
+		 fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		 fpsRxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		 fpsTxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
 		
-		fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-		fpsRxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-		fpsTxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-		
-		fpsHandler = new Handler();
-		runnableFps = new Runnable () {
+		 fpsHandler = new Handler();
+		 runnableFps = new Runnable () {
 			//@Override
 			public void run()
 			{
@@ -401,9 +336,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 				fpsRxStack.push(_framecountRx);
 				fpsTxStack.push(_framecountTx);
 				
-				//fps = _framecount;
-				//fpsRx = _framecountRx;
-				//fpsTx = _framecountTx;
 				
 				fps = (int) Math.floor(fpsStack.average());
 				fpsRx = (int) Math.floor(fpsRxStack.average());
@@ -450,9 +382,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 				fpsHandler.postDelayed(this,1000);
 			}
 		};
+		// Start the FPS counters
 		fpsHandler.postDelayed(runnableFps,1000);
 		
 		
+		// Cyclic job to send watchdog to the Tx module
 		watchdogHandler = new Handler();
 		runnableWatchdog = new Runnable () {
 			//@Override
@@ -469,7 +403,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		
 	}
-
+	
+	
+	/**
+	 * eso: Send a "Request all alarms" command to the FrSky radio module. 
+	 * The returns from this command can be used to calculate FPS and connection status 
+	 */
 	public void sendWatchdog()
 	{
 		// Send get all alarms frame to force frames from Tx
@@ -502,38 +441,76 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
 		if(D)Log.i(TAG,"Something tries to bind to me");
 		return mBinder;
 		//return null;
 	}
 	
-
+	
+	
+	// **************************************************************************************************************
+	//                                   GETTERS AND SETTERS
+	// **************************************************************************************************************
+	
+	
+	/**
+	 * 
+	 * @param state Determines if the cyclic watchdogs should be sent or not
+	 */
 	public void setWatchdogEnabled(boolean state)
 	{
 		_watchdogEnabled = state;
 	}
+	
+	/**
+	 * 
+	 * @return if the cyclic watchdog is enabled or not 
+	 */
 	public boolean getWatchdogEnabled()
 	{
 		return _watchdogEnabled;
 	}
 	
+	/**
+	 * 
+	 * @return a ServerChannel corresponding to the given id
+	 */
 	public static Channel getSourceChannel(int id)
 	{
 		return _sourceChannelMap.get(id);
 	}
 	
+	/**
+	 * 
+	 * @return all the ServerChannels in a TreeMap (key is the id of the Channel) 
+	 */
 	public static TreeMap<Integer,Channel> getSourceChannels()
 	{
 		return _sourceChannelMap;
 	}
+	
+	/**
+	 * 
+	 * @return the application context 
+	 */
 	public static Context getContext()
 	{
 		//Log.e(TAG,"Someone asked me for context!");
 		return context;
 	}
 	
-	
+	/**
+	 * Used to create initial alarms for a model.<br>
+	 * This consists of the following alarms:<br>
+	 * <ul>
+	 * <li>AD1 Alarm 1 and 2
+	 * <li>AD2 Alarm 1 and 2
+	 * <li>RSSI Alarm 1 and 2 <i>(Note, RSSI alarms are undocumented)</i>
+	 * </ul>
+	 * 
+	 * FIXME: Get the proper default values<br>
+	 * FIXME: consider if this should be moved to Model
+	 */
 	public TreeMap<Integer,Alarm> initializeFrSkyAlarms()
 	{
 		TreeMap<Integer,Alarm> aMap = new TreeMap<Integer,Alarm>();
@@ -546,9 +523,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_RSSIRX));
 		a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
-		
-		
-		
 		
 		alarmFrame = Frame.AlarmFrame(
 				Frame.FRAMETYPE_ALARM2_RSSI, 
@@ -603,40 +577,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return aMap;
 	}
 	
-    private void showNotification() {
-    	 CharSequence text = "FrSkyServer Started";
-    	 Notification notification = new Notification(R.drawable.ic_status, text, System.currentTimeMillis());
-    	 //notification.defaults |= Notification.FLAG_ONGOING_EVENT;
-    	 //notification.flags = Notification.DEFAULT_LIGHTS;
-    	 notification.ledOffMS = 500;
-    	 notification.ledOnMS = 500;
-    	 notification.ledARGB = 0xff00ff00;
-
-    	 notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-    	 notification.flags |= Notification.FLAG_ONGOING_EVENT;
-    	 notification.flags |= Notification.FLAG_NO_CLEAR;
-
-    	 
-    	 //notification.flags |= Notification.FLAG_FOREGROUND_SERVICE; 
-    	 
-    	 // The following intent makes sure that the application is "resumed" properly
-    	 //Intent notificationIntent = new Intent(this,Frskydash.class);
-    	 Intent notificationIntent = new Intent(this,ActivityDashboard.class);
-    	 notificationIntent.setAction(Intent.ACTION_MAIN);
-         notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-    	 
-    	 // http://developer.android.com/guide/topics/ui/notifiers/notifications.html
-    	 PendingIntent contentIntent = PendingIntent.getActivity(this, 0,notificationIntent, 0);
-    	notification.setLatestEventInfo(this, "FrSkyDash",text, contentIntent);
-    	startForeground(NOTIFICATION_ID,notification);
-    }
-	
-	
 	
 	/**
-	 * Set time between reads
-	 * @param interval seconds between reads
+	 * Set time between voice output.
+	 * 
+	 * @param interval time in seconds between reads
 	 */
 	public void setCyclicSpeechInterval(int interval)
 	{
@@ -653,27 +598,17 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
 		}
 	}
+
+	/**
+	 * 
+	 * @return The time in seconds between voice output
+	 */
 	public int getCyclicSpeechInterval()
 	{
 		return _settings.getInt("cyclicSpeakerInterval", 30);
 	}
 	
-	public void send(byte[] out) {
-    	mSerialService.write( out );
-    }
-	public void send(int[] out) {
-    	mSerialService.write( out );
-    }
-	public void send(Frame f) {
-		send(f.toInts());
-	}
 	
-	public void reConnect()
-	{
-		//if(getConnectionState()==BluetoothSerialService.)
-		mSerialService.connect(_device);
-	}
-
 	public void setConnecting(boolean connecting)
 	{
 		_connecting = connecting;
@@ -683,54 +618,92 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return _connecting;
 	}
 	
-	public void connect(BluetoothDevice device)
+	public TreeMap<Integer,Alarm> getRecordedAlarmMap()
 	{
-		setConnecting(true);
-		
-		logger.stop();
-		_device = device;
-		mSerialService.connect(device);
+		return _alarmMap;
 	}
 	
-	 public void connect()	// connect to previous device
-	 {
-    	if(mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
-        {
-	       	if(getBtLastConnectedToAddress()!="")
-	       	{
-	       		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(getBtLastConnectedToAddress());
-	            connect(device);
-	       	}
-	    }
+	// Related to startup default for cyclic speaker
+	public boolean getCyclicSpeechEnabledAtStartup()
+	{
+		return _settings.getBoolean("cyclicSpeakerEnabledAtStartup", false);
+	}
+	
+	public void setCyclicSpeechEnabledAtStartup(boolean state)
+	{
+		if(D)Log.i(TAG,"Setting Cyclic speech to: "+state);
+		_editor.putBoolean("cyclicSpeakerEnabledAtStartup", state);
+		_editor.commit();
+		//_cyclicSpeechEnabled = state;
+	}
+	
+	
+	// Current state of cyclic speaker
+	public boolean getCyclicSpeechEnabled()
+	{
+		return _cyclicSpeechEnabled;
+	}
+	public void setCyclicSpeechEnabled(boolean cyclicSpeakerEnabled)
+	{
+		_cyclicSpeechEnabled = cyclicSpeakerEnabled;
+		if(cyclicSpeakerEnabled) 
+		{
+			startCyclicSpeaker();
+		}
+		else
+		{
+			stopCyclicSpeaker();
+		}
+	}
+	
+	public String getFps()
+	{
+		if(statusRx)
+		{
+			return Integer.toString(fpsRx);
+		}
+		else
+		{
+			return Integer.toString(fpsTx);
+		}
+	}
+	
+	
+	
+	// **************************************************************************************************************
+	//                                   APPLICATION STUFF
+	// **************************************************************************************************************
+	
+	
+	
+	
+	/**
+	 * Used to show a notification icon in the notification field. 
+	 * Necessary since we want the application to be able to run even if the user goes back to the home screen.
+	 */
+    private void showNotification() {
+    	CharSequence text = "FrSkyServer Started";
+    	Notification notification = new Notification(R.drawable.ic_status, text, System.currentTimeMillis());
+
+    	notification.ledOffMS = 500;
+    	notification.ledOnMS = 500;
+    	notification.ledARGB = 0xff00ff00;
+
+    	notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+    	notification.flags |= Notification.FLAG_ONGOING_EVENT;
+    	notification.flags |= Notification.FLAG_NO_CLEAR;
+
+    	Intent notificationIntent = new Intent(this,ActivityDashboard.class);
+    	notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        
+    	PendingIntent contentIntent = PendingIntent.getActivity(this, 0,notificationIntent, 0);
+    	notification.setLatestEventInfo(this, "FrSkyDash",text, contentIntent);
+    	startForeground(NOTIFICATION_ID,notification);
     }
-	    
 	
-	public void disconnect()
-	{
-		_manualBtDisconnect = true;
-		mSerialService.stop();
-	}
-	
-	public void reconnectBt()
-	{
-		mSerialService.stop();
-		mSerialService.start();
-	}
-	
-	public int getConnectionState() {
-		return mSerialService.getState();
-	}
-	
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId)
-	{
-		if(D)Log.i(TAG,"Receieved startCommand or intent ");
-		handleIntent(intent);
-		return START_STICKY;
-	}
-	
-	
-	public void getWakeLock()
+    
+    public void getWakeLock()
 	{
 		if(!wl.isHeld())
 		{
@@ -789,9 +762,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_dying=true;
 		
 		if(D)Log.i(TAG,"onDestroy");
-		
-//		AudioManager audioManager = 
-//        	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		
 		_audiomanager.stopBluetoothSco();
 		
@@ -876,6 +846,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 	}
 	
+	
+	/**
+	 * FIXME: Document this
+	 */
 	public void onInit(int status) {
 		if(D)Log.i(TAG,"TTS initialized");
     	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
@@ -905,25 +879,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     		if(D)Log.e(TAG, "Could not initialize TextToSpeech.");
     	}
     }
-	
-	
-	public void recordAlarmsFromModule()
-	{
-		// empty the map, allowing others to monitor it for becoming full again
-		_recordingAlarms = true;
-		_alarmMap.clear();
-		
-		// Only send request if Rx communication is up since we do automatic requests for alarms otherwise
-		if((statusRx==true) && (statusBt==true))
-		{
-			send(Frame.InputRequestAll());
-		}
-	}
-	
-	public TreeMap<Integer,Alarm> getRecordedAlarmMap()
-	{
-		return _alarmMap;
-	}
+    
 	
 	private void setupChannels()
 	{
@@ -966,11 +922,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssitx.setShortUnit("dBm");
 		rssitx.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_RSSITX, rssitx);
-		
-		
-		
-		
-		
 	}
 	
 	private void resetChannels()
@@ -981,6 +932,110 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		
 	}
+    
+	// **************************************************************************************************************
+	//                                   BLUETOOTH STUFF
+	// **************************************************************************************************************
+    
+	public void reConnect()
+	{
+		//if(getConnectionState()==BluetoothSerialService.)
+		mSerialService.connect(_device);
+	}
+
+	
+	
+	public void connect(BluetoothDevice device)
+	{
+		setConnecting(true);
+		
+		logger.stop();
+		_device = device;
+		mSerialService.connect(device);
+	}
+	
+	 public void connect()	// connect to previous device
+	 {
+    	if(mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
+        {
+	       	if(getBtLastConnectedToAddress()!="")
+	       	{
+	       		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(getBtLastConnectedToAddress());
+	            connect(device);
+	       	}
+	    }
+    }
+	    
+	
+	public void disconnect()
+	{
+		_manualBtDisconnect = true;
+		mSerialService.stop();
+	}
+	
+	public void reconnectBt()
+	{
+		mSerialService.stop();
+		mSerialService.start();
+	}
+	
+	public int getConnectionState() {
+		return mSerialService.getState();
+	}
+    
+	// **************************************************************************************************************
+	//                                   COMMUNICATION
+	// **************************************************************************************************************
+	    
+	/**
+	 * Transmit bytes to the Bluetoot serial receiver
+	 * 
+	 * @param out Array of the bytes to send
+	 */
+	public void send(byte[] out) {
+    	mSerialService.write( out );
+    }
+	public void send(int[] out) {
+    	mSerialService.write( out );
+    }
+	public void send(Frame f) {
+		send(f.toInts());
+	}
+	
+	
+	
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId)
+	{
+		if(D)Log.i(TAG,"Receieved startCommand or intent ");
+		handleIntent(intent);
+		return START_STICKY;
+	}
+	
+	
+	
+	
+	/**
+	 * Used to start recording alarms from the FrSky Module,
+	 * To use the alarms, listen to the MESSAGE_ALARM_RECORDING_COMPLETE broadcast, then
+	 * use <b>getRecordedAlarmMap()</b> to retrieve them. 	
+	 */
+	public void recordAlarmsFromModule()
+	{
+		// empty the map, allowing others to monitor it for becoming full again
+		_recordingAlarms = true;
+		_alarmMap.clear();
+		
+		// Only send request if Rx communication is up since we do automatic requests for alarms otherwise
+		if((statusRx==true) && (statusBt==true))
+		{
+			send(Frame.InputRequestAll());
+		}
+	}
+	
+	
+	
+
 	
 	
 	// *************************************************
@@ -1091,28 +1146,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 //	                int[] i = new int[msg.arg1];
             		//int[] i = (int[])msg.obj;
             		handleByteBuffer(readBuf);
-//	                
-//	                for(int n=0;n<msg.arg1;n++)
-//	                {
-//	                	//Log.d(TAG,n+": "+readBuf[n]);
-//	                	if(readBuf[n]<0)
-//	                	{
-//	                		i[n]=readBuf[n]+256;
-//	                	}
-//	                	else
-//	                	{
-//	                		i[n]=readBuf[n];
-//	                	}
-//	                }
-//	                
-//	                // NEEDS to be changed!!!
-//	                if(i.length<20)
-//	                {
-	                	//Frame f = new Frame(i);
-	                	//Log.i(TAG,f.toHuman());
-	                	//parseFrame(f);
-//	                }
-	            	//Log.d(TAG,readBuf.toString()+":"+msg.arg1);
             	}
                 break;
                 
@@ -1132,6 +1165,13 @@ public class FrSkyServer extends Service implements OnInitListener {
         }
     };
   
+    
+	// **************************************************************************************************************
+	//                                   BYTE STREAM ANALYSIS
+	// **************************************************************************************************************
+    
+    
+    
     /**
      * for simulation and testing only
      * 
@@ -1221,9 +1261,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
     }
 	
+	
+	// **************************************************************************************************************
+	//                                   FRAME HANDLING
+	// **************************************************************************************************************
+	
 	/**
 	 * Handle a single parsed frame. This frame is expected to be exactly 11 bytes long and in proper format.
 	 * @param list
+	 * 
+	 * NOTE: eso: we could add Frame(List<Integer>) ctor
 	 */
 //	public void handleFrame(int[] frame){
 	public void handleFrame(List<Integer> list){
@@ -1239,108 +1286,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Frame f = new Frame(ints);
 		// TODO adapt for encoding and accepting all lengths
     	parseFrame(f);
-	}
-	
-	public TextToSpeech createSpeaker()
-	{
-		if(D)Log.i(TAG,"Create Speaker");
-		mTts = new TextToSpeech(this, this);
-		return mTts;
-	}
-	
-	public void saySomething(String myText)
-	{
-		
-		
-		if(D)Log.i(TAG,"Speak something");
-		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
-		//mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, myAudibleStreamMap);
-	}
-	
-	public void startCyclicSpeaker()
-	{
-		// Stop it before starting it
-		if(D)Log.i(TAG,"Start Cyclic Speaker");
-		speakHandler.removeCallbacks(runnableSpeaker);
-		speakHandler.post(runnableSpeaker);
-		_cyclicSpeechEnabled = true;
-		
-		Intent i = new Intent();
-		i.setAction(MESSAGE_SPEAKERCHANGE);
-		sendBroadcast(i);
-	}
-	public void stopCyclicSpeaker()
-	{
-		if(D)Log.i(TAG,"Stop Cyclic Speaker");
-		try
-		{
-			speakHandler.removeCallbacks(runnableSpeaker);
-			mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
-		}
-		catch (Exception e) {}
-		_cyclicSpeechEnabled = false;
-		Intent i = new Intent();
-		i.setAction(MESSAGE_SPEAKERCHANGE);
-		sendBroadcast(i);
-	}
-
-	
-	// Related to startup default for cyclic speaker
-	public boolean getCyclicSpeechEnabledAtStartup()
-	{
-		return _settings.getBoolean("cyclicSpeakerEnabledAtStartup", false);
-	}
-	
-	public void setCyclicSpeechEnabledAtStartup(boolean state)
-	{
-		if(D)Log.i(TAG,"Setting Cyclic speech to: "+state);
-		_editor.putBoolean("cyclicSpeakerEnabledAtStartup", state);
-		_editor.commit();
-		//_cyclicSpeechEnabled = state;
-	}
-	
-	
-	// Current state of cyclic speaker
-	public boolean getCyclicSpeechEnabled()
-	{
-		return _cyclicSpeechEnabled;
-	}
-	public void setCyclicSpeechEnabled(boolean cyclicSpeakerEnabled)
-	{
-		_cyclicSpeechEnabled = cyclicSpeakerEnabled;
-		if(cyclicSpeakerEnabled) 
-		{
-			startCyclicSpeaker();
-		}
-		else
-		{
-			stopCyclicSpeaker();
-		}
-	}
-	
-	public void simStart()
-	{
-		if(D)Log.i(TAG,"Sim Start");
-		sim.start();
-	}
-	
-	public void simStop()
-	{
-		if(D)Log.i(TAG,"Sim Stop");
-		sim.reset();
-	}
-	
-	public void setSimStarted(boolean state)
-	{
-		if(state)
-		{
-			simStart();
-			
-		}
-		else
-		{
-			simStop();
-		}
 	}
 	
 	/**
@@ -1446,6 +1391,88 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return parseFrame(f,true);
 	}
 	
+	// **************************************************************************************************************
+	//                                   TEXT TO SPEECH STUFF
+	// **************************************************************************************************************
+	
+	public TextToSpeech createSpeaker()
+	{
+		if(D)Log.i(TAG,"Create Speaker");
+		mTts = new TextToSpeech(this, this);
+		return mTts;
+	}
+	
+	public void saySomething(String myText)
+	{
+		
+		
+		if(D)Log.i(TAG,"Speak something");
+		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
+		//mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, myAudibleStreamMap);
+	}
+	
+	public void startCyclicSpeaker()
+	{
+		// Stop it before starting it
+		if(D)Log.i(TAG,"Start Cyclic Speaker");
+		speakHandler.removeCallbacks(runnableSpeaker);
+		speakHandler.post(runnableSpeaker);
+		_cyclicSpeechEnabled = true;
+		
+		Intent i = new Intent();
+		i.setAction(MESSAGE_SPEAKERCHANGE);
+		sendBroadcast(i);
+	}
+	public void stopCyclicSpeaker()
+	{
+		if(D)Log.i(TAG,"Stop Cyclic Speaker");
+		try
+		{
+			speakHandler.removeCallbacks(runnableSpeaker);
+			mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
+		}
+		catch (Exception e) {}
+		_cyclicSpeechEnabled = false;
+		Intent i = new Intent();
+		i.setAction(MESSAGE_SPEAKERCHANGE);
+		sendBroadcast(i);
+	}
+
+	// **************************************************************************************************************
+	//                                   SIMULATOR STUFF
+	// **************************************************************************************************************
+	
+	
+	public void simStart()
+	{
+		if(D)Log.i(TAG,"Sim Start");
+		sim.start();
+	}
+	
+	public void simStop()
+	{
+		if(D)Log.i(TAG,"Sim Stop");
+		sim.reset();
+	}
+	
+	public void setSimStarted(boolean state)
+	{
+		if(state)
+		{
+			simStart();
+			
+		}
+		else
+		{
+			simStop();
+		}
+	}
+	
+
+	// **************************************************************************************************************
+	//                                   UNCATEGORIZED
+	// **************************************************************************************************************
+	
 	public void compareAlarms()
 	{
 		boolean equal = true;
@@ -1503,17 +1530,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 	}
 	
-	public String getFps()
-	{
-		if(statusRx)
-		{
-			return Integer.toString(fpsRx);
-		}
-		else
-		{
-			return Integer.toString(fpsTx);
-		}
-	}
+	
 
 	public void deleteAllLogFiles()
 	{

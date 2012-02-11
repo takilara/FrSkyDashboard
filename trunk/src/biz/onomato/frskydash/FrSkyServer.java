@@ -33,11 +33,28 @@ import android.util.Log;
 import android.widget.Toast;
 import biz.onomato.frskydash.hub.FrSkyHub;
 
+
 /**
- * The FrSkyServer is receives the buffer from the
- * {@link BluetoothSerialService} and starts by parsing this buffer into
- * individual decoded {@link Frame} objects.
+ * Main server service.
+ * This service will get started by the first Activity launched. It will stay alive
+ * even if the application is "minimized". It will only be closed by a press on the "Back" button while
+ * on the Dashboard.
+ * <br><br>
+ * Serves as a store for {@link Model}s, {@link Channel}s and {@link Alarm}s
+ * <br><br>
+ * Receives bytebuffer from {@link BluetoothSerialService}, and parses this into individual {@link Frame}s that is then sent 
+ * to the respective Channel, Alarm or Hub. The frame is also sent to the {@link Logger} for logging to file.
+ * <br><br>
+ * Activities should bind to this service using 
+ * startService and bindService
+ * <br><br>
+ * Communication from Service to Activities: Send broadcasts<br>
+ * FIXME: Cleanup Activity -> Service<br>
+ * Communication from Activity to Service: Method call, startservice with intent, or broadcast
  * 
+ * 
+ * @author eso
+ *
  */
 public class FrSkyServer extends Service implements OnInitListener {
 	    
@@ -430,7 +447,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				// only do this if not receiving anything from Rx side
 				if((statusRx==false) && (statusBt==true))
 				{
-					send(Frame.InputRequestAll().toInts());
+					send(Frame.InputRequestAll());
 					_outGoingWatchdogFlag = true;
 					_lastOutGoingWatchdogTime = System.currentTimeMillis();
 				}
@@ -608,27 +625,48 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return _settings.getInt("cyclicSpeakerInterval", 30);
 	}
 	
-	
-	public void setConnecting(boolean connecting)
+
+	/**
+	 * 
+	 * @param set to true while the application is connection to BlueTooth
+	 */
+	private void setConnecting(boolean connecting)
 	{
 		_connecting = connecting;
 	}
+	
+	/**
+	 * 
+	 * @return returns true if the application is trying to connect
+	 */
 	public boolean getConnecting()
 	{
 		return _connecting;
 	}
 	
+	/**
+	 * 
+	 * @return TreeMap containing alarms recorded from the FrSky module
+	 */
 	public TreeMap<Integer,Alarm> getRecordedAlarmMap()
 	{
 		return _alarmMap;
 	}
 	
-	// Related to startup default for cyclic speaker
+	
+	/**
+	 * 
+	 * @return true if the cyclic speaker should be enabled at startup
+	 */
 	public boolean getCyclicSpeechEnabledAtStartup()
 	{
 		return _settings.getBoolean("cyclicSpeakerEnabledAtStartup", false);
 	}
 	
+	/**
+	 * 
+	 * @param state set to true if you want Cyclic speaker to be enabled at startup
+	 */
 	public void setCyclicSpeechEnabledAtStartup(boolean state)
 	{
 		if(D)Log.i(TAG,"Setting Cyclic speech to: "+state);
@@ -637,16 +675,24 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//_cyclicSpeechEnabled = state;
 	}
 	
-	
-	// Current state of cyclic speaker
+	/**
+	 * 
+	 * @return true if cyclic speaker is enabled
+	 */
 	public boolean getCyclicSpeechEnabled()
 	{
 		return _cyclicSpeechEnabled;
 	}
-	public void setCyclicSpeechEnabled(boolean cyclicSpeakerEnabled)
+	
+	/**
+	 * 
+	 * @param state set to true to enable cyclic speaker
+	 * 
+	 */
+	public void setCyclicSpeechEnabled(boolean state)
 	{
-		_cyclicSpeechEnabled = cyclicSpeakerEnabled;
-		if(cyclicSpeakerEnabled) 
+		_cyclicSpeechEnabled = state;
+		if(state) 
 		{
 			startCyclicSpeaker();
 		}
@@ -656,6 +702,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return the current FPS as a string.
+	 * 
+	 * NOTE: Will return FPS from rx if rx communication is up, and FPS from tx otherwise
+	 */
 	public String getFps()
 	{
 		if(statusRx)
@@ -668,12 +720,276 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param lastConnectedToAddress an address to store persistantly, used to attempt autoconnect
+	 */
+	private void setBtLastConnectedToAddress(String lastConnectedToAddress)
+	{
+		_editor.putString("btLastConnectedToAddress", lastConnectedToAddress);
+	    _editor.commit();
+	}
 	
+	/**
+	 * 
+	 * @return address of the previously connected Bluetooth device
+	 */
+	private String getBtLastConnectedToAddress()
+	{
+		return _settings.getString("btLastConnectedToAddress","");
+	}
+	
+	/**
+	 * 
+	 * @return true if logging to binary/raw file is enabled
+	 */
+	public boolean getLogToRaw()
+	{
+		return _settings.getBoolean("logToRaw", false);
+	}
+	
+	/**
+	 * 
+	 * @return true if logging to CSV file is enabled
+	 */
+	public boolean getLogToCsv()
+	{
+		return _settings.getBoolean("logToCsv", false);
+	}
+	
+	/**
+	 * 
+	 * @return true if logging to human readable file is enabled
+	 */
+	public boolean getLogToHuman()
+	{
+		return _settings.getBoolean("logToHuman", false);
+	}
+	
+	/**
+	 * 
+	 * @param state true to enable logging to binary file
+	 */
+	public void setLogToRaw(boolean state)
+	{
+		_editor.putBoolean("logToRaw", state);
+		_editor.commit();
+		logger.setLogToRaw(state);
+	}
+
+	/**
+	 * 
+	 * @param state true to enable logging to human readable file
+	 */
+	public void setLogToHuman(boolean logToHuman)
+	{
+		_editor.putBoolean("logToHuman", logToHuman);
+		_editor.commit();
+		logger.setLogToHuman(logToHuman);
+	}
+	
+	/**
+	 * 
+	 * @param state true to enable logging to CSV file
+	 */
+	public void setLogToCsv(boolean logToCsv)
+	{
+		_editor.putBoolean("logToCsv", logToCsv);
+		_editor.commit();
+		logger.setLogToCsv(logToCsv);
+	}
+	
+	/**
+	 *
+	 * @param state true to autoenable bluetooth at startup
+	 */
+	public void setBtAutoEnable(boolean state)
+	{
+		_btAutoEnable = state;
+		_editor.putBoolean("btAutoEnable", state);
+		_editor.commit();
+	}
+	
+	/**
+	 * 
+	 * @return true if Bluetooth auto enable is set
+	 */
+	public boolean getBtAutoEnable()
+	{
+		return _settings.getBoolean("btAutoEnable",false);
+	}
+	
+	/**
+	 * 
+	 * @param state true to attempt autoconnect at startup
+	 */
+	public void setBtAutoConnect(boolean state)
+	{
+		_btAutoConnect = state;
+		_editor.putBoolean("btAutoConnect", state);
+		_editor.commit();
+	}
+	
+	/**
+	 * 
+	 * @return true if startup autoconnect is enabled
+	 */
+	public boolean getBtAutoConnect()
+	{
+		return _settings.getBoolean("btAutoConnect",false);
+	}
+	
+	/**
+	 * 
+	 * @param minimumVolumePrc the minimum volume (percentage 0 - 100) the application should use for cyclic speaker
+	 * @see #setAutoSetVolume(boolean)
+	 */
+	public void setMinimumVolume(int minimumVolumePrc)
+	{
+		//_minimumVolumeLevel=minimumVolumePrc;
+		_editor.putInt("initialMinimumVolume", minimumVolumePrc);
+		_editor.commit();
+	}
+	
+	/**
+	 * 
+	 * @return the minimum volume (percentage 0 - 100) used for cyclic speaker
+	 */
+	public int getMinimumVolume()
+	{
+		return _settings.getInt("initialMinimumVolume", 70);
+	}
+	
+	/**
+	 * 
+	 * @param state true to have the application autoset the media volume on startup
+	 * <br><br>
+	 * @see #setMinimumVolume(int)
+	 */
+	public void setAutoSetVolume(boolean state)
+	{
+		//_autoSetVolume = state;
+		_editor.putBoolean("autoSetVolume", _autoSetVolume);
+		_editor.commit();
+	}
+	
+	/**
+	 * 
+	 * @return true if the application is set to autoset the volume at startup
+	 */
+	public boolean getAutoSetVolume()
+	{
+		return _settings.getBoolean("autoSetVolume", false);
+	}
+	
+	/**
+	 * 
+	 * @param state set true to have application send a models alarms on model change
+	 * @see #setCurrentModel(Model)
+	 */
+	public void setAutoSendAlarms(boolean state)
+	{
+		_editor.putBoolean("autoSendAlarms", state);
+		_editor.commit();
+	}
+	
+	/**
+	 * 
+	 * @return true if application is set to autosend alarms on model change
+	 */
+	public boolean getAutoSendAlarms()
+	{
+		return _settings.getBoolean("autoSendAlarms", false);
+	}
+	
+	/**
+	 * 
+	 * @return the current Model
+	 */
+	public Model getCurrentModel()
+	{
+		return _currentModel;
+	}
+	
+	/**
+	 * 
+	 * @param currentModel the model the application should be monitoring
+	 */
+	public void setCurrentModel(Model currentModel)
+	{
+		logger.setModel(currentModel);
+		_currentModel = currentModel;
+		//_prevModelId = _currentModel.getId();
+		_editor.putInt("prevModelId", _currentModel.getId());
+		_editor.commit();
+		
+		if(_currentModel.getFrSkyAlarms().size()==0)
+		{
+			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
+			database.saveModel(_currentModel);
+		}
+		else
+		{
+			// we already have alarms
+			// send them if user wants
+			if(getAutoSendAlarms())
+			{
+				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+				{
+					send(a.toFrame());
+				}
+			}
+		}
+		
+		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
+		//logger.stop();		// SetModel will stop current Logger
+		
+
+	}
+	
+	/**
+	 * 
+	 * @return the application settings
+	 */
+	public SharedPreferences getSettings()
+	{
+		return _settings;
+	}
+
+	/**
+	 * 
+	 * @return the state of the Bluetooth connection
+	 */
+	public int getConnectionState() {
+		return mSerialService.getState();
+	}
 	
 	// **************************************************************************************************************
-	//                                   APPLICATION STUFF
+	//                                   APPLICATION/SERVICE STUFF
 	// **************************************************************************************************************
 	
+	/**
+	 * Used to allow the Activities to attach to the service.
+	 * Study the activities for how to use
+	 *
+	 */
+	public class MyBinder extends Binder {
+		FrSkyServer getService() {
+			return FrSkyServer.this;
+		}
+	}
+
+	/** 
+	 * Called when activities run startService
+	 * @see #handleIntent
+	 */
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId)
+	{
+		if(D)Log.i(TAG,"Receieved startCommand or intent ");
+		handleIntent(intent);
+		return START_STICKY;
+	}
 	
 	
 	
@@ -702,7 +1018,9 @@ public class FrSkyServer extends Service implements OnInitListener {
     	startForeground(NOTIFICATION_ID,notification);
     }
 	
-    
+    /**
+     * Request wakelock
+     */
     public void getWakeLock()
 	{
 		if(!wl.isHeld())
@@ -716,6 +1034,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 	}
 	
+    /**
+     * Handler to handle incoming intents from activities
+     * @param intent the intent to react on
+     */
 	public void handleIntent(Intent intent)
 	{
 		int cmd = intent.getIntExtra("command",CMD_IGNORE);
@@ -744,11 +1066,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 			default:
 				if(D)Log.i(TAG,"Command "+cmd+" not implemented. Skipping");
 				break;
-			
 		}
-		
 	}
-	
+
+	/*
+	 * Used to initiate shutdown of the application, will trigger onDestroy()
+	 */
 	public void die()
 	{
 		if(D)Log.i(TAG,"Die, perform cleanup");
@@ -806,7 +1129,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		fpsHandler.removeCallbacks(runnableFps);
 		
 		if(D)Log.i(TAG,"Reset channels");
-		resetChannels();
+		zeroChannels();
 		
 		if(D)Log.i(TAG,"Stop Logger");
 		try{
@@ -848,7 +1171,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	
 	/**
-	 * FIXME: Document this
+	 * Called after TextToSpeech was requested
 	 */
 	public void onInit(int status) {
 		if(D)Log.i(TAG,"TTS initialized");
@@ -880,7 +1203,9 @@ public class FrSkyServer extends Service implements OnInitListener {
     	}
     }
     
-	
+	/**
+	 * Setup the server channels
+	 */
 	private void setupChannels()
 	{
 		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
@@ -924,7 +1249,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_sourceChannelMap.put(CHANNEL_ID_RSSITX, rssitx);
 	}
 	
-	private void resetChannels()
+	/**
+	 * Set the value of all channels to 0
+	 * FIXME: Purpose of this, only used in onDestroy
+	 */
+	private void zeroChannels()
 	{
 		for(Channel c : _sourceChannelMap.values())
 		{
@@ -932,11 +1261,102 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		
 	}
+	
+	/**
+	 * Compare incoming alarms to currentModels alarms
+	 * <br>
+	 * NOTE: Incomplete
+	 */
+	public void compareAlarms()
+	{
+		boolean equal = true;
+		if(_currentModel!=null)
+		{
+			for(Alarm a: _alarmMap.values())
+			{
+				Log.w(TAG,"Checking "+a.getFrSkyFrameType());
+				if(!_currentModel.getFrSkyAlarms().containsValue(a))
+				{
+					Log.w(TAG," Not equal!");
+					equal = false;
+					break;
+				}
+				Log.w(TAG," equal");
+				// compare a to _currentModel.alarms.get(a.getFrameType)
+			}
+			
+			if(equal)
+			{
+				Log.e(TAG,"Alarm sets are equal");
+			}
+			else
+			{
+				Log.e(TAG,"Alarm sets are not equal");
+				// Take 1:
+				// Popup with:
+				// - Get new alarms
+				// - Modify Frsky alarms
+				// - Ignore
+				
+				// Take 2:
+				// Compare to other models
+				// If other model found
+				//    Popup Change Model to <newmodel>?
+				//    Yes - No
+				//    If No: Popup, update alarms:
+				//           On device
+				//           On radio
+				//           Ignore
+				
+				// Take 3:
+				// Depending on settings
+				
+				// 1. send currentmodels alarms
+				
+				// 2. Launch popup, Alarms not equal
+				// 2.1. Load alarm from FrSky
+				// 2.2. Send model alarms to FrSky
+				// 2.3. Ignore
+				// 2.4. ....
+				
+			}
+		}
+		
+	}
+	
+	
+
+	/**
+	 * Delete all the logfiles
+	 */
+	public void deleteAllLogFiles()
+	{
+		if(D)Log.i(TAG,"Really delete all log files");
+		// Make logger stop logging, and close files
+		logger.stop();
+		
+		// get list of all ASC files
+		File path = getExternalFilesDir(null);
+		String[] files = path.list();
+		for(int i=0;i<files.length;i++)
+		{
+			File f = new File(getExternalFilesDir(null), files[i]);
+			if(D)Log.i(TAG,"Delete: "+f.getAbsolutePath());
+			f.delete();
+		}
+		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
+	}
+	
+	
+		
     
 	// **************************************************************************************************************
 	//                                   BLUETOOTH STUFF
 	// **************************************************************************************************************
     
+	/**
+	 * Attempts to reconnect to the bluetooth device we lost connection with
+	 */
 	public void reConnect()
 	{
 		//if(getConnectionState()==BluetoothSerialService.)
@@ -944,19 +1364,25 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 
 	
-	
+	/**
+	 * 
+	 * @param device the Bluetooth device we want to connect to
+	 */
 	public void connect(BluetoothDevice device)
 	{
 		setConnecting(true);
 		
-		logger.stop();
+		logger.stop();		// stop the logger (will force creation of new files)
 		_device = device;
 		mSerialService.connect(device);
 	}
 	
-	 public void connect()	// connect to previous device
-	 {
-    	if(mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
+	/** 
+	 * Connects to the stored Bluetooth device
+	 */
+	public void connect()	// connect to previous device
+	{
+		if(mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
         {
 	       	if(getBtLastConnectedToAddress()!="")
 	       	{
@@ -966,52 +1392,100 @@ public class FrSkyServer extends Service implements OnInitListener {
 	    }
     }
 	    
-	
+	/**
+	 * Disconnects from the Bluetooth device
+	 */
 	public void disconnect()
 	{
 		_manualBtDisconnect = true;
 		mSerialService.stop();
 	}
 	
+	/**
+	 * Forces reconnection of the bluetooth link
+	 */
 	public void reconnectBt()
 	{
 		mSerialService.stop();
 		mSerialService.start();
 	}
 	
-	public int getConnectionState() {
-		return mSerialService.getState();
-	}
+	/**
+	 * 
+	 * @return the device's default BluetoothAdapter
+	 */
+	public BluetoothAdapter getBluetoothAdapter()
+    {
+    	if(D)Log.i(TAG,"Check for BT");
+	    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	    if (mBluetoothAdapter == null) {
+	        // Device does not support Bluetooth
+	    	if(D)Log.i(TAG,"Device does not support Bluetooth");
+	    	// Disable all BT related menu items
+	    }
+	    
+	    // popup to enable BT if not enabled
+	    if (mBluetoothAdapter != null)
+	    {
+	        if (!mBluetoothAdapter.isEnabled()) {
+	        	bluetoothEnabledAtStart = false;
+	        	if(D)Log.d(TAG,"BT NOT enabled at start");
+	        	if(getBtAutoEnable())
+	        	{
+	        		mBluetoothAdapter.enable();
+	        		Toast.makeText(this, "Bluetooth autoenabled", Toast.LENGTH_LONG).show();
+	        	}
+	        	else
+	        	{
+	        		if(D)Log.i(TAG,"Request user to enable bt");
+	        		
+	        	}
+	        }
+	        else
+	        {
+	        	bluetoothEnabledAtStart = true;
+	        	if(D)Log.d(TAG,"BT enabled at start");
+
+		        //autoconnect here if autoconnect
+	        	if(getBtAutoConnect()) 
+		    	{
+	        		connect();
+		    	}
+	        }
+	    }
+	    return mBluetoothAdapter;
+    } 
     
 	// **************************************************************************************************************
 	//                                   COMMUNICATION
 	// **************************************************************************************************************
 	    
 	/**
-	 * Transmit bytes to the Bluetoot serial receiver
+	 * Transmits bytes to the Bluetooth serial receiver
 	 * 
 	 * @param out Array of the bytes to send
 	 */
 	public void send(byte[] out) {
     	mSerialService.write( out );
     }
+	
+	/**
+	 * Transmits ints to the Bluetooth serial receiver
+	 * 
+	 * @param out Array of the ints to send
+	 */
 	public void send(int[] out) {
     	mSerialService.write( out );
     }
+	
+	/**
+	 * Transmits a frame to the Bluetooth serial receiver
+	 * 
+	 * @param f the frame to send 
+	 */	
 	public void send(Frame f) {
 		send(f.toInts());
 	}
-	
-	
-	
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId)
-	{
-		if(D)Log.i(TAG,"Receieved startCommand or intent ");
-		handleIntent(intent);
-		return START_STICKY;
-	}
-	
 	
 	
 	
@@ -1033,26 +1507,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 	}
 	
-	
-	
-
-	
-	
-	// *************************************************
-	// Public methods
-	public class MyBinder extends Binder {
-		FrSkyServer getService() {
-			return FrSkyServer.this;
-		}
-	}
-	public int[] getCurrentFrame() {
-		int[] t = new int[11];
-		t[0] = 0x7e;
-		t[1] = 0xfe;
-		t[10] = 0xfe;
-		return t;
-	}
-
+	/**
+	 * Gets called whenever bluetooth connection is unintentionally dropped
+	 * @param source the name of the device we lost connection with
+	 */
 	public void wasDisconnected(String source)
 	{
     	//eso: TODO: what is reset vs channel.setRaw(0) (used in resetChannels) 
@@ -1083,87 +1541,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     	
 	}
 	
-	private final Handler mHandlerBT = new Handler() {
-    	
-        @Override
-        public void handleMessage(Message msg) {        	
-            switch (msg.what) {
-            case MESSAGE_STATE_CHANGE:
-            	Intent bcI = new Intent();
-        		bcI.setAction(MESSAGE_BLUETOOTH_STATE_CHANGED);
-        		sendBroadcast(bcI);
-        		
-        		if(D)Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                switch (msg.arg1) {
-                case BluetoothSerialService.STATE_CONNECTED:
-                	if(D)Log.d(TAG,"BT connected");
-                	setConnecting(false);
-                	statusBt = true;
-                	
-                	_manualBtDisconnect = false;
-                	//send(Frame.InputRequestAll().toInts());
-                	
-                	if(getAutoSendAlarms())
-        			{
-        				for(Alarm a : _currentModel.getFrSkyAlarms().values())
-        				{
-        					send(a.toFrame());
-        				}
-        			}
-                    
-                    break;
-                    
-                case BluetoothSerialService.STATE_CONNECTING:
-                	if(D)Log.d(TAG,"BT connecting");
-                	setConnecting(true);
-                	 //mTitle.setText(R.string.title_connecting);
-                    break;
-                    
-                case BluetoothSerialService.STATE_LISTEN:
-                	if(D)Log.d(TAG,"BT listening");
-                case BluetoothSerialService.STATE_NONE:
-                	if(D)Log.d(TAG,"BT state changed to NONE");
-                	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
-                	setConnecting(false);
-                	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
-                	statusBt = false;
-                	// set all the channels to -1
-                	
-                	
-                	logger.stop();
-                }
-                break;
-            case MESSAGE_WRITE:
-            	//Log.d(TAG,"BT writing");
-                break;
-                
-            //handle receiving data from frsky 
-            case MESSAGE_READ:
-            	if(!_dying)
-            	{
-            		//hcpl updated to handle the new int array after byte per byte read update
-	                byte[] readBuf = (byte[]) msg.obj;
-//	                int[] i = new int[msg.arg1];
-            		//int[] i = (int[])msg.obj;
-            		handleByteBuffer(readBuf);
-            	}
-                break;
-                
-            case MESSAGE_DEVICE_NAME:
-                // save the connected device's name
-                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
-                setBtLastConnectedToAddress(_device.getAddress());
-                Toast.makeText(getApplicationContext(), "Connected to "
-                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                if(D)Log.d(TAG,"BT connected to...");
-                break;
-            case MESSAGE_TOAST:
-                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
-                               Toast.LENGTH_SHORT).show();
-                break;
-            }
-        }
-    };
+
   
     
 	// **************************************************************************************************************
@@ -1289,11 +1667,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 	/**
-	 * parse this frame
+	 * Determines what to do with a single frame
 	 * 
-	 * @param f
-	 * @param inBound
-	 * @return
+	 * @param f the frame to parse
+	 * @param inBound set to false to mask the frame from FPS calculations
+	 * @return always true
 	 */
 	public boolean parseFrame(Frame f, boolean inBound)
 	{
@@ -1381,20 +1759,22 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	
 	/**
-	 * wrapper to parse frames that are inbound so they get logged
-	 * 
-	 * @param f
-	 * @return
+	 * @see #parseFrame(Frame, boolean)
 	 */
 	public boolean parseFrame(Frame f)
 	{
 		return parseFrame(f,true);
 	}
 	
+	
 	// **************************************************************************************************************
 	//                                   TEXT TO SPEECH STUFF
 	// **************************************************************************************************************
-	
+
+	/**
+	 * Creates a TextToSpeech object
+	 * @return the TextToSpeech object we will use
+	 */
 	public TextToSpeech createSpeaker()
 	{
 		if(D)Log.i(TAG,"Create Speaker");
@@ -1402,15 +1782,20 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return mTts;
 	}
 	
+	/**
+	 * Speaks something using default values
+	 * @param myText the text to speak
+	 */
 	public void saySomething(String myText)
 	{
-		
-		
 		if(D)Log.i(TAG,"Speak something");
 		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
 		//mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, myAudibleStreamMap);
 	}
 	
+	/**
+	 * Starts the cyclic speaker threads
+	 */
 	public void startCyclicSpeaker()
 	{
 		// Stop it before starting it
@@ -1423,6 +1808,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		i.setAction(MESSAGE_SPEAKERCHANGE);
 		sendBroadcast(i);
 	}
+	
+	/**
+	 * Stops the cyclic speaker thread
+	 */
 	public void stopCyclicSpeaker()
 	{
 		if(D)Log.i(TAG,"Stop Cyclic Speaker");
@@ -1443,24 +1832,35 @@ public class FrSkyServer extends Service implements OnInitListener {
 	// **************************************************************************************************************
 	
 	
+	/**
+	 * Starts the cyclic simulator
+	 * @see Simulator
+	 */
 	public void simStart()
 	{
 		if(D)Log.i(TAG,"Sim Start");
 		sim.start();
 	}
 	
+	/**
+	 * Stops the cyclic simulator
+	 * @see Simulator
+	 */
 	public void simStop()
 	{
 		if(D)Log.i(TAG,"Sim Stop");
 		sim.reset();
 	}
 	
+	/**
+	 * 
+	 * @param state true to enable the Cyclic simulator
+	 */
 	public void setSimStarted(boolean state)
 	{
 		if(state)
 		{
 			simStart();
-			
 		}
 		else
 		{
@@ -1469,246 +1869,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 
+	
+	
+	
 	// **************************************************************************************************************
-	//                                   UNCATEGORIZED
+	//                                   HANDLERS AND RECEIVERS
 	// **************************************************************************************************************
 	
-	public void compareAlarms()
-	{
-		boolean equal = true;
-		if(_currentModel!=null)
-		{
-			for(Alarm a: _alarmMap.values())
-			{
-				Log.w(TAG,"Checking "+a.getFrSkyFrameType());
-				if(!_currentModel.getFrSkyAlarms().containsValue(a))
-				{
-					Log.w(TAG," Not equal!");
-					equal = false;
-					break;
-				}
-				Log.w(TAG," equal");
-				// compare a to _currentModel.alarms.get(a.getFrameType)
-			}
-			
-			if(equal)
-			{
-				Log.e(TAG,"Alarm sets are equal");
-			}
-			else
-			{
-				Log.e(TAG,"Alarm sets are not equal");
-				// Take 1:
-				// Popup with:
-				// - Get new alarms
-				// - Modify Frsky alarms
-				// - Ignore
-				
-				// Take 2:
-				// Compare to other models
-				// If other model found
-				//    Popup Change Model to <newmodel>?
-				//    Yes - No
-				//    If No: Popup, update alarms:
-				//           On device
-				//           On radio
-				//           Ignore
-				
-				// Take 3:
-				// Depending on settings
-				
-				// 1. send currentmodels alarms
-				
-				// 2. Launch popup, Alarms not equal
-				// 2.1. Load alarm from FrSky
-				// 2.2. Send model alarms to FrSky
-				// 2.3. Ignore
-				// 2.4. ....
-				
-			}
-		}
-		
-	}
-	
 	
 
-	public void deleteAllLogFiles()
-	{
-		if(D)Log.i(TAG,"Really delete all log files");
-		// Make logger stop logging, and close files
-		logger.stop();
-		
-		// get list of all ASC files
-		File path = getExternalFilesDir(null);
-		String[] files = path.list();
-		for(int i=0;i<files.length;i++)
-		{
-			File f = new File(getExternalFilesDir(null), files[i]);
-			if(D)Log.i(TAG,"Delete: "+f.getAbsolutePath());
-			f.delete();
-		}
-		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
-	}
-	
-	// Settings setters and getters
-	///TODO: Have setters and getters work with settings store
-	
-	public void setBtLastConnectedToAddress(String lastConnectedToAddress)
-	{
-		_editor.putString("btLastConnectedToAddress", lastConnectedToAddress);
-	    _editor.commit();
-	}
-	
-	public String getBtLastConnectedToAddress()
-	{
-		return _settings.getString("btLastConnectedToAddress","");
-	}
-	
-	public boolean getLogToRaw()
-	{
-		return _settings.getBoolean("logToRaw", false);
-	}
-	
-	public boolean getLogToCsv()
-	{
-		return _settings.getBoolean("logToCsv", false);
-	}
-	
-	public boolean getLogToHuman()
-	{
-		return _settings.getBoolean("logToHuman", false);
-	}
-	
-	public void setLogToRaw(boolean logToRaw)
-	{
-		_editor.putBoolean("logToRaw", logToRaw);
-		_editor.commit();
-		logger.setLogToRaw(logToRaw);
-	}
-	
-	public void setLogToHuman(boolean logToHuman)
-	{
-		_editor.putBoolean("logToHuman", logToHuman);
-		_editor.commit();
-		logger.setLogToHuman(logToHuman);
-	}
-	
-	public void setLogToCsv(boolean logToCsv)
-	{
-		_editor.putBoolean("logToCsv", logToCsv);
-		_editor.commit();
-		logger.setLogToCsv(logToCsv);
-	}
-	
-	public void setBtAutoEnable(boolean btAutoEnable)
-	{
-		_btAutoEnable = btAutoEnable;
-		_editor.putBoolean("btAutoEnable", btAutoEnable);
-		_editor.commit();
-	}
-	
-	public boolean getBtAutoEnable()
-	{
-		return _settings.getBoolean("btAutoEnable",false);
-	}
-	
-	public void setBtAutoConnect(boolean btAutoConnect)
-	{
-		_btAutoConnect = btAutoConnect;
-		_editor.putBoolean("btAutoConnect", btAutoConnect);
-		_editor.commit();
-	}
-	
-	public boolean getBtAutoConnect()
-	{
-		return _settings.getBoolean("btAutoConnect",false);
-	}
-	
-	public void setMinimumVolume(int minimumVolumePrc)
-	{
-		_minimumVolumeLevel=minimumVolumePrc;
-		_editor.putInt("initialMinimumVolume", minimumVolumePrc);
-		_editor.commit();
-	}
-	public int getMinimumVolume()
-	{
-		return _settings.getInt("initialMinimumVolume", 70);
-	}
-	public void setAutoSetVolume(boolean autoSetVolume)
-	{
-		_autoSetVolume = autoSetVolume;
-		_editor.putBoolean("autoSetVolume", _autoSetVolume);
-		_editor.commit();
-	}
-	public boolean getAutoSetVolume()
-	{
-		return _settings.getBoolean("autoSetVolume", false);
-	}
-	
-	public void setAutoSendAlarms(boolean autoSend)
-	{
-		
-		_editor.putBoolean("autoSendAlarms", autoSend);
-		_editor.commit();
-	}
-	
-	public boolean getAutoSendAlarms()
-	{
-
-		return _settings.getBoolean("autoSendAlarms", false);
-	}
-	
-	
-	public Model getCurrentModel()
-	{
-		return _currentModel;
-	}
-	
-	public void setCurrentModel(Model currentModel)
-	{
-		logger.setModel(currentModel);
-		_currentModel = currentModel;
-		//_prevModelId = _currentModel.getId();
-		_editor.putInt("prevModelId", _currentModel.getId());
-		_editor.commit();
-		
-		if(_currentModel.getFrSkyAlarms().size()==0)
-		{
-			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
-			database.saveModel(_currentModel);
-		}
-		else
-		{
-			// we already have alarms
-			// send them if user wants
-			if(getAutoSendAlarms())
-			{
-				for(Alarm a : _currentModel.getFrSkyAlarms().values())
-				{
-					send(a.toFrame());
-				}
-			}
-		}
-		
-		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
-		//logger.stop();		// SetModel will stop current Logger
-		
-
-	}
-	
-	public SharedPreferences getSettings()
-	{
-		return _settings;
-	}
-	
-	
-	public void createChannelConfigDatabase()
-	{
-		
-	}
-	
-	// Can be used to detect broadcasts from Bluetooth
-    // Remember to add the message to the intentfilter (mIntentFilterBt) above
+	/**
+	 * Used to detect broadcasts from Bluetooth.
+	 * Remember to add the message to the intentfilter (mIntentFilterBt) above
+	 */
     private BroadcastReceiver mIntentReceiverBt = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1765,51 +1938,92 @@ public class FrSkyServer extends Service implements OnInitListener {
         	}
         }
     };
-    
-    
-    
-    
-    public BluetoothAdapter getBluetoothAdapter()
-    {
-    	if(D)Log.i(TAG,"Check for BT");
-	    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-	    if (mBluetoothAdapter == null) {
-	        // Device does not support Bluetooth
-	    	if(D)Log.i(TAG,"Device does not support Bluetooth");
-	    	// Disable all BT related menu items
-	    }
-	    
-	    // popup to enable BT if not enabled
-	    if (mBluetoothAdapter != null)
-	    {
-	        if (!mBluetoothAdapter.isEnabled()) {
-	        	bluetoothEnabledAtStart = false;
-	        	if(D)Log.d(TAG,"BT NOT enabled at start");
-	        	if(getBtAutoEnable())
-	        	{
-	        		mBluetoothAdapter.enable();
-	        		Toast.makeText(this, "Bluetooth autoenabled", Toast.LENGTH_LONG).show();
-	        	}
-	        	else
-	        	{
-	        		if(D)Log.i(TAG,"Request user to enable bt");
-	        		
-	        	}
-	        }
-	        else
-	        {
-	        	bluetoothEnabledAtStart = true;
-	        	if(D)Log.d(TAG,"BT enabled at start");
 
-		        //autoconnect here if autoconnect
-	        	if(getBtAutoConnect()) 
-		    	{
-	        		connect();
-		    	}
-	        }
-	    }
-	    return mBluetoothAdapter;
-    } 
-	
+    /**
+     * Acts on the Bluetooth events
+     */
+	private final Handler mHandlerBT = new Handler() {
+    	
+        @Override
+        public void handleMessage(Message msg) {        	
+            switch (msg.what) {
+            case MESSAGE_STATE_CHANGE:
+            	Intent bcI = new Intent();
+        		bcI.setAction(MESSAGE_BLUETOOTH_STATE_CHANGED);
+        		sendBroadcast(bcI);
+        		
+        		if(D)Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                switch (msg.arg1) {
+                case BluetoothSerialService.STATE_CONNECTED:
+                	if(D)Log.d(TAG,"BT connected");
+                	setConnecting(false);
+                	statusBt = true;
+                	
+                	_manualBtDisconnect = false;
+                	//send(Frame.InputRequestAll().toInts());
+                	
+                	if(getAutoSendAlarms())
+        			{
+        				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+        				{
+        					send(a.toFrame());
+        				}
+        			}
+                    
+                    break;
+                    
+                case BluetoothSerialService.STATE_CONNECTING:
+                	if(D)Log.d(TAG,"BT connecting");
+                	setConnecting(true);
+                	 //mTitle.setText(R.string.title_connecting);
+                    break;
+                    
+                case BluetoothSerialService.STATE_LISTEN:
+                	if(D)Log.d(TAG,"BT listening");
+                case BluetoothSerialService.STATE_NONE:
+                	if(D)Log.d(TAG,"BT state changed to NONE");
+                	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+                	setConnecting(false);
+                	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
+                	statusBt = false;
+                	// set all the channels to -1
+                	
+                	
+                	logger.stop();
+                }
+                break;
+            case MESSAGE_WRITE:
+            	//Log.d(TAG,"BT writing");
+                break;
+                
+            //handle receiving data from frsky 
+            case MESSAGE_READ:
+            	if(!_dying)
+            	{
+            		//hcpl updated to handle the new int array after byte per byte read update
+	                byte[] readBuf = (byte[]) msg.obj;
+//	                int[] i = new int[msg.arg1];
+            		//int[] i = (int[])msg.obj;
+            		handleByteBuffer(readBuf);
+            	}
+                break;
+                
+            case MESSAGE_DEVICE_NAME:
+                // save the connected device's name
+                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                setBtLastConnectedToAddress(_device.getAddress());
+                Toast.makeText(getApplicationContext(), "Connected to "
+                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                if(D)Log.d(TAG,"BT connected to...");
+                break;
+            case MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                               Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    };
+    
+    
 }
 

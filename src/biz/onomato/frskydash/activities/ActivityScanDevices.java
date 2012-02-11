@@ -1,8 +1,13 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.activities;
 
 import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
+
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.R.id;
+import biz.onomato.frskydash.R.layout;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;

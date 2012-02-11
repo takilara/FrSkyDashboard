@@ -31,6 +31,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import android.widget.Toast;
+import biz.onomato.frskydash.activities.ActivityDashboard;
 import biz.onomato.frskydash.hub.FrSkyHub;
 
 
@@ -974,7 +975,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 *
 	 */
 	public class MyBinder extends Binder {
-		FrSkyServer getService() {
+		public FrSkyServer getService() {
 			return FrSkyServer.this;
 		}
 	}

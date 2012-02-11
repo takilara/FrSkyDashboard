@@ -14,7 +14,7 @@
         
         </activity>
          -->
-        <activity android:name="ActivityDashboard"
+        <activity android:name=".activities.ActivityDashboard"
         	android:label="@string/app_name"  
         	android:configChanges="keyboardHidden|orientation" 
             android:screenOrientation="portrait" >
@@ -24,26 +24,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="ActivityModuleSettings"
+        <activity android:name=".activities.ActivityModuleSettingsduleSettings"
            	android:label="@string/activity_module_settings" />
-        <activity android:name="ActivityApplicationSettings"
+        <activity android:name=".activities.ActivityApplicationSettings"
         	android:label="@string/activity_application_settings" />
 		<!--   <activity android:name=".ChannelConfigActivity" android:label="@string/activity_channel_settings" /> -->
-        <activity android:name="ActivitySimulator"
+        .activities.ActivitySimulator:name="ActivitySimulator"
         	android:label="@string/activity_simulator" />
-        <activity android:name=".ActivityScanDevices"
-        	android:label="@string/app_name" />
-        <activity android:name=".ActivityChannelConfig"
+        .activities.ActivityScanDevicesme=".ActivityScanDevices"
+        	android:label="@string/app_name" .activities.ActivityChannelConfigndroid:name=".ActivityChannelConfig"
         	android:label="@string/activity_channel_settings" />	
-        <activity android:name="ActivityDeviceList"
+        <activity android:name=".activities.ActivityDeviceList"
         	android:label="@string/app_name" />
-        <activity android:name="ActivityModelConfig"
+        <activity android:name=".activities.ActivityModelConfig"
         	android:label="@string/activity_model_configuration"
         	android:windowSoftInputMode="stateHidden" 
         	/>
-        <activity android:name="ActivityModelManagement"
+        <activity android:name=".activities.ActivityModelManagementel"
         	android:label="@string/activity_model_management" />
-        <activity android:name="ActivityDebug"
+        <activity android:name=".activity.ActivityDebug"
         	android:label="@string/activity_debug" />
         	
         <service android:name="FrSkyServer" android:label="@string/app_name"></service>

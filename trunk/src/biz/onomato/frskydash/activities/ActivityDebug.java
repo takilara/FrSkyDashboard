@@ -1,10 +1,16 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.activities;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.FrSkyServer.MyBinder;
+import biz.onomato.frskydash.R.id;
+import biz.onomato.frskydash.R.layout;
 
 import android.app.Activity;
 import android.app.ProgressDialog;

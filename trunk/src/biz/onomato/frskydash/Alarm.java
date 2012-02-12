@@ -36,7 +36,7 @@ public class Alarm {
 	private String _unitChannelUnit="";
 	private float _unitChannelOffset=0;
 	private float _unitChannelFactor=1;
-	private String _unitChannelDescription="";
+//	private String _unitChannelDescription="";
 	private int _unitChannelPrecision=0;
 	
 	private static final int MINIMUM_THRESHOLD_RSSI=20;
@@ -264,7 +264,7 @@ public class Alarm {
 		_unitChannelFactor = channel.getFactor();
 		_unitChannelOffset = channel.getOffset();
 		_unitChannelUnit = channel.getShortUnit();
-		_unitChannelDescription = channel.getDescription();
+		//_unitChannelDescription = channel.getDescription();
 		_unitChannelPrecision = channel.getPrecision();
 	}
 	

@@ -3,7 +3,16 @@
       package="biz.onomato.frskydash" 
       android:versionCode="9"
       android:versionName="2.0A01">
+    
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>  
+    
     <uses-sdk android:minSdkVersion="8" />
+    
     <application android:icon="@drawable/ic_status" android:label="@string/app_name" android:debuggable="true">
          <!-- 
          <activity android:name=".FrSkyDash"
@@ -24,15 +33,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ActivityModuleSettingsduleSettings"
+        <activity android:name=".activities.ActivityModuleSettings"
            	android:label="@string/activity_module_settings" />
         <activity android:name=".activities.ActivityApplicationSettings"
         	android:label="@string/activity_application_settings" />
 		<!--   <activity android:name=".ChannelConfigActivity" android:label="@string/activity_channel_settings" /> -->
-        .activities.ActivitySimulator:name="ActivitySimulator"
+        <activity android:name=".activities.ActivitySimulator"
         	android:label="@string/activity_simulator" />
-        .activities.ActivityScanDevicesme=".ActivityScanDevices"
-        	android:label="@string/app_name" .activities.ActivityChannelConfigndroid:name=".ActivityChannelConfig"
+        <activity android:name=".activities.ActivityScanDevices"
+        	android:label="@string/app_name" />
+        <activity android:name=".activities.ActivityChannelConfig"
         	android:label="@string/activity_channel_settings" />	
         <activity android:name=".activities.ActivityDeviceList"
         	android:label="@string/app_name" />
@@ -40,17 +50,12 @@
         	android:label="@string/activity_model_configuration"
         	android:windowSoftInputMode="stateHidden" 
         	/>
-        <activity android:name=".activities.ActivityModelManagementel"
+        <activity android:name=".activities.ActivityModelManagement"
         	android:label="@string/activity_model_management" />
-        <activity android:name=".activity.ActivityDebug"
+        <activity android:name=".activities.ActivityDebug"
         	android:label="@string/activity_debug" />
         	
         <service android:name="FrSkyServer" android:label="@string/app_name"></service>
     </application> 
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+
 </manifest>

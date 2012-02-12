@@ -267,7 +267,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			    		tv_statusRx.setBackgroundColor(0xff00aa00);
 			    		tv_statusRx.setText("Rx: UP");
 			    		
-			    		tv_fps.setTextColor(0xff0a0a0a);
+			    		tv_fps.setTextColor(0xffbbbbbb);
 			    	}
 			    	else
 			    	{
@@ -305,7 +305,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
     }
     
-    
+    //TODO: Refactor to listen for broadcasts, insert into array, then cyclically read from array
     private void updateChannelValues()
     {
     	if(server!=null)

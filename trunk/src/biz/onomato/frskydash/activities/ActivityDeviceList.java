@@ -121,6 +121,8 @@ public class ActivityDeviceList extends Activity {
             String noDevices = getResources().getText(R.string.none_paired).toString();
             mPairedDevicesArrayAdapter.add(noDevices);
         }
+        pairedListView.requestLayout();
+        
     }
 
     @Override

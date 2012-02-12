@@ -1,5 +1,10 @@
 package biz.onomato.frskydash;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import android.app.Service;
 import android.content.Context;
 import android.os.Handler;
@@ -12,6 +17,8 @@ public class Simulator {
     public int _ad1,_ad2,_rssirx,_rssitx;
     private int[] _simFrame;
     public boolean running;
+    
+    public boolean noise = false;
     
     //private FrSkyServer context;
     
@@ -49,7 +56,51 @@ public class Simulator {
 				
 				//_simFrame = genFrame(_ad1,_ad2,_rssirx,_rssitx);
 				Frame f = Frame.FrameFromAnalog(_ad1,_ad2,_rssirx,_rssitx);
+				//deliberately break the frame
+
 				_simFrame = f.toInts();
+
+				// Corrupt data
+				if(noise)
+					{
+					if(Math.random()*100>90)
+					{
+						int brokenBytePos = (int) (Math.random()*Frame.SIZE_TELEMETRY_FRAME);
+						int newInt = (int) (Math.random()*255);
+						//Log.w(TAG,"Modifying frame, setting pos: "+brokenBytePos+" to "+newInt);
+						_simFrame[brokenBytePos]=newInt;
+					}
+					// Bad frame size
+					if(Math.random()*100>90)
+					{
+						ArrayList<Integer> l = new ArrayList<Integer>();
+						for(int v=0;v<_simFrame.length;v++)
+						{
+							l.add(_simFrame[v]);
+						}
+						
+						int brokenBytePos = (int) (Math.random()*Frame.SIZE_TELEMETRY_FRAME);
+						int newInt = (int) (Math.random()*255);
+						if(Math.random()*100>50)
+						{
+							l.add(brokenBytePos,newInt);
+							//Log.w(TAG,"Modifying frame, adding a byte at pos "+brokenBytePos);
+						}
+						else
+						{
+							l.remove(brokenBytePos);
+							//Log.w(TAG,"Modifying frame, removing a byte at pos "+brokenBytePos);
+						}
+						
+						_simFrame = new int[l.size()];
+						for(int v=0;v<_simFrame.length;v++)
+						{
+							_simFrame[v]=(Integer) l.get(v);
+						}
+						
+					}
+					f = new Frame(_simFrame);
+				}
 
 				//context.parseFrame(_simFrame);
 				server.parseFrame(f);

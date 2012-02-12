@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
@@ -38,6 +39,8 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
     private TextView rssitx_raw_tv;
     private TextView rssirx_raw_tv;
     private TextView outFrame_tv;
+    
+    private CheckBox chkNoise;
     
     private View btnSend;
     private ToggleButton btnSimTgl;
@@ -81,6 +84,8 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
         rssitx_raw_tv = (TextView) findViewById(R.id.sim_rssitxraw);
         rssirx_raw_tv = (TextView) findViewById(R.id.sim_rssirxraw);
         
+        chkNoise = (CheckBox) findViewById(R.id.sim_chkNoise);
+        
         outFrame_tv = (TextView) findViewById(R.id.outFrame);
         
         btnSend = findViewById(R.id.sim_btnSend);
@@ -96,7 +101,7 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
         
         //hcpl simulate raw frames
         ((Button)findViewById(R.id.sim_btnSend_raw)).setOnClickListener(this);
-		
+		chkNoise.setOnClickListener(this);
 		
 		// Code to update GUI cyclic
         tickHandler = new Handler();
@@ -203,6 +208,13 @@ public class ActivitySimulator extends Activity implements OnSeekBarChangeListen
     				globals.sim.stop();
     			}
     			*/
+    			break;
+    		case R.id.sim_chkNoise:
+    			
+    			if(server!=null)
+    			{
+    				server.sim.noise=chkNoise.isChecked();
+    			}
     			break;
     		case R.id.sim_btnSend_raw:
     			if( server == null )

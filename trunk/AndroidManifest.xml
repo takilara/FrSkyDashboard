@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="biz.onomato.frskydash" 
-      android:versionCode="9"
-      android:versionName="2.0A01">
+      android:versionCode="10"
+      android:versionName="2.0A02">
     
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BLUETOOTH" />

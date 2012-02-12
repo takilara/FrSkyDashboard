@@ -108,6 +108,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     // FPS
     public int fps,fpsRx,fpsTx=0;
+    public static int badFrames = 0;
     private MyStack fpsStack;
     private MyStack fpsRxStack;
 	private MyStack fpsTxStack;
@@ -276,7 +277,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
 		
-		if(D)Log.e(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
+		if(D)Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
 
 		
 	
@@ -918,6 +919,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setCurrentModel(Model currentModel)
 	{
+		badFrames=0;
 		logger.setModel(currentModel);
 		_currentModel = currentModel;
 		//_prevModelId = _currentModel.getId();
@@ -1685,6 +1687,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 		if(inBound)	_framecount++;
 		switch(f.frametype)
 		{
+			case Frame.FRAMETYPE_CORRUPT:
+				if(D)Log.w(TAG,"Frame most likely corrupt, discarded: "+f.toHuman());
+				badFrames++;
+				break;
+			case Frame.FRAMETYPE_UNDEFINED:
+				if(D)Log.w(TAG,"Frame currently not supported, discarded: "+f.toHuman());
+				badFrames++;
+				break;
 			// Analog values
 			case Frame.FRAMETYPE_ANALOG:
 				// get AD1, AD2 etc from frame

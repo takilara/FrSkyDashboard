@@ -8,6 +8,7 @@ public class Frame {
 	private static final String TAG="Frame";
 	
 	public static final int FRAMETYPE_UNDEFINED=-1;
+	public static final int FRAMETYPE_CORRUPT=-2;
 	public static final int FRAMETYPE_FRSKY_ALARM=1;
 	public static final int FRAMETYPE_ANALOG=0xfe;
 	public static final int FRAMETYPE_INPUT_REQUEST_ALL=0xf8;
@@ -99,6 +100,8 @@ public class Frame {
 				frame = frameDecode(frame);
 			}
 			
+
+			
 			_frame = frame;
 			
 			humanFrame = Frame.frameToHuman(frame);
@@ -107,86 +110,95 @@ public class Frame {
 			int _greaterthan;
 			int _level;
 			
-			frameHeaderByte =frame[1]; 
-			switch(frame[1])
+			if(frame.length!=Frame.SIZE_TELEMETRY_FRAME)
 			{
-				// Analog values
-				case FRAMETYPE_ANALOG:
-					frametype=FRAMETYPE_ANALOG;
-					ad1 = frame[2];
-					ad2 = frame[3];
-					rssirx = frame[4];
-					rssitx = (int) frame[5]/2;
-					break;
-				case FRAMETYPE_INPUT_REQUEST_ALL:
-					frametype=FRAMETYPE_INPUT_REQUEST_ALL;
-					break;
-				case FRAMETYPE_ALARM1_AD1:
-					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = Channel.CHANNELTYPE_AD1;
-					alarmNumber = 0;
-					
-					break;
-				case FRAMETYPE_ALARM2_AD1:
-					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = Channel.CHANNELTYPE_AD1;
-					alarmNumber = 1;
-					break;	
-				case FRAMETYPE_ALARM1_AD2:
-					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = Channel.CHANNELTYPE_AD2;
-					alarmNumber = 0;
-					break;
-				case FRAMETYPE_ALARM2_AD2:
-					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = Channel.CHANNELTYPE_AD2;
-					alarmNumber = 1;
-					break;
-				case FRAMETYPE_ALARM1_RSSI:
-					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = Channel.CHANNELTYPE_RSSI;
-					alarmNumber = 0;
-					break;
-				case FRAMETYPE_ALARM2_RSSI:
-					frametype=FRAMETYPE_FRSKY_ALARM;
-					alarmChannel = Channel.CHANNELTYPE_RSSI;
-					alarmNumber = 1;
-					break;
-				case FRAMETYPE_USER_DATA:
-					//hcpl handle sensor hub information
-					frametype=FRAMETYPE_USER_DATA;
-					//parsing is done in parseFrame method using Frame object and 
-					break;
-				default:
-					frametype=FRAMETYPE_UNDEFINED;
-					
-					if(FrSkyServer.D)Log.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
-					break;
+				frametype=FRAMETYPE_CORRUPT;
+				Log.w(TAG,"Found corrupt frame");
 			}
-			if(frametype==FRAMETYPE_FRSKY_ALARM)
+			else
 			{
-				// Value of <AlarmChannel> alarm <AlarmNumber> is <greater> than <alarmthreshold>, and is at level <alarmlevel>
-				_threshold = frame[2];
-				_greaterthan = frame[3];
-				String _greaterthanhuman;
-				if(_greaterthan==1)
+			
+				frameHeaderByte =frame[1]; 
+				switch(frame[1])
 				{
-					_greaterthanhuman="greater";
+					// Analog values
+					case FRAMETYPE_ANALOG:
+						frametype=FRAMETYPE_ANALOG;
+						ad1 = frame[2];
+						ad2 = frame[3];
+						rssirx = frame[4];
+						rssitx = (int) frame[5]/2;
+						break;
+					case FRAMETYPE_INPUT_REQUEST_ALL:
+						frametype=FRAMETYPE_INPUT_REQUEST_ALL;
+						break;
+					case FRAMETYPE_ALARM1_AD1:
+						frametype=FRAMETYPE_FRSKY_ALARM;
+						alarmChannel = Channel.CHANNELTYPE_AD1;
+						alarmNumber = 0;
+						
+						break;
+					case FRAMETYPE_ALARM2_AD1:
+						frametype=FRAMETYPE_FRSKY_ALARM;
+						alarmChannel = Channel.CHANNELTYPE_AD1;
+						alarmNumber = 1;
+						break;	
+					case FRAMETYPE_ALARM1_AD2:
+						frametype=FRAMETYPE_FRSKY_ALARM;
+						alarmChannel = Channel.CHANNELTYPE_AD2;
+						alarmNumber = 0;
+						break;
+					case FRAMETYPE_ALARM2_AD2:
+						frametype=FRAMETYPE_FRSKY_ALARM;
+						alarmChannel = Channel.CHANNELTYPE_AD2;
+						alarmNumber = 1;
+						break;
+					case FRAMETYPE_ALARM1_RSSI:
+						frametype=FRAMETYPE_FRSKY_ALARM;
+						alarmChannel = Channel.CHANNELTYPE_RSSI;
+						alarmNumber = 0;
+						break;
+					case FRAMETYPE_ALARM2_RSSI:
+						frametype=FRAMETYPE_FRSKY_ALARM;
+						alarmChannel = Channel.CHANNELTYPE_RSSI;
+						alarmNumber = 1;
+						break;
+					case FRAMETYPE_USER_DATA:
+						//hcpl handle sensor hub information
+						frametype=FRAMETYPE_USER_DATA;
+						//parsing is done in parseFrame method using Frame object and 
+						break;
+					default:
+						frametype=FRAMETYPE_UNDEFINED;
+						
+						if(FrSkyServer.D)Log.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
+						break;
 				}
-				else
+				if(frametype==FRAMETYPE_FRSKY_ALARM)
 				{
-					_greaterthanhuman="lower";
+					// Value of <AlarmChannel> alarm <AlarmNumber> is <greater> than <alarmthreshold>, and is at level <alarmlevel>
+					_threshold = frame[2];
+					_greaterthan = frame[3];
+					String _greaterthanhuman;
+					if(_greaterthan==1)
+					{
+						_greaterthanhuman="greater";
+					}
+					else
+					{
+						_greaterthanhuman="lower";
+					}
+					
+					_level = frame[4];
+					
+					alarmLevel = _level;
+					alarmThreshold=_threshold;
+					alarmGreaterThan = _greaterthan;
+					alarmGreaterThanString = _greaterthanhuman;
+					//Log.i(TAG,alarmChannel+" alarm "+alarmNumber+": Fires if value is "+_greaterthanhuman+" than "+_threshold+", and is at level "+_level);
+					
+					
 				}
-				
-				_level = frame[4];
-				
-				alarmLevel = _level;
-				alarmThreshold=_threshold;
-				alarmGreaterThan = _greaterthan;
-				alarmGreaterThanString = _greaterthanhuman;
-				//Log.i(TAG,alarmChannel+" alarm "+alarmNumber+": Fires if value is "+_greaterthanhuman+" than "+_threshold+", and is at level "+_level);
-				
-				
 			}
 		//}
 	}
@@ -250,12 +262,14 @@ public class Frame {
 			// the start and stop bytes
 			if (di >= Frame.SIZE_TELEMETRY_FRAME - 1) {
 				// inform about this issues
-				if(FrSkyServer.D)Log.e(TAG, "Invalid frame length, can't decode frame: " + frameToHuman(frame));
-				// no need to continue here, this will return a wrong formatted
-				// frame now... Maybe best to replace the stop bit with this out
-				// of range byte so we can detect this problem later on
-				decodedFrame[di] = b;
-				break;
+//				if(FrSkyServer.D)Log.e(TAG, "Invalid frame length, can't decode frame: " + frameToHuman(frame));
+//				// no need to continue here, this will return a wrong formatted
+//				// frame now... Maybe best to replace the stop bit with this out
+//				// of range byte so we can detect this problem later on
+//				decodedFrame[di] = b;
+//				break;
+				// eso: keep adding bytes, but set frametype to CORRUPT
+				
 			}
 			// get current byte
 			b = frame[i];

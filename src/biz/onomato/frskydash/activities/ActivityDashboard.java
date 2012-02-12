@@ -94,7 +94,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     
     private TextView tv_ad1_val,tv_ad2_val,tv_ad1_unit,tv_ad2_unit;
     private TextView tv_statusBt,tv_statusRx,tv_statusTx;
-    private TextView tv_rssitx,tv_rssirx,tv_fps;
+    private TextView tv_rssitx,tv_rssirx,tv_fps,tv_bad;
     private TextView tv_modelName;
     private TextView tv_dash_ch0NameDesc,tv_dash_ch1NameDesc;
     private LinearLayout llDashboardMain;
@@ -178,6 +178,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         tv_rssitx   = (TextView) findViewById(R.id.dash_tvRSSItx);
         tv_rssirx   = (TextView) findViewById(R.id.dash_tvRSSIrx);
         tv_fps      = (TextView) findViewById(R.id.dash_tvFps);
+        tv_bad		= (TextView) findViewById(R.id.dash_tvBad);
         
         tv_modelName = (TextView) findViewById(R.id.dash_tvModelName);
         
@@ -314,6 +315,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    	tv_rssitx.setText("RSSItx: "+FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSITX).toValueString());
 	    	tv_rssirx.setText("RSSIrx: "+FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX).toValueString());
 	    	tv_fps.setText("FPS: "+server.getFps());
+	    	tv_bad.setText("Bad: "+FrSkyServer.badFrames);
 	    	
 	    	int len = server.getCurrentModel().getChannels().size();
 	    	//for(int i=0;i<len;i++)

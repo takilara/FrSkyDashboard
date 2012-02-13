@@ -172,7 +172,10 @@ public class Model {
 	public void addChannel(Channel channel)
 	{
 		//TODO: if id == -1, save to retrieve new id
-		
+		if(channel.getId()==-1)
+		{
+			FrSkyServer.saveChannel(channel);
+		}
 		channelMap.put(channel.getId(), channel);
 	}
 	

@@ -108,7 +108,7 @@ public class Simulator {
 				//globals.parseFrame(simFrame);
 				
 				simHandler.removeCallbacks(runnableSimulator);
-				simHandler.postDelayed(runnableSimulator, 30);
+				simHandler.postDelayed(runnableSimulator, 10);
 			}
 		};
 		

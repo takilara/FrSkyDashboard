@@ -30,6 +30,9 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	public static final String delim=";";
 	
 	
+	public boolean listening = false;
+	
+	
 	
 	public double raw,rawAvg;
 	public double eng,engAvg;
@@ -476,13 +479,14 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	// ====                        INTER CHANNEL COMMUNICATION                              =====
 	// ==========================================================================================
 	
+
 	public void listenTo(Channel channel)
 	{
 		listenTo(channel.getId());
 	}
 	public void listenTo(long channelId)
 	{
-		if(channelId!=-1)
+		if((channelId!=-1)&&(!listening))
 		{
 			mIntentFilter = new IntentFilter();
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
@@ -493,11 +497,13 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		    if(FrSkyServer.D)Log.d(TAG,"Context is : "+FrSkyServer.getContext());
 //		    if(_context!=null)
 //		    {
+		    listening=true;
 		    FrSkyServer.getContext().registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
 //		    }
 		}
 		else
 		{
+			listening=false;
 			_sourceChannelId = channelId;
 			
 			try
@@ -527,7 +533,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
         	//	Log.i(TAG,"I have received BroadCast that the server has started");
         	// Get the value..
         	double val = intent.getDoubleExtra("channelValue", -1);
-        	//if(DEBUG) Log.d(TAG,"Received input value "+val);
+        	if(FrSkyServer.D) Log.w(TAG,_description +" on model "+_modelId+" received broadcast input value "+val);
+        	
         	double v = setRaw(val);
     		//Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
 
@@ -560,6 +567,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		rawAvg = _avg;
 		eng = _val;
 		_stack = new MyStack(_movingAverage);
+		listenTo(-1);	// force unregister receiver
 		setDirtyFlag(true);
 	}
 	

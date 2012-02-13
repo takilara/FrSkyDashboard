@@ -919,6 +919,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setCurrentModel(Model currentModel)
 	{
+		// reset old channels 
+		//FIXME destroy?
+		for(Channel c: _currentModel.getChannels().values())
+		{
+			c.reset();
+		}
+		
 		badFrames=0;
 		logger.setModel(currentModel);
 		_currentModel = currentModel;

@@ -132,12 +132,13 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				_model = new Model("Model "+(len+1));
 				// save, to get id
 				//FrSkyServer.modelMap.put(_model.getId(), _model);
-				
+				//FrSkyServer.saveModel(_model);
 				
 				_model.initializeDefaultChannels();
 				// save again to persist
 				//FrSkyServer.database.saveModel(_model);
 				FrSkyServer.addModel(_model);
+				
 				
 			}
 			else

@@ -127,14 +127,17 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			if(_modelId==-1)
 			{
 				if(FrSkyServer.D) Log.d(TAG,"Configure new Model object");
-				int len = FrSkyServer.database.getModels().size();
+				//int len = FrSkyServer.database.getModels().size();
+				int len = FrSkyServer.modelMap.size();
 				_model = new Model("Model "+(len+1));
 				// save, to get id
-				FrSkyServer.database.saveModel(_model);
+				//FrSkyServer.modelMap.put(_model.getId(), _model);
+				
 				
 				_model.initializeDefaultChannels();
 				// save again to persist
-				FrSkyServer.database.saveModel(_model);
+				//FrSkyServer.database.saveModel(_model);
+				FrSkyServer.addModel(_model);
 				
 			}
 			else
@@ -142,7 +145,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				if(FrSkyServer.D) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
-				_model = FrSkyServer.database.getModel(_modelId);
+				//_model = FrSkyServer.database.getModel(_modelId);
+				_model = FrSkyServer.modelMap.get(_modelId);
 				
 				
 //				_model = new Model(getApplicationContext());
@@ -236,16 +240,18 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		_model.setName(edName.getText().toString());
 		_model.setType((String) spType.getSelectedItem());
 		//_model.saveToDatabase();
-		FrSkyServer.database.saveModel(_model);
-		if(_model.getId()==server.getCurrentModel().getId())
-		{
-			if(FrSkyServer.D)Log.d(TAG,"Should update the servers.currentmodel");
-			server.setCurrentModel(_model);
-		}
-		else
-		{
-			if(FrSkyServer.D)Log.d(TAG,"This is not the current model");
-		}
+		//FrSkyServer.database.saveModel(_model);
+
+		FrSkyServer.saveModel(_model);
+//		if(_model.getId()==server.getCurrentModel().getId())
+//		{
+//			if(FrSkyServer.D)Log.d(TAG,"Should update the servers.currentmodel");
+//			server.setCurrentModel(_model);
+//		}
+//		else
+//		{
+//			if(FrSkyServer.D)Log.d(TAG,"This is not the current model");
+//		}
 	}
 	
 	private void populateChannelList()

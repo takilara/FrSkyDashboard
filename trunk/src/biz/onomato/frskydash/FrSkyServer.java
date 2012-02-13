@@ -118,6 +118,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     private Logger logger;
     private Model _currentModel;
     
+    public static TreeMap<Integer,Model> modelMap;
+    
     private boolean _watchdogEnabled = true;
     private static boolean _outGoingWatchdogFlag = false;
     private static long _lastOutGoingWatchdogTime;
@@ -139,7 +141,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     private static TreeMap<Integer,Channel> _sourceChannelMap;
     
-    public static FrSkyDatabase database;
+    private static FrSkyDatabase database;
     
     private boolean _dying=false;
 	
@@ -215,6 +217,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
 		
 		
+		
+		
 		_audiomanager = 
         	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		
@@ -249,8 +253,20 @@ public class FrSkyServer extends Service implements OnInitListener {
 	//	_currentModel = new Model(context);
 		
 		// DEBUG, List all channels for the model using new databaseadapter
+		
+		modelMap = new TreeMap<Integer,Model>();
 		database = new FrSkyDatabase(getApplicationContext());
-		_currentModel = database.getModel(_prevModelId);
+		
+		for(Model m: database.getModels())
+		{
+			modelMap.put(m.getId(), m);
+		}
+		
+		_currentModel = modelMap.get(_prevModelId);
+		
+		//_currentModel = database.getModel(_prevModelId);
+		
+		
 		if(_currentModel==null)
 		{
 			if(D)Log.e(TAG,"No model exists, make a new one");
@@ -267,6 +283,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			
 			//_currentModel.setId(0);
 			database.saveModel(_currentModel);
+			modelMap.put(_currentModel.getId(),_currentModel);
 		}
 		
 		if(_currentModel.getFrSkyAlarms().size()==0)
@@ -298,6 +315,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 		mIntentFilterBt.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
+		
 		//mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
 		
@@ -918,6 +936,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 	/**
+	 *  
+	 * @param modelId the id of the model the application should be monitoring
+	 */
+	public void setCurrentModel(int modelId)
+	{
+		setCurrentModel(modelMap.get(modelId));
+	}
+	/**
 	 * 
 	 * @param currentModel the model the application should be monitoring
 	 */
@@ -959,7 +985,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		//logger.stop();		// SetModel will stop current Logger
-		
+		Toast.makeText(this, _currentModel.getName() + " set as the active model", Toast.LENGTH_LONG).show();
 
 	}
 	
@@ -2047,7 +2073,66 @@ public class FrSkyServer extends Service implements OnInitListener {
             }
         }
     };
+
     
+	// **************************************************************************************************************
+	//                                   MODEL STUFF
+	// **************************************************************************************************************
+    /**
+     * Adds new model to the model map (will replace if id is positive and exists)
+     * @param model the model to add to the modelstore
+     */
+    public static void addModel(Model model)
+    {
+    	if(model.getId()==-1)
+    	{
+    		// save to get id
+    		database.saveModel(model);
+    	}
+    	modelMap.put(model.getId(), model);
+    	
+    }
+    
+    /**
+     * 
+     * @param model the model to delete
+     */
+    public static void deleteModel(Model model)
+    {
+    	model.frSkyAlarms.clear();
+    	model.getChannels().clear();
+    	database.deleteAllChannelsForModel(model);
+    	database.deleteAlarmsForModel(model);
+    	database.deleteModel(model.getId());
+    	modelMap.remove(model.getId());
+    }
+    
+    /**
+     * 
+     * @param model the model to save
+     */
+    public static void saveModel(Model model)
+    {
+    	database.saveModel(model);
+    }
+    
+    /**
+     * 
+     * @param modelId id of the model to save
+     */
+    public static void saveModel(int modelId)
+    {
+    	saveModel(modelMap.get(modelId));
+    }
+    
+    /**
+     * Saves a channel
+     * @param channel the channel to save
+     */
+    public static void saveChannel(Channel channel)
+    {
+    	database.saveChannel(channel);
+    }
     
 }
 

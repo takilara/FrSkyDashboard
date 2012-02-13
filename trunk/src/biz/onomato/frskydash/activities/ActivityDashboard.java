@@ -669,17 +669,21 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			}
 			speakerV.setClickable(true);
 			speakerV.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT,0));
-			speakerV.setId(ID_CHANNEL_BUTTON_SILENT+n);
+			speakerV.setId(ID_CHANNEL_BUTTON_SILENT+c.getId());
 			speakerV.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					ImageView iv = (ImageView) v;
-					Channel c = currentModel.getChannels().get(v.getId()-ID_CHANNEL_BUTTON_SILENT);
+					int channelId = v.getId()-ID_CHANNEL_BUTTON_SILENT;
+					Log.w(TAG,"Change silent on channel with id: "+channelId);
+					Channel c = currentModel.getChannels().get(channelId);
 					//if(DEBUG) Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
 					if(FrSkyServer.D)  Log.d(TAG,"Toggle silent on "+c.getDescription());
 					boolean s = !c.getSilent();
 					c.setSilent(s);
 					//c.saveToDatabase();
-					FrSkyServer.database.saveChannel(c);
+					//FrSkyServer.database.saveChannel(c);
+					FrSkyServer.saveChannel(c);
+					//or SAVE_MODEL
 					if(s)
 					{
 						iv.setImageResource(R.drawable.ic_lock_silent_mode);

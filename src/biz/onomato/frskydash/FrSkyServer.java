@@ -29,6 +29,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 import biz.onomato.frskydash.activities.ActivityDashboard;
@@ -91,7 +92,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static final int CMD_START_SPEECH	=	 2;
 	public static final int CMD_STOP_SPEECH		=	 3;
 	
-	
+		
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
@@ -177,6 +178,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
 	
+	public LocalBroadcastManager broadcastManager;
+	
 	// hcpl: these are class members now since we have to collect the data over
 	// several method executions since the bytes could be spread over several
 	// telemetry 11 bytes frames
@@ -205,6 +208,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		if(D)Log.i(TAG,"onCreate");
 		super.onCreate();
 		context = getApplicationContext();
+		broadcastManager = LocalBroadcastManager.getInstance(context);
 		//_serverChannels = new HashMap<String,Channel>();
 		
 		_alarmMap = new TreeMap<Integer,Alarm>();
@@ -921,10 +925,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		// reset old channels 
 		//FIXME destroy?
-		for(Channel c: _currentModel.getChannels().values())
+		if(_currentModel!=null)
 		{
-			c.reset();
+			_currentModel.close();
 		}
+
+		_currentModel = null;
 		
 		badFrames=0;
 		logger.setModel(currentModel);

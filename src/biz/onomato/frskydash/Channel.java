@@ -486,37 +486,47 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 	public void listenTo(long channelId)
 	{
-		if((channelId!=-1)&&(!listening))
+		if(channelId!=-1)
 		{
+			if(listening)	// already listening to something
+			{
+				// remove existing listener before allowing to add new one
+				try
+				{
+					FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
+				}
+				catch (Exception e){
+					Log.e(TAG,e.getMessage());
+					
+				}				
+				
+			}
+			
+			
 			mIntentFilter = new IntentFilter();
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
 			_sourceChannelId = channelId;
-			if(FrSkyServer.D)Log.d(TAG,"Listens for broadcast of values to on context "+FrSkyServer.getContext()+", with message: "+bCastAction);
+			if(FrSkyServer.D)Log.d(TAG,_description+": Added broadcast listener");
 			
 		    mIntentFilter.addAction(bCastAction);
-		    if(FrSkyServer.D)Log.d(TAG,"Context is : "+FrSkyServer.getContext());
-//		    if(_context!=null)
-//		    {
 		    listening=true;
+		    
+		    // TODO: try to use "this" as receiver instead of mChannelUpdateReceiver
+		    
 		    FrSkyServer.getContext().registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
-//		    }
+
 		}
 		else
 		{
 			listening=false;
 			_sourceChannelId = channelId;
 			
+			if(FrSkyServer.D)Log.d(TAG,_description+": Removed broadcast listener");
 			try
 			{
-				//if(_context!=null)
-				//{
 				FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
-				//}
 			}
-			catch (Exception e)
-			{
-				
-			}
+			catch (Exception e){Log.e(TAG,e.getMessage());}
 		}
 		setDirtyFlag(true);
 	}
@@ -560,6 +570,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	
 	public void reset()
 	{
+		if(FrSkyServer.D)Log.d(TAG,_description+": Resetting self");
 		_raw = -1;
 		_val = -1;
 		_avg = 0;

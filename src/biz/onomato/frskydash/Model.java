@@ -84,6 +84,23 @@ public class Model {
 	}
 	
 
+	/**
+	 * Should be called when you want to "release" a model
+	 * 
+	 * Stops any channel listeners
+	 * Removes channel references
+	 * Removes alarm references 
+	 */
+	public void close()
+	{
+		if(FrSkyServer.D)Log.d(TAG,_name+": Resetting myself and all my components");
+		for(Channel c: getChannels().values())
+		{
+			c.reset();
+			c= null;
+		}
+		channelMap.clear();
+	}
 	
 	
 	public String getType() {

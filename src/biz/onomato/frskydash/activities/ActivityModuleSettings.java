@@ -190,13 +190,15 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 				if(FrSkyServer.D) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
-				_model = FrSkyServer.database.getModel(_modelId);
+				//_model = FrSkyServer.database.getModel(_modelId);
+				_model = FrSkyServer.modelMap.get(_modelId);
 			}
         	
 			
 			//_alarmMap = _model.getFrSkyAlarms();
 			_alarmMap = new TreeMap<Integer,Alarm>(Collections.reverseOrder());
-			_alarmMap.putAll(FrSkyServer.database.getAlarmsForModel(_modelId));
+			//_alarmMap.putAll(FrSkyServer.database.getAlarmsForModel(_modelId));
+			_alarmMap.putAll(FrSkyServer.modelMap.get(_modelId).getFrSkyAlarms());
 			//_alarmMap = FrSkyServer.database.getAlarmsForModel(_modelId);
 			
 			
@@ -299,7 +301,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     			break;
     		case R.id.FrSkySettings_save:
     			_model.setFrSkyAlarms(_alarmMap);
-    			FrSkyServer.database.saveModel(_model);
+    			//FrSkyServer.database.saveModel(_model);
+    			FrSkyServer.saveModel(_model);
 
     			this.setResult(RESULT_OK);
 				this.finish();

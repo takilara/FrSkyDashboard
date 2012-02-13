@@ -106,12 +106,14 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			rbCurrentModel.setChecked(true);
 			//Model m = new Model(getApplicationContext());
 			//m.loadFromDatabase(ii);
-			Model m = FrSkyServer.database.getModel(ii);
+			//Model m = FrSkyServer.database.getModel(ii);
+			//Model m = FrSkyServer.modelMap.get(ii);
 			
 			if(server!=null)
 			{
-				server.setCurrentModel(m);
-				Toast.makeText(this, m.getName() + " set as the active model", Toast.LENGTH_LONG).show();
+				//server.setCurrentModel(m);
+				server.setCurrentModel(ii);
+				
 			}
 		}
 		else if(id>1000)	// EDIT
@@ -171,8 +173,8 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		int n = 0;
 		//while(n < c.getCount())
 		
-		int modelCount = FrSkyServer.database.getModels().size();
-		for(Model m : FrSkyServer.database.getModels())
+		int modelCount = FrSkyServer.modelMap.size();
+		for(Model m : FrSkyServer.modelMap.values())
 		{
 			if(FrSkyServer.D)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
 			LinearLayout ll = new LinearLayout(getApplicationContext());
@@ -269,7 +271,8 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		///TODO: Modify for deletion of models
 		//final Model m = new Model(getApplicationContext());
 		//m.loadFromDatabase(id);
-		final Model m = server.database.getModel(id); 
+		//final Model m = server.database.getModel(id); 
+		final Model m = FrSkyServer.modelMap.get(id);
 		if(FrSkyServer.D)Log.i(TAG,"Delete model with id:"+id);
 		_deleteId = id;
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
@@ -287,14 +290,18 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             	int delModelId = m.getId();
             	
             	
-            	FrSkyServer.database.deleteAllChannelsForModel(m);
-            	FrSkyServer.database.deleteAlarmsForModel(m);
-            	FrSkyServer.database.deleteModel(_deleteId);
+//            	FrSkyServer.database.deleteAllChannelsForModel(m);
+//            	FrSkyServer.database.deleteAlarmsForModel(m);
+//            	FrSkyServer.database.deleteModel(_deleteId);
+            	
+
+            	FrSkyServer.deleteModel(m);
             	
             	if(delModelId==server.getCurrentModel().getId())
             	{
             		// we deleted the current model
-            		server.setCurrentModel(FrSkyServer.database.getModel());
+            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
+            		
             	}
             	
 //            	DBAdapterModel db = new DBAdapterModel(getApplicationContext());

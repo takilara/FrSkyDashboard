@@ -19,6 +19,7 @@ public class Model {
 	public static final int MODEL_TYPE_BOAT=3;
 	public static final int MODEL_TYPE_MULTIROTOR=4;
 	public static final int MODEL_TYPE_UNKNOWN=-1;
+	 
 	
 	
 	
@@ -33,6 +34,8 @@ public class Model {
 	//public Alarm[] alarms;
 	TreeMap<Integer,Alarm> frSkyAlarms;
 	public int alarmCount = 0;
+	
+	public boolean dirty=false;
 
 	
 	
@@ -146,7 +149,7 @@ public class Model {
 		ad1raw.setPrecision(0);
 		ad1raw.setMovingAverage(0);
 		// save to force id update
-		FrSkyServer.database.saveChannel(ad1raw);
+		//FrSkyServer.database.saveChannel(ad1raw);
 		addChannel(ad1raw);
 		
 		Channel ad2raw = new Channel();
@@ -160,8 +163,9 @@ public class Model {
 		ad2raw.setPrecision(0);
 		ad2raw.setMovingAverage(0);
 		// save to force id update		
-		FrSkyServer.database.saveChannel(ad2raw);
+		//FrSkyServer.database.saveChannel(ad2raw);
 		addChannel(ad2raw);
+		dirty=true;
 	}
 
 	// I need to be able to add channels to this model

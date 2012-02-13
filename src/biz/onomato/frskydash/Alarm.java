@@ -230,8 +230,10 @@ public class Alarm {
 	{
 		if(channelId>=0)
 		{
-			Channel ch = FrSkyServer.database.getChannel(channelId);
-			setUnitChannel(ch);
+			//Channel ch = FrSkyServer.database.getChannel(channelId);
+			//setUnitChannel(ch);
+			_unitChannelId = channelId;
+			//setUnitChannel(FrSkyServer.modelMap.get(_modelId).getChannels().get(channelId));
 		}
 		else
 		{

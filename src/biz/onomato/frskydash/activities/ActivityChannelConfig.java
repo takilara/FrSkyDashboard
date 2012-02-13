@@ -152,7 +152,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				if(FrSkyServer.D)Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
-				_model = FrSkyServer.database.getModel(_modelId);
+				//_model = FrSkyServer.database.getModel(_modelId);
+				_model = FrSkyServer.modelMap.get(_modelId);
 			}
 	        
 			
@@ -321,7 +322,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		{
 			if(FrSkyServer.D)Log.d(TAG,"This is an existing model, feel free to save");
 			//channel.saveToDatabase();
-			FrSkyServer.database.saveChannel(channel);
+			//FrSkyServer.database.saveChannel(channel);
+			FrSkyServer.modelMap.get(channel.getModelId()).setChannel(channel);
+			FrSkyServer.saveChannel(channel);
+			//or SAVE_MODEL, modelId
 		}
 		else
 		{

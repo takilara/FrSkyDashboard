@@ -171,7 +171,6 @@ public class Model {
 	// I need to be able to add channels to this model
 	public void addChannel(Channel channel)
 	{
-		//TODO: if id == -1, save to retrieve new id
 		if(channel.getId()==-1)
 		{
 			FrSkyServer.saveChannel(channel);

@@ -2088,6 +2088,11 @@ public class FrSkyServer extends Service implements OnInitListener {
     	{
     		// save to get id
     		database.saveModel(model);
+    		// Update channels with new model id
+    		for(Channel c : model.getChannels().values())
+    		{
+    			c.setModelId(model.getId());
+    		}
     	}
     	modelMap.put(model.getId(), model);
     	

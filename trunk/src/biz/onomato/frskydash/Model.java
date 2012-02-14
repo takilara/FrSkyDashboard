@@ -318,6 +318,11 @@ public class Model {
 		}
 		return sourceChannels;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Model [_type=" + _type + ", _name=" + _name + ", _id=" + _id
+				+ "]";
+	}
+
 }

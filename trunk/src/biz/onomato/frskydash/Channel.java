@@ -416,11 +416,14 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		}
 	}
 	
-	public String toString()
-	{
-		return getDescription();
+	@Override
+	public String toString() {
+		return "Channel [_raw=" + _raw + ", _val=" + _val + ", _avg=" + _avg
+				+ ", _description=" + _description + ", _movingAverage="
+				+ _movingAverage + ", _modelId=" + _modelId + ", _channelId="
+				+ _channelId + "]";
 	}
-	
+
 	public String toValueString()
 	{
 		return String.format("%."+_precision+"f", _val);

@@ -490,14 +490,21 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	// ==========================================================================================
 	
 
-	public void listenTo(Channel channel)
+	public void setSourceChannel(Channel channel)
 	{
-		listenTo(channel.getId());
+		_sourceChannelId = channel.getId(); 
+		//listenTo(channel.getId());
 	}
-	public void listenTo(long channelId)
+	public void setSourceChannel(long channelId)
 	{
-		if(channelId!=-1)
+		_sourceChannelId = channelId;
+	}
+	
+	public void registerListener()
+	{
+		if(_sourceChannelId != -1)
 		{
+			Log.w(TAG,_description+"Registering listener");
 			if(listening)	// already listening to something
 			{
 				// remove existing listener before allowing to add new one
@@ -514,8 +521,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			
 			
 			mIntentFilter = new IntentFilter();
-			String bCastAction = MESSAGE_CHANNEL_UPDATED+channelId;
-			_sourceChannelId = channelId;
+			String bCastAction = MESSAGE_CHANNEL_UPDATED+_sourceChannelId;
+			
 			if(FrSkyServer.D)Log.d(TAG,_description+": Added broadcast listener");
 			
 		    mIntentFilter.addAction(bCastAction);
@@ -528,17 +535,24 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		}
 		else
 		{
-			listening=false;
-			_sourceChannelId = channelId;
-			
-			if(FrSkyServer.D)Log.d(TAG,_description+": Removed broadcast listener");
-			try
-			{
-				FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
-			}
-			catch (Exception e){Log.e(TAG,e.getMessage());}
+			Log.e(TAG,"SourceChannel was -1!");
+			unregisterListener();
 		}
 		setDirtyFlag(true);
+	}
+	
+	public void unregisterListener()
+	{
+
+		if(FrSkyServer.D)Log.d(TAG,_description+": Removing broadcast listener");
+		try
+		{
+			FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
+			if(FrSkyServer.D)Log.d(TAG,_description+": Removed Listener Success");
+			listening=false;
+		}
+		catch (Exception e){Log.e(TAG,e.getMessage());}
+
 	}
 	
 	private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
@@ -588,7 +602,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		rawAvg = _avg;
 		eng = _val;
 		_stack = new MyStack(_movingAverage);
-		listenTo(-1);	// force unregister receiver
+		setSourceChannel(-1);	// force unregister receiver
 		setDirtyFlag(true);
 	}
 	

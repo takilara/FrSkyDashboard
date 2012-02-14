@@ -116,7 +116,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private static final int FRAMES_FOR_FPS_CALC=2;
     
     private Logger logger;
-    private Model _currentModel;
+    private Model _currentModel=null;
     
     public static TreeMap<Integer,Model> modelMap;
     
@@ -254,6 +254,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		// DEBUG, List all channels for the model using new databaseadapter
 		
+		
+		
+		
 		modelMap = new TreeMap<Integer,Model>();
 		database = new FrSkyDatabase(getApplicationContext());
 		
@@ -262,53 +265,57 @@ public class FrSkyServer extends Service implements OnInitListener {
 			modelMap.put(m.getId(), m);
 		}
 		
-		_currentModel = modelMap.get(_prevModelId);
+		Model cm = modelMap.get(_prevModelId);
 		
 		//_currentModel = database.getModel(_prevModelId);
 		
 		
-		if(_currentModel==null)
+		if(cm==null)
 		{
 			if(D)Log.e(TAG,"No model exists, make a new one");
-			_currentModel = new Model("Model 1");
+			cm = new Model("Model 1");
 			// Saving to get id
-			database.saveModel(_currentModel);
+			database.saveModel(cm);
 			
-			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
+			cm.setFrSkyAlarms(initializeFrSkyAlarms());
 			// Create Default model channels.
-			_currentModel.initializeDefaultChannels();
+			cm.initializeDefaultChannels();
 			
 			
 			//_model.addChannel(c);
 			
 			//_currentModel.setId(0);
-			database.saveModel(_currentModel);
-			modelMap.put(_currentModel.getId(),_currentModel);
+			database.saveModel(cm);
+			modelMap.put(cm.getId(),cm);
 		}
 		
-		if(_currentModel.getFrSkyAlarms().size()==0)
+		if(cm.getFrSkyAlarms().size()==0)
 		{
 			if(D)Log.e(TAG,"No alarms exists, setup with defaults");
-			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
-			database.saveModel(_currentModel);
+			cm.setFrSkyAlarms(initializeFrSkyAlarms());
+			database.saveModel(cm);
 		}
 		
 		
-		_prevModelId = _currentModel.getId();
+		_prevModelId = cm.getId();
 		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
 		
-		if(D)Log.d(TAG,"The current model is: "+_currentModel.getName()+" and has id: "+_currentModel.getId());
-
 		
-	
-
+		
+		if(D)Log.d(TAG,"The current model is: "+cm.getName()+" and has id: "+cm.getId());
+		if(D)Log.d(TAG,"Activating the model");
+		setCurrentModel(cm);
+		
 		logger = new Logger(getApplicationContext(),_currentModel,true,true,true);
 		//logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
 		logger.setCsvHeader();
 		logger.setLogToRaw(getLogToRaw());
 		logger.setLogToCsv(getLogToCsv());
 		logger.setLogToHuman(getLogToHuman());
+		
+
+		
 
 		
 		
@@ -949,17 +956,27 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setCurrentModel(Model currentModel)
 	{
+		
 		// reset old channels 
 		//FIXME destroy?
 		if(_currentModel!=null)
 		{
-			_currentModel.close();
+			Log.i(TAG,"Changing Models from "+_currentModel.getName()+" to "+currentModel.getName());
+			
+			_currentModel.unregisterListeners();
 		}
-
-		_currentModel = null;
+		else
+		{
+			Log.i(TAG,"Changing Models from NULL to "+currentModel.getName());
+		}
+		//_currentModel = null;
 		
 		badFrames=0;
-		logger.setModel(currentModel);
+		
+		if(logger!=null)
+		{
+			logger.setModel(currentModel);
+		}
 		_currentModel = currentModel;
 		//_prevModelId = _currentModel.getId();
 		_editor.putInt("prevModelId", _currentModel.getId());
@@ -982,7 +999,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				}
 			}
 		}
-		
+		_currentModel.registerListeners();
 		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		//logger.stop();		// SetModel will stop current Logger
 		Toast.makeText(this, _currentModel.getName() + " set as the active model", Toast.LENGTH_LONG).show();

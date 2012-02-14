@@ -304,7 +304,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		
 		Channel c = (Channel) spSourceChannel.getSelectedItem();
 		if(FrSkyServer.D)Log.d(TAG,"Try to set source channel to:"+c.toString()+" (ID: "+c.getId()+")");
-		channel.listenTo(c);
+		channel.setSourceChannel(c);
 		
 		//channel.setDirtyFlag(true);
 		

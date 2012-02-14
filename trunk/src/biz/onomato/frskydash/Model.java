@@ -141,7 +141,7 @@ public class Model {
 		Channel ad1raw = new Channel();
 		ad1raw.setDescription("AD1 raw");
 		ad1raw.setModelId(_id);
-		ad1raw.listenTo(FrSkyServer.CHANNEL_ID_AD1);
+		ad1raw.setSourceChannel(FrSkyServer.CHANNEL_ID_AD1);
 		ad1raw.setId(-1);
 		ad1raw.setSilent(true);
 		ad1raw.setLongUnit("");
@@ -155,7 +155,7 @@ public class Model {
 		Channel ad2raw = new Channel();
 		ad2raw.setDescription("AD2 raw");
 		ad2raw.setModelId(_id);
-		ad2raw.listenTo(FrSkyServer.CHANNEL_ID_AD2);
+		ad2raw.setSourceChannel(FrSkyServer.CHANNEL_ID_AD2);
 		ad2raw.setId(-1);
 		ad2raw.setSilent(true);
 		ad2raw.setLongUnit("");
@@ -319,6 +319,23 @@ public class Model {
 		return sourceChannels;
 	}
 
+	public void unregisterListeners()
+	{
+		for(Channel c: getChannels().values())
+		{
+			c.unregisterListener();
+		}
+	}
+	
+	public void registerListeners()
+	{
+		if(FrSkyServer.D)Log.d(TAG,_name+": Registrering listeners");
+		for(Channel c: getChannels().values())
+		{
+			c.registerListener();
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return "Model [_type=" + _type + ", _name=" + _name + ", _id=" + _id

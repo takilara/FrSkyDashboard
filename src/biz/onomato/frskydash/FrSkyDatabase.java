@@ -157,6 +157,17 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	}
     	if(model.getId()!=-1) // Insert/update did not fail
     	{
+    		// first, make sure the channels have the correct modelId
+        	//Make sure all the models channels modelid is correct
+        	int mId = model.getId();
+        	if(mId!=-1)
+        	{
+        		for(Channel c : model.getChannels().values())
+        		{
+        			c.setModelId(mId);
+        		}
+        	}
+    		
     		// Update the channels
     		if(FrSkyServer.D)Log.i(TAG,"Saving channels");
     		

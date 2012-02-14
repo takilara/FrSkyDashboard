@@ -504,7 +504,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	{
 		if(_sourceChannelId != -1)
 		{
-			Log.w(TAG,_description+"Registering listener");
+			if(FrSkyServer.D)Log.d(TAG,_description+" Registering listener");
 			if(listening)	// already listening to something
 			{
 				// remove existing listener before allowing to add new one
@@ -535,7 +535,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		}
 		else
 		{
-			Log.e(TAG,"SourceChannel was -1!");
+			//Log.e(TAG,"SourceChannel was -1!");
 			unregisterListener();
 		}
 		setDirtyFlag(true);

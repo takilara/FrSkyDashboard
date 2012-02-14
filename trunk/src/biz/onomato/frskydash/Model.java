@@ -319,6 +319,9 @@ public class Model {
 		return sourceChannels;
 	}
 
+	/**
+	 * Remove listeners for all channels in the model
+	 */
 	public void unregisterListeners()
 	{
 		for(Channel c: getChannels().values())
@@ -327,6 +330,9 @@ public class Model {
 		}
 	}
 	
+	/**
+	 * Make the channels of this model start listening
+	 */
 	public void registerListeners()
 	{
 		if(FrSkyServer.D)Log.d(TAG,_name+": Registrering listeners");

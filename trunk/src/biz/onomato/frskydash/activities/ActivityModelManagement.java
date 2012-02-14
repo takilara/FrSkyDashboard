@@ -95,10 +95,11 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			//remove check from all the radio buttons
 			for(RadioButton rb : rbList)
 			{
+				//Log.w(TAG,"Remove the selection on RadioButton with id "+rb.getId());
 				rb.setChecked(false);
 			}
 			
-			rbList.clear();
+			//rbList.clear();
 			
 			int ii = id -10000;
 			//rbCurrentModel.setChecked(false);
@@ -154,7 +155,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
 		//llModelsLayout
 		llModelsLayout.removeAllViews();
-
+		rbList.clear();
 		long currentModelId = -1;
 		if(server==null)
 		{

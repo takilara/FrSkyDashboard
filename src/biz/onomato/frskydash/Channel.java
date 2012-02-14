@@ -416,12 +416,19 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return The description of the Channel
+	 * 
+	 * eso: This is used when the channel are added to adapters for the spinners
+	 */
 	@Override
 	public String toString() {
-		return "Channel [_raw=" + _raw + ", _val=" + _val + ", _avg=" + _avg
-				+ ", _description=" + _description + ", _movingAverage="
-				+ _movingAverage + ", _modelId=" + _modelId + ", _channelId="
-				+ _channelId + "]";
+		return getDescription();
+//		return "Channel [_raw=" + _raw + ", _val=" + _val + ", _avg=" + _avg
+//				+ ", _description=" + _description + ", _movingAverage="
+//				+ _movingAverage + ", _modelId=" + _modelId + ", _channelId="
+//				+ _channelId + "]";
 	}
 
 	public String toValueString()

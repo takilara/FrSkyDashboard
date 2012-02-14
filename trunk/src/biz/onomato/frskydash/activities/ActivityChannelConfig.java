@@ -198,7 +198,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 					    	if(parentView.getSelectedItem()instanceof Channel)
 					    	{
 					    		Channel channel = (Channel) parentView.getSelectedItem();
-					    		Log.e(TAG,"User selecte channel "+channel+" the units are: "+channel.getLongUnit());
+					    		if(FrSkyServer.D)Log.d(TAG,"User selecte channel "+channel+" the units are: "+channel.getLongUnit());
 					    		String longUnit = channel.getLongUnit();
 					    		String shortUnit = channel.getShortUnit();
 					    		

@@ -242,6 +242,7 @@ public class Model {
 		{
 			for(Alarm a:alarmMap.values())
 			{
+				a.setModelId(_id);
 				addAlarm(a);
 			//	alarmCount += 1;
 			}

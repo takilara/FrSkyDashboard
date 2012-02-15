@@ -148,7 +148,14 @@ public class Alarm {
 	
 	public void setModelId(Model model)
 	{
-		setModelId(model.getId());
+		if(model!=null)
+		{
+			setModelId(model.getId());
+		}
+		else
+		{
+			setModelId(-1);
+		}
 	}
 	
 	public void setModelId(int modelId)

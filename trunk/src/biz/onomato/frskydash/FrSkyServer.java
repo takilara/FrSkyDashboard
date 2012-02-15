@@ -293,6 +293,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		{
 			if(D)Log.e(TAG,"No alarms exists, setup with defaults");
 			cm.setFrSkyAlarms(initializeFrSkyAlarms());
+			
 			database.saveModel(cm);
 		}
 		
@@ -569,7 +570,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Alarm.LESSERTHAN);
 		Alarm a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_RSSIRX));
-		a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
 		alarmFrame = Frame.AlarmFrame(
@@ -580,7 +581,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_RSSIRX));
-		a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
 		alarmFrame = Frame.AlarmFrame(
@@ -590,7 +591,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD1));
-		a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
 		alarmFrame = Frame.AlarmFrame(
@@ -600,7 +601,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD1));
-		a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
 		alarmFrame = Frame.AlarmFrame(
@@ -610,7 +611,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD2));
-		a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		
 		alarmFrame = Frame.AlarmFrame(
@@ -620,7 +621,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD2));
-		a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		return aMap;
 	}

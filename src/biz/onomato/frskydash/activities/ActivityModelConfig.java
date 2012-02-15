@@ -343,6 +343,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            			//populateChannelList();
 	            			
 	            		//}
+	            			//_model.getChannels().get(returnChannel.getSourceChannelId()).registerListener();
 	            			if(FrSkyServer.D) Log.d(TAG,"Received channel from ActivityChannelConfig: channel:"+returnChannel.getDescription()+", silent: "+returnChannel.getSilent());
 	            		
 	            	}
@@ -373,6 +374,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 
 	            @Override
 	            public void onClick(DialogInterface dialog, int which) {
+	            	
 	            	_model.removeChannel(channel);
 	            	populateChannelList();
 	            }

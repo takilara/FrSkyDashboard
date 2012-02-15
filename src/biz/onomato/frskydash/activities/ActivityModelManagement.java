@@ -295,7 +295,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 //            	FrSkyServer.database.deleteAlarmsForModel(m);
 //            	FrSkyServer.database.deleteModel(_deleteId);
             	
-
+            	
             	FrSkyServer.deleteModel(m);
             	
             	if(delModelId==server.getCurrentModel().getId())

@@ -2122,6 +2122,7 @@ public class FrSkyServer extends Service implements OnInitListener {
      */
     public static void deleteModel(Model model)
     {
+    	model.unregisterListeners();
     	model.frSkyAlarms.clear();
     	model.getChannels().clear();
     	database.deleteAllChannelsForModel(model);

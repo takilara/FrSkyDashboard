@@ -251,6 +251,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				applyChannel();
 				
 				
+				// Enable the listener:
+				//channel.registerListener();
 
 				
 				//Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
@@ -323,6 +325,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			if(FrSkyServer.D)Log.d(TAG,"This is an existing model, feel free to save");
 			//channel.saveToDatabase();
 			//FrSkyServer.database.saveChannel(channel);
+			channel.registerListener();
 			FrSkyServer.modelMap.get(channel.getModelId()).setChannel(channel);
 			FrSkyServer.saveChannel(channel);
 			//or SAVE_MODEL, modelId

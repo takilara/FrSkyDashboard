@@ -181,6 +181,7 @@ public class Model {
 	// I need to be able to delete channels from this model
 	public boolean removeChannel(Channel channel)
 	{
+		channel.unregisterListener();
 		channelMap.remove(channel.getId());
 		return true;
 		//return _channels.remove(channel);

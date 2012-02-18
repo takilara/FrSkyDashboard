@@ -107,6 +107,9 @@ public class FrSkyServer extends Service implements OnInitListener {
     public boolean reconnectBt = true;
     private boolean _manualBtDisconnect = false;    
     
+    private boolean _compareAfterRecord =false;
+    private boolean _autoSwitch = false;
+    
     // FPS
     public int fps,fpsRx,fpsTx=0;
     public static int badFrames = 0;
@@ -179,6 +182,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static final String MESSAGE_BLUETOOTH_STATE_CHANGED = "biz.onomato.frskydash.intent.action.BLUETOOTH_STATE_CHANGED";
 	
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
+	public static final String MESSAGE_ALARM_MISMATCH = "biz.onomato.frskydash.intent.action.ALARM_MISMATCH";
 	
 	public LocalBroadcastManager broadcastManager;
 	
@@ -1324,65 +1328,92 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 	/**
+	 * Compares the recorded alarms to the alarm set of a model
+	 * @param model the model to compare to
+	 * @return true if the alarms match
+	 */
+	public boolean alarmsSameAsModel(Model model)
+	{
+		boolean equal = false;
+		if(model!=null)
+		{
+			equal = true;
+			for(Alarm a: _alarmMap.values())
+			{
+				//Log.w(TAG,"Checking "+a.getFrSkyFrameType());
+				if(!model.getFrSkyAlarms().containsValue(a))
+				{
+					//Log.w(TAG," Not equal!");
+					equal = false;
+					break;
+				}
+				//Log.w(TAG," equal");
+				// compare a to _currentModel.alarms.get(a.getFrameType)
+			}
+		}
+		return equal;
+	}
+	
+	/**
 	 * Compare incoming alarms to currentModels alarms
 	 * <br>
 	 * NOTE: Incomplete
 	 */
 	public void compareAlarms()
 	{
+		
 		boolean equal = true;
 		if(_currentModel!=null)
 		{
-			for(Alarm a: _alarmMap.values())
-			{
-				Log.w(TAG,"Checking "+a.getFrSkyFrameType());
-				if(!_currentModel.getFrSkyAlarms().containsValue(a))
-				{
-					Log.w(TAG," Not equal!");
-					equal = false;
-					break;
-				}
-				Log.w(TAG," equal");
-				// compare a to _currentModel.alarms.get(a.getFrameType)
-			}
-			
+			equal = alarmsSameAsModel(_currentModel);
 			if(equal)
 			{
 				Log.e(TAG,"Alarm sets are equal");
 			}
 			else
 			{
-				Log.e(TAG,"Alarm sets are not equal");
-				// Take 1:
-				// Popup with:
-				// - Get new alarms
-				// - Modify Frsky alarms
-				// - Ignore
-				
-				// Take 2:
-				// Compare to other models
-				// If other model found
-				//    Popup Change Model to <newmodel>?
-				//    Yes - No
-				//    If No: Popup, update alarms:
-				//           On device
-				//           On radio
-				//           Ignore
-				
-				// Take 3:
-				// Depending on settings
-				
-				// 1. send currentmodels alarms
-				
-				// 2. Launch popup, Alarms not equal
-				// 2.1. Load alarm from FrSky
-				// 2.2. Send model alarms to FrSky
-				// 2.3. Ignore
-				// 2.4. ....
-				
+				Log.e(TAG,"Alarm sets are not equal, see if i can find a model that is equal");
+				boolean found = false;
+				for(Model m: modelMap.values())
+				{
+					if(m!=_currentModel)	// no point checking currentModel again
+					{
+						if(alarmsSameAsModel(m))
+						{
+							found = true;
+							Log.w(TAG,"Alarms match model "+m.getName());
+							// _autoSwitch should come from settings
+							if(_autoSwitch)
+							{
+								//setCurrentModel(m);
+								Log.e(TAG,"Auto Switch model");
+							}
+							else
+							{
+								Log.e(TAG,"Show popup allow switch of model");
+								Intent i = new Intent(MESSAGE_ALARM_MISMATCH);
+								i.putExtra("modelId", m.getId());
+								sendBroadcast(i);
+								
+							}
+							break;
+						}
+						else
+						{
+							//Log.w(TAG,"Alarms does not match model "+m.getName());
+						}
+					}
+				}
+				if(!found)
+				{
+					Log.e(TAG,"Show popup no switch option");
+					Intent i = new Intent(MESSAGE_ALARM_MISMATCH);
+					i.putExtra("modelId", -1);
+					sendBroadcast(i);
+				}
 			}
 		}
-		
+		_compareAfterRecord = false;	
 	}
 	
 	
@@ -1807,7 +1838,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 							i.setAction(MESSAGE_ALARM_RECORDING_COMPLETE);
 							sendBroadcast(i);
 							
-							compareAlarms();
+							if(_compareAfterRecord)
+							{
+								compareAlarms();
+							}
 						}
 					}
 				}
@@ -2038,13 +2072,17 @@ public class FrSkyServer extends Service implements OnInitListener {
                 	_manualBtDisconnect = false;
                 	//send(Frame.InputRequestAll().toInts());
                 	
-                	if(getAutoSendAlarms())
-        			{
-        				for(Alarm a : _currentModel.getFrSkyAlarms().values())
-        				{
-        					send(a.toFrame());
-        				}
-        			}
+                	_compareAfterRecord=true;
+                	recordAlarmsFromModule();
+                	
+                	// Dont autosend when connecting, rather autosend when setting currentModel
+//                	if(getAutoSendAlarms())
+//        			{
+//        				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+//        				{
+//        					send(a.toFrame());
+//        				}
+//        			}
                     
                     break;
                     

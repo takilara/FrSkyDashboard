@@ -268,14 +268,14 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			    		tv_statusRx.setBackgroundColor(0xff00aa00);
 			    		tv_statusRx.setText("Rx: UP");
 			    		
-			    		tv_fps.setTextColor(0xffbbbbbb);
+			    		//tv_fps.setTextColor(0xffbbbbbb);
 			    	}
 			    	else
 			    	{
 			    		tv_statusRx.setBackgroundColor(0xffff0000);
 			    		tv_statusRx.setText("Rx: DOWN");
 			    		
-			    		tv_fps.setTextColor(0xffff5500);
+			    		//tv_fps.setTextColor(0xffff5500);
 			    	}
 			    	
 			    	if(server.statusTx)

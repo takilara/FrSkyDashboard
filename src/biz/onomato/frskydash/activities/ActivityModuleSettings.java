@@ -574,7 +574,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
         				{
 	        				try
 	        				{
-	        					Log.w(TAG,"Got recorded alarm: "+server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
+	        					Log.w(TAG,"Got recorded alarm: "+a.getFrSkyFrameType()+": "+
+	        				server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
 		        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
 		        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
 		        				a.setGreaterThan(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getGreaterThan());

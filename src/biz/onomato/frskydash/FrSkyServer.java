@@ -479,7 +479,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				// only do this if not receiving anything from Rx side
 				if((statusRx==false) && (statusBt==true))
 				{
-					send(Frame.InputRequestAll());
+					send(Frame.InputRequestADAlarms());
 					_outGoingWatchdogFlag = true;
 					_lastOutGoingWatchdogTime = System.currentTimeMillis();
 				}
@@ -742,6 +742,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public String getFps()
 	{
+//		return Integer.toString(fpsRx);
 		if(statusRx)
 		{
 			return Integer.toString(fpsRx);
@@ -1544,6 +1545,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * @param f the frame to send 
 	 */	
 	public void send(Frame f) {
+		//Log.w(TAG,"Sending: "+f.toHuman());
 		send(f.toInts());
 	}
 	
@@ -1560,11 +1562,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_recordingAlarms = true;
 		_alarmMap.clear();
 		
-		// Only send request if Rx communication is up since we do automatic requests for alarms otherwise
+		// Only send request for RSSI alarms if Rx communication is up since we do automatic requests for RSSI alarms otherwise
 		if((statusRx==true) && (statusBt==true))
 		{
-			send(Frame.InputRequestAll());
+			//send(Frame.InputRequestRSSIAlarms());
+			send(Frame.InputRequestADAlarms());
 		}
+		//send(Frame.InputRequestADAlarms());
 	}
 	
 	/**
@@ -1742,6 +1746,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			logger.logFrame(f);
 		}
 		if(inBound)	_framecount++;
+		//Log.w(TAG,f.toHuman());
 		switch(f.frametype)
 		{
 			case Frame.FRAMETYPE_CORRUPT:
@@ -1770,7 +1775,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				}
 				break;
 			case Frame.FRAMETYPE_FRSKY_ALARM:
-				if(D)Log.d(TAG,"handle inbound FrSky alarm");
+				//if(D)Log.d(TAG,"handle inbound FrSky alarm");
 				if(_currentModel!=null)
 				{
 					// don't copy the entire alarm, as that would kill off sourcechannel
@@ -1812,7 +1817,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 				if(D)Log.d(TAG,"Frametype User Data");
 				FrSkyHub.getInstance().extractUserDataBytes(f);
 				break;
-			case Frame.FRAMETYPE_INPUT_REQUEST_ALL:
+			case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_AD:
+				//Log.d(TAG,"Frametype Request all alarms");
+				break;
+			case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_RSSI:
 				//Log.d(TAG,"Frametype Request all alarms");
 				break;
 			default:
@@ -2066,6 +2074,7 @@ public class FrSkyServer extends Service implements OnInitListener {
                 
             //handle receiving data from frsky 
             case MESSAGE_READ:
+            	//Log.w(TAG,"Received bytes: "+msg.obj);
             	if(!_dying)
             	{
             		//hcpl updated to handle the new int array after byte per byte read update

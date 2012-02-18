@@ -1,6 +1,7 @@
 package biz.onomato.frskydash.activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,6 +9,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -63,6 +65,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private static final String TAG = "Dashboard"; 
     
     private static final int DIALOG_ABOUT_ID=0;
+    private static final int DIALOG_ALARMS_MISMATCH=1;
     private Dialog dlgAbout;
     //private static final boolean DEBUG=true;
     //private static boolean _enableDebugActivity=false;
@@ -74,7 +77,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     private boolean bluetoothEnabledAtStart;
     private int _clickToDebug=0;
     
-    
+    private int _targetModel=-1;
     
 	// Used for Cyclic speak
 
@@ -300,7 +303,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		mIntentFilter = new IntentFilter();
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 	    mIntentFilter.addAction(FrSkyServer.MESSAGE_SPEAKERCHANGE);
-
+	    mIntentFilter.addAction(FrSkyServer.MESSAGE_ALARM_MISMATCH);
+	    
 	    // Listen for BT events (not used yet)
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -377,6 +381,50 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         	{     		
         	}
             break;
+        case DIALOG_ALARMS_MISMATCH:
+        	Log.e(TAG,"Show alarm mismatch dialog");
+        	Model tm = null;
+        	if(_targetModel!=-1)
+        	{
+        		
+        		tm = FrSkyServer.modelMap.get(_targetModel);
+        		Log.e(TAG,"Allow switch to model "+tm);        		
+        	}
+        	Model cm = server.getCurrentModel();
+        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        	builder.setTitle("Model Mismatch");
+        	String msg = "The module configuration seem to be different from the current model '"+server.getCurrentModel().getName()+"'.";
+        	if(_targetModel!=-1)
+        	{
+        		msg += "\n\nThe model looks like '"+tm.getName()+"'";
+        	}
+        	builder.setMessage(msg);
+        	builder.setCancelable(true);
+        	builder.setPositiveButton("Update FrSky", new DialogInterface.OnClickListener() {
+        	           public void onClick(DialogInterface dialog, int id) {
+        	                Log.e(TAG,"Send the alarms to module");
+        	           }
+        	       });
+        	if(tm!=null)
+        	{
+        		builder.setNeutralButton("Switch to '"+tm.getName()+"'", new DialogInterface.OnClickListener() {
+     	           public void onClick(DialogInterface dialog, int id) {
+     	        	   Log.e(TAG,"Change Currentmodel");
+     	           }
+     	       });
+        	}
+        	builder.setNegativeButton("Update '"+cm.getName()+"'", new DialogInterface.OnClickListener() {
+        	           public void onClick(DialogInterface dialog, int id) {
+        	        	   Log.e(TAG,"Update alarms from module");
+        	           }
+        	       });
+        	       
+        	AlertDialog alert = builder.create();
+        	
+        	
+        	dialog = alert;
+        	
+        	break;
         default:
             dialog = null;
         }
@@ -428,12 +476,20 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         	if(FrSkyServer.D) Log.i(TAG,"Received Broadcast: '"+msg+"'");
         	if(FrSkyServer.D) Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
         	if(msg.equals(FrSkyServer.MESSAGE_STARTED))
+        	{
         		if(FrSkyServer.D) Log.i(TAG,"I have received BroadCast that the server has started");
-        	if(msg.equals(FrSkyServer.MESSAGE_SPEAKERCHANGE))
+        	}
+        	
+        	else if(msg.equals(FrSkyServer.MESSAGE_SPEAKERCHANGE))
         	{
         		if(FrSkyServer.D) Log.i(TAG,"I have received BroadCast that cyclic speaker has toggled");
         		if(server!=null)
         			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
+        	}
+        	else if(msg.equals(FrSkyServer.MESSAGE_ALARM_MISMATCH))
+        	{
+        		_targetModel = intent.getIntExtra("modelId", -1);
+        		showDialog(DIALOG_ALARMS_MISMATCH);
         	}
 
         }

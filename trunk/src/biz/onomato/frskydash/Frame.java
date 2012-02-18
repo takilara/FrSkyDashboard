@@ -11,7 +11,8 @@ public class Frame {
 	public static final int FRAMETYPE_CORRUPT=-2;
 	public static final int FRAMETYPE_FRSKY_ALARM=1;
 	public static final int FRAMETYPE_ANALOG=0xfe;
-	public static final int FRAMETYPE_INPUT_REQUEST_ALL=0xf8;
+	public static final int FRAMETYPE_INPUT_REQUEST_ALARMS_AD=0xf8;
+	public static final int FRAMETYPE_INPUT_REQUEST_ALARMS_RSSI=0xf1;
 	public static final int FRAMETYPE_ALARM1_RSSI=0xf7;
 	public static final int FRAMETYPE_ALARM2_RSSI=0xf6;
 	public static final int FRAMETYPE_ALARM1_AD1=0xfc;
@@ -129,8 +130,11 @@ public class Frame {
 						rssirx = frame[4];
 						rssitx = (int) frame[5]/2;
 						break;
-					case FRAMETYPE_INPUT_REQUEST_ALL:
-						frametype=FRAMETYPE_INPUT_REQUEST_ALL;
+					case FRAMETYPE_INPUT_REQUEST_ALARMS_AD:
+						frametype=FRAMETYPE_INPUT_REQUEST_ALARMS_AD;
+						break;
+					case FRAMETYPE_INPUT_REQUEST_ALARMS_RSSI:
+						frametype=FRAMETYPE_INPUT_REQUEST_ALARMS_RSSI;
 						break;
 					case FRAMETYPE_ALARM1_AD1:
 						frametype=FRAMETYPE_FRSKY_ALARM;
@@ -177,6 +181,7 @@ public class Frame {
 				if(frametype==FRAMETYPE_FRSKY_ALARM)
 				{
 					// Value of <AlarmChannel> alarm <AlarmNumber> is <greater> than <alarmthreshold>, and is at level <alarmlevel>
+					//Log.w(TAG,"Incoming frame is alarmframe");
 					_threshold = frame[2];
 					_greaterthan = frame[3];
 					String _greaterthanhuman;
@@ -346,24 +351,34 @@ public class Frame {
 		//Log.i(TAG,"Constructor");
 	}
 	
-	public static Frame InputRequestAll()
+	public static Frame InputRequestADAlarms()
 	{
 		int[] buf = new int[11];
-		buf[0] = 0x7e;
-		buf[1] = 0xf8;	// Request All
-		buf[10] = 0x7e;	// Request All
+		buf[0] = START_STOP_TELEMETRY_FRAME;
+		buf[1] = FRAMETYPE_INPUT_REQUEST_ALARMS_AD;
+		buf[10] = START_STOP_TELEMETRY_FRAME;
 		return new Frame(buf);
 	}
+	public static Frame InputRequestRSSIAlarms()
+	{
+		int[] buf = new int[11];
+		buf[0] = START_STOP_TELEMETRY_FRAME;
+		buf[1] = FRAMETYPE_INPUT_REQUEST_ALARMS_RSSI;
+		buf[10] = START_STOP_TELEMETRY_FRAME;
+		return new Frame(buf);
+	}
+
+	
 	
 	public static Frame AlarmFrame(int AlarmType,int AlarmLevel,int AlarmThreshold, int AlarmGreaterThan)
 	{
 		int[] buf = new int[11];
-		buf[0] = 0x7e;
+		buf[0] = START_STOP_TELEMETRY_FRAME;
 		buf[1] = AlarmType;
 		buf[2] = AlarmThreshold;
 		buf[3] = AlarmGreaterThan;
 		buf[4] = AlarmLevel;
-		buf[10] = 0x7e;
+		buf[10] = START_STOP_TELEMETRY_FRAME;
 		return new Frame(buf);
 	}
 	
@@ -378,22 +393,22 @@ public class Frame {
 		inBuf[3] = rssitx*2 & 0xff;
 		
 		// Add the header
-		buf[0] = 0x7e;
+		buf[0] = START_STOP_TELEMETRY_FRAME;
 		buf[1] = 0xfe;
 
 		// loop through the simulated values to see if we need to bytestuff the array
 		int i = 2;
 		for(int n=0;n<inBuf.length;n++)
 		{
-			if(inBuf[n]==0x7e)
+			if(inBuf[n]==START_STOP_TELEMETRY_FRAME)
 			{
-				buf[i]=0x7d;
+				buf[i]=STUFFING_TELEMETRY_FRAME;
 				buf[i+1]=0x5e;
 				i++;
 			}
-			else if(inBuf[n]==0x7d)
+			else if(inBuf[n]==STUFFING_TELEMETRY_FRAME)
 			{
-				buf[i]=0x7d;
+				buf[i]=STUFFING_TELEMETRY_FRAME;
 				buf[i+1]=0x5d;
 				i++;
 			}
@@ -412,7 +427,7 @@ public class Frame {
 		}
 		
 		// add the ending 0x7e
-		buf[i] = 0x7e;
+		buf[i] = START_STOP_TELEMETRY_FRAME;
 		
 		int[] outBuf = new int[i+1];
 		
@@ -437,7 +452,7 @@ public class Frame {
 		{
 			String hex ="";
 			if(
-					(frame[n]==0x7e) 		// delimiter
+					(frame[n]==START_STOP_TELEMETRY_FRAME) 		// delimiter
 					&& (n>1)				// not first or second byte
 					&& (n<frame.length-1) 	// not last byte
 				)
@@ -445,7 +460,7 @@ public class Frame {
 				hex = "7d 5e";
 			}
 			else if(
-					(frame[n]==0x7d) 		// delimiter
+					(frame[n]==STUFFING_TELEMETRY_FRAME) 		// delimiter
 					&& (n>1)				// not first or second byte
 					&& (n<frame.length-1) 	// not last byte
 				)

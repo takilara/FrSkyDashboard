@@ -311,7 +311,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     		case R.id.FrSkySettings_btnGetFromModule:
     			if(FrSkyServer.D)Log.d(TAG,"Try to fetch alarms from the module");
     			btnGetAlarmsFromModule.setEnabled(false);
-    			server.recordAlarmsFromModule();
+    			server.recordAlarmsFromModule(_model.getId());
     			// register a listener for a full update
     			break;
     	}
@@ -566,30 +566,33 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
         	if(FrSkyServer.D)Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE+"'");
         	if(msg.equals(FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE))
         	{
-        		for(Alarm a : _alarmMap.values())
-        		{
-        			if(server!=null)
-        			{
-        				if((a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM1_RSSI) && (a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM2_RSSI))
-        				{
-	        				try
+        		if(server!=null)
+    			{
+	        		//for(Alarm a : _alarmMap.values())
+	        		for(Alarm a : server.getRecordedAlarmMap().values())
+	        		{
+	        			
+	        				if((a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM1_RSSI) && (a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM2_RSSI))
 	        				{
-	        					Log.w(TAG,"Got recorded alarm: "+a.getFrSkyFrameType()+": "+
-	        				server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
-		        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
-		        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
-		        				a.setGreaterThan(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getGreaterThan());
-		        				updateAlarmVisualization(a);
-		        				updateAlarmDescription(a.getFrSkyFrameType());
+		        				try
+		        				{
+		        					Log.w(TAG,"Got recorded alarm: "+a.getFrSkyFrameType()+": "+
+		        				server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
+	//		        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
+	//		        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
+	//		        				a.setGreaterThan(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getGreaterThan());
+			        				updateAlarmVisualization(a);
+			        				updateAlarmDescription(a.getFrSkyFrameType());
+		        				}
+		        				catch(Exception e)
+		        				{
+		        					if(FrSkyServer.D)Log.e(TAG,"Failed to get alarms from the server..");
+		        					//if(FrSkyServer.D)Log.e(TAG,e.getMessage());
+		        				}
 	        				}
-	        				catch(Exception e)
-	        				{
-	        					if(FrSkyServer.D)Log.e(TAG,"Failed to get alarms from the server..");
-	        					//if(FrSkyServer.D)Log.e(TAG,e.getMessage());
-	        				}
-        				}
-        			}
-        		}
+	        			
+	        		}
+    			}
         		//registerReceiver(mIntentReceiver, mIntentFilter);
         		//unregisterReceiver(mIntentReceiver);
         		//unregisterReceiver(this);

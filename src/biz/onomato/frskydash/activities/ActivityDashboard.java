@@ -328,8 +328,16 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	    	{
 	    		//Channel c = server.getCurrentModel().getChannels().get(i);
 		    		//if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
-		    		TextView tv = (TextView) findViewById(c.getTextViewId());
-		    		tv.setText(c.toValueString());
+	    			// eso: adding try/catch, as switching model will break the id structure..
+	    			try
+	    			{
+	    				TextView tv = (TextView) findViewById(c.getTextViewId());
+	    				tv.setText(c.toValueString());
+	    			}
+	    			catch (Exception e)
+	    			{
+	    				
+	    			}
 	    	}
 //	    	for(Channel c : server.getCurrentModel().getChannels())
 //	    	{
@@ -408,7 +416,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         	builder.setCancelable(true);
         	builder.setPositiveButton("Update FrSky", new DialogInterface.OnClickListener() {
         	           public void onClick(DialogInterface dialog, int id) {
-        	                Log.e(TAG,"Send the alarms to module");
+        	                Log.e(TAG,"Send the alarms for current model to module");
         	                server.sendAlarms(server.getCurrentModel());
         	           }
         	       });
@@ -418,12 +426,16 @@ public class ActivityDashboard extends Activity implements OnClickListener {
      	           public void onClick(DialogInterface dialog, int id) {
      	        	   Log.e(TAG,"Change Currentmodel");
      	        	   server.setCurrentModel(ttm);
+     	        	   populateChannelList();
+     	        	  
      	           }
      	       });
         	}
         	builder.setNegativeButton("Update '"+cm.getName()+"'", new DialogInterface.OnClickListener() {
         	           public void onClick(DialogInterface dialog, int id) {
         	        	   Log.e(TAG,"Update alarms from module");
+        	        	   server.getCurrentModel().setFrSkyAlarms(server.getRecordedAlarmMap());
+        	        	   FrSkyServer.saveModel(server.getCurrentModel());
         	           }
         	       });
         	       
@@ -498,6 +510,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         	{
         		_targetModel = intent.getIntExtra("modelId", -1);
         		showDialog(DIALOG_ALARMS_MISMATCH);
+        		//populateChannelList();
         	}
 
         }

@@ -176,6 +176,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	private TreeMap<Integer,Alarm> _alarmMap;
 	private boolean _recordingAlarms = false;
+	private int _recordingModelId = -1;
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
@@ -1581,17 +1582,22 @@ public class FrSkyServer extends Service implements OnInitListener {
 		send(f.toInts());
 	}
 	
-	
+	public void recordAlarmsFromModule()
+	{
+		recordAlarmsFromModule(-1);
+	}
 	
 	/**
 	 * Used to start recording alarms from the FrSky Module,
 	 * To use the alarms, listen to the MESSAGE_ALARM_RECORDING_COMPLETE broadcast, then
 	 * use <b>getRecordedAlarmMap()</b> to retrieve them. 	
+	 * @param modelId id of the model you want the recorded alarms to be stored on
 	 */
-	public void recordAlarmsFromModule()
+	public void recordAlarmsFromModule(int modelId)
 	{
 		// empty the map, allowing others to monitor it for becoming full again
 		_recordingAlarms = true;
+		_recordingModelId = modelId;
 		_alarmMap.clear();
 		
 		// Only send request for RSSI alarms if Rx communication is up since we do automatic requests for RSSI alarms otherwise
@@ -1834,7 +1840,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 						{
 							if(D)Log.w(TAG,"recording completed");
 							_recordingAlarms = false;
-							//FIXME: send broadcast to allow GUI to update
+							// Update the alarms for the model
+							if(_recordingModelId!=-1)
+							{
+								modelMap.get(_recordingModelId).setFrSkyAlarms(_alarmMap);
+								saveModel(modelMap.get(_recordingModelId));
+							}
+							
+
 							Intent i = new Intent();
 							i.setAction(MESSAGE_ALARM_RECORDING_COMPLETE);
 							sendBroadcast(i);
@@ -2215,10 +2228,13 @@ public class FrSkyServer extends Service implements OnInitListener {
      */
     public void sendAlarms(Model model)
     {
-    	for(Alarm a : model.getFrSkyAlarms().values())
-		{
-			send(a.toFrame());
-		}
+    	if(statusRx)
+    	{
+	    	for(Alarm a : model.getFrSkyAlarms().values())
+			{
+				send(a.toFrame());
+			}
+    	}
     }
 }
 

@@ -250,7 +250,7 @@ public class Frame {
 			return frame;
 		// otherwise we need to handle the bytestuffing here
 		// a new frame in proper size for the decode bytes
-		int[] decodedFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+		int[] decodedFrame = new int[frame.length];
 		// set delimiters in decodedFrame, these are fixed
 		decodedFrame[0] = frame[0];
 		decodedFrame[Frame.SIZE_TELEMETRY_FRAME - 1] = frame[frame.length - 1];

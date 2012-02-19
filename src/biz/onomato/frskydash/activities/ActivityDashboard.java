@@ -41,6 +41,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import biz.onomato.frskydash.Alarm;
 import biz.onomato.frskydash.BluetoothSerialService;
 import biz.onomato.frskydash.Channel;
 import biz.onomato.frskydash.FrSkyServer;
@@ -340,7 +341,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
     }
     
     
-    // About dialog
+    // Dialogs
+    /**
+     * Put all dialogs here
+     */
     protected Dialog onCreateDialog(int id) {
         Dialog dialog;
         if(FrSkyServer.D) Log.i(TAG,"Make a dialog on context: "+this.getPackageName());
@@ -390,6 +394,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         		tm = FrSkyServer.modelMap.get(_targetModel);
         		Log.e(TAG,"Allow switch to model "+tm);        		
         	}
+        	
+        	final Model ttm = tm;
         	Model cm = server.getCurrentModel();
         	AlertDialog.Builder builder = new AlertDialog.Builder(this);
         	builder.setTitle("Model Mismatch");
@@ -403,6 +409,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         	builder.setPositiveButton("Update FrSky", new DialogInterface.OnClickListener() {
         	           public void onClick(DialogInterface dialog, int id) {
         	                Log.e(TAG,"Send the alarms to module");
+        	                server.sendAlarms(server.getCurrentModel());
         	           }
         	       });
         	if(tm!=null)
@@ -410,6 +417,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
         		builder.setNeutralButton("Switch to '"+tm.getName()+"'", new DialogInterface.OnClickListener() {
      	           public void onClick(DialogInterface dialog, int id) {
      	        	   Log.e(TAG,"Change Currentmodel");
+     	        	   server.setCurrentModel(ttm);
      	           }
      	       });
         	}

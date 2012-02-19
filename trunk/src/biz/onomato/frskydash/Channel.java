@@ -567,7 +567,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
         	//	Log.i(TAG,"I have received BroadCast that the server has started");
         	// Get the value..
         	double val = intent.getDoubleExtra("channelValue", -1);
-        	if(FrSkyServer.D) Log.w(TAG,_description +" on model "+_modelId+" received broadcast input value "+val);
+        	//if(FrSkyServer.D) Log.w(TAG,_description +" on model "+_modelId+" received broadcast input value "+val);
         	
         	double v = setRaw(val);
     		//Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);

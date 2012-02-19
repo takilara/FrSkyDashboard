@@ -202,6 +202,7 @@ public class BluetoothSerialService {
      */
     public void write(byte[] out) {
         // Create temporary object
+    	//Log.w(TAG,"Trying to write");
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {

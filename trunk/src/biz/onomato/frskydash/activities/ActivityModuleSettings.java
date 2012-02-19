@@ -396,7 +396,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 					
 				}
 			});
-			if((a.getFrSkyFrameType()==Frame.FRAMETYPE_ALARM1_RSSI)||(a.getFrSkyFrameType()==Frame.FRAMETYPE_ALARM1_RSSI))
+			if((a.getFrSkyFrameType()==Frame.FRAMETYPE_ALARM1_RSSI)||(a.getFrSkyFrameType()==Frame.FRAMETYPE_ALARM2_RSSI))
 			{
 				sourceSp.setEnabled(false);
 			}

@@ -999,10 +999,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 			// send them if user wants
 			if(getAutoSendAlarms())
 			{
-				for(Alarm a : _currentModel.getFrSkyAlarms().values())
-				{
-					send(a.toFrame());
-				}
+				sendAlarms(_currentModel);
+//				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+//				{
+//					send(a.toFrame());
+//				}
 			}
 		}
 		_currentModel.registerListeners();
@@ -2208,5 +2209,16 @@ public class FrSkyServer extends Service implements OnInitListener {
     	database.saveChannel(channel);
     }
     
+    /**
+     * Sends a models alarms to the module
+     * @param model the model to send alarms for
+     */
+    public void sendAlarms(Model model)
+    {
+    	for(Alarm a : model.getFrSkyAlarms().values())
+		{
+			send(a.toFrame());
+		}
+    }
 }
 

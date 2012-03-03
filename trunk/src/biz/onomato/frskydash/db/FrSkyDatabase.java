@@ -1,7 +1,12 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.db;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
+
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.domain.Alarm;
+import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Model;
 
 import android.content.ContentValues;
 import android.content.Context;

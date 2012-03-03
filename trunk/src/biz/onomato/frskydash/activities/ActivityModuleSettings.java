@@ -7,17 +7,17 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
-import biz.onomato.frskydash.Alarm;
 import biz.onomato.frskydash.BluetoothSerialService;
-import biz.onomato.frskydash.Channel;
 import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.Frame;
-import biz.onomato.frskydash.Model;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.FrSkyServer.MyBinder;
 import biz.onomato.frskydash.R.array;
 import biz.onomato.frskydash.R.id;
 import biz.onomato.frskydash.R.layout;
+import biz.onomato.frskydash.domain.Alarm;
+import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Frame;
+import biz.onomato.frskydash.domain.Model;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;

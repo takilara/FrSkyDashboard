@@ -3,12 +3,12 @@ package biz.onomato.frskydash.activities;
 import java.util.ArrayList;
 
 import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.Model;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.FrSkyServer.MyBinder;
 import biz.onomato.frskydash.R.drawable;
 import biz.onomato.frskydash.R.id;
 import biz.onomato.frskydash.R.layout;
+import biz.onomato.frskydash.domain.Model;
 
 import android.app.Activity;
 import android.app.AlertDialog;

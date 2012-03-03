@@ -1,7 +1,8 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.domain;
 
 
 
+import biz.onomato.frskydash.FrSkyServer;
 import android.util.Log;
 
 

@@ -1,4 +1,4 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.domain;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.MyStack;
+
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Comparator;

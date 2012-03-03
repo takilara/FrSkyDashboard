@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import android.util.Log;
 import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.Frame;
+import biz.onomato.frskydash.domain.Frame;
 
 /**
  * responsible for parsing FrSky Hub Sensor Data

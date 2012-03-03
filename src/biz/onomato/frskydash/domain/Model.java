@@ -1,8 +1,12 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.domain;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
+
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.R.array;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -32,7 +36,7 @@ public class Model {
 	private int _id;
 	//private Context _context;
 	//public Alarm[] alarms;
-	TreeMap<Integer,Alarm> frSkyAlarms;
+	public TreeMap<Integer,Alarm> frSkyAlarms;
 	public int alarmCount = 0;
 	
 	public boolean dirty=false;

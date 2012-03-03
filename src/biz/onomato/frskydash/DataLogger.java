@@ -7,6 +7,10 @@ import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
 import android.content.Context;
+import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Frame;
+import biz.onomato.frskydash.domain.Model;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -19,7 +23,7 @@ import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Logger {
+public class DataLogger {
 	private static final String TAG="Logger";
 	private boolean _logRaw;
 	private boolean _logCsv;
@@ -65,7 +69,7 @@ public class Logger {
 	private final Calendar time = Calendar.getInstance();
 	 
 	
-	public Logger(Context Context, Model model, boolean LogRaw,boolean LogCsv,boolean LogHuman)
+	public DataLogger(Context Context, Model model, boolean LogRaw,boolean LogCsv,boolean LogHuman)
 	{
 		//_channelList = new ArrayList<Channel>();
 		_model = model;
@@ -421,21 +425,21 @@ public class Logger {
 					// Comments
 					
 					
-					sb.append("// Model: "+_model.getName()+""+Logger.crlf);
+					sb.append("// Model: "+_model.getName()+""+DataLogger.crlf);
 					
 					
 					// Add Channel data:
 					for(Channel c : _model.getChannels().values())
 					{
 						sb.append("// Channel '"+c.getDescription()+"', Averaged over "+c.getMovingAverage()+" sample(s), shown with a precision of "+c.getPrecision()+" decimals");
-						sb.append(Logger.crlf);
+						sb.append(DataLogger.crlf);
 					}
 					
 					sb.append("// Log Started: ");
 					SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
 					sb.append(formatter.format(startDate));
-					sb.append(Logger.crlf);
-					sb.append(Logger.crlf);
+					sb.append(DataLogger.crlf);
+					sb.append(DataLogger.crlf);
 					//sb.append("// Model: "+model.getName()+"\""+Channel.delim);
 					setCsvHeader();
 					sb.append(_headerString);

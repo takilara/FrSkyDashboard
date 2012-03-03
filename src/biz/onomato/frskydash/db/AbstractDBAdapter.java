@@ -1,6 +1,7 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.db;
 
 
+import biz.onomato.frskydash.FrSkyServer;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;

@@ -1,11 +1,11 @@
 package biz.onomato.frskydash.activities;
 
 import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.Frame;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.FrSkyServer.MyBinder;
 import biz.onomato.frskydash.R.id;
 import biz.onomato.frskydash.R.layout;
+import biz.onomato.frskydash.domain.Frame;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;

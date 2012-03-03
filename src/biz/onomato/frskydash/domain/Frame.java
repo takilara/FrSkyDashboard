@@ -1,6 +1,9 @@
-package biz.onomato.frskydash;
+package biz.onomato.frskydash.domain;
 
 import java.util.Date;
+
+import biz.onomato.frskydash.BluetoothSerialService;
+import biz.onomato.frskydash.FrSkyServer;
 
 import android.util.Log;
 

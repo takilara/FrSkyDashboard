@@ -33,6 +33,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 import biz.onomato.frskydash.activities.ActivityDashboard;
+import biz.onomato.frskydash.db.FrSkyDatabase;
+import biz.onomato.frskydash.domain.Alarm;
+import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Frame;
+import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.hub.FrSkyHub;
 
 
@@ -45,7 +50,7 @@ import biz.onomato.frskydash.hub.FrSkyHub;
  * Serves as a store for {@link Model}s, {@link Channel}s and {@link Alarm}s
  * <br><br>
  * Receives bytebuffer from {@link BluetoothSerialService}, and parses this into individual {@link Frame}s that is then sent 
- * to the respective Channel, Alarm or Hub. The frame is also sent to the {@link Logger} for logging to file.
+ * to the respective Channel, Alarm or Hub. The frame is also sent to the {@link DataLogger} for logging to file.
  * <br><br>
  * Activities should bind to this service using 
  * startService and bindService
@@ -118,7 +123,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private MyStack fpsTxStack;
 	private static final int FRAMES_FOR_FPS_CALC=2;
     
-    private Logger logger;
+    private DataLogger logger;
     private Model _currentModel=null;
     
     public static TreeMap<Integer,Model> modelMap;
@@ -313,7 +318,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		if(D)Log.d(TAG,"Activating the model");
 		setCurrentModel(cm);
 		
-		logger = new Logger(getApplicationContext(),_currentModel,true,true,true);
+		logger = new DataLogger(getApplicationContext(),_currentModel,true,true,true);
 		//logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
 		logger.setCsvHeader();
 		logger.setLogToRaw(getLogToRaw());

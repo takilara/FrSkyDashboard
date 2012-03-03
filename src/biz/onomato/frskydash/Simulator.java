@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import biz.onomato.frskydash.domain.Frame;
+
 import android.app.Service;
 import android.content.Context;
 import android.os.Handler;

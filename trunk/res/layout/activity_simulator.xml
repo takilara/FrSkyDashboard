@@ -1,54 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <LinearLayout android:id="@+id/linearLayout0" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
-    <ScrollView 
-	    android:id="@+id/ScrollViewSimulator"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
-    <LinearLayout android:id="@+id/linearLayout1" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
-        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout2" android:layout_width="match_parent">
-            <TextView android:layout_height="wrap_content" android:id="@+id/textView1" android:text="AD1" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
-            <TextView android:layout_height="wrap_content" android:id="@+id/sim_ad1raw" android:text="0" android:layout_width="wrap_content"></TextView>
-        </LinearLayout>
-        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_ad1" android:layout_width="match_parent" android:max="255"></SeekBar>
-        
-        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:layout_width="match_parent">
-            <TextView android:layout_height="wrap_content" android:id="@+id/textView2" android:text="AD2" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
-            <TextView android:text="0" android:id="@+id/sim_ad2raw" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-        </LinearLayout>
-        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_ad2" android:layout_width="match_parent" android:max="255"></SeekBar>
-        
-        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout4" android:layout_width="match_parent">
-            <TextView android:layout_height="wrap_content" android:id="@+id/textView3" android:text="RSSItx" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
-            <TextView android:text="0" android:id="@+id/sim_rssitxraw" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-        </LinearLayout>
-        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_rssitx" android:layout_width="match_parent" android:max="255"></SeekBar>
-        
-        <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout5" android:layout_width="match_parent">
-            <TextView android:layout_height="wrap_content" android:id="@+id/textView4" android:text="RSSIrx" android:layout_width="wrap_content" android:layout_marginRight="5dip"></TextView>
-            <TextView android:text="0" android:id="@+id/sim_rssirxraw" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
-        </LinearLayout>
-        <SeekBar android:layout_height="wrap_content" android:id="@+id/sim_sb_rssirx" android:layout_width="match_parent" android:max="255"></SeekBar>
-         
-        <View
-        	android:layout_height="2dip"
-        	android:background="#FF909090" 
-        	android:layout_width="match_parent" />
-        <TextView android:layout_height="wrap_content" android:id="@+id/textView5" android:text="Frame:" android:layout_width="match_parent"></TextView>
-        <TextView android:layout_height="wrap_content" android:id="@+id/outFrame" android:text="" android:layout_width="match_parent"></TextView>
-        <View
-        	android:layout_height="2dip"
-        	android:background="#FF909090" 
-        	android:layout_width="match_parent" />
-		<Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/sim_btnSend" android:text="Send"></Button>
-        <ToggleButton android:text="Continous" android:id="@+id/sim_tglBtn1" android:layout_width="match_parent" android:textOn="Cyclic Sim On" android:textOff="Cyclic Sim Off" android:layout_height="wrap_content"></ToggleButton>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayout0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-        <CheckBox
-            android:id="@+id/sim_chkNoise"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Noise" />
-        
-        <View
+    <ScrollView
+        android:id="@+id/ScrollViewSimulator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/linearLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/linearLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dip"
+                    android:text="AD1" >
+                </TextView>
+
+                <TextView
+                    android:id="@+id/sim_ad1raw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" >
+                </TextView>
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/sim_sb_ad1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="255" >
+            </SeekBar>
+
+            <LinearLayout
+                android:id="@+id/linearLayout3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dip"
+                    android:text="AD2" >
+                </TextView>
+
+                <TextView
+                    android:id="@+id/sim_ad2raw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" >
+                </TextView>
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/sim_sb_ad2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="255" >
+            </SeekBar>
+
+            <LinearLayout
+                android:id="@+id/linearLayout4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dip"
+                    android:text="RSSItx" >
+                </TextView>
+
+                <TextView
+                    android:id="@+id/sim_rssitxraw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" >
+                </TextView>
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/sim_sb_rssitx"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="255" >
+            </SeekBar>
+
+            <LinearLayout
+                android:id="@+id/linearLayout5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dip"
+                    android:text="RSSIrx" >
+                </TextView>
+
+                <TextView
+                    android:id="@+id/sim_rssirxraw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" >
+                </TextView>
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/sim_sb_rssirx"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="255" >
+            </SeekBar>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="#FF909090" />
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Frame:" >
+            </TextView>
+
+            <TextView
+                android:id="@+id/outFrame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="" >
+            </TextView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="#FF909090" />
+
+            <Button
+                android:id="@+id/sim_btnSend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Send" >
+            </Button>
+
+            <ToggleButton
+                android:id="@+id/sim_tglBtn1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Continous"
+                android:textOff="Cyclic Sim Off"
+                android:textOn="Cyclic Sim On" >
+            </ToggleButton>
+
+            <CheckBox
+                android:id="@+id/sim_chkNoise"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Noise" />
+
+            <View
                 android:layout_width="match_parent"
                 android:layout_height="2dip"
                 android:background="#FF909090" />
@@ -59,13 +186,41 @@
                 android:layout_height="wrap_content"
                 android:text="Raw Data:" />
 
+            <!-- log file input -->
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <EditText
+                    android:id="@+id/textView_sim_file"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="/sdcard/..."
+                    android:inputType="text" />
+
+                <Button
+                    android:id="@+id/sim_btn_file"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="Use File" />
+            </LinearLayout>
+
+            <!-- string input -->
+
             <EditText
                 android:id="@+id/editTextSim"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:hint="int/hex formatted raw bytes separated by comma (,). Ex: 0, 255, 0, 255"
-                android:inputType="textMultiLine" />
-
+                android:inputType="textMultiLine" >
+
+                <requestFocus />
+            </EditText>
+
             <RadioGroup
                 android:id="@+id/radioGroup1"
                 android:layout_width="fill_parent"
@@ -76,8 +231,8 @@
                     android:id="@+id/radio0_signed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
                     android:layout_weight="1"
+                    android:checked="true"
                     android:text="-128 to 127" />
 
                 <RadioButton
@@ -100,17 +255,17 @@
                 android:layout_height="2dip"
                 android:background="#FF909090" />
 
-            
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dip"
                 android:background="#FF909090" />
-            
+
             <Button
                 android:id="@+id/sim_btnSend_raw"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Send RAW Data" />
-</LinearLayout>
+        </LinearLayout>
     </ScrollView>
+
 </LinearLayout>

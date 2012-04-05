@@ -243,7 +243,7 @@ public class FrSkyServer extends Service implements OnInitListener {
         
 		showNotification();		
 		
-		setupChannels();
+		setupFixedChannels();
 
 
 		
@@ -1276,9 +1276,9 @@ public class FrSkyServer extends Service implements OnInitListener {
     }
     
 	/**
-	 * Setup the server channels
+	 * Setup the server fixed channels
 	 */
-	private void setupChannels()
+	private void setupFixedChannels()
 	{
 		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
 		Channel none =  new Channel("None", 0, 1, "", "");

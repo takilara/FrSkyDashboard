@@ -1963,42 +1963,38 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	/**
 	 * Starts the cyclic simulator
+	 * 
 	 * @see Simulator
 	 */
-	public void simStart()
-	{
-		if(D)Log.i(TAG,"Sim Start");
+	public void simStart() {
+		if (D)
+			Log.i(TAG, "Sim Start");
 		sim.start();
 	}
-	
+
 	/**
 	 * Stops the cyclic simulator
+	 * 
 	 * @see Simulator
 	 */
-	public void simStop()
-	{
-		if(D)Log.i(TAG,"Sim Stop");
+	public void simStop() {
+		if (D)
+			Log.i(TAG, "Sim Stop");
 		sim.reset();
 	}
-	
+
 	/**
 	 * 
-	 * @param state true to enable the Cyclic simulator
+	 * @param state
+	 *            true to enable the Cyclic simulator
 	 */
-	public void setSimStarted(boolean state)
-	{
-		if(state)
-		{
+	public void setSimStarted(boolean state) {
+		if (state) {
 			simStart();
-		}
-		else
-		{
+		} else {
 			simStop();
 		}
 	}
-	
-
-	
 	
 	
 	// **************************************************************************************************************

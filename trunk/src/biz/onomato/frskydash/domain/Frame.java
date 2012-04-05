@@ -514,6 +514,11 @@ public class Frame {
 		return _frameRaw;
 	}
 	
+	/**
+	 * translate array of ints (0-255) to signed bytes (-128 to 127)
+	 * 
+	 * @return
+	 */
 	public byte[] toRawBytes()
 	{
 		byte[] buf = new byte[_frameRaw.length];

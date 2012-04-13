@@ -195,7 +195,7 @@
                 android:id="@+id/textView6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Raw Data from file:" />
+                android:text="From RAW file (leave empty for log path):" />
 
             <!-- log file cycle sim input -->
 

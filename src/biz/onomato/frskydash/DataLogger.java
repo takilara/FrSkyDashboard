@@ -482,6 +482,14 @@ public class DataLogger {
 			}
 		}
 	}
-	
+
+	/**
+	 * retrieve the path where logging is done by default
+	 * 
+	 * @return
+	 */
+	public static File getLoggingPath(Context context) {
+		return context.getExternalFilesDir(null);
+	}
 	
 }

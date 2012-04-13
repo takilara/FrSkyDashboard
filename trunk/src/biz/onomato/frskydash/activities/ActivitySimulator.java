@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -42,7 +44,7 @@ public class ActivitySimulator extends Activity implements
 	private TextView rssirx_raw_tv;
 	private TextView outFrame_tv;
 
-	private CheckBox chkNoise;
+	private CheckBox chkNoise, chkSensorData;
 
 	private View btnSend;
 	private ToggleButton btnSimTgl, btnToggleFileSim;
@@ -83,6 +85,16 @@ public class ActivitySimulator extends Activity implements
 		rssirx_raw_tv = (TextView) findViewById(R.id.sim_rssirxraw);
 
 		chkNoise = (CheckBox) findViewById(R.id.sim_chkNoise);
+		chkSensorData = (CheckBox) findViewById(R.id.sim_chk_sensor_data);
+		chkSensorData.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton button, boolean checked) {
+				if (server != null) {
+					server.getSim().setSensorData(checked);
+				}
+			}
+		});
 
 		outFrame_tv = (TextView) findViewById(R.id.outFrame);
 
@@ -108,7 +120,7 @@ public class ActivitySimulator extends Activity implements
 			public void run() {
 				// Log.i(TAG,"Update GUI");
 				if (server != null) {
-					if (server.sim.running) {
+					if (server.getSim().running) {
 						// sb_ad1.setProgress(server.sim._ad1);
 						// sb_ad2.setProgress(server.sim._ad2);
 						// sb_rssirx.setProgress(server.sim._rssirx);
@@ -153,7 +165,7 @@ public class ActivitySimulator extends Activity implements
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			if (FrSkyServer.D)
 				Log.i(TAG, "Bound to Service");
-			btnSimTgl.setChecked(server.sim.running);
+			btnSimTgl.setChecked(server.getSim().running);
 			// simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw,
 			// rssitx_raw);
 
@@ -180,10 +192,10 @@ public class ActivitySimulator extends Activity implements
 	};
 
 	private void updateProgressBar() {
-		sb_ad1.setProgress(server.sim._ad1);
-		sb_ad2.setProgress(server.sim._ad2);
-		sb_rssirx.setProgress(server.sim._rssirx);
-		sb_rssitx.setProgress(server.sim._rssitx);
+		sb_ad1.setProgress(server.getSim()._ad1);
+		sb_ad2.setProgress(server.getSim()._ad2);
+		sb_rssirx.setProgress(server.getSim()._rssirx);
+		sb_rssitx.setProgress(server.getSim()._rssitx);
 	}
 
 	public void onClick(View v) {
@@ -205,7 +217,7 @@ public class ActivitySimulator extends Activity implements
 		case R.id.sim_chkNoise:
 
 			if (server != null) {
-				server.sim.noise = chkNoise.isChecked();
+				server.getSim().setNoise(chkNoise.isChecked());
 			}
 			break;
 		case R.id.btn_file_cycle:
@@ -338,23 +350,23 @@ public class ActivitySimulator extends Activity implements
 			switch (sb.getId()) {
 			case R.id.sim_sb_ad1:
 				ad1_raw = prog;
-				server.sim._ad1 = ad1_raw;
+				server.getSim()._ad1 = ad1_raw;
 				ad1_raw_tv.setText(Integer.toString(prog));
 				break;
 			case R.id.sim_sb_ad2:
 				ad2_raw = prog;
-				server.sim._ad2 = ad2_raw;
+				server.getSim()._ad2 = ad2_raw;
 				ad2_raw_tv.setText(Integer.toString(prog));
 
 				break;
 			case R.id.sim_sb_rssitx:
 				rssitx_raw = prog;
-				server.sim._rssitx = rssitx_raw;
+				server.getSim()._rssitx = rssitx_raw;
 				rssitx_raw_tv.setText(Integer.toString(prog));
 				break;
 			case R.id.sim_sb_rssirx:
 				rssirx_raw = prog;
-				server.sim._rssirx = rssirx_raw;
+				server.getSim()._rssirx = rssirx_raw;
 				rssirx_raw_tv.setText(Integer.toString(prog));
 				break;
 			}

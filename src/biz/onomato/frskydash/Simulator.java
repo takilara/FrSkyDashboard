@@ -7,7 +7,13 @@ import android.os.Handler;
 import android.util.Log;
 import biz.onomato.frskydash.domain.Frame;
 
+/**
+ * Simulator for faking streams so we can test application without actual
+ * connection
+ * 
+ */
 public class Simulator {
+	
     private Handler simHandler;
     private Runnable runnableSimulator;
     
@@ -15,39 +21,46 @@ public class Simulator {
     private int[] _simFrame;
     public boolean running;
     
-    public boolean noise = false;
+    // hcpl: shouldn't be public, hide properly with getters and setters
+    private boolean noise = false;
     
-    //private FrSkyServer context;
+    private boolean sensorData = false;
     
     private FrSkyServer server;
     
-    
     private static final String TAG="Simulator Class";
-    
+
+    /**
+     * default ctor
+     * 
+     * @param srv The FrSkyServer
+     */
 	public Simulator(Service srv)
 	{
-		//context = (FrSkyServer) cnt;
 		server = (FrSkyServer) srv;
 		if(FrSkyServer.D)Log.i(TAG,"constructor");
+		
+		// init
 		running = false;
 		_ad1 = 0;
 		_ad2 = 0;
 		_rssirx = 0;
 		_rssitx = 0;
 		
-		//globals = ((MyApp) getApplicationContext());	
-		
 		simHandler = new Handler();
 		
+		//create runnable to iterate fake values
 		runnableSimulator = new Runnable() {
 			//@Override
 			public void run()
 			{
-				_ad1 +=1;
-				if(_ad1>=255) {_ad1=0;}
 				
-				_ad2 -=1;
-				if(_ad2<=0) {_ad2=255;}
+				//TODO implement creation of sensor hub data frames also
+				
+				// increase A1 value for simulator use only
+				_ad1 = _ad1 >= 255 ? 0 : _ad1 + 1;
+				// decrease A2 value for simulator use only
+				_ad2 = _ad2 <= 0 ? _ad2 = 255 : _ad2 - 1;
 				
 				//Log.i("SIM","Automatic post new frame");
 				
@@ -146,6 +159,33 @@ public class Simulator {
 		_rssirx=0;
 	}
 	
+	/**
+	 * update if this simulator needs to generate sensor hub frame data as well
+	 * 
+	 * @param sensorData
+	 */
+	public void setSensorData(boolean sensorData) {
+		this.sensorData = sensorData;
+	}
+
+	/**
+	 * update if simulator should create noise also when generating frames. If
+	 * noise is set a percent (10%?) of the generated frames will contain
+	 * errors.
+	 * 
+	 * @param noise
+	 */
+	public void setNoise(boolean noise) {
+		this.noise = noise;
+	}
+
+	/**
+	 * 
+	 * FIXME is this a duplicate? If so remove for code clean up
+	 * 
+	 * @deprecated don't think this is used anymore. See
+	 *             {@link Frame#FrameFromAnalog(int, int, int, int)} instead.
+	 */
 	public int[] genFrame(int ad1,int ad2,int rssirx,int rssitx)
 	{
 		int[] inBuf = new int[4];

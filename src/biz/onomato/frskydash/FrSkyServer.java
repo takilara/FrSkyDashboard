@@ -160,7 +160,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	//private MyApp globals;
 	private static Context context;
 	
-	public Simulator sim;
+	// hcpl shouldn't be public, hide properly with setters and getters
+	private Simulator sim;
 
 	public boolean statusBt=false;
 	public boolean statusTx=false;
@@ -2237,5 +2238,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
     	}
     }
+
+    /**
+     * retrieve the simulator set to this server instance
+     * 
+     * @return
+     */
+	public Simulator getSim() {
+		return sim;
+	}
+    
 }
 

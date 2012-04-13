@@ -385,11 +385,23 @@ public class Frame {
 		return new Frame(buf);
 	}
 	
+	/**
+	 * Create a valide Frame object based on the given values. 
+	 * 
+	 * @param ad1 Analog value 1 or A1
+	 * @param ad2 Analog value 2 or A2
+	 * @param rssirx RX signal 
+	 * @param rssitx TX signal
+	 * @return a single valid frame
+	 */
 	public static Frame FrameFromAnalog(int ad1,int ad2,int rssirx,int rssitx)
 	{
+		// a buffer for these given values
 		int[] inBuf = new int[4];
+		// buffer for the complete frame 
 		int[] buf = new int[30];
 		
+		// init buffer with given values
 		inBuf[0] = ad1;
 		inBuf[1] = ad2;
 		inBuf[2] = rssirx;
@@ -400,6 +412,7 @@ public class Frame {
 		buf[1] = 0xfe;
 
 		// loop through the simulated values to see if we need to bytestuff the array
+		// TODO move this to a generic add/remove bytestuff method
 		int i = 2;
 		for(int n=0;n<inBuf.length;n++)
 		{

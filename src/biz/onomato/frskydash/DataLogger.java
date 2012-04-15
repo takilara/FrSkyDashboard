@@ -201,10 +201,19 @@ public class DataLogger {
 			if(_logCsv){
 				int len = _model.getChannels().size();
 				StringBuilder sb = new StringBuilder();
-				for(int i=0;i<len;i++)
+				//for(int i=0;i<len;i++)
+				for(Channel c : _model.getChannels().values())
 				{
-					//sb.append(channels.get(i).getValue()+Channel.delim);
-					sb.append(_model.getChannels().get(i).getValue(true)+Channel.delim);
+					// behave differently if integer vs double
+					if(c.getPrecision()>0)
+					{
+						sb.append(c.getValue(true));
+					}
+					else
+					{
+						sb.append((int)c.getValue(true));
+					}
+					sb.append(Channel.delim);
 				}
 				sb.append(crlf);
 

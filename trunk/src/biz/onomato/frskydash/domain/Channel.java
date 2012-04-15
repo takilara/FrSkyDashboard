@@ -14,10 +14,12 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 
 import java.math.MathContext;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class Channel implements Parcelable, Comparator<Channel>  {
@@ -590,9 +592,29 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	// ==========================================================================================
 	// ====                        UTILITY METHODS                                          =====
 	// ==========================================================================================
+    
+    /**
+     * Used to concatenate different parameters of the channel to a string that can be used for TextToSpeech. 
+     * Will convert the value of the channel to Locale.US as that is currently the hardcoded locale for the TextToSpeech engine.
+     * @return the string to be passed to the speaker
+     * @author eso
+     */
 	public String toVoiceString()
 	{
-		return getDescription()+": "+toValueString()+" "+getLongUnit();
+//		DecimalFormatSymbols dsDefault = new DecimalFormatSymbols();
+//		char decDefault = dsDefault.getDecimalSeparator();
+//		
+//		DecimalFormatSymbols dsUS = new DecimalFormatSymbols(Locale.US);
+//		char decUS = dsUS.getDecimalSeparator();
+//		
+//		if(FrSkyServer.D)Log.d(TAG,"Local decimal symbol: '"+decDefault+"', US decimal symbol: '"+decUS+"'");
+		// toValueString should perform replace of Locale's decimal point with Locale.US decimal point
+		
+		
+		String outString =  getDescription()+": "+String.format(Locale.US,"%."+_precision+"f", _val)+getLongUnit();
+		
+		return outString;
+//		return getDescription()+": "+toValueString()+" "+getLongUnit();
 	}
 	
 	public void reset()
@@ -609,6 +631,12 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		setDirtyFlag(true);
 	}
 	
+	/**
+	 * Converts a raw value to engineering units, and performs "rounding" on it.
+	 * @param inputValue the raw value to convert
+	 * @return the value in engineering units
+	 * @author eso
+	 */
 	private double convert(double inputValue)
 	{
 		double o = (inputValue * _factor)+_offset;
@@ -624,15 +652,17 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 //		setDirtyFlag(true);
 //	}
 	
-	public String toCsv()
-	{
-		
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append(String.format("%."+_precision+"f",convert(_raw))+delim);
-		sb.append(String.format("%."+_precision+"f",convert(_avg))+delim);
-		return sb.toString();
-	}
+//	public String toCsv()
+//	{
+//		///TODO: stop using String.format, should not be neccessary as already uses convert
+//	
+//		StringBuilder sb = new StringBuilder();
+//		
+// 
+//		sb.append(String.format("%."+_precision+"f",convert(_raw))+delim);
+//		sb.append(String.format("%."+_precision+"f",convert(_avg))+delim);
+//		return sb.toString();
+//	}
 	public String toCsvHeader()
 	{
 		StringBuilder sb = new StringBuilder();

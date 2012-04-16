@@ -26,7 +26,7 @@
         <activity android:name=".activities.ActivityDashboard"
         	android:label="@string/app_name"  
         	android:configChanges="keyboardHidden|orientation" 
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
         	 
         	<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -57,6 +57,8 @@
         <activity android:name=".activities.ActivityDebug"
         	android:label="@string/activity_debug" />
         	
+        <activity android:name=".activities.ActivityHubData" android:label="@string/app_name"/>
+        
         <service android:name="FrSkyServer" android:label="@string/app_name"></service>
     </application> 
 

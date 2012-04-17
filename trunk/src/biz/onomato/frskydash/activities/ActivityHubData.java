@@ -169,12 +169,34 @@ public class ActivityHubData extends Activity {
 			((TextView) findViewById(R.id.textViewTemp2)).setText(format
 					.format(value));
 			break;
-		case volt:
-			((TextView) findViewById(R.id.textViewVolt)).setText(format
+		// for voltage values per cell
+		case volt_1:
+			((TextView) findViewById(R.id.textViewVoltCell1)).setText(format
 					.format(value));
 			break;
+		case volt_2:
+			((TextView) findViewById(R.id.textViewVoltCell2)).setText(format
+					.format(value));
+			break;
+		case volt_3:
+			((TextView) findViewById(R.id.textViewVoltCell3)).setText(format
+					.format(value));
+			break;
+		case volt_4:
+			((TextView) findViewById(R.id.textViewVoltCell4)).setText(format
+					.format(value));
+			break;
+		case volt_5:
+			((TextView) findViewById(R.id.textViewVoltCell5)).setText(format
+					.format(value));
+			break;
+		case volt_6:
+			((TextView) findViewById(R.id.textViewVoltCell6)).setText(format
+					.format(value));
+			break;
+
 		default:
-			// TODO update other fields
+			// TODO update other fields (NE, WS from gps? new current sensors?)
 			Logger.d(this.getClass().getName(),
 					"non implemented display of channel type: " + channelType);
 		}

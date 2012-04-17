@@ -2,9 +2,9 @@ package biz.onomato.frskydash.hub;
 
 import java.util.Arrays;
 
-import android.util.Log;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.domain.Frame;
+import biz.onomato.frskydash.util.Logger;
 
 /**
  * responsible for parsing FrSky Hub Sensor Data
@@ -46,7 +46,7 @@ public class FrSkyHub {
 
 	}
 
-	public static FrSkyHub getInstance(/*FrSkyServer forServer*/) {
+	public static FrSkyHub getInstance(/* FrSkyServer forServer */) {
 		if (instance == null) {
 			instance = new FrSkyHub();
 			// server = forServer;
@@ -88,7 +88,7 @@ public class FrSkyHub {
 				// don't unset the xor flag yet since we'll have to check on
 				// this for start/stop bit detection
 				// xor = false;
-				Log.d(FrSkyServer.TAG,
+				Logger.d(FrSkyServer.TAG,
 						"XOR operation, unstuffed to " + Integer.toHexString(b));
 			}
 			// if we encounter a start byte we need to indicate we're in a
@@ -127,7 +127,7 @@ public class FrSkyHub {
 				// again.
 				else {
 					// log debug info here
-					Log.d(FrSkyServer.TAG,
+					Logger.d(FrSkyServer.TAG,
 							"Start/stop byte at wrong position: 0x"
 									+ Integer.toHexString(b)
 									+ " frame so far: "
@@ -148,7 +148,7 @@ public class FrSkyHub {
 			// a frame, just discard them for now
 			else {
 				// log debug info here
-				Log.d(FrSkyServer.TAG,
+				Logger.d(FrSkyServer.TAG,
 						"Received data outside frame, dropped byte: 0x"
 								+ Integer.toHexString(b));
 			}
@@ -171,16 +171,14 @@ public class FrSkyHub {
 				|| frame[0] != Frame.START_STOP_HUB_FRAME
 				|| frame[Frame.SIZE_HUB_FRAME - 1] != Frame.START_STOP_HUB_FRAME) {
 			// log exception here
-			Log.d(FrSkyServer.TAG,
+			Logger.d(FrSkyServer.TAG,
 					"Wrong hub frame format: " + Arrays.toString(frame));
 			return;
 		}
 		// check data ID and update correct channel
-		// ...?
 		switch (frame[1]) {
 		case 0x01:
-			// FIXME seems like this should be an unsigned value, test again
-			// outside
+			// FIXME seems like this should be an unsigned value, test needed
 			updateChannel(ChannelTypes.gps_altitude_before,
 					getSigned16BitValue(frame));
 			break;
@@ -192,6 +190,7 @@ public class FrSkyHub {
 			updateChannel(ChannelTypes.temp1, getSigned16BitValue(frame));
 			break;
 		case 0x03:
+			// actual RPM value is Frame1*60
 			updateChannel(ChannelTypes.rpm, getUnsigned16BitValue(frame) * 60);
 			break;
 		case 0x04:
@@ -200,14 +199,22 @@ public class FrSkyHub {
 		case 0x05:
 			updateChannel(ChannelTypes.temp2, getSigned16BitValue(frame));
 		case 0x06:
-			// FIXME cell & voltage in this one value
-			updateChannel(ChannelTypes.volt, 0);
+			// first 4 bit is battery cell number
+			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
+			int cell = getBatteryCell(frame);
+			double value = getCellVoltage(frame);
+			// get the right channeltype based on cell nr
+			String channelType = "volt_"+cell;
+			// and update
+			updateChannel(ChannelTypes.valueOf(channelType), value);
 			break;
 		case 0x10:
-			updateChannel(ChannelTypes.altitude_before, getSigned16BitValue(frame));
+			updateChannel(ChannelTypes.altitude_before,
+					getSigned16BitValue(frame));
 			break;
 		case 0x21:
-			updateChannel(ChannelTypes.altitude_after, getUnsigned16BitValue(frame));
+			updateChannel(ChannelTypes.altitude_after,
+					getUnsigned16BitValue(frame));
 			break;
 		case 0x11:
 			updateChannel(ChannelTypes.gps_speed_before,
@@ -233,16 +240,19 @@ public class FrSkyHub {
 					getUnsigned16BitValue(frame));
 			break;
 		case 0x13 + 8:
-			updateChannel(ChannelTypes.latitude_after, getUnsigned16BitValue(frame));
+			updateChannel(ChannelTypes.latitude_after,
+					getUnsigned16BitValue(frame));
 			break;
 		case 0x1B + 8:
 			updateChannel(ChannelTypes.ns, frame[2]);
 			break;
 		case 0x14:
-			updateChannel(ChannelTypes.course_before, getUnsigned16BitValue(frame));
+			updateChannel(ChannelTypes.course_before,
+					getUnsigned16BitValue(frame));
 			break;
 		case 0x14 + 8:
-			updateChannel(ChannelTypes.course_after, getUnsigned16BitValue(frame));
+			updateChannel(ChannelTypes.course_after,
+					getUnsigned16BitValue(frame));
 			break;
 		case 0x15:
 			updateChannel(ChannelTypes.day, frame[2]);
@@ -259,16 +269,20 @@ public class FrSkyHub {
 			updateChannel(ChannelTypes.second, frame[2]);
 			break;
 		case 0x24:
+			// actual 3-axis value is Frame1/1000
 			updateChannel(ChannelTypes.acc_x, getSigned16BitValue(frame) / 1000);
 			break;
 		case 0x25:
+			// actual 3-axis value is Frame1/1000
 			updateChannel(ChannelTypes.acc_y, getSigned16BitValue(frame) / 1000);
 			break;
 		case 0x26:
+			// actual 3-axis value is Frame1/1000
 			updateChannel(ChannelTypes.acc_z, getSigned16BitValue(frame) / 1000);
 			break;
 		default:
-			Log.d(FrSkyServer.TAG,
+			// TODO add voltage and current sensor data
+			Logger.d(FrSkyServer.TAG,
 					"Unknown sensor type for frame: " + Arrays.toString(frame));
 		}
 	}
@@ -292,6 +306,30 @@ public class FrSkyHub {
 	// private int getBCDValue(int[] frame){
 	// return 0;
 	// }
+	
+	/**
+	 * helper to retrieve the number of the cell from frame
+	 * 
+	 * @param frame
+	 * @return
+	 */
+	private int getBatteryCell(int[] frame) {
+		// only need the first 4 bits to get cell number
+		int cellNumber = frame[2] >> 4;
+		return cellNumber;
+	}
+
+	/**
+	 * helper to retrieve voltage of a cell from frame
+	 * 
+	 * @param frame
+	 * @return
+	 */
+	private double getCellVoltage(int[] frame){
+//		the last 12 bits are a value between 0-2100 representing voltage 0-4.2v (so /500)
+		double voltage = (double)((frame[2]<<8&0xFFF)+frame[3])/500;
+		return voltage;
+	}
 
 	/**
 	 * update a single channel with a single value
@@ -302,7 +340,7 @@ public class FrSkyHub {
 	private void updateChannel(ChannelTypes channel, double value) {
 		// TODO create a channel here for the correct type of information and
 		// broadcast channel so GUI can update this value
-		Log.d(FrSkyServer.TAG, "Data received for channel: " + channel
+		Logger.d(FrSkyServer.TAG, "Data received for channel: " + channel
 				+ ", value: " + value);
 		// let server updat this information
 		server.broadcastChannelData(channel, value);

@@ -46,10 +46,12 @@ public class FrSkyHub {
 
 	}
 
-	public static FrSkyHub getInstance(FrSkyServer forServer) {
+	public static FrSkyHub getInstance(/*FrSkyServer forServer*/) {
 		if (instance == null) {
 			instance = new FrSkyHub();
-			server = forServer;
+			// server = forServer;
+			// not a good idea since parameter will be ignored if instance
+			// already existed, moved to method where needed
 		}
 		return instance;
 	}
@@ -62,8 +64,11 @@ public class FrSkyHub {
 	 * 
 	 * @param frame
 	 */
-	public void extractUserDataBytes(Frame frame) {
+	public void extractUserDataBytes(FrSkyServer paramServer, Frame frame) {
 		// init
+		// FIXME can't this be implemented in another way so we don't have to
+		// pass the server instance?
+		server = paramServer;
 		int b;
 		int[] ints = frame.toInts();
 		// iterate elements in frame

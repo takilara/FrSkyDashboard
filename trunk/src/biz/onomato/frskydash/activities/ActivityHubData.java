@@ -61,7 +61,15 @@ public class ActivityHubData extends Activity {
 		// stopService(broadcastIntent);
 	}
 
-	private NumberFormat format = new DecimalFormat("0");
+	/**
+	 * number format for integers
+	 */
+	private NumberFormat intFormat = new DecimalFormat("0");
+
+	/**
+	 * number format for decimals
+	 */
+	private NumberFormat decFormat = new DecimalFormat("0.00");
 
 	private void updateUI(Intent intent) {
 		String channelType = intent.getStringExtra(FIELD_CHANNEL);
@@ -69,129 +77,129 @@ public class ActivityHubData extends Activity {
 
 		switch (ChannelTypes.valueOf(channelType)) {
 		case altitude_before:
-			((TextView) findViewById(R.id.textViewAltBefore)).setText(format
+			((TextView) findViewById(R.id.textViewAltBefore)).setText(intFormat
 					.format(value));
 			break;
 		case altitude_after:
-			((TextView) findViewById(R.id.textViewAltAfter)).setText(format
+			((TextView) findViewById(R.id.textViewAltAfter)).setText(intFormat
 					.format(value));
 			break;
 		case rpm:
-			((TextView) findViewById(R.id.textViewRpm)).setText(format
+			((TextView) findViewById(R.id.textViewRpm)).setText(intFormat
 					.format(value));
 			break;
 		case acc_x:
-			((TextView) findViewById(R.id.textViewAccX)).setText(format
+			((TextView) findViewById(R.id.textViewAccX)).setText(intFormat
 					.format(value));
 			break;
 		case acc_y:
-			((TextView) findViewById(R.id.textViewAccY)).setText(format
+			((TextView) findViewById(R.id.textViewAccY)).setText(intFormat
 					.format(value));
 			break;
 		case acc_z:
-			((TextView) findViewById(R.id.textViewAccZ)).setText(format
+			((TextView) findViewById(R.id.textViewAccZ)).setText(intFormat
 					.format(value));
 			break;
 		case course_after:
-			((TextView) findViewById(R.id.textViewCourseAfter)).setText(format
-					.format(value));
+			((TextView) findViewById(R.id.textViewCourseAfter))
+					.setText(intFormat.format(value));
 			break;
 		case course_before:
-			((TextView) findViewById(R.id.textViewCourseBefore)).setText(format
-					.format(value));
+			((TextView) findViewById(R.id.textViewCourseBefore))
+					.setText(intFormat.format(value));
 			break;
 		case day:
-			((TextView) findViewById(R.id.textViewDay)).setText(format
+			((TextView) findViewById(R.id.textViewDay)).setText(intFormat
 					.format(value));
 			break;
 		case month:
-			((TextView) findViewById(R.id.textViewMonth)).setText(format
+			((TextView) findViewById(R.id.textViewMonth)).setText(intFormat
 					.format(value));
 			break;
 		case year:
-			((TextView) findViewById(R.id.textViewYear)).setText(format
+			((TextView) findViewById(R.id.textViewYear)).setText(intFormat
 					.format(value));
 			break;
 		case fuel:
-			((TextView) findViewById(R.id.textViewFuel)).setText(format
+			((TextView) findViewById(R.id.textViewFuel)).setText(intFormat
 					.format(value));
 			break;
 		case hour:
-			((TextView) findViewById(R.id.textViewHour)).setText(format
+			((TextView) findViewById(R.id.textViewHour)).setText(intFormat
 					.format(value));
 			break;
 
 		case minute:
-			((TextView) findViewById(R.id.textViewMinute)).setText(format
+			((TextView) findViewById(R.id.textViewMinute)).setText(intFormat
 					.format(value));
 			break;
 		case second:
-			((TextView) findViewById(R.id.textViewSecond)).setText(format
+			((TextView) findViewById(R.id.textViewSecond)).setText(intFormat
 					.format(value));
 			break;
 		case gps_altitude_after:
-			((TextView) findViewById(R.id.textViewGpsAltAfter)).setText(format
-					.format(value));
+			((TextView) findViewById(R.id.textViewGpsAltAfter))
+					.setText(intFormat.format(value));
 			break;
 		case gps_altitude_before:
-			((TextView) findViewById(R.id.textViewGpsAltBefore)).setText(format
-					.format(value));
+			((TextView) findViewById(R.id.textViewGpsAltBefore))
+					.setText(intFormat.format(value));
 			break;
 		case gps_speed_after:
-			((TextView) findViewById(R.id.textViewSpeedAfter)).setText(format
-					.format(value));
+			((TextView) findViewById(R.id.textViewSpeedAfter))
+					.setText(intFormat.format(value));
 			break;
 		case gps_speed_before:
-			((TextView) findViewById(R.id.textViewSpeedBefore)).setText(format
-					.format(value));
+			((TextView) findViewById(R.id.textViewSpeedBefore))
+					.setText(intFormat.format(value));
 			break;
 		case latitude_after:
-			((TextView) findViewById(R.id.textViewLatAfter)).setText(format
+			((TextView) findViewById(R.id.textViewLatAfter)).setText(intFormat
 					.format(value));
 			break;
 		case latitude_before:
-			((TextView) findViewById(R.id.textViewLatBefore)).setText(format
+			((TextView) findViewById(R.id.textViewLatBefore)).setText(intFormat
 					.format(value));
 			break;
 		case longitude_after:
-			((TextView) findViewById(R.id.textViewLonAfter)).setText(format
+			((TextView) findViewById(R.id.textViewLonAfter)).setText(intFormat
 					.format(value));
 			break;
 		case longitude_before:
-			((TextView) findViewById(R.id.textViewLonBefore)).setText(format
+			((TextView) findViewById(R.id.textViewLonBefore)).setText(intFormat
 					.format(value));
 			break;
 		case temp1:
-			((TextView) findViewById(R.id.textViewTemp1)).setText(format
+			((TextView) findViewById(R.id.textViewTemp1)).setText(intFormat
 					.format(value));
 			break;
 		case temp2:
-			((TextView) findViewById(R.id.textViewTemp2)).setText(format
+			((TextView) findViewById(R.id.textViewTemp2)).setText(intFormat
 					.format(value));
 			break;
 		// for voltage values per cell
 		case volt_1:
-			((TextView) findViewById(R.id.textViewVoltCell1)).setText(format
+			((TextView) findViewById(R.id.textViewVoltCell1)).setText(decFormat
 					.format(value));
 			break;
 		case volt_2:
-			((TextView) findViewById(R.id.textViewVoltCell2)).setText(format
+			((TextView) findViewById(R.id.textViewVoltCell2)).setText(decFormat
 					.format(value));
 			break;
 		case volt_3:
-			((TextView) findViewById(R.id.textViewVoltCell3)).setText(format
+			((TextView) findViewById(R.id.textViewVoltCell3)).setText(decFormat
 					.format(value));
 			break;
 		case volt_4:
-			((TextView) findViewById(R.id.textViewVoltCell4)).setText(format
+			((TextView) findViewById(R.id.textViewVoltCell4)).setText(decFormat
 					.format(value));
 			break;
 		case volt_5:
-			((TextView) findViewById(R.id.textViewVoltCell5)).setText(format
+			((TextView) findViewById(R.id.textViewVoltCell5)).setText(decFormat
 					.format(value));
 			break;
 		case volt_6:
-			((TextView) findViewById(R.id.textViewVoltCell6)).setText(format
+			((TextView) findViewById(R.id.textViewVoltCell6)).setText(decFormat
 					.format(value));
 			break;
 

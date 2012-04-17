@@ -264,16 +264,6 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 
-		// button for showing sensor hub data
-		((Button) findViewById(R.id.button_show_hub_data))
-				.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						startActivity(new Intent(getApplicationContext(),
-								ActivityHubData.class));
-					}
-				});
 	}
 
 	// TODO: Refactor to listen for broadcasts, insert into array, then

@@ -315,14 +315,6 @@
 	
 	    	</LinearLayout>
 	    	
-		    
-		    <Button android:id="@+id/button_show_hub_data"
-		            android:layout_width="match_parent"
-		            android:layout_height="wrap_content"
-		            android:text="Sensor Hub Data"
-		        
-		        />
-    	
 		</LinearLayout>
 	</ScrollView>  
 </LinearLayout>

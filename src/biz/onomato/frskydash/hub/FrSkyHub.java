@@ -88,8 +88,8 @@ public class FrSkyHub {
 				// don't unset the xor flag yet since we'll have to check on
 				// this for start/stop bit detection
 				// xor = false;
-				Logger.d(FrSkyServer.TAG,
-						"XOR operation, unstuffed to " + Integer.toHexString(b));
+				Logger.d(FrSkyServer.TAG, "XOR operation, unstuffed to "
+						+ Integer.toHexString(b));
 			}
 			// if we encounter a start byte we need to indicate we're in a
 			// frame or if at the end handle the frame and continue
@@ -127,7 +127,8 @@ public class FrSkyHub {
 				// again.
 				else {
 					// log debug info here
-					Logger.d(FrSkyServer.TAG,
+					Logger.d(
+							FrSkyServer.TAG,
 							"Start/stop byte at wrong position: 0x"
 									+ Integer.toHexString(b)
 									+ " frame so far: "
@@ -202,9 +203,14 @@ public class FrSkyHub {
 			// first 4 bit is battery cell number
 			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
 			int cell = getBatteryCell(frame);
+			if (cell < 1 || cell > 6) {
+				Logger.d(this.getClass().toString(),
+						"failed to handle cell nr out of range: " + cell);
+				break;
+			}
 			double value = getCellVoltage(frame);
 			// get the right channeltype based on cell nr
-			String channelType = "volt_"+cell;
+			String channelType = "volt_" + cell;
 			// and update
 			updateChannel(ChannelTypes.valueOf(channelType), value);
 			break;
@@ -282,8 +288,8 @@ public class FrSkyHub {
 			break;
 		default:
 			// TODO add voltage and current sensor data
-			Logger.d(FrSkyServer.TAG,
-					"Unknown sensor type for frame: " + Arrays.toString(frame));
+			Logger.d(FrSkyServer.TAG, "Unknown sensor type for frame: "
+					+ Arrays.toString(frame));
 		}
 	}
 
@@ -306,7 +312,7 @@ public class FrSkyHub {
 	// private int getBCDValue(int[] frame){
 	// return 0;
 	// }
-	
+
 	/**
 	 * helper to retrieve the number of the cell from frame
 	 * 
@@ -325,9 +331,10 @@ public class FrSkyHub {
 	 * @param frame
 	 * @return
 	 */
-	private double getCellVoltage(int[] frame){
-//		the last 12 bits are a value between 0-2100 representing voltage 0-4.2v (so /500)
-		double voltage = (double)((frame[2]<<8&0xFFF)+frame[3])/500;
+	private double getCellVoltage(int[] frame) {
+		// the last 12 bits are a value between 0-2100 representing voltage
+		// 0-4.2v (so /500)
+		double voltage = (double) ((frame[2] << 8 & 0xFFF) + frame[3]) / 500;
 		return voltage;
 	}
 

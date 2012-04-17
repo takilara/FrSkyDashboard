@@ -448,36 +448,36 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	
 	//return String.format("%."+_precision+"f",(inputValue*_factor)+_offset);
 	
-	public String toEng()
-	{
-		//return String.format("%s %s", getValue(),_shortUnit);
-		return toEng(_avg,false);
-	}
-	
-	public String toEng(boolean longUnit)
-	{
-		//return String.format("%s %s", getValue(),_shortUnit);
-		return toEng(_avg,longUnit);
-	}
-	
-
-	public String toEng(double inputValue)
-	{
-		//return String.format("%s %s", getValue(inputValue),_shortUnit);
-		return toEng(inputValue,false);
-	}
-	
-	public String toEng(double inputValue,boolean longUnit)
-	{
-		if(longUnit==true)
-		{
-			return String.format("%."+_precision+"f %s", convert(inputValue),getLongUnit());
-		}
-		else
-		{
-			return String.format("%."+_precision+"f %s", convert(inputValue),_shortUnit);
-		}
-	}
+//	public String toEng()
+//	{
+//		//return String.format("%s %s", getValue(),_shortUnit);
+//		return toEng(_avg,false);
+//	}
+//	
+//	public String toEng(boolean longUnit)
+//	{
+//		//return String.format("%s %s", getValue(),_shortUnit);
+//		return toEng(_avg,longUnit);
+//	}
+//	
+//
+//	public String toEng(double inputValue)
+//	{
+//		//return String.format("%s %s", getValue(inputValue),_shortUnit);
+//		return toEng(inputValue,false);
+//	}
+//	
+//	public String toEng(double inputValue,boolean longUnit)
+//	{
+//		if(longUnit==true)
+//		{
+//			return String.format("%."+_precision+"f %s", convert(inputValue),getLongUnit());
+//		}
+//		else
+//		{
+//			return String.format("%."+_precision+"f %s", convert(inputValue),_shortUnit);
+//		}
+//	}
 
 //	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
 //	{

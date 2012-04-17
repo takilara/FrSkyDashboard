@@ -42,153 +42,157 @@ import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.FrSkyHub;
 
+
 /**
- * Main server service. This service will get started by the first Activity
- * launched. It will stay alive even if the application is "minimized". It will
- * only be closed by a press on the "Back" button while on the Dashboard. <br>
- * <br>
- * Serves as a store for {@link Model}s, {@link Channel}s and {@link Alarm}s <br>
- * <br>
- * Receives bytebuffer from {@link BluetoothSerialService}, and parses this into
- * individual {@link Frame}s that is then sent to the respective Channel, Alarm
- * or Hub. The frame is also sent to the {@link DataLogger} for logging to file. <br>
- * <br>
- * Activities should bind to this service using startService and bindService <br>
- * <br>
+ * Main server service.
+ * This service will get started by the first Activity launched. It will stay alive
+ * even if the application is "minimized". It will only be closed by a press on the "Back" button while
+ * on the Dashboard.
+ * <br><br>
+ * Serves as a store for {@link Model}s, {@link Channel}s and {@link Alarm}s
+ * <br><br>
+ * Receives bytebuffer from {@link BluetoothSerialService}, and parses this into individual {@link Frame}s that is then sent 
+ * to the respective Channel, Alarm or Hub. The frame is also sent to the {@link DataLogger} for logging to file.
+ * <br><br>
+ * Activities should bind to this service using 
+ * startService and bindService
+ * <br><br>
  * Communication from Service to Activities: Send broadcasts<br>
  * FIXME: Cleanup Activity -> Service<br>
- * Communication from Activity to Service: Method call, startservice with
- * intent, or broadcast
+ * Communication from Activity to Service: Method call, startservice with intent, or broadcast
  * 
  * 
  * @author eso
- * 
+ *
  */
 public class FrSkyServer extends Service implements OnInitListener {
-
-	public static final String TAG = "FrSkyServerService";
+	    
+	public static final String TAG="FrSkyServerService";
 	public static boolean D = true;
-	// private static final UUID SerialPortServiceClass_UUID =
-	// UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-	private static final int NOTIFICATION_ID = 56;
+	//private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+	private static final int NOTIFICATION_ID=56;
 	private AudioManager _audiomanager;
-	// private boolean _scoConnected = false;
-
+	//private boolean _scoConnected = false;
+	
 	// Things for Bluetooth
-	// private static final int REQUEST_ENABLE_BT = 2;
+	//private static final int REQUEST_ENABLE_BT = 2;
 	private IntentFilter mIntentFilterBt;
 	private boolean bluetoothEnabledAtStart;
-	private boolean _connecting = false;
-	private BluetoothAdapter mBluetoothAdapter = null;
-
-	// private int MY_DATA_CHECK_CODE;
-	private SharedPreferences _settings = null;
-	// SharedPreferences settings;
+	private boolean _connecting=false;
+    private BluetoothAdapter mBluetoothAdapter = null;
+	
+    //private int MY_DATA_CHECK_CODE;
+    private SharedPreferences _settings=null;
+	//SharedPreferences settings;
 	private SharedPreferences.Editor _editor;
 
-	// private Long counter = 0L;
-	// private NotificationManager nm;
-	// private Timer timer = new Timer();
+	
+	//private Long counter = 0L; 
+	//private NotificationManager nm;
+	//private Timer timer = new Timer();
 	private final Calendar time = Calendar.getInstance();
-
-	public static final int CMD_KILL_SERVICE = 9999;
-	public static final int CMD_IGNORE = -1;
-	public static final int CMD_START_SIM = 0;
-	public static final int CMD_STOP_SIM = 1;
-	public static final int CMD_START_SPEECH = 2;
-	public static final int CMD_STOP_SPEECH = 3;
-
+	
+	public static final int CMD_KILL_SERVICE	=	9999;
+	public static final int CMD_IGNORE			=	 -1;
+	public static final int CMD_START_SIM		=	 0;
+	public static final int CMD_STOP_SIM		=	 1;
+	public static final int CMD_START_SPEECH	=	 2;
+	public static final int CMD_STOP_SPEECH		=	 3;
+	
+		
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
-	public static final int MESSAGE_WRITE = 3;
-	public static final int MESSAGE_DEVICE_NAME = 4;
-	public static final int MESSAGE_TOAST = 5;
-
-	public static final String DEVICE_NAME = "device_name";
-	private String mConnectedDeviceName = null;
-	public static final String TOAST = "toast";
-	private static BluetoothSerialService mSerialService = null;
-	private BluetoothDevice _device = null;
-	public boolean reconnectBt = true;
-	private boolean _manualBtDisconnect = false;
-
-	private boolean _compareAfterRecord = false;
-	private boolean _autoSwitch = false;
-
-	// FPS
-	public int fps, fpsRx, fpsTx = 0;
-	public static int badFrames = 0;
-	private MyStack fpsStack;
-	private MyStack fpsRxStack;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_NAME = 4;
+    public static final int MESSAGE_TOAST = 5;
+    
+    public static final String DEVICE_NAME = "device_name";
+    private String mConnectedDeviceName = null;
+    public static final String TOAST = "toast";
+    private static BluetoothSerialService mSerialService = null;
+    private BluetoothDevice _device = null;
+    public boolean reconnectBt = true;
+    private boolean _manualBtDisconnect = false;    
+    
+    private boolean _compareAfterRecord =false;
+    private boolean _autoSwitch = false;
+    
+    // FPS
+    public int fps,fpsRx,fpsTx=0;
+    public static int badFrames = 0;
+    private MyStack fpsStack;
+    private MyStack fpsRxStack;
 	private MyStack fpsTxStack;
-	private static final int FRAMES_FOR_FPS_CALC = 2;
-
-	private DataLogger logger;
-	private Model _currentModel = null;
-
-	public static TreeMap<Integer, Model> modelMap;
-
-	private boolean _watchdogEnabled = true;
-	private static boolean _outGoingWatchdogFlag = false;
-	private static long _lastOutGoingWatchdogTime;
-
+	private static final int FRAMES_FOR_FPS_CALC=2;
+    
+    private DataLogger logger;
+    private Model _currentModel=null;
+    
+    public static TreeMap<Integer,Model> modelMap;
+    
+    private boolean _watchdogEnabled = true;
+    private static boolean _outGoingWatchdogFlag = false;
+    private static long _lastOutGoingWatchdogTime;
+	
 	private TextToSpeech mTts;
 	private int _speakDelay;
-
+    
 	private Handler fpsHandler, watchdogHandler, speakHandler;
-	private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
-
-	// server Channels, add constants for all known source channels
-	// eso: refactor to ChannelMap
-	public static final int CHANNEL_ID_NONE = -1;
-	public static final int CHANNEL_ID_AD1 = -100;
-	public static final int CHANNEL_ID_AD2 = -101;
-	public static final int CHANNEL_ID_RSSIRX = -102;
-	public static final int CHANNEL_ID_RSSITX = -103;
-
-	private static TreeMap<Integer, Channel> _sourceChannelMap;
-
-	private static FrSkyDatabase database;
-
-	private boolean _dying = false;
-
+    private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
+    
+    // server Channels, add constants for all known source channels
+//eso: refactor to ChannelMap
+    public static final int CHANNEL_ID_NONE = -1;
+    public static final int CHANNEL_ID_AD1 = -100;
+    public static final int CHANNEL_ID_AD2 = -101;
+    public static final int CHANNEL_ID_RSSIRX = -102;
+    public static final int CHANNEL_ID_RSSITX = -103;
+    
+    
+    private static TreeMap<Integer,Channel> _sourceChannelMap;
+    
+    private static FrSkyDatabase database;
+    
+    private boolean _dying=false;
+	
 	private final IBinder mBinder = new MyBinder();
-
+	
 	private WakeLock wl;
 	private boolean _cyclicSpeechEnabled;
-	// private MyApp globals;
+	//private MyApp globals;
 	private static Context context;
-
+	
 	// hcpl shouldn't be public, hide properly with setters and getters
 	private Simulator sim;
 
-	public boolean statusBt = false;
-	public boolean statusTx = false;
-	public boolean statusRx = false;
+	public boolean statusBt=false;
+	public boolean statusTx=false;
+	public boolean statusRx=false;
+	
+	//private HashMap<String,Channel> _serverChannels;
+	
+	//private int MAX_CHANNELS=4;
 
-	// private HashMap<String,Channel> _serverChannels;
-
-	// private int MAX_CHANNELS=4;
-
-	private int _framecount = 0;
-	private int _framecountRx = 0;
-	private int _framecountTx = 0;
+	private int _framecount=0;
+	private int _framecountRx=0;
+	private int _framecountTx=0;
 	private boolean _btAutoEnable;
 	private boolean _btAutoConnect;
 	private int _minimumVolumeLevel;
 	private boolean _autoSetVolume;
 
-	private TreeMap<Integer, Alarm> _alarmMap;
+	
+	private TreeMap<Integer,Alarm> _alarmMap;
 	private boolean _recordingAlarms = false;
 	private int _recordingModelId = -1;
 
 	public static final String MESSAGE_STARTED = "biz.onomato.frskydash.intent.action.SERVER_STARTED";
 	public static final String MESSAGE_SPEAKERCHANGE = "biz.onomato.frskydash.intent.action.SPEAKER_CHANGED";
 	public static final String MESSAGE_BLUETOOTH_STATE_CHANGED = "biz.onomato.frskydash.intent.action.BLUETOOTH_STATE_CHANGED";
-
+	
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
 	public static final String MESSAGE_ALARM_MISMATCH = "biz.onomato.frskydash.intent.action.ALARM_MISMATCH";
-
+	
 	public LocalBroadcastManager broadcastManager;
 
 	/**
@@ -204,237 +208,266 @@ public class FrSkyServer extends Service implements OnInitListener {
 	// hcpl: these are class members now since we have to collect the data over
 	// several method executions since the bytes could be spread over several
 	// telemetry 11 bytes frames
-
+	
 	/**
 	 * the current user frame we are working on. This is used to pass data
 	 * between incompletes frames.
 	 */
-	private List<Integer> frSkyFrame = new ArrayList<Integer>(
-			Frame.SIZE_TELEMETRY_FRAME);
-
-	// private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-	//
-	// /**
-	// * index of the current user frame. If set to -1 no user frame is under
-	// * construction.
-	// */
-	// private static int currentFrSkyFrameIndex = -1;
-	//
-	// /**
-	// * if on previous byte the XOR byte was found or not
-	// */
-	// private static boolean frSkyXOR = false;
-
+	private List<Integer> frSkyFrame = new ArrayList<Integer>(Frame.SIZE_TELEMETRY_FRAME);
+//	private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+//
+//	/**
+//	 * index of the current user frame. If set to -1 no user frame is under
+//	 * construction.
+//	 */
+//	private static int currentFrSkyFrameIndex = -1;
+//
+//	/**
+//	 * if on previous byte the XOR byte was found or not
+//	 */
+//	private static boolean frSkyXOR = false;
+	
 	@Override
-	public void onCreate() {
-		if (D)
-			Log.i(TAG, "onCreate");
+	public void onCreate()
+	{
+		if(D)Log.i(TAG,"onCreate");
 		super.onCreate();
 		context = getApplicationContext();
 		broadcastManager = LocalBroadcastManager.getInstance(context);
-		// _serverChannels = new HashMap<String,Channel>();
-
-		_alarmMap = new TreeMap<Integer, Alarm>();
-		_sourceChannelMap = new TreeMap<Integer, Channel>(
-				Collections.reverseOrder());
-
-		_audiomanager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		Toast.makeText(this, "Service created at " + time.getTime(),
-				Toast.LENGTH_LONG).show();
-
-		if (D)
-			Log.i(TAG, "Try to load settings");
-		_settings = context.getSharedPreferences("FrSkyDash", MODE_PRIVATE);
-		_editor = _settings.edit();
-
-		showNotification();
-
+		//_serverChannels = new HashMap<String,Channel>();
+		
+		_alarmMap = new TreeMap<Integer,Alarm>();
+		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
+		
+		
+		
+		
+		_audiomanager = 
+        	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		
+	
+		
+		NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
+		
+		if(D)Log.i(TAG,"Try to load settings");
+        _settings = context.getSharedPreferences("FrSkyDash",MODE_PRIVATE);
+        _editor = _settings.edit();
+        
+		showNotification();		
+		
 		setupFixedChannels();
 
-		// String _prevModel = "FunCub 1";
+
+		
+		//String _prevModel = "FunCub 1";
 		int _prevModelId;
-		try {
-			_prevModelId = _settings.getInt("prevModelId", -1);
-		} catch (Exception e) {
+		try
+		{
+			
+			_prevModelId= _settings.getInt("prevModelId", -1);
+		}
+		catch(Exception e)
+		{
 			_prevModelId = -1;
 		}
-
-		if (D)
-			Log.i(TAG, "Previous ModelId was: " + _prevModelId);
-		// _currentModel = new Model(context);
-
+		
+		if(D)Log.i(TAG,"Previous ModelId was: "+_prevModelId);
+	//	_currentModel = new Model(context);
+		
 		// DEBUG, List all channels for the model using new databaseadapter
-
-		modelMap = new TreeMap<Integer, Model>();
+		
+		
+		
+		
+		modelMap = new TreeMap<Integer,Model>();
 		database = new FrSkyDatabase(getApplicationContext());
-
-		for (Model m : database.getModels()) {
+		
+		for(Model m: database.getModels())
+		{
 			modelMap.put(m.getId(), m);
 		}
-
+		
 		Model cm = modelMap.get(_prevModelId);
-
-		// _currentModel = database.getModel(_prevModelId);
-
-		if (cm == null) {
-			if (D)
-				Log.e(TAG, "No model exists, make a new one");
+		
+		//_currentModel = database.getModel(_prevModelId);
+		
+		
+		if(cm==null)
+		{
+			if(D)Log.e(TAG,"No model exists, make a new one");
 			cm = new Model("Model 1");
 			// Saving to get id
 			database.saveModel(cm);
-
+			
 			cm.setFrSkyAlarms(initializeFrSkyAlarms());
 			// Create Default model channels.
 			cm.initializeDefaultChannels();
-
-			// _model.addChannel(c);
-
-			// _currentModel.setId(0);
+			
+			
+			//_model.addChannel(c);
+			
+			//_currentModel.setId(0);
 			database.saveModel(cm);
-			modelMap.put(cm.getId(), cm);
+			modelMap.put(cm.getId(),cm);
 		}
-
-		if (cm.getFrSkyAlarms().size() == 0) {
-			if (D)
-				Log.e(TAG, "No alarms exists, setup with defaults");
+		
+		if(cm.getFrSkyAlarms().size()==0)
+		{
+			if(D)Log.e(TAG,"No alarms exists, setup with defaults");
 			cm.setFrSkyAlarms(initializeFrSkyAlarms());
-
+			
 			database.saveModel(cm);
 		}
-
+		
+		
 		_prevModelId = cm.getId();
 		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
-
-		if (D)
-			Log.d(TAG, "The current model is: " + cm.getName()
-					+ " and has id: " + cm.getId());
-		if (D)
-			Log.d(TAG, "Activating the model");
+		
+		
+		
+		if(D)Log.d(TAG,"The current model is: "+cm.getName()+" and has id: "+cm.getId());
+		if(D)Log.d(TAG,"Activating the model");
 		setCurrentModel(cm);
-
-		logger = new DataLogger(getApplicationContext(), _currentModel, true,
-				true, true);
-		// logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
+		
+		logger = new DataLogger(getApplicationContext(),_currentModel,true,true,true);
+		//logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
 		logger.setCsvHeader();
 		logger.setLogToRaw(getLogToRaw());
 		logger.setLogToCsv(getLogToCsv());
 		logger.setLogToHuman(getLogToHuman());
+		
 
+		
+
+		
+		
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 		mIntentFilterBt.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
-
-		// mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
-		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive
-																// BT events
-
-		if (D)
-			Log.i(TAG, "Broadcast that i've started");
+		
+		//mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
+		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
+		
+		
+		if(D)Log.i(TAG,"Broadcast that i've started");
 		Intent i = new Intent();
 		i.setAction(MESSAGE_STARTED);
 		sendBroadcast(i);
-
+		
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
-		getWakeLock();
-
-		mSerialService = new BluetoothSerialService(this, mHandlerBT);
-
-		sim = new Simulator(this);
-
-		_cyclicSpeechEnabled = false;
-		_speakDelay = 30000;
-
-		// Cyclic job to "speak out" the channel values
-		speakHandler = new Handler();
-		runnableSpeaker = new Runnable() {
-			// @Override
-			public void run() {
-				if (D)
-					Log.i(TAG, "Cyclic Speak stuff");
-				if (statusRx) {
-					for (Channel c : getCurrentModel().getChannels().values()) {
-						if (!c.getSilent())
-							mTts.speak(c.toVoiceString(),
-									TextToSpeech.QUEUE_ADD, null);
+		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
+		 getWakeLock();
+		 
+		 
+		 mSerialService = new BluetoothSerialService(this, mHandlerBT);
+		 
+		 sim = new Simulator(this);
+		 
+		 _cyclicSpeechEnabled = false;
+		 _speakDelay = 30000;
+		
+		 
+		
+		 // Cyclic job to "speak out" the channel values
+		 speakHandler = new Handler();
+		 runnableSpeaker = new Runnable() {
+			//@Override
+			public void run()
+			{
+				if(D)Log.i(TAG,"Cyclic Speak stuff");
+				if(statusRx)
+				{
+					for(Channel c : getCurrentModel().getChannels().values())
+					{
+						if(!c.getSilent()) mTts.speak(c.toVoiceString(), TextToSpeech.QUEUE_ADD, null);
 					}
 				}
-
+				
 				speakHandler.removeCallbacks(runnableSpeaker);
-				speakHandler.postDelayed(this, _speakDelay);
-			}
-		};
+		    	speakHandler.postDelayed(this, _speakDelay);
+		 	}
+		 };
+		
 
-		// Cyclic handler to calculate FPS, and set the various connection
-		// statuses
+		 // Cyclic handler to calculate FPS, and set the various connection statuses
+		 
+		 fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		 fpsRxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		 fpsTxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
+		
+		 fpsHandler = new Handler();
+		 runnableFps = new Runnable () {
+			//@Override
+			public void run()
+			{
 
-		fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-		fpsRxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-		fpsTxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-
-		fpsHandler = new Handler();
-		runnableFps = new Runnable() {
-			// @Override
-			public void run() {
-
+				
 				fpsStack.push(_framecount);
 				fpsRxStack.push(_framecountRx);
 				fpsTxStack.push(_framecountTx);
-
+				
+				
 				fps = (int) Math.floor(fpsStack.average());
 				fpsRx = (int) Math.floor(fpsRxStack.average());
 				fpsTx = (int) Math.floor(fpsTxStack.average());
-
-				if (fpsRx > 0) // receiving frames from Rx, means Tx comms is up
-								// as well
+				
+				
+				if(fpsRx>0)	// receiving frames from Rx, means Tx comms is up as well 
 				{
 					// check if we should restart the cyclic speaker
-					if ((statusRx == false) && (getCyclicSpeechEnabled())) {
-						// Restart speaker if running
+					if((statusRx==false) && (getCyclicSpeechEnabled()))
+					{
+							// Restart speaker if running
 						startCyclicSpeaker();
 					}
 					statusRx = true;
 					statusTx = true;
-				} else // not receiving frames from Rx
+				}
+				else		// not receiving frames from Rx
 				{
 					// make sure user knows if state changed from ok to not ok
-					if (statusRx == true) {
+					if(statusRx==true)
+					{
 						wasDisconnected("Rx");
 					}
 					statusRx = false;
-
-					if (fpsTx > 0) // need to check if Tx comms is up
+					
+					if(fpsTx>0) // need to check if Tx comms is up
 					{
 						statusTx = true;
-					} else {
+					}
+					else
+					{
 						statusTx = false;
 					}
-
+					
 				}
-
+				
+				
 				_framecount = 0;
 				_framecountRx = 0;
 				_framecountTx = 0;
-				// Log.i(TAG,"FPS: "+fps);
+				//Log.i(TAG,"FPS: "+fps);
 				fpsHandler.removeCallbacks(runnableFps);
-				fpsHandler.postDelayed(this, 1000);
+				fpsHandler.postDelayed(this,1000);
 			}
 		};
 		// Start the FPS counters
-		fpsHandler.postDelayed(runnableFps, 1000);
-
+		fpsHandler.postDelayed(runnableFps,1000);
+		
+		
 		// Cyclic job to send watchdog to the Tx module
 		watchdogHandler = new Handler();
-		runnableWatchdog = new Runnable() {
-			// @Override
-			public void run() {
+		runnableWatchdog = new Runnable () {
+			//@Override
+			public void run()
+			{
 				sendWatchdog();
-
+				
 				watchdogHandler.removeCallbacks(runnableWatchdog);
-				watchdogHandler.postDelayed(this, 500);
+				watchdogHandler.postDelayed(this,500);
 			}
 		};
 		watchdogHandler.postDelayed(runnableWatchdog, 500);
@@ -443,27 +476,33 @@ public class FrSkyServer extends Service implements OnInitListener {
 		broadcastHubDataIntent = new Intent(BROADCAST_ACTION_HUB_DATA);
 
 	}
-
+	
+	
 	/**
-	 * eso: Send a "Request all alarms" command to the FrSky radio module. The
-	 * returns from this command can be used to calculate FPS and connection
-	 * status
+	 * eso: Send a "Request all alarms" command to the FrSky radio module. 
+	 * The returns from this command can be used to calculate FPS and connection status 
 	 */
-	public void sendWatchdog() {
+	public void sendWatchdog()
+	{
 		// Send get all alarms frame to force frames from Tx
-
-		if (_watchdogEnabled) {
+	
+		if(_watchdogEnabled)
+		{
 			// check if we already sent one
-			if (_outGoingWatchdogFlag) {
+			if(_outGoingWatchdogFlag)
+			{
 				// How long ago?
-				if ((System.currentTimeMillis() - _lastOutGoingWatchdogTime) > 5000) {
+				if((System.currentTimeMillis()-_lastOutGoingWatchdogTime)>5000)
+				{
 					// More than 5 seconds ago, reset outgoing flag
 					_outGoingWatchdogFlag = false;
 				}
-			} else // no outgoing watchdog
+			}
+			else // no outgoing watchdog
 			{
 				// only do this if not receiving anything from Rx side
-				if ((statusRx == false) && (statusBt == true)) {
+				if((statusRx==false) && (statusBt==true))
+				{
 					send(Frame.InputRequestADAlarms());
 					_outGoingWatchdogFlag = true;
 					_lastOutGoingWatchdogTime = System.currentTimeMillis();
@@ -471,62 +510,68 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
 		}
 	}
-
+	
+	
 	@Override
 	public IBinder onBind(Intent arg0) {
-		if (D)
-			Log.i(TAG, "Something tries to bind to me");
+		if(D)Log.i(TAG,"Something tries to bind to me");
 		return mBinder;
-		// return null;
+		//return null;
 	}
-
+	
+	
+	
 	// **************************************************************************************************************
-	// GETTERS AND SETTERS
+	//                                   GETTERS AND SETTERS
 	// **************************************************************************************************************
-
+	
+	
 	/**
 	 * 
-	 * @param state
-	 *            Determines if the cyclic watchdogs should be sent or not
+	 * @param state Determines if the cyclic watchdogs should be sent or not
 	 */
-	public void setWatchdogEnabled(boolean state) {
+	public void setWatchdogEnabled(boolean state)
+	{
 		_watchdogEnabled = state;
 	}
-
+	
 	/**
 	 * 
-	 * @return if the cyclic watchdog is enabled or not
+	 * @return if the cyclic watchdog is enabled or not 
 	 */
-	public boolean getWatchdogEnabled() {
+	public boolean getWatchdogEnabled()
+	{
 		return _watchdogEnabled;
 	}
-
+	
 	/**
 	 * 
 	 * @return a ServerChannel corresponding to the given id
 	 */
-	public static Channel getSourceChannel(int id) {
+	public static Channel getSourceChannel(int id)
+	{
 		return _sourceChannelMap.get(id);
 	}
-
+	
 	/**
 	 * 
-	 * @return all the ServerChannels in a TreeMap (key is the id of the
-	 *         Channel)
+	 * @return all the ServerChannels in a TreeMap (key is the id of the Channel) 
 	 */
-	public static TreeMap<Integer, Channel> getSourceChannels() {
+	public static TreeMap<Integer,Channel> getSourceChannels()
+	{
 		return _sourceChannelMap;
 	}
-
+	
 	/**
 	 * 
-	 * @return the application context
+	 * @return the application context 
 	 */
-	public static Context getContext() {
-		// Log.e(TAG,"Someone asked me for context!");
+	public static Context getContext()
+	{
+		//Log.e(TAG,"Someone asked me for context!");
 		return context;
 	}
-
+	
 	/**
 	 * Used to create initial alarms for a model.<br>
 	 * This consists of the following alarms:<br>
@@ -539,67 +584,88 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * FIXME: Get the proper default values<br>
 	 * FIXME: consider if this should be moved to Model
 	 */
-	public TreeMap<Integer, Alarm> initializeFrSkyAlarms() {
-		TreeMap<Integer, Alarm> aMap = new TreeMap<Integer, Alarm>();
-		Frame alarmFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM1_RSSI,
-				Alarm.ALARMLEVEL_LOW, 45, Alarm.LESSERTHAN);
+	public TreeMap<Integer,Alarm> initializeFrSkyAlarms()
+	{
+		TreeMap<Integer,Alarm> aMap = new TreeMap<Integer,Alarm>();
+		Frame alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_RSSI, 
+				Alarm.ALARMLEVEL_LOW, 
+				45, 
+				Alarm.LESSERTHAN);
 		Alarm a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_RSSIRX));
-		// a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
-
-		alarmFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM2_RSSI,
-				Alarm.ALARMLEVEL_MID, 42, Alarm.LESSERTHAN);
-
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_RSSI, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_RSSIRX));
-		// a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
-
-		alarmFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM1_AD1,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD1, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD1));
-		// a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
-
-		alarmFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM2_AD1,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD1, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD1));
-		// a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
-
-		alarmFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM1_AD2,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD2, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD2));
-		// a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
-
-		alarmFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM2_AD2,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
+		
+		alarmFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD2, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
 		a = new Alarm(alarmFrame);
 		a.setUnitChannel(_sourceChannelMap.get(CHANNEL_ID_AD2));
-		// a.setModelId(_currentModel);
+		//a.setModelId(_currentModel);
 		aMap.put(a.getFrSkyFrameType(), a);
 		return aMap;
 	}
-
+	
+	
 	/**
 	 * Set time between voice output.
 	 * 
-	 * @param interval
-	 *            time in seconds between reads
+	 * @param interval time in seconds between reads
 	 */
-	public void setCyclicSpeechInterval(int interval) {
-		if (D)
-			Log.i(TAG, "Set new interval to " + interval + " seconds");
-		_editor.putInt("cyclicSpeakerInterval", interval);
+	public void setCyclicSpeechInterval(int interval)
+	{
+		if(D)Log.i(TAG,"Set new interval to "+interval+" seconds");
+		_editor.putInt("cyclicSpeakerInterval",interval);
 		_editor.commit();
-		if (interval > 0) {
-			_speakDelay = interval * 1000;
-			if (getCyclicSpeechEnabled()) {
+		if(interval>0)
+		{
+			_speakDelay = interval*1000;
+			if(getCyclicSpeechEnabled())
+			{
 				// Restart speaker if running
 				startCyclicSpeaker();
 			}
@@ -610,144 +676,159 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * 
 	 * @return The time in seconds between voice output
 	 */
-	public int getCyclicSpeechInterval() {
+	public int getCyclicSpeechInterval()
+	{
 		return _settings.getInt("cyclicSpeakerInterval", 30);
 	}
+	
 
 	/**
 	 * 
-	 * @param set
-	 *            to true while the application is connection to BlueTooth
+	 * @param set to true while the application is connection to BlueTooth
 	 */
-	private void setConnecting(boolean connecting) {
+	private void setConnecting(boolean connecting)
+	{
 		_connecting = connecting;
 	}
-
+	
 	/**
 	 * 
 	 * @return returns true if the application is trying to connect
 	 */
-	public boolean getConnecting() {
+	public boolean getConnecting()
+	{
 		return _connecting;
 	}
-
+	
 	/**
 	 * 
 	 * @return TreeMap containing alarms recorded from the FrSky module
 	 */
-	public TreeMap<Integer, Alarm> getRecordedAlarmMap() {
+	public TreeMap<Integer,Alarm> getRecordedAlarmMap()
+	{
 		return _alarmMap;
 	}
-
+	
+	
 	/**
 	 * 
 	 * @return true if the cyclic speaker should be enabled at startup
 	 */
-	public boolean getCyclicSpeechEnabledAtStartup() {
+	public boolean getCyclicSpeechEnabledAtStartup()
+	{
 		return _settings.getBoolean("cyclicSpeakerEnabledAtStartup", false);
 	}
-
+	
 	/**
 	 * 
-	 * @param state
-	 *            set to true if you want Cyclic speaker to be enabled at
-	 *            startup
+	 * @param state set to true if you want Cyclic speaker to be enabled at startup
 	 */
-	public void setCyclicSpeechEnabledAtStartup(boolean state) {
-		if (D)
-			Log.i(TAG, "Setting Cyclic speech to: " + state);
+	public void setCyclicSpeechEnabledAtStartup(boolean state)
+	{
+		if(D)Log.i(TAG,"Setting Cyclic speech to: "+state);
 		_editor.putBoolean("cyclicSpeakerEnabledAtStartup", state);
 		_editor.commit();
-		// _cyclicSpeechEnabled = state;
+		//_cyclicSpeechEnabled = state;
 	}
-
+	
 	/**
 	 * 
 	 * @return true if cyclic speaker is enabled
 	 */
-	public boolean getCyclicSpeechEnabled() {
+	public boolean getCyclicSpeechEnabled()
+	{
 		return _cyclicSpeechEnabled;
 	}
-
+	
 	/**
 	 * 
-	 * @param state
-	 *            set to true to enable cyclic speaker
+	 * @param state set to true to enable cyclic speaker
 	 * 
 	 */
-	public void setCyclicSpeechEnabled(boolean state) {
+	public void setCyclicSpeechEnabled(boolean state)
+	{
 		_cyclicSpeechEnabled = state;
-		if (state) {
+		if(state) 
+		{
 			startCyclicSpeaker();
-		} else {
+		}
+		else
+		{
 			stopCyclicSpeaker();
 		}
 	}
-
+	
 	/**
 	 * 
 	 * @return the current FPS as a string.
 	 * 
-	 *         NOTE: Will return FPS from rx if rx communication is up, and FPS
-	 *         from tx otherwise
+	 * NOTE: Will return FPS from rx if rx communication is up, and FPS from tx otherwise
 	 */
-	public String getFps() {
-		// return Integer.toString(fpsRx);
-		if (statusRx) {
+	public String getFps()
+	{
+//		return Integer.toString(fpsRx);
+		if(statusRx)
+		{
 			return Integer.toString(fpsRx);
-		} else {
+		}
+		else
+		{
 			return Integer.toString(fpsTx);
 		}
 	}
-
+	
 	/**
 	 * 
-	 * @param lastConnectedToAddress
-	 *            an address to store persistantly, used to attempt autoconnect
+	 * @param lastConnectedToAddress an address to store persistantly, used to attempt autoconnect
 	 */
-	private void setBtLastConnectedToAddress(String lastConnectedToAddress) {
+	private void setBtLastConnectedToAddress(String lastConnectedToAddress)
+	{
 		_editor.putString("btLastConnectedToAddress", lastConnectedToAddress);
-		_editor.commit();
+	    _editor.commit();
 	}
-
+	
 	/**
 	 * 
 	 * @return address of the previously connected Bluetooth device
 	 */
-	private String getBtLastConnectedToAddress() {
-		return _settings.getString("btLastConnectedToAddress", "");
+	private String getBtLastConnectedToAddress()
+	{
+		return _settings.getString("btLastConnectedToAddress","");
 	}
-
+	
 	/**
 	 * 
 	 * @return true if logging to binary/raw file is enabled
 	 */
-	public boolean getLogToRaw() {
+	public boolean getLogToRaw()
+	{
 		return _settings.getBoolean("logToRaw", false);
 	}
-
+	
 	/**
 	 * 
 	 * @return true if logging to CSV file is enabled
 	 */
-	public boolean getLogToCsv() {
+	public boolean getLogToCsv()
+	{
 		return _settings.getBoolean("logToCsv", false);
 	}
-
+	
 	/**
 	 * 
 	 * @return true if logging to human readable file is enabled
 	 */
-	public boolean getLogToHuman() {
+	public boolean getLogToHuman()
+	{
 		return _settings.getBoolean("logToHuman", false);
 	}
-
+	
 	/**
 	 * 
-	 * @param state
-	 *            true to enable logging to binary file
+	 * @param state true to enable logging to binary file
 	 */
-	public void setLogToRaw(boolean state) {
+	public void setLogToRaw(boolean state)
+	{
 		_editor.putBoolean("logToRaw", state);
 		_editor.commit();
 		logger.setLogToRaw(state);
@@ -755,201 +836,209 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	/**
 	 * 
-	 * @param state
-	 *            true to enable logging to human readable file
+	 * @param state true to enable logging to human readable file
 	 */
-	public void setLogToHuman(boolean logToHuman) {
+	public void setLogToHuman(boolean logToHuman)
+	{
 		_editor.putBoolean("logToHuman", logToHuman);
 		_editor.commit();
 		logger.setLogToHuman(logToHuman);
 	}
-
+	
 	/**
 	 * 
-	 * @param state
-	 *            true to enable logging to CSV file
+	 * @param state true to enable logging to CSV file
 	 */
-	public void setLogToCsv(boolean logToCsv) {
+	public void setLogToCsv(boolean logToCsv)
+	{
 		_editor.putBoolean("logToCsv", logToCsv);
 		_editor.commit();
 		logger.setLogToCsv(logToCsv);
 	}
-
+	
 	/**
-	 * 
-	 * @param state
-	 *            true to autoenable bluetooth at startup
+	 *
+	 * @param state true to autoenable bluetooth at startup
 	 */
-	public void setBtAutoEnable(boolean state) {
+	public void setBtAutoEnable(boolean state)
+	{
 		_btAutoEnable = state;
 		_editor.putBoolean("btAutoEnable", state);
 		_editor.commit();
 	}
-
+	
 	/**
 	 * 
 	 * @return true if Bluetooth auto enable is set
 	 */
-	public boolean getBtAutoEnable() {
-		return _settings.getBoolean("btAutoEnable", false);
+	public boolean getBtAutoEnable()
+	{
+		return _settings.getBoolean("btAutoEnable",false);
 	}
-
+	
 	/**
 	 * 
-	 * @param state
-	 *            true to attempt autoconnect at startup
+	 * @param state true to attempt autoconnect at startup
 	 */
-	public void setBtAutoConnect(boolean state) {
+	public void setBtAutoConnect(boolean state)
+	{
 		_btAutoConnect = state;
 		_editor.putBoolean("btAutoConnect", state);
 		_editor.commit();
 	}
-
+	
 	/**
 	 * 
 	 * @return true if startup autoconnect is enabled
 	 */
-	public boolean getBtAutoConnect() {
-		return _settings.getBoolean("btAutoConnect", false);
+	public boolean getBtAutoConnect()
+	{
+		return _settings.getBoolean("btAutoConnect",false);
 	}
-
+	
 	/**
 	 * 
-	 * @param minimumVolumePrc
-	 *            the minimum volume (percentage 0 - 100) the application should
-	 *            use for cyclic speaker
+	 * @param minimumVolumePrc the minimum volume (percentage 0 - 100) the application should use for cyclic speaker
 	 * @see #setAutoSetVolume(boolean)
 	 */
-	public void setMinimumVolume(int minimumVolumePrc) {
-		// _minimumVolumeLevel=minimumVolumePrc;
+	public void setMinimumVolume(int minimumVolumePrc)
+	{
+		//_minimumVolumeLevel=minimumVolumePrc;
 		_editor.putInt("initialMinimumVolume", minimumVolumePrc);
 		_editor.commit();
 	}
-
+	
 	/**
 	 * 
 	 * @return the minimum volume (percentage 0 - 100) used for cyclic speaker
 	 */
-	public int getMinimumVolume() {
+	public int getMinimumVolume()
+	{
 		return _settings.getInt("initialMinimumVolume", 70);
 	}
-
+	
 	/**
 	 * 
-	 * @param state
-	 *            true to have the application autoset the media volume on
-	 *            startup <br>
-	 * <br>
+	 * @param state true to have the application autoset the media volume on startup
+	 * <br><br>
 	 * @see #setMinimumVolume(int)
 	 */
-	public void setAutoSetVolume(boolean state) {
-		// _autoSetVolume = state;
+	public void setAutoSetVolume(boolean state)
+	{
+		//_autoSetVolume = state;
 		_editor.putBoolean("autoSetVolume", _autoSetVolume);
 		_editor.commit();
 	}
-
+	
 	/**
 	 * 
 	 * @return true if the application is set to autoset the volume at startup
 	 */
-	public boolean getAutoSetVolume() {
+	public boolean getAutoSetVolume()
+	{
 		return _settings.getBoolean("autoSetVolume", false);
 	}
-
+	
 	/**
 	 * 
-	 * @param state
-	 *            set true to have application send a models alarms on model
-	 *            change
+	 * @param state set true to have application send a models alarms on model change
 	 * @see #setCurrentModel(Model)
 	 */
-	public void setAutoSendAlarms(boolean state) {
+	public void setAutoSendAlarms(boolean state)
+	{
 		_editor.putBoolean("autoSendAlarms", state);
 		_editor.commit();
 	}
-
+	
 	/**
 	 * 
 	 * @return true if application is set to autosend alarms on model change
 	 */
-	public boolean getAutoSendAlarms() {
+	public boolean getAutoSendAlarms()
+	{
 		return _settings.getBoolean("autoSendAlarms", false);
 	}
-
+	
 	/**
 	 * 
 	 * @return the current Model
 	 */
-	public Model getCurrentModel() {
+	public Model getCurrentModel()
+	{
 		return _currentModel;
 	}
-
+	
 	/**
-	 * 
-	 * @param modelId
-	 *            the id of the model the application should be monitoring
+	 *  
+	 * @param modelId the id of the model the application should be monitoring
 	 */
-	public void setCurrentModel(int modelId) {
+	public void setCurrentModel(int modelId)
+	{
 		setCurrentModel(modelMap.get(modelId));
 	}
-
 	/**
 	 * 
-	 * @param currentModel
-	 *            the model the application should be monitoring
+	 * @param currentModel the model the application should be monitoring
 	 */
-	public void setCurrentModel(Model currentModel) {
-
-		// reset old channels
-		// FIXME destroy?
-		if (_currentModel != null) {
-			Log.i(TAG, "Changing Models from " + _currentModel.getName()
-					+ " to " + currentModel.getName());
-
+	public void setCurrentModel(Model currentModel)
+	{
+		
+		// reset old channels 
+		//FIXME destroy?
+		if(_currentModel!=null)
+		{
+			Log.i(TAG,"Changing Models from "+_currentModel.getName()+" to "+currentModel.getName());
+			
 			_currentModel.unregisterListeners();
-		} else {
-			Log.i(TAG, "Changing Models from NULL to " + currentModel.getName());
 		}
-		// _currentModel = null;
-
-		badFrames = 0;
-
-		if (logger != null) {
+		else
+		{
+			Log.i(TAG,"Changing Models from NULL to "+currentModel.getName());
+		}
+		//_currentModel = null;
+		
+		badFrames=0;
+		
+		if(logger!=null)
+		{
 			logger.setModel(currentModel);
 		}
 		_currentModel = currentModel;
-		// _prevModelId = _currentModel.getId();
+		//_prevModelId = _currentModel.getId();
 		_editor.putInt("prevModelId", _currentModel.getId());
 		_editor.commit();
-
-		if (_currentModel.getFrSkyAlarms().size() == 0) {
+		
+		if(_currentModel.getFrSkyAlarms().size()==0)
+		{
 			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
 			database.saveModel(_currentModel);
-		} else {
+		}
+		else
+		{
 			// we already have alarms
 			// send them if user wants
-			if (getAutoSendAlarms()) {
+			if(getAutoSendAlarms())
+			{
 				sendAlarms(_currentModel);
-				// for(Alarm a : _currentModel.getFrSkyAlarms().values())
-				// {
-				// send(a.toFrame());
-				// }
+//				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+//				{
+//					send(a.toFrame());
+//				}
 			}
 		}
 		_currentModel.registerListeners();
-		// _currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
-		// logger.stop(); // SetModel will stop current Logger
-		Toast.makeText(this,
-				_currentModel.getName() + " set as the active model",
-				Toast.LENGTH_LONG).show();
+		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
+		//logger.stop();		// SetModel will stop current Logger
+		Toast.makeText(this, _currentModel.getName() + " set as the active model", Toast.LENGTH_LONG).show();
 
 	}
-
+	
 	/**
 	 * 
 	 * @return the application settings
 	 */
-	public SharedPreferences getSettings() {
+	public SharedPreferences getSettings()
+	{
 		return _settings;
 	}
 
@@ -960,15 +1049,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public int getConnectionState() {
 		return mSerialService.getState();
 	}
-
+	
 	// **************************************************************************************************************
-	// APPLICATION/SERVICE STUFF
+	//                                   APPLICATION/SERVICE STUFF
 	// **************************************************************************************************************
-
+	
 	/**
-	 * Used to allow the Activities to attach to the service. Study the
-	 * activities for how to use
-	 * 
+	 * Used to allow the Activities to attach to the service.
+	 * Study the activities for how to use
+	 *
 	 */
 	public class MyBinder extends Binder {
 		public FrSkyServer getService() {
@@ -976,265 +1065,258 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 	}
 
-	/**
+	/** 
 	 * Called when activities run startService
-	 * 
 	 * @see #handleIntent
 	 */
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (D)
-			Log.i(TAG, "Receieved startCommand or intent ");
+	public int onStartCommand(Intent intent, int flags, int startId)
+	{
+		if(D)Log.i(TAG,"Receieved startCommand or intent ");
 		handleIntent(intent);
 		return START_STICKY;
 	}
-
+	
+	
+	
 	/**
-	 * Used to show a notification icon in the notification field. Necessary
-	 * since we want the application to be able to run even if the user goes
-	 * back to the home screen.
+	 * Used to show a notification icon in the notification field. 
+	 * Necessary since we want the application to be able to run even if the user goes back to the home screen.
 	 */
-	private void showNotification() {
-		CharSequence text = "FrSkyServer Started";
-		Notification notification = new Notification(R.drawable.ic_status,
-				text, System.currentTimeMillis());
+    private void showNotification() {
+    	CharSequence text = "FrSkyServer Started";
+    	Notification notification = new Notification(R.drawable.ic_status, text, System.currentTimeMillis());
 
-		notification.ledOffMS = 500;
-		notification.ledOnMS = 500;
-		notification.ledARGB = 0xff00ff00;
+    	notification.ledOffMS = 500;
+    	notification.ledOnMS = 500;
+    	notification.ledARGB = 0xff00ff00;
 
-		notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		notification.flags |= Notification.FLAG_ONGOING_EVENT;
-		notification.flags |= Notification.FLAG_NO_CLEAR;
+    	notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+    	notification.flags |= Notification.FLAG_ONGOING_EVENT;
+    	notification.flags |= Notification.FLAG_NO_CLEAR;
 
-		Intent notificationIntent = new Intent(this, ActivityDashboard.class);
-		notificationIntent.setAction(Intent.ACTION_MAIN);
-		notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				notificationIntent, 0);
-		notification.setLatestEventInfo(this, "FrSkyDash", text, contentIntent);
-		startForeground(NOTIFICATION_ID, notification);
-	}
-
-	/**
-	 * Request wakelock
-	 */
-	public void getWakeLock() {
-		if (!wl.isHeld()) {
-			if (D)
-				Log.i(TAG, "Acquire wakelock");
+    	Intent notificationIntent = new Intent(this,ActivityDashboard.class);
+    	notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        
+    	PendingIntent contentIntent = PendingIntent.getActivity(this, 0,notificationIntent, 0);
+    	notification.setLatestEventInfo(this, "FrSkyDash",text, contentIntent);
+    	startForeground(NOTIFICATION_ID,notification);
+    }
+	
+    /**
+     * Request wakelock
+     */
+    public void getWakeLock()
+	{
+		if(!wl.isHeld())
+		{
+			if(D)Log.i(TAG,"Acquire wakelock");
 			wl.acquire();
-		} else {
-			if (D)
-				Log.i(TAG, "Wakelock already acquired");
+		}
+		else
+		{
+			if(D)Log.i(TAG,"Wakelock already acquired");
 		}
 	}
-
-	/**
-	 * Handler to handle incoming intents from activities
-	 * 
-	 * @param intent
-	 *            the intent to react on
-	 */
-	public void handleIntent(Intent intent) {
-		int cmd = intent.getIntExtra("command", CMD_IGNORE);
-		if (D)
-			Log.i(TAG, "CMD: " + cmd);
-		switch (cmd) {
-		case CMD_START_SIM:
-			if (D)
-				Log.i(TAG, "Start Simulator");
-			break;
-		case CMD_STOP_SIM:
-			if (D)
-				Log.i(TAG, "Stop Simulator");
-			break;
-		case CMD_START_SPEECH:
-			if (D)
-				Log.i(TAG, "Start Speaker");
-
-			break;
-		case CMD_STOP_SPEECH:
-			if (D)
-				Log.i(TAG, "Stop Speaker");
-			break;
-		case CMD_KILL_SERVICE:
-			if (D)
-				Log.i(TAG, "Killing myself");
-			die();
-			break;
-		case CMD_IGNORE:
-			// Log.i(TAG,"No command, skipping");
-			break;
-		default:
-			if (D)
-				Log.i(TAG, "Command " + cmd + " not implemented. Skipping");
-			break;
+	
+    /**
+     * Handler to handle incoming intents from activities
+     * @param intent the intent to react on
+     */
+	public void handleIntent(Intent intent)
+	{
+		int cmd = intent.getIntExtra("command",CMD_IGNORE);
+		if(D)Log.i(TAG,"CMD: "+cmd);
+		switch(cmd) {
+			case CMD_START_SIM:
+				if(D)Log.i(TAG,"Start Simulator");
+				break;
+			case CMD_STOP_SIM:
+				if(D)Log.i(TAG,"Stop Simulator");
+				break;
+			case CMD_START_SPEECH:
+				if(D)Log.i(TAG,"Start Speaker");
+				
+				break;
+			case CMD_STOP_SPEECH:
+				if(D)Log.i(TAG,"Stop Speaker");
+				break;	
+			case CMD_KILL_SERVICE:
+				if(D)Log.i(TAG,"Killing myself");
+				die();
+				break;
+			case CMD_IGNORE:
+				//Log.i(TAG,"No command, skipping");
+				break;
+			default:
+				if(D)Log.i(TAG,"Command "+cmd+" not implemented. Skipping");
+				break;
 		}
 	}
 
 	/*
 	 * Used to initiate shutdown of the application, will trigger onDestroy()
 	 */
-	public void die() {
-		if (D)
-			Log.i(TAG, "Die, perform cleanup");
+	public void die()
+	{
+		if(D)Log.i(TAG,"Die, perform cleanup");
 
 		stopSelf();
 	}
-
+	
 	@Override
-	public void onDestroy() {
-		_dying = true;
-
-		if (D)
-			Log.i(TAG, "onDestroy");
-
+	public void onDestroy()
+	{
+		_dying=true;
+		
+		if(D)Log.i(TAG,"onDestroy");
+		
 		_audiomanager.stopBluetoothSco();
-
+		
+		
 		simStop();
 		unregisterReceiver(mIntentReceiverBt);
-		// sim.reset();
-
+		//sim.reset();
+		
 		// disable bluetooth if it was disabled upon start:
-
-		if (!bluetoothEnabledAtStart) // bluetooth was not enabled at start
+		
+    	if(!bluetoothEnabledAtStart)	// bluetooth was not enabled at start
+    	{
+    		if(mBluetoothAdapter!=null) mBluetoothAdapter.disable();	// only do this if bluetooth feature exists
+    	}
+    	if(D)Log.i(TAG,"Releasing Wakelock");
+		if(wl.isHeld())
 		{
-			if (mBluetoothAdapter != null)
-				mBluetoothAdapter.disable(); // only do this if bluetooth
-												// feature exists
-		}
-		if (D)
-			Log.i(TAG, "Releasing Wakelock");
-		if (wl.isHeld()) {
 			wl.release();
 		}
 		stopCyclicSpeaker();
-		if (D)
-			Log.i(TAG, "Shutdown mTts");
-
-		try {
+		if(D)Log.i(TAG,"Shutdown mTts");
+		
+		try{
 			mTts.shutdown();
-		} catch (Exception e) {
 		}
-
-		if (D)
-			Log.i(TAG, "Stop BT service if neccessary");
-		if (mSerialService.getState() != BluetoothSerialService.STATE_NONE) {
-			try {
+		catch (Exception e) {}
+		
+		if(D)Log.i(TAG,"Stop BT service if neccessary");
+		if(mSerialService.getState()!=BluetoothSerialService.STATE_NONE)
+		{
+			try
+			{
 				mSerialService.stop();
-			} catch (Exception e) {
 			}
+			catch (Exception e) {}
 		}
-
+		
 		// Disable BT
-
-		if (D)
-			Log.i(TAG, "Stop FPS counter");
+		
+		
+		if(D)Log.i(TAG,"Stop FPS counter");
 		fpsHandler.removeCallbacks(runnableFps);
-
-		if (D)
-			Log.i(TAG, "Reset channels");
+		
+		if(D)Log.i(TAG,"Reset channels");
 		zeroChannels();
-
-		if (D)
-			Log.i(TAG, "Stop Logger");
-		try {
+		
+		if(D)Log.i(TAG,"Stop Logger");
+		try{
 			logger.stop();
-		} catch (Exception e) {
-
 		}
-
-		// stopCyclicSpeaker();
-
-		if (D)
-			Log.i(TAG, "Remove from foreground");
-		try {
+		catch (Exception e)
+		{
+			
+		}
+		
+		//stopCyclicSpeaker();
+		
+		if(D)Log.i(TAG,"Remove from foreground");
+		try{
 			stopForeground(true);
-		} catch (Exception e) {
-			if (D)
-				Log.d(TAG, "Exeption during stopForeground");
 		}
-
-		try {
+		catch (Exception e)
+		{
+			if(D)Log.d(TAG,"Exeption during stopForeground");
+		}
+		
+		try
+		{
 			super.onDestroy();
-		} catch (Exception e) {
-			if (D)
-				Log.d(TAG, "Exeption during super.onDestroy");
 		}
-		try {
-			Toast.makeText(this, "Service destroyed at " + time.getTime(),
-					Toast.LENGTH_LONG).show();
-		} catch (Exception e) {
-			if (D)
-				Log.d(TAG, "Exeption during last toast");
+		catch (Exception e)
+		{
+			if(D)Log.d(TAG,"Exeption during super.onDestroy");
+		}
+		try
+		{
+			Toast.makeText(this, "Service destroyed at " + time.getTime(), Toast.LENGTH_LONG).show();
+		}
+		catch (Exception e)
+		{
+			if(D)Log.d(TAG,"Exeption during last toast");
 		}
 	}
-
+	
+	
 	/**
 	 * Called after TextToSpeech was requested
 	 */
 	public void onInit(int status) {
-		if (D)
-			Log.i(TAG, "TTS initialized");
-		// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-		if (status == TextToSpeech.SUCCESS) {
-			int result = mTts.setLanguage(Locale.US);
-			if (result == TextToSpeech.LANG_MISSING_DATA
-					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
-				// Lanuage data is missing or the language is not supported.
-				if (D)
-					Log.e(TAG, "Language is not available.");
-			} else {
-				// Check the documentation for other possible result codes.
-				// For example, the language may be available for the locale,
-				// but not for the specified country and variant.
-				// The TTS engine has been successfully initialized.
-				// Allow the user to press the button for the app to speak
-				// again.
-
-				// Greet the user.
-				String myGreeting = "Application has enabled Text to Speech";
-				mTts.speak(myGreeting, TextToSpeech.QUEUE_FLUSH, null);
-
-				setCyclicSpeechEnabled(getCyclicSpeechEnabledAtStartup());
-
-			}
-		} else {
-			// Initialization failed.
-			if (D)
-				Log.i(TAG, "Something wrong with TTS");
-			if (D)
-				Log.e(TAG, "Could not initialize TextToSpeech.");
-		}
-	}
-
+		if(D)Log.i(TAG,"TTS initialized");
+    	// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
+    	if (status == TextToSpeech.SUCCESS) {
+    	int result = mTts.setLanguage(Locale.US);
+    	if (result == TextToSpeech.LANG_MISSING_DATA ||
+    	result == TextToSpeech.LANG_NOT_SUPPORTED) {
+    	// Lanuage data is missing or the language is not supported.
+    		if(D)Log.e(TAG, "Language is not available.");
+    	} else {
+    	// Check the documentation for other possible result codes.
+    	// For example, the language may be available for the locale,
+    	// but not for the specified country and variant.
+    	// The TTS engine has been successfully initialized.
+    	// Allow the user to press the button for the app to speak again.
+    	
+    	// Greet the user.
+    		String myGreeting = "Application has enabled Text to Speech";
+        	mTts.speak(myGreeting,TextToSpeech.QUEUE_FLUSH,null);
+        	
+        	setCyclicSpeechEnabled(getCyclicSpeechEnabledAtStartup());
+        	
+    	}
+    	} else {
+    	// Initialization failed.
+    		if(D)Log.i(TAG,"Something wrong with TTS");
+    		if(D)Log.e(TAG, "Could not initialize TextToSpeech.");
+    	}
+    }
+    
 	/**
 	 * Setup the server fixed channels
 	 */
-	private void setupFixedChannels() {
-		// Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
-		Channel none = new Channel("None", 0, 1, "", "");
+	private void setupFixedChannels()
+	{
+		//Sets up the hardcoded channels (AD1,AD2,RSSIrx,RSSItx)
+		Channel none =  new Channel("None", 0, 1, "", "");
 		none.setId(CHANNEL_ID_NONE);
-
+		
 		none.setPrecision(0);
 		none.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_NONE, none);
-
-		Channel ad1 = new Channel("AD1", 0, 1, "", "");
+		
+		
+		Channel ad1 =  new Channel("AD1", 0, 1, "", "");
 		ad1.setId(CHANNEL_ID_AD1);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_AD1, ad1);
-
-		Channel ad2 = new Channel("AD2", 0, 1, "", "");
+		
+		
+		Channel ad2 =  new Channel("AD2", 0, 1, "", "");
 		ad2.setId(CHANNEL_ID_AD2);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_AD2, ad2);
 
-		Channel rssirx = new Channel("RSSIrx", 0, 1, "", "");
+		Channel rssirx =  new Channel("RSSIrx", 0, 1, "", "");
 		rssirx.setId(CHANNEL_ID_RSSIRX);
 		rssirx.setPrecision(0);
 		rssirx.setMovingAverage(-1);
@@ -1242,8 +1324,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssirx.setShortUnit("dBm");
 		rssirx.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_RSSIRX, rssirx);
-
-		Channel rssitx = new Channel("RSSItx", 0, 1, "", "");
+		
+		Channel rssitx =  new Channel("RSSItx", 0, 1, "", "");
 		rssitx.setId(CHANNEL_ID_RSSITX);
 		rssitx.setPrecision(0);
 		rssitx.setMovingAverage(-1);
@@ -1252,360 +1334,389 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssitx.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_RSSITX, rssitx);
 	}
-
+	
 	/**
-	 * Set the value of all channels to 0 FIXME: Purpose of this, only used in
-	 * onDestroy
+	 * Set the value of all channels to 0
+	 * FIXME: Purpose of this, only used in onDestroy
 	 */
-	private void zeroChannels() {
-		for (Channel c : _sourceChannelMap.values()) {
+	private void zeroChannels()
+	{
+		for(Channel c : _sourceChannelMap.values())
+		{
 			c.setRaw(0);
 		}
-
+		
 	}
-
+	
 	/**
 	 * Compares the recorded alarms to the alarm set of a model
-	 * 
-	 * @param model
-	 *            the model to compare to
+	 * @param model the model to compare to
 	 * @return true if the alarms match
 	 */
-	public boolean alarmsSameAsModel(Model model) {
+	public boolean alarmsSameAsModel(Model model)
+	{
 		boolean equal = false;
-		if (model != null) {
+		if(model!=null)
+		{
 			equal = true;
-			for (Alarm a : _alarmMap.values()) {
-				// Log.w(TAG,"Checking "+a.getFrSkyFrameType());
-				if (!model.getFrSkyAlarms().containsValue(a)) {
-					// Log.w(TAG," Not equal!");
+			for(Alarm a: _alarmMap.values())
+			{
+				//Log.w(TAG,"Checking "+a.getFrSkyFrameType());
+				if(!model.getFrSkyAlarms().containsValue(a))
+				{
+					//Log.w(TAG," Not equal!");
 					equal = false;
 					break;
 				}
-				// Log.w(TAG," equal");
+				//Log.w(TAG," equal");
 				// compare a to _currentModel.alarms.get(a.getFrameType)
 			}
 		}
 		return equal;
 	}
-
+	
 	/**
-	 * Compare incoming alarms to currentModels alarms <br>
+	 * Compare incoming alarms to currentModels alarms
+	 * <br>
 	 * NOTE: Incomplete
 	 */
-	public void compareAlarms() {
-
+	public void compareAlarms()
+	{
+		
 		boolean equal = true;
-		if (_currentModel != null) {
+		if(_currentModel!=null)
+		{
 			equal = alarmsSameAsModel(_currentModel);
-			if (equal) {
-				Log.e(TAG, "Alarm sets are equal");
-			} else {
-				Log.e(TAG,
-						"Alarm sets are not equal, see if i can find a model that is equal");
+			if(equal)
+			{
+				Log.e(TAG,"Alarm sets are equal");
+			}
+			else
+			{
+				Log.e(TAG,"Alarm sets are not equal, see if i can find a model that is equal");
 				boolean found = false;
-				for (Model m : modelMap.values()) {
-					if (m != _currentModel) // no point checking currentModel
-											// again
+				for(Model m: modelMap.values())
+				{
+					if(m!=_currentModel)	// no point checking currentModel again
 					{
-						if (alarmsSameAsModel(m)) {
+						if(alarmsSameAsModel(m))
+						{
 							found = true;
-							Log.w(TAG, "Alarms match model " + m.getName());
+							Log.w(TAG,"Alarms match model "+m.getName());
 							// _autoSwitch should come from settings
-							if (_autoSwitch) {
-								// setCurrentModel(m);
-								Log.e(TAG, "Auto Switch model");
-							} else {
-								Log.e(TAG, "Show popup allow switch of model");
+							if(_autoSwitch)
+							{
+								//setCurrentModel(m);
+								Log.e(TAG,"Auto Switch model");
+							}
+							else
+							{
+								Log.e(TAG,"Show popup allow switch of model");
 								Intent i = new Intent(MESSAGE_ALARM_MISMATCH);
 								i.putExtra("modelId", m.getId());
 								sendBroadcast(i);
-
+								
 							}
 							break;
-						} else {
-							// Log.w(TAG,"Alarms does not match model "+m.getName());
+						}
+						else
+						{
+							//Log.w(TAG,"Alarms does not match model "+m.getName());
 						}
 					}
 				}
-				if (!found) {
-					Log.e(TAG, "Show popup no switch option");
+				if(!found)
+				{
+					Log.e(TAG,"Show popup no switch option");
 					Intent i = new Intent(MESSAGE_ALARM_MISMATCH);
 					i.putExtra("modelId", -1);
 					sendBroadcast(i);
 				}
 			}
 		}
-		_compareAfterRecord = false;
+		_compareAfterRecord = false;	
 	}
+	
+	
 
 	/**
 	 * Delete all the logfiles
 	 */
-	public void deleteAllLogFiles() {
-		if (D)
-			Log.i(TAG, "Really delete all log files");
+	public void deleteAllLogFiles()
+	{
+		if(D)Log.i(TAG,"Really delete all log files");
 		// Make logger stop logging, and close files
 		logger.stop();
-
+		
 		// get list of all ASC files
 		File path = getExternalFilesDir(null);
 		String[] files = path.list();
-		for (int i = 0; i < files.length; i++) {
+		for(int i=0;i<files.length;i++)
+		{
 			File f = new File(getExternalFilesDir(null), files[i]);
-			if (D)
-				Log.i(TAG, "Delete: " + f.getAbsolutePath());
+			if(D)Log.i(TAG,"Delete: "+f.getAbsolutePath());
 			f.delete();
 		}
-		Toast.makeText(getApplicationContext(), "All logs file deleted",
-				Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(),"All logs file deleted", Toast.LENGTH_LONG).show();
 	}
-
+	
+	
+		
+    
 	// **************************************************************************************************************
-	// BLUETOOTH STUFF
+	//                                   BLUETOOTH STUFF
 	// **************************************************************************************************************
-
+    
 	/**
 	 * Attempts to reconnect to the bluetooth device we lost connection with
 	 */
-	public void reConnect() {
-		// if(getConnectionState()==BluetoothSerialService.)
+	public void reConnect()
+	{
+		//if(getConnectionState()==BluetoothSerialService.)
 		mSerialService.connect(_device);
 	}
 
+	
 	/**
 	 * 
-	 * @param device
-	 *            the Bluetooth device we want to connect to
+	 * @param device the Bluetooth device we want to connect to
 	 */
-	public void connect(BluetoothDevice device) {
+	public void connect(BluetoothDevice device)
+	{
 		setConnecting(true);
-
-		logger.stop(); // stop the logger (will force creation of new files)
+		
+		logger.stop();		// stop the logger (will force creation of new files)
 		_device = device;
 		mSerialService.connect(device);
 	}
-
-	/**
+	
+	/** 
 	 * Connects to the stored Bluetooth device
 	 */
-	public void connect() // connect to previous device
+	public void connect()	// connect to previous device
 	{
-		if (mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
-		{
-			if (getBtLastConnectedToAddress() != "") {
-				BluetoothDevice device = mBluetoothAdapter
-						.getRemoteDevice(getBtLastConnectedToAddress());
-				connect(device);
-			}
-		}
-	}
-
+		if(mBluetoothAdapter.isEnabled()) // only connect if adapter is enabled
+        {
+	       	if(getBtLastConnectedToAddress()!="")
+	       	{
+	       		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(getBtLastConnectedToAddress());
+	            connect(device);
+	       	}
+	    }
+    }
+	    
 	/**
 	 * Disconnects from the Bluetooth device
 	 */
-	public void disconnect() {
+	public void disconnect()
+	{
 		_manualBtDisconnect = true;
 		mSerialService.stop();
 	}
-
+	
 	/**
 	 * Forces reconnection of the bluetooth link
 	 */
-	public void reconnectBt() {
+	public void reconnectBt()
+	{
 		mSerialService.stop();
 		mSerialService.start();
 	}
-
+	
 	/**
 	 * 
 	 * @return the device's default BluetoothAdapter
 	 */
-	public BluetoothAdapter getBluetoothAdapter() {
-		if (D)
-			Log.i(TAG, "Check for BT");
-		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		if (mBluetoothAdapter == null) {
-			// Device does not support Bluetooth
-			if (D)
-				Log.i(TAG, "Device does not support Bluetooth");
-			// Disable all BT related menu items
-		}
+	public BluetoothAdapter getBluetoothAdapter()
+    {
+    	if(D)Log.i(TAG,"Check for BT");
+	    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	    if (mBluetoothAdapter == null) {
+	        // Device does not support Bluetooth
+	    	if(D)Log.i(TAG,"Device does not support Bluetooth");
+	    	// Disable all BT related menu items
+	    }
+	    
+	    // popup to enable BT if not enabled
+	    if (mBluetoothAdapter != null)
+	    {
+	        if (!mBluetoothAdapter.isEnabled()) {
+	        	bluetoothEnabledAtStart = false;
+	        	if(D)Log.d(TAG,"BT NOT enabled at start");
+	        	if(getBtAutoEnable())
+	        	{
+	        		mBluetoothAdapter.enable();
+	        		Toast.makeText(this, "Bluetooth autoenabled", Toast.LENGTH_LONG).show();
+	        	}
+	        	else
+	        	{
+	        		if(D)Log.i(TAG,"Request user to enable bt");
+	        		
+	        	}
+	        }
+	        else
+	        {
+	        	bluetoothEnabledAtStart = true;
+	        	if(D)Log.d(TAG,"BT enabled at start");
 
-		// popup to enable BT if not enabled
-		if (mBluetoothAdapter != null) {
-			if (!mBluetoothAdapter.isEnabled()) {
-				bluetoothEnabledAtStart = false;
-				if (D)
-					Log.d(TAG, "BT NOT enabled at start");
-				if (getBtAutoEnable()) {
-					mBluetoothAdapter.enable();
-					Toast.makeText(this, "Bluetooth autoenabled",
-							Toast.LENGTH_LONG).show();
-				} else {
-					if (D)
-						Log.i(TAG, "Request user to enable bt");
-
-				}
-			} else {
-				bluetoothEnabledAtStart = true;
-				if (D)
-					Log.d(TAG, "BT enabled at start");
-
-				// autoconnect here if autoconnect
-				if (getBtAutoConnect()) {
-					connect();
-				}
-			}
-		}
-		return mBluetoothAdapter;
-	}
-
+		        //autoconnect here if autoconnect
+	        	if(getBtAutoConnect()) 
+		    	{
+	        		connect();
+		    	}
+	        }
+	    }
+	    return mBluetoothAdapter;
+    } 
+    
 	// **************************************************************************************************************
-	// COMMUNICATION
+	//                                   COMMUNICATION
 	// **************************************************************************************************************
-
+	    
 	/**
 	 * Transmits bytes to the Bluetooth serial receiver
 	 * 
-	 * @param out
-	 *            Array of the bytes to send
+	 * @param out Array of the bytes to send
 	 */
 	public void send(byte[] out) {
-		mSerialService.write(out);
-	}
-
+    	mSerialService.write( out );
+    }
+	
 	/**
 	 * Transmits ints to the Bluetooth serial receiver
 	 * 
-	 * @param out
-	 *            Array of the ints to send
+	 * @param out Array of the ints to send
 	 */
 	public void send(int[] out) {
-		mSerialService.write(out);
-	}
-
+    	mSerialService.write( out );
+    }
+	
 	/**
 	 * Transmits a frame to the Bluetooth serial receiver
 	 * 
-	 * @param f
-	 *            the frame to send
-	 */
+	 * @param f the frame to send 
+	 */	
 	public void send(Frame f) {
-		// Log.w(TAG,"Sending: "+f.toHuman());
+		//Log.w(TAG,"Sending: "+f.toHuman());
 		send(f.toInts());
 	}
-
-	public void recordAlarmsFromModule() {
+	
+	public void recordAlarmsFromModule()
+	{
 		recordAlarmsFromModule(-1);
 	}
-
+	
 	/**
-	 * Used to start recording alarms from the FrSky Module, To use the alarms,
-	 * listen to the MESSAGE_ALARM_RECORDING_COMPLETE broadcast, then use
-	 * <b>getRecordedAlarmMap()</b> to retrieve them.
-	 * 
-	 * @param modelId
-	 *            id of the model you want the recorded alarms to be stored on
+	 * Used to start recording alarms from the FrSky Module,
+	 * To use the alarms, listen to the MESSAGE_ALARM_RECORDING_COMPLETE broadcast, then
+	 * use <b>getRecordedAlarmMap()</b> to retrieve them. 	
+	 * @param modelId id of the model you want the recorded alarms to be stored on
 	 */
-	public void recordAlarmsFromModule(int modelId) {
+	public void recordAlarmsFromModule(int modelId)
+	{
 		// empty the map, allowing others to monitor it for becoming full again
 		_recordingAlarms = true;
 		_recordingModelId = modelId;
 		_alarmMap.clear();
-
-		// Only send request for RSSI alarms if Rx communication is up since we
-		// do automatic requests for RSSI alarms otherwise
-		if ((statusRx == true) && (statusBt == true)) {
-			// send(Frame.InputRequestRSSIAlarms());
+		
+		// Only send request for RSSI alarms if Rx communication is up since we do automatic requests for RSSI alarms otherwise
+		if((statusRx==true) && (statusBt==true))
+		{
+			//send(Frame.InputRequestRSSIAlarms());
 			send(Frame.InputRequestADAlarms());
 		}
-		// send(Frame.InputRequestADAlarms());
+		//send(Frame.InputRequestADAlarms());
 	}
-
+	
 	/**
 	 * Gets called whenever bluetooth connection is unintentionally dropped
-	 * 
-	 * @param source
-	 *            the name of the device we lost connection with
+	 * @param source the name of the device we lost connection with
 	 */
-	public void wasDisconnected(String source) {
-		// eso: TODO: what is reset vs channel.setRaw(0) (used in resetChannels)
-		for (Channel c : _sourceChannelMap.values()) {
-			c.reset();
-		}
-
-		// speak warning
-		saySomething("Alarm! Alarm! Alarm! Connection Lost!");
-		Toast.makeText(getApplicationContext(),
-				"Lost connection with " + source, Toast.LENGTH_SHORT).show();
-		// Get instance of Vibrator from current Context
-		try {
-			Vibrator v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
-
+	public void wasDisconnected(String source)
+	{
+    	//eso: TODO: what is reset vs channel.setRaw(0) (used in resetChannels) 
+    	for(Channel c: _sourceChannelMap.values())
+    	{
+    		c.reset();
+    	}
+    	
+    	
+    	// speak warning
+    	saySomething("Alarm! Alarm! Alarm! Connection Lost!");
+    	Toast.makeText(getApplicationContext(), "Lost connection with "+source, Toast.LENGTH_SHORT).show();
+    	// Get instance of Vibrator from current Context
+    	try
+    	{
+    		Vibrator v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
+	
 			// Start immediately
 			// Vibrate for 200 milliseconds
 			// Sleep for 500 milliseconds
 			long[] pattern = { 0, 200, 500, 200, 500, 200, 500 };
-			v.vibrate(pattern, -1);
-		} catch (Exception e) {
-
-		}
-
+			v.vibrate(pattern,-1);
+    	}
+    	catch (Exception e)
+    	{
+    	 
+    	}
+    	
 	}
+	
 
+  
+    
 	// **************************************************************************************************************
-	// BYTE STREAM ANALYSIS
+	//                                   BYTE STREAM ANALYSIS
 	// **************************************************************************************************************
-
-	/**
-	 * for simulation and testing only
-	 * 
-	 * @param buffer
-	 * @param signed
-	 */
-	public void handleStringBuffer(String buffer, String separator,
-			boolean signed) {
-		// construct an int array out of the string
-		List<Integer> list = new ArrayList<Integer>();
-		// parse string
-		for (String str : buffer.split(separator)) {
-			try {
-				list.add(Integer.decode(str.trim()));
-			} catch (NumberFormatException nfe) {
-				Log.e(TAG, "dropped unparseable byte: " + str);
-			}
-		}
-		// translate
-		int[] ints = new int[list.size()];
-		for (int i = 0; i < list.size(); i++)
-			ints[i] = list.get(i);
-		// and send on
-		handleIntBuffer(ints, signed);
-	}
-
-	/**
-	 * for simulation and testing only
-	 * 
-	 * @param buffer
-	 * @param signed
-	 */
-	public void handleIntBuffer(int[] buffer, boolean signed) {
-		// rework that int buffer into a byte buffer
-		byte[] byteBuffer = new byte[buffer.length];
-		for (int i = 0; i < buffer.length; i++) {
-			byteBuffer[i] = (byte) (signed ? buffer[i] : buffer[i] - 256);
-		}
-		// todo this requires a reset of the buffers state
-		// shouldn't be needed since it will reset properly on it's own on
-		// reaching delimiters
-		// frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-		// currentFrSkyFrameIndex = -1;
-		// frSkyXOR = false;
-		// pass on
-		handleByteBuffer(byteBuffer);
-	}
-
+    
+    
+    
+    /**
+     * for simulation and testing only
+     * 
+     * @param buffer
+     * @param signed
+     */
+    public void handleStringBuffer(String buffer, String separator, boolean signed){
+    	//construct an int array out of the string
+    	List<Integer> list = new ArrayList<Integer>();
+    	//parse string
+    	for(String str : buffer.split(separator)){
+    		try{
+    			list.add(Integer.decode(str.trim()));
+    		}catch(NumberFormatException nfe){
+    			Log.e(TAG, "dropped unparseable byte: "+str);
+    		}
+    	}
+    	//translate
+    	int[] ints = new int[list.size()];
+    	for(int i=0; i<list.size(); i++)
+    		ints[i] = list.get(i);
+    	//and send on
+    	handleIntBuffer(ints, signed);
+    }
+    
+    /**
+     * for simulation and testing only
+     * 
+     * @param buffer
+     * @param signed
+     */
+    public void handleIntBuffer(int[] buffer, boolean signed){
+    	//rework that int buffer into a byte buffer
+    	byte[] byteBuffer = new byte[buffer.length];
+    	for(int i =0 ; i < buffer.length ; i++){
+    		byteBuffer[i] = (byte)(signed?buffer[i]:buffer[i]-256);
+    	}
+    	//todo this requires a reset of the buffers state
+		//shouldn't be needed since it will reset properly on it's own on reaching delimiters
+    	//frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
+		//currentFrSkyFrameIndex = -1;
+		//frSkyXOR = false;
+		//pass on
+    	handleByteBuffer(byteBuffer);
+    }
+    
 	/**
 	 * hcpl: This is where the bytes buffer from bluetooth connection (or any
 	 * other type of connection like test data or wired) will be handled byte
@@ -1620,244 +1731,239 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// init current byte
 		int b;
 		// iterate all bytes in buffer
-		for (int i = 0; i < buffer.length; i++) {
+		for( int i=0 ; i< buffer.length ; i++){
 			// use & 0xff to properly convert from byte to 0-255 int
 			// value (java only knows signed bytes)
 			b = buffer[i] & 0xff;
 			// no decoding at this point, just parse the frames from this buffer
-			// on start stop byte we need to pass alon the collected frame and
+			// on start stop byte we need to pass alon the collected frame and 
 			// clean up so we can start collecting another frame
-			if (b == Frame.START_STOP_TELEMETRY_FRAME) {
+			if( b==Frame.START_STOP_TELEMETRY_FRAME){
 				// we already have content so we were working on a valid frame
-				if (!frSkyFrame.isEmpty()) {
+				if( !frSkyFrame.isEmpty()){
 					// complete this frame with the stop bit
 					frSkyFrame.add(b);
 					// pass along
 					handleFrame(frSkyFrame);
 					// clean up
 					frSkyFrame.clear();
-				}
+				} 
 				// otherwise this is a start bit so just register
-				else
+				else 
 					frSkyFrame.add(b);
-			}
+			} 
 			// otherwise just add to the current frame were working on
 			else {
 				frSkyFrame.add(b);
 			}
 
 		}
-	}
-
+    }
+	
+	
 	// **************************************************************************************************************
-	// FRAME HANDLING
+	//                                   FRAME HANDLING
 	// **************************************************************************************************************
-
+	
 	/**
-	 * Handle a single parsed frame. This frame is expected to be exactly 11
-	 * bytes long and in proper format.
-	 * 
+	 * Handle a single parsed frame. This frame is expected to be exactly 11 bytes long and in proper format.
 	 * @param list
 	 * 
-	 *            NOTE: eso: we could add Frame(List<Integer>) ctor
+	 * NOTE: eso: we could add Frame(List<Integer>) ctor
 	 */
-	// public void handleFrame(int[] frame){
-	public void handleFrame(List<Integer> list) {
-		// first convert
+//	public void handleFrame(int[] frame){
+	public void handleFrame(List<Integer> list){
+		// first convert 
 		int[] ints = new int[list.size()];
-		// index
-		int i = 0;
+		//index
+		int i=0;
 		// iterate
-		for (int li = 0; li < list.size(); li++) {
+		for(int li = 0 ; li< list.size(); li++){
 			ints[i++] = list.get(li);
 		}
-		// then pass to ctor Frame
+		//then pass to ctor Frame
 		Frame f = new Frame(ints);
 		// TODO adapt for encoding and accepting all lengths
-		parseFrame(f);
+    	parseFrame(f);
 	}
-
+	
 	/**
 	 * Determines what to do with a single frame
 	 * 
-	 * @param f
-	 *            the frame to parse
-	 * @param inBound
-	 *            set to false to mask the frame from FPS calculations
+	 * @param f the frame to parse
+	 * @param inBound set to false to mask the frame from FPS calculations
 	 * @return always true
 	 */
-	public boolean parseFrame(Frame f, boolean inBound) {
-		// int [] frame = f.toInts();
-		boolean ok = true;
-		if (inBound) // only log inbound frames
+	public boolean parseFrame(Frame f, boolean inBound)
+	{
+		//int [] frame = f.toInts(); 
+		boolean ok=true;
+		if(inBound) // only log inbound frames
 		{
 			logger.logFrame(f);
 		}
-		if (inBound)
-			_framecount++;
-		// Log.w(TAG,f.toHuman());
-		switch (f.frametype) {
-		case Frame.FRAMETYPE_CORRUPT:
-			if (D)
-				Log.w(TAG,
-						"Frame most likely corrupt, discarded: " + f.toHuman());
-			badFrames++;
-			break;
-		case Frame.FRAMETYPE_UNDEFINED:
-			if (D)
-				Log.w(TAG,
-						"Frame currently not supported, discarded: "
-								+ f.toHuman());
-			badFrames++;
-			break;
-		// Analog values
-		case Frame.FRAMETYPE_ANALOG:
-			// get AD1, AD2 etc from frame
-			_sourceChannelMap.get(CHANNEL_ID_AD1).setRaw(f.ad1);
-			_sourceChannelMap.get(CHANNEL_ID_AD2).setRaw(f.ad2);
-			_sourceChannelMap.get(CHANNEL_ID_RSSIRX).setRaw(f.rssirx);
-			_sourceChannelMap.get(CHANNEL_ID_RSSITX).setRaw(f.rssitx);
+		if(inBound)	_framecount++;
+		//Log.w(TAG,f.toHuman());
+		switch(f.frametype)
+		{
+			case Frame.FRAMETYPE_CORRUPT:
+				if(D)Log.w(TAG,"Frame most likely corrupt, discarded: "+f.toHuman());
+				badFrames++;
+				break;
+			case Frame.FRAMETYPE_UNDEFINED:
+				if(D)Log.w(TAG,"Frame currently not supported, discarded: "+f.toHuman());
+				badFrames++;
+				break;
+			// Analog values
+			case Frame.FRAMETYPE_ANALOG:
+				// get AD1, AD2 etc from frame
+				_sourceChannelMap.get(CHANNEL_ID_AD1).setRaw(f.ad1);
+				_sourceChannelMap.get(CHANNEL_ID_AD2).setRaw(f.ad2);
+				_sourceChannelMap.get(CHANNEL_ID_RSSIRX).setRaw(f.rssirx);
+				_sourceChannelMap.get(CHANNEL_ID_RSSITX).setRaw(f.rssitx);
+				
+				
+				if(inBound)	
+				{
+					_framecountRx++;
+					//TODO: replace with models logged channels
+					//logger.logCsv(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
+					logger.logCsv();
+				}
+				break;
+			case Frame.FRAMETYPE_FRSKY_ALARM:
+				//if(D)Log.d(TAG,"handle inbound FrSky alarm");
+				if(_currentModel!=null)
+				{
+					// don't copy the entire alarm, as that would kill off sourcechannel
+					//TODO: Compare to existing
+					//TODO: Ask to load into the alarms
+//					Alarm a = _currentModel.getFrSkyAlarms().get(aIn.getFrSkyFrameType());
+//					aIn.setThreshold(aIn.getThreshold());
+//					aIn.setGreaterThan(aIn.getGreaterThan());
+//					aIn.setAlarmLevel(aIn.getAlarmLevel());
+				}
+				
+				if(inBound)	
+				{
+					_framecountTx++;
+					_outGoingWatchdogFlag=false;
+					
+					if(_recordingAlarms)
+					{
+						// store alarms for future use
+						Alarm aIn = new Alarm(f);
+						Log.w(TAG,"Adding alarm to the recording buffer, alarm id: "+aIn.getFrSkyFrameType());
+						_alarmMap.put(aIn.getFrSkyFrameType(), aIn);
+						if(_alarmMap.size()>=4)
+						{
+							if(D)Log.w(TAG,"recording completed");
+							_recordingAlarms = false;
+							// Update the alarms for the model
+							if(_recordingModelId!=-1)
+							{
+								modelMap.get(_recordingModelId).setFrSkyAlarms(_alarmMap);
+								saveModel(modelMap.get(_recordingModelId));
+							}
+							
 
-			if (inBound) {
-				_framecountRx++;
-				// TODO: replace with models logged channels
-				// logger.logCsv(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
-				logger.logCsv();
-			}
-			break;
-		case Frame.FRAMETYPE_FRSKY_ALARM:
-			// if(D)Log.d(TAG,"handle inbound FrSky alarm");
-			if (_currentModel != null) {
-				// don't copy the entire alarm, as that would kill off
-				// sourcechannel
-				// TODO: Compare to existing
-				// TODO: Ask to load into the alarms
-				// Alarm a =
-				// _currentModel.getFrSkyAlarms().get(aIn.getFrSkyFrameType());
-				// aIn.setThreshold(aIn.getThreshold());
-				// aIn.setGreaterThan(aIn.getGreaterThan());
-				// aIn.setAlarmLevel(aIn.getAlarmLevel());
-			}
-
-			if (inBound) {
-				_framecountTx++;
-				_outGoingWatchdogFlag = false;
-
-				if (_recordingAlarms) {
-					// store alarms for future use
-					Alarm aIn = new Alarm(f);
-					Log.w(TAG,
-							"Adding alarm to the recording buffer, alarm id: "
-									+ aIn.getFrSkyFrameType());
-					_alarmMap.put(aIn.getFrSkyFrameType(), aIn);
-					if (_alarmMap.size() >= 4) {
-						if (D)
-							Log.w(TAG, "recording completed");
-						_recordingAlarms = false;
-						// Update the alarms for the model
-						if (_recordingModelId != -1) {
-							modelMap.get(_recordingModelId).setFrSkyAlarms(
-									_alarmMap);
-							saveModel(modelMap.get(_recordingModelId));
-						}
-
-						Intent i = new Intent();
-						i.setAction(MESSAGE_ALARM_RECORDING_COMPLETE);
-						sendBroadcast(i);
-
-						if (_compareAfterRecord) {
-							compareAlarms();
+							Intent i = new Intent();
+							i.setAction(MESSAGE_ALARM_RECORDING_COMPLETE);
+							sendBroadcast(i);
+							
+							if(_compareAfterRecord)
+							{
+								compareAlarms();
+							}
 						}
 					}
 				}
-			}
-			break;
-		case Frame.FRAMETYPE_USER_DATA:
-			// hcpl add handling user data frames!!
-			if (D)
-				Log.d(TAG, "Frametype User Data");
-			FrSkyHub.getInstance(this).extractUserDataBytes(f);
-			break;
-		case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_AD:
-			// Log.d(TAG,"Frametype Request all alarms");
-			break;
-		case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_RSSI:
-			// Log.d(TAG,"Frametype Request all alarms");
-			break;
-		default:
-			if (D)
-				Log.i(TAG, "Frametype currently not supported: " + f.frametype);
-			if (D)
-				Log.i(TAG, "Frame: " + f.toHuman());
-			break;
+				break;
+			case Frame.FRAMETYPE_USER_DATA:
+				// hcpl add handling user data frames!!
+				if(D)Log.d(TAG,"Frametype User Data");
+				FrSkyHub.getInstance(this).extractUserDataBytes(f);
+				break;
+			case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_AD:
+				//Log.d(TAG,"Frametype Request all alarms");
+				break;
+			case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_RSSI:
+				//Log.d(TAG,"Frametype Request all alarms");
+				break;
+			default:
+				if(D)Log.i(TAG,"Frametype currently not supported: "+f.frametype);
+				if(D)Log.i(TAG,"Frame: "+f.toHuman());
+				break;
 		}
 		return ok;
-
+		
 	}
-
+	
+	
+	
 	/**
 	 * @see #parseFrame(Frame, boolean)
 	 */
-	public boolean parseFrame(Frame f) {
-		return parseFrame(f, true);
+	public boolean parseFrame(Frame f)
+	{
+		return parseFrame(f,true);
 	}
-
+	
+	
 	// **************************************************************************************************************
-	// TEXT TO SPEECH STUFF
+	//                                   TEXT TO SPEECH STUFF
 	// **************************************************************************************************************
 
 	/**
 	 * Creates a TextToSpeech object
-	 * 
 	 * @return the TextToSpeech object we will use
 	 */
-	public TextToSpeech createSpeaker() {
-		if (D)
-			Log.i(TAG, "Create Speaker");
+	public TextToSpeech createSpeaker()
+	{
+		if(D)Log.i(TAG,"Create Speaker");
 		mTts = new TextToSpeech(this, this);
 		return mTts;
 	}
-
+	
 	/**
 	 * Speaks something using default values
-	 * 
-	 * @param myText
-	 *            the text to speak
+	 * @param myText the text to speak
 	 */
-	public void saySomething(String myText) {
-		if (D)
-			Log.i(TAG, "Speak something");
+	public void saySomething(String myText)
+	{
+		if(D)Log.i(TAG,"Speak something");
 		mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, null);
-		// mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, myAudibleStreamMap);
+		//mTts.speak(myText, TextToSpeech.QUEUE_FLUSH, myAudibleStreamMap);
 	}
-
+	
 	/**
 	 * Starts the cyclic speaker threads
 	 */
-	public void startCyclicSpeaker() {
+	public void startCyclicSpeaker()
+	{
 		// Stop it before starting it
-		if (D)
-			Log.i(TAG, "Start Cyclic Speaker");
+		if(D)Log.i(TAG,"Start Cyclic Speaker");
 		speakHandler.removeCallbacks(runnableSpeaker);
 		speakHandler.post(runnableSpeaker);
 		_cyclicSpeechEnabled = true;
-
+		
 		Intent i = new Intent();
 		i.setAction(MESSAGE_SPEAKERCHANGE);
 		sendBroadcast(i);
 	}
-
+	
 	/**
 	 * Stops the cyclic speaker thread
 	 */
-	public void stopCyclicSpeaker() {
-		if (D)
-			Log.i(TAG, "Stop Cyclic Speaker");
-		try {
+	public void stopCyclicSpeaker()
+	{
+		if(D)Log.i(TAG,"Stop Cyclic Speaker");
+		try
+		{
 			speakHandler.removeCallbacks(runnableSpeaker);
 			mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
-		} catch (Exception e) {
 		}
+		catch (Exception e) {}
 		_cyclicSpeechEnabled = false;
 		Intent i = new Intent();
 		i.setAction(MESSAGE_SPEAKERCHANGE);
@@ -1865,9 +1971,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 
 	// **************************************************************************************************************
-	// SIMULATOR STUFF
+	//                                   SIMULATOR STUFF
 	// **************************************************************************************************************
-
+	
+	
 	/**
 	 * Starts the cyclic simulator
 	 * 
@@ -1902,268 +2009,254 @@ public class FrSkyServer extends Service implements OnInitListener {
 			simStop();
 		}
 	}
-
+	
+	
 	// **************************************************************************************************************
-	// HANDLERS AND RECEIVERS
+	//                                   HANDLERS AND RECEIVERS
 	// **************************************************************************************************************
+	
+	
 
 	/**
-	 * Used to detect broadcasts from Bluetooth. Remember to add the message to
-	 * the intentfilter (mIntentFilterBt) above
+	 * Used to detect broadcasts from Bluetooth.
+	 * Remember to add the message to the intentfilter (mIntentFilterBt) above
 	 */
-	private BroadcastReceiver mIntentReceiverBt = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String msg = intent.getAction();
-			if (D)
-				Log.d(TAG, "Received Broadcast: " + msg);
-			if (msg.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-				// does not work?
-				int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-				if (D)
-					Log.i(TAG, "CMD: " + cmd);
-				switch (cmd) {
-				case BluetoothAdapter.STATE_ON:
-					if (D)
-						Log.d(TAG, "Bluetooth state changed to ON");
+    private BroadcastReceiver mIntentReceiverBt = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	String msg = intent.getAction();
+        	if(D)Log.d(TAG,"Received Broadcast: "+msg);
+        	if(msg.equals(BluetoothAdapter.ACTION_STATE_CHANGED))
+        	{
+	        	// does not work?
+	    		int cmd = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
+	    		if(D)Log.i(TAG,"CMD: "+cmd);
+	    		switch(cmd) {
+	    			case BluetoothAdapter.STATE_ON:
+	    				if(D)Log.d(TAG,"Bluetooth state changed to ON");
+	    				
+	    				if(getBtAutoConnect()) 
+	    		    	{
+	    					if(D)Log.d(TAG,"Autoconnect requested");
+	    					connect();
+	    		    	}
+	    				break;
+	    			case BluetoothAdapter.STATE_OFF:
+	    				if(D)Log.d(TAG,"Blueotooth state changed to OFF");
+	    				break;
+	    			default:
+	    				if(D)Log.d(TAG,"No information about "+msg);
+	    		
+	    		}
+        	}
+        	else if(msg.equals(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED))
+        	{
+        		if(D)Log.d(TAG,"SCO STATE CHANGED!!!"+msg);
+        		int scoState = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+        		switch(scoState) {
+        			case AudioManager.SCO_AUDIO_STATE_CONNECTED:
+        				if(D)Log.i(TAG,"SCO CONNECTED!!!!");
+        				//_scoConnected = true;
+        				break;
+        			case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
+        				if(D)Log.i(TAG,"SCO DIS-CONNECTED!!!!");
+        				//_scoConnected = false;
+        				break;
+        			default:
+        				if(D)Log.e(TAG,"Unhandled state");
+        				//_scoConnected = false;
+        				break;
+        		}
+        		
+        	}
 
-					if (getBtAutoConnect()) {
-						if (D)
-							Log.d(TAG, "Autoconnect requested");
-						connect();
-					}
-					break;
-				case BluetoothAdapter.STATE_OFF:
-					if (D)
-						Log.d(TAG, "Blueotooth state changed to OFF");
-					break;
-				default:
-					if (D)
-						Log.d(TAG, "No information about " + msg);
+        	else
+        	{
+        		if(D)Log.e(TAG,"Unhandled intent: "+msg);
+        		
+        	}
+        }
+    };
 
-				}
-			} else if (msg.equals(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED)) {
-				if (D)
-					Log.d(TAG, "SCO STATE CHANGED!!!" + msg);
-				int scoState = intent.getIntExtra(
-						AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
-				switch (scoState) {
-				case AudioManager.SCO_AUDIO_STATE_CONNECTED:
-					if (D)
-						Log.i(TAG, "SCO CONNECTED!!!!");
-					// _scoConnected = true;
-					break;
-				case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
-					if (D)
-						Log.i(TAG, "SCO DIS-CONNECTED!!!!");
-					// _scoConnected = false;
-					break;
-				default:
-					if (D)
-						Log.e(TAG, "Unhandled state");
-					// _scoConnected = false;
-					break;
-				}
-
-			}
-
-			else {
-				if (D)
-					Log.e(TAG, "Unhandled intent: " + msg);
-
-			}
-		}
-	};
-
-	/**
-	 * Acts on the Bluetooth events
-	 */
+    /**
+     * Acts on the Bluetooth events
+     */
 	private final Handler mHandlerBT = new Handler() {
+    	
+        @Override
+        public void handleMessage(Message msg) {        	
+            switch (msg.what) {
+            case MESSAGE_STATE_CHANGE:
+            	Intent bcI = new Intent();
+        		bcI.setAction(MESSAGE_BLUETOOTH_STATE_CHANGED);
+        		sendBroadcast(bcI);
+        		
+        		if(D)Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                switch (msg.arg1) {
+                case BluetoothSerialService.STATE_CONNECTED:
+                	if(D)Log.d(TAG,"BT connected");
+                	setConnecting(false);
+                	statusBt = true;
+                	
+                	_manualBtDisconnect = false;
+                	//send(Frame.InputRequestAll().toInts());
+                	
+                	_compareAfterRecord=true;
+                	recordAlarmsFromModule();
+                	
+                	// Dont autosend when connecting, rather autosend when setting currentModel
+//                	if(getAutoSendAlarms())
+//        			{
+//        				for(Alarm a : _currentModel.getFrSkyAlarms().values())
+//        				{
+//        					send(a.toFrame());
+//        				}
+//        			}
+                    
+                    break;
+                    
+                case BluetoothSerialService.STATE_CONNECTING:
+                	if(D)Log.d(TAG,"BT connecting");
+                	setConnecting(true);
+                	 //mTitle.setText(R.string.title_connecting);
+                    break;
+                    
+                case BluetoothSerialService.STATE_LISTEN:
+                	if(D)Log.d(TAG,"BT listening");
+                case BluetoothSerialService.STATE_NONE:
+                	if(D)Log.d(TAG,"BT state changed to NONE");
+                	//Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+                	setConnecting(false);
+                	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
+                	statusBt = false;
+                	// set all the channels to -1
+                	
+                	
+                	logger.stop();
+                }
+                break;
+            case MESSAGE_WRITE:
+            	//Log.d(TAG,"BT writing");
+                break;
+                
+            //handle receiving data from frsky 
+            case MESSAGE_READ:
+            	//Log.w(TAG,"Received bytes: "+msg.obj);
+            	if(!_dying)
+            	{
+            		//hcpl updated to handle the new int array after byte per byte read update
+	                byte[] readBuf = (byte[]) msg.obj;
+//	                int[] i = new int[msg.arg1];
+            		//int[] i = (int[])msg.obj;
+            		handleByteBuffer(readBuf);
+            	}
+                break;
+                
+            case MESSAGE_DEVICE_NAME:
+                // save the connected device's name
+                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                setBtLastConnectedToAddress(_device.getAddress());
+                Toast.makeText(getApplicationContext(), "Connected to "
+                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                if(D)Log.d(TAG,"BT connected to...");
+                break;
+            case MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
+                               Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    };
 
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case MESSAGE_STATE_CHANGE:
-				Intent bcI = new Intent();
-				bcI.setAction(MESSAGE_BLUETOOTH_STATE_CHANGED);
-				sendBroadcast(bcI);
-
-				if (D)
-					Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-				switch (msg.arg1) {
-				case BluetoothSerialService.STATE_CONNECTED:
-					if (D)
-						Log.d(TAG, "BT connected");
-					setConnecting(false);
-					statusBt = true;
-
-					_manualBtDisconnect = false;
-					// send(Frame.InputRequestAll().toInts());
-
-					_compareAfterRecord = true;
-					recordAlarmsFromModule();
-
-					// Dont autosend when connecting, rather autosend when
-					// setting currentModel
-					// if(getAutoSendAlarms())
-					// {
-					// for(Alarm a : _currentModel.getFrSkyAlarms().values())
-					// {
-					// send(a.toFrame());
-					// }
-					// }
-
-					break;
-
-				case BluetoothSerialService.STATE_CONNECTING:
-					if (D)
-						Log.d(TAG, "BT connecting");
-					setConnecting(true);
-					// mTitle.setText(R.string.title_connecting);
-					break;
-
-				case BluetoothSerialService.STATE_LISTEN:
-					if (D)
-						Log.d(TAG, "BT listening");
-				case BluetoothSerialService.STATE_NONE:
-					if (D)
-						Log.d(TAG, "BT state changed to NONE");
-					// Toast.makeText(getApplicationContext(), "Disconnected",
-					// Toast.LENGTH_SHORT).show();
-					setConnecting(false);
-					if ((statusBt == true) && (!_dying)
-							&& (!_manualBtDisconnect))
-						wasDisconnected("Bt"); // Only do disconnect message if
-												// previously connected
-					statusBt = false;
-					// set all the channels to -1
-
-					logger.stop();
-				}
-				break;
-			case MESSAGE_WRITE:
-				// Log.d(TAG,"BT writing");
-				break;
-
-			// handle receiving data from frsky
-			case MESSAGE_READ:
-				// Log.w(TAG,"Received bytes: "+msg.obj);
-				if (!_dying) {
-					// hcpl updated to handle the new int array after byte per
-					// byte read update
-					byte[] readBuf = (byte[]) msg.obj;
-					// int[] i = new int[msg.arg1];
-					// int[] i = (int[])msg.obj;
-					handleByteBuffer(readBuf);
-				}
-				break;
-
-			case MESSAGE_DEVICE_NAME:
-				// save the connected device's name
-				mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
-				setBtLastConnectedToAddress(_device.getAddress());
-				Toast.makeText(getApplicationContext(),
-						"Connected to " + mConnectedDeviceName,
-						Toast.LENGTH_SHORT).show();
-				if (D)
-					Log.d(TAG, "BT connected to...");
-				break;
-			case MESSAGE_TOAST:
-				Toast.makeText(getApplicationContext(),
-						msg.getData().getString(TOAST), Toast.LENGTH_SHORT)
-						.show();
-				break;
-			}
-		}
-	};
-
+    
 	// **************************************************************************************************************
-	// MODEL STUFF
+	//                                   MODEL STUFF
 	// **************************************************************************************************************
-	/**
-	 * Adds new model to the model map (will replace if id is positive and
-	 * exists)
-	 * 
-	 * @param model
-	 *            the model to add to the modelstore
-	 */
-	public static void addModel(Model model) {
-		if (model.getId() == -1) {
-			// save to get id
-			database.saveModel(model);
-			// Update channels with new model id
-			for (Channel c : model.getChannels().values()) {
-				c.setModelId(model.getId());
-			}
-		}
-		modelMap.put(model.getId(), model);
+    /**
+     * Adds new model to the model map (will replace if id is positive and exists)
+     * @param model the model to add to the modelstore
+     */
+    public static void addModel(Model model)
+    {
+    	if(model.getId()==-1)
+    	{
+    		// save to get id
+    		database.saveModel(model);
+    		// Update channels with new model id
+    		for(Channel c : model.getChannels().values())
+    		{
+    			c.setModelId(model.getId());
+    		}
+    	}
+    	modelMap.put(model.getId(), model);
+    	
+    }
+    
+    /**
+     * 
+     * @param model the model to delete
+     */
+    public static void deleteModel(Model model)
+    {
+    	model.unregisterListeners();
+    	model.frSkyAlarms.clear();
+    	model.getChannels().clear();
+    	database.deleteAllChannelsForModel(model);
+    	database.deleteAlarmsForModel(model);
+    	database.deleteModel(model.getId());
+    	modelMap.remove(model.getId());
+    }
+    
+    /**
+     * 
+     * @param model the model to save
+     */
+    public static void saveModel(Model model)
+    {
+    	//FIXME: What happens if saving a model with -1 id, but with channels?
+    	
 
-	}
-
-	/**
-	 * 
-	 * @param model
-	 *            the model to delete
-	 */
-	public static void deleteModel(Model model) {
-		model.unregisterListeners();
-		model.frSkyAlarms.clear();
-		model.getChannels().clear();
-		database.deleteAllChannelsForModel(model);
-		database.deleteAlarmsForModel(model);
-		database.deleteModel(model.getId());
-		modelMap.remove(model.getId());
-	}
-
-	/**
-	 * 
-	 * @param model
-	 *            the model to save
-	 */
-	public static void saveModel(Model model) {
-		// FIXME: What happens if saving a model with -1 id, but with channels?
-
-		database.saveModel(model);
-	}
-
-	/**
-	 * 
-	 * @param modelId
-	 *            id of the model to save
-	 */
-	public static void saveModel(int modelId) {
-		saveModel(modelMap.get(modelId));
-	}
-
-	/**
-	 * Saves a channel
-	 * 
-	 * @param channel
-	 *            the channel to save
-	 */
-	public static void saveChannel(Channel channel) {
-		database.saveChannel(channel);
-	}
-
-	/**
-	 * Sends a models alarms to the module
-	 * 
-	 * @param model
-	 *            the model to send alarms for
-	 */
-	public void sendAlarms(Model model) {
-		if (statusRx) {
-			for (Alarm a : model.getFrSkyAlarms().values()) {
+    	database.saveModel(model);
+    }
+    
+    /**
+     * 
+     * @param modelId id of the model to save
+     */
+    public static void saveModel(int modelId)
+    {
+    	saveModel(modelMap.get(modelId));
+    }
+    
+    /**
+     * Saves a channel
+     * @param channel the channel to save
+     */
+    public static void saveChannel(Channel channel)
+    {
+    	database.saveChannel(channel);
+    }
+    
+    /**
+     * Sends a models alarms to the module
+     * @param model the model to send alarms for
+     */
+    public void sendAlarms(Model model)
+    {
+    	if(statusRx)
+    	{
+	    	for(Alarm a : model.getFrSkyAlarms().values())
+			{
 				send(a.toFrame());
 			}
-		}
-	}
+    	}
+    }
 
-	/**
-	 * retrieve the simulator set to this server instance
-	 * 
-	 * @return
-	 */
+    /**
+     * retrieve the simulator set to this server instance
+     * 
+     * @return
+     */
 	public Simulator getSim() {
 		return sim;
 	}

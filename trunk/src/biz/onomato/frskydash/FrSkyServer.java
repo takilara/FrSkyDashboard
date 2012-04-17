@@ -1882,7 +1882,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			case Frame.FRAMETYPE_USER_DATA:
 				// hcpl add handling user data frames!!
 				if(D)Log.d(TAG,"Frametype User Data");
-				FrSkyHub.getInstance(this).extractUserDataBytes(f);
+				FrSkyHub.getInstance().extractUserDataBytes(this, f);
 				break;
 			case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_AD:
 				//Log.d(TAG,"Frametype Request all alarms");

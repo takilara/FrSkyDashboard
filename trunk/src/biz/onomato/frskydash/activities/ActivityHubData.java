@@ -178,27 +178,27 @@ public class ActivityHubData extends Activity {
 					.format(value));
 			break;
 		// for voltage values per cell
-		case volt_1:
+		case volt_0:
 			((TextView) findViewById(R.id.textViewVoltCell1)).setText(decFormat
 					.format(value));
 			break;
-		case volt_2:
+		case volt_1:
 			((TextView) findViewById(R.id.textViewVoltCell2)).setText(decFormat
 					.format(value));
 			break;
-		case volt_3:
+		case volt_2:
 			((TextView) findViewById(R.id.textViewVoltCell3)).setText(decFormat
 					.format(value));
 			break;
-		case volt_4:
+		case volt_3:
 			((TextView) findViewById(R.id.textViewVoltCell4)).setText(decFormat
 					.format(value));
 			break;
-		case volt_5:
+		case volt_4:
 			((TextView) findViewById(R.id.textViewVoltCell5)).setText(decFormat
 					.format(value));
 			break;
-		case volt_6:
+		case volt_5:
 			((TextView) findViewById(R.id.textViewVoltCell6)).setText(decFormat
 					.format(value));
 			break;

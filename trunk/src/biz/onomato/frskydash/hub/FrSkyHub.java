@@ -203,8 +203,9 @@ public class FrSkyHub {
 			// first 4 bit is battery cell number
 			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
 			int cell = getBatteryCell(frame);
-			if (cell < 1 || cell > 6) {
-				Logger.d(this.getClass().toString(),
+			//if (cell < 1 || cell > 6) {
+			if( cell < 0 || cell > 5 ){
+			Logger.d(this.getClass().toString(),
 						"failed to handle cell nr out of range: " + cell);
 				break;
 			}

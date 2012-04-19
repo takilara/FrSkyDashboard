@@ -41,6 +41,56 @@ public class ActivityHubData extends Activity {
 		setContentView(R.layout.activity_hubdata);
 		// register the receiving intent
 		broadcastIntent = new Intent(this, FrSkyServer.class);
+
+		// init all required fields here for performance
+		initTextFields();
+	}
+
+	private TextView textViewAltBefore, textViewAltAfter, textViewRpm,
+			textViewAccX, textViewAccY, textViewAccZ, textViewCourseAfter,
+			textViewDay, textViewMonth, textViewYear, textViewFuel,
+			textViewHour, textViewMinute, textViewSecond, textViewGpsAltAfter,
+			textViewGpsAltBefore, textViewSpeedAfter, textViewSpeedBefore,
+			textViewLatAfter, textViewCourseBefore, textViewLatBefore,
+			textViewLonAfter, textViewLonBefore, textViewTemp1, textViewTemp2,
+			textViewVoltCell2, textViewVoltCell1, textViewVoltCell3,
+			textViewVoltCell4, textViewVoltCell5, textViewVoltCell6;
+
+	/**
+	 * init all the text fields only once on create of activity
+	 */
+	private void initTextFields() {
+		textViewAltBefore = (TextView) findViewById(R.id.textViewAltBefore);
+		textViewAltAfter = (TextView) findViewById(R.id.textViewAltAfter);
+		textViewRpm = (TextView) findViewById(R.id.textViewRpm);
+		textViewAccX = (TextView) findViewById(R.id.textViewAccX);
+		textViewAccY = (TextView) findViewById(R.id.textViewAccY);
+		textViewAccZ = (TextView) findViewById(R.id.textViewAccZ);
+		textViewCourseAfter = (TextView) findViewById(R.id.textViewCourseAfter);
+		textViewCourseBefore = (TextView) findViewById(R.id.textViewCourseBefore);
+		textViewDay = (TextView) findViewById(R.id.textViewDay);
+		textViewMonth = (TextView) findViewById(R.id.textViewMonth);
+		textViewYear = (TextView) findViewById(R.id.textViewYear);
+		textViewFuel = (TextView) findViewById(R.id.textViewFuel);
+		textViewHour = (TextView) findViewById(R.id.textViewHour);
+		textViewMinute = (TextView) findViewById(R.id.textViewMinute);
+		textViewSecond = (TextView) findViewById(R.id.textViewSecond);
+		textViewGpsAltAfter = (TextView) findViewById(R.id.textViewGpsAltAfter);
+		textViewGpsAltBefore = (TextView) findViewById(R.id.textViewGpsAltBefore);
+		textViewSpeedAfter = (TextView) findViewById(R.id.textViewSpeedAfter);
+		textViewSpeedBefore = (TextView) findViewById(R.id.textViewSpeedBefore);
+		textViewLatAfter = (TextView) findViewById(R.id.textViewLatAfter);
+		textViewLatBefore = (TextView) findViewById(R.id.textViewLatBefore);
+		textViewLonAfter = (TextView) findViewById(R.id.textViewLonAfter);
+		textViewLonBefore = (TextView) findViewById(R.id.textViewLonBefore);
+		textViewTemp1 = (TextView) findViewById(R.id.textViewTemp1);
+		textViewTemp2 = (TextView) findViewById(R.id.textViewTemp2);
+		textViewVoltCell1 = (TextView) findViewById(R.id.textViewVoltCell1);
+		textViewVoltCell2 = (TextView) findViewById(R.id.textViewVoltCell2);
+		textViewVoltCell3 = (TextView) findViewById(R.id.textViewVoltCell3);
+		textViewVoltCell4 = (TextView) findViewById(R.id.textViewVoltCell4);
+		textViewVoltCell5 = (TextView) findViewById(R.id.textViewVoltCell5);
+		textViewVoltCell6 = (TextView) findViewById(R.id.textViewVoltCell6);
 	}
 
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -78,135 +128,102 @@ public class ActivityHubData extends Activity {
 	private void updateUI(Intent intent) {
 		String channelType = intent.getStringExtra(FIELD_CHANNEL);
 		double value = intent.getDoubleExtra(FIELD_VALUE, 0);
-
+		// switch based on type of channel
 		switch (ChannelTypes.valueOf(channelType)) {
 		case altitude_before:
-			((TextView) findViewById(R.id.textViewAltBefore)).setText(intFormat
-					.format(value));
+			textViewAltBefore.setText(intFormat.format(value));
 			break;
 		case altitude_after:
-			((TextView) findViewById(R.id.textViewAltAfter)).setText(intFormat
-					.format(value));
+			textViewAltAfter.setText(intFormat.format(value));
 			break;
 		case rpm:
-			((TextView) findViewById(R.id.textViewRpm)).setText(intFormat
-					.format(value));
+			textViewRpm.setText(intFormat.format(value));
 			break;
 		case acc_x:
-			((TextView) findViewById(R.id.textViewAccX)).setText(intFormat
-					.format(value));
+			textViewAccX.setText(intFormat.format(value));
 			break;
 		case acc_y:
-			((TextView) findViewById(R.id.textViewAccY)).setText(intFormat
-					.format(value));
+			textViewAccY.setText(intFormat.format(value));
 			break;
 		case acc_z:
-			((TextView) findViewById(R.id.textViewAccZ)).setText(intFormat
-					.format(value));
+			textViewAccZ.setText(intFormat.format(value));
 			break;
 		case course_after:
-			((TextView) findViewById(R.id.textViewCourseAfter))
-					.setText(intFormat.format(value));
+			textViewCourseAfter.setText(intFormat.format(value));
 			break;
 		case course_before:
-			((TextView) findViewById(R.id.textViewCourseBefore))
-					.setText(intFormat.format(value));
+			textViewCourseBefore.setText(intFormat.format(value));
 			break;
 		case day:
-			((TextView) findViewById(R.id.textViewDay)).setText(intFormat
-					.format(value));
+			textViewDay.setText(intFormat.format(value));
 			break;
 		case month:
-			((TextView) findViewById(R.id.textViewMonth)).setText(intFormat
-					.format(value));
+			textViewMonth.setText(intFormat.format(value));
 			break;
 		case year:
-			((TextView) findViewById(R.id.textViewYear)).setText(intFormat
-					.format(value));
+			textViewYear.setText(intFormat.format(value));
 			break;
 		case fuel:
-			((TextView) findViewById(R.id.textViewFuel)).setText(intFormat
-					.format(value));
+			textViewFuel.setText(intFormat.format(value));
 			break;
 		case hour:
-			((TextView) findViewById(R.id.textViewHour)).setText(intFormat
-					.format(value));
+			textViewHour.setText(intFormat.format(value));
 			break;
-
 		case minute:
-			((TextView) findViewById(R.id.textViewMinute)).setText(intFormat
-					.format(value));
+			textViewMinute.setText(intFormat.format(value));
 			break;
 		case second:
-			((TextView) findViewById(R.id.textViewSecond)).setText(intFormat
-					.format(value));
+			textViewSecond.setText(intFormat.format(value));
 			break;
 		case gps_altitude_after:
-			((TextView) findViewById(R.id.textViewGpsAltAfter))
-					.setText(intFormat.format(value));
+			textViewGpsAltAfter.setText(intFormat.format(value));
 			break;
 		case gps_altitude_before:
-			((TextView) findViewById(R.id.textViewGpsAltBefore))
-					.setText(intFormat.format(value));
+			textViewGpsAltBefore.setText(intFormat.format(value));
 			break;
 		case gps_speed_after:
-			((TextView) findViewById(R.id.textViewSpeedAfter))
-					.setText(intFormat.format(value));
+			textViewSpeedAfter.setText(intFormat.format(value));
 			break;
 		case gps_speed_before:
-			((TextView) findViewById(R.id.textViewSpeedBefore))
-					.setText(intFormat.format(value));
+			textViewSpeedBefore.setText(intFormat.format(value));
 			break;
 		case latitude_after:
-			((TextView) findViewById(R.id.textViewLatAfter)).setText(intFormat
-					.format(value));
+			textViewLatAfter.setText(intFormat.format(value));
 			break;
 		case latitude_before:
-			((TextView) findViewById(R.id.textViewLatBefore)).setText(intFormat
-					.format(value));
+			textViewLatBefore.setText(intFormat.format(value));
 			break;
 		case longitude_after:
-			((TextView) findViewById(R.id.textViewLonAfter)).setText(intFormat
-					.format(value));
+			textViewLonAfter.setText(intFormat.format(value));
 			break;
 		case longitude_before:
-			((TextView) findViewById(R.id.textViewLonBefore)).setText(intFormat
-					.format(value));
+			textViewLonBefore.setText(intFormat.format(value));
 			break;
 		case temp1:
-			((TextView) findViewById(R.id.textViewTemp1)).setText(intFormat
-					.format(value));
+			textViewTemp1.setText(intFormat.format(value));
 			break;
 		case temp2:
-			((TextView) findViewById(R.id.textViewTemp2)).setText(intFormat
-					.format(value));
+			textViewTemp2.setText(intFormat.format(value));
 			break;
 		// for voltage values per cell
 		case volt_0:
-			((TextView) findViewById(R.id.textViewVoltCell1)).setText(decFormat
-					.format(value));
+			textViewVoltCell1.setText(decFormat.format(value));
 			break;
 		case volt_1:
-			((TextView) findViewById(R.id.textViewVoltCell2)).setText(decFormat
-					.format(value));
+			textViewVoltCell2.setText(decFormat.format(value));
 			break;
 		case volt_2:
-			((TextView) findViewById(R.id.textViewVoltCell3)).setText(decFormat
-					.format(value));
+			textViewVoltCell3.setText(decFormat.format(value));
 			break;
 		case volt_3:
-			((TextView) findViewById(R.id.textViewVoltCell4)).setText(decFormat
-					.format(value));
+			textViewVoltCell4.setText(decFormat.format(value));
 			break;
 		case volt_4:
-			((TextView) findViewById(R.id.textViewVoltCell5)).setText(decFormat
-					.format(value));
+			textViewVoltCell5.setText(decFormat.format(value));
 			break;
 		case volt_5:
-			((TextView) findViewById(R.id.textViewVoltCell6)).setText(decFormat
-					.format(value));
+			textViewVoltCell6.setText(decFormat.format(value));
 			break;
-
 		default:
 			// TODO update other fields (NE, WS from gps? new current sensors?)
 			Logger.d(this.getClass().getName(),

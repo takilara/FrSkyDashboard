@@ -75,7 +75,20 @@ public class FrSkyHub {
 		// for (int b : frame) {
 		// don't handle all the bytes, skip header (0), prim(1), size(2),
 		// unused(3) and end but(10)
-		for (int i = 4; i < Frame.SIZE_TELEMETRY_FRAME - 1; i++) {
+		// the byte at index 2 indicated how many bytes are valid in this frame.
+		// Make sure to only take in account these valid bytes starting to count
+		// from byte at index 4
+		// index => byte description
+		// 0 => frame start byte
+		// 1 => type of frame byte (analog, signal, user data, ...)
+		// 2 => length of valid bytes
+		// 3 => discard this byte
+		// 4 => first user data byte
+		// ...
+		// 10 => stop byte frame
+		int nrOfValidBytesInFrame = ints[2];
+		// for (int i = 4; i < Frame.SIZE_TELEMETRY_FRAME - 1; i++) {
+		for (int i = 4; i < 4 + nrOfValidBytesInFrame; i++) {
 			b = ints[i];
 			// handle byte stuffing first
 			if (b == Frame.STUFFING_HUB_FRAME) {
@@ -203,9 +216,9 @@ public class FrSkyHub {
 			// first 4 bit is battery cell number
 			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
 			int cell = getBatteryCell(frame);
-			//if (cell < 1 || cell > 6) {
-			if( cell < 0 || cell > 5 ){
-			Logger.d(this.getClass().toString(),
+			// if (cell < 1 || cell > 6) {
+			if (cell < 0 || cell > 5) {
+				Logger.d(this.getClass().toString(),
 						"failed to handle cell nr out of range: " + cell);
 				break;
 			}

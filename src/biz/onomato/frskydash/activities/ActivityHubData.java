@@ -9,10 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.hub.ChannelTypes;
+import biz.onomato.frskydash.hub.EditPreferences;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -25,6 +28,7 @@ public class ActivityHubData extends Activity {
 
 	public static final String FIELD_VALUE = "value";
 	public static final String FIELD_CHANNEL = "channel-type";
+	private static final int ACTIVITY_PREFERENCES = 1;
 	/**
 	 * receiving intent
 	 */
@@ -209,6 +213,29 @@ public class ActivityHubData extends Activity {
 					"non implemented display of channel type: " + channelType);
 		}
 
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		// example of adding an item to the options menu, here for opening
+		// preferences
+		menu.add(0, ACTIVITY_PREFERENCES, 1, R.string.settings_label);
+		return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		boolean bla = super.onMenuItemSelected(featureId, item);
+
+		switch (item.getItemId()) {
+		// link the preference option to the preference activity
+		case ACTIVITY_PREFERENCES:
+			startActivity(new Intent(this, EditPreferences.class));
+			return (true);
+		}
+
+		return bla;
 	}
 
 }

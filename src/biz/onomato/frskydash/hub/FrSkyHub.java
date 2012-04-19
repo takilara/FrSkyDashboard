@@ -192,16 +192,15 @@ public class FrSkyHub {
 		// check data ID and update correct channel
 		switch (frame[1]) {
 		case 0x01:
-			// FIXME seems like this should be an unsigned value, test needed
 			updateChannel(ChannelTypes.gps_altitude_before,
-					getSigned16BitValue(frame));
+					getUnsigned16BitValue(frame));
 			break;
 		case 0x01 + 8:
 			updateChannel(ChannelTypes.gps_altitude_after,
 					getUnsigned16BitValue(frame));
 			break;
 		case 0x02:
-			updateChannel(ChannelTypes.temp1, getSigned16BitValue(frame));
+			updateChannel(ChannelTypes.temp1, getUnsigned16BitValue(frame));
 			break;
 		case 0x03:
 			// actual RPM value is Frame1*60
@@ -211,7 +210,7 @@ public class FrSkyHub {
 			updateChannel(ChannelTypes.fuel, getUnsigned16BitValue(frame));
 			break;
 		case 0x05:
-			updateChannel(ChannelTypes.temp2, getSigned16BitValue(frame));
+			updateChannel(ChannelTypes.temp2, getUnsigned16BitValue(frame));
 		case 0x06:
 			// first 4 bit is battery cell number
 			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
@@ -230,7 +229,7 @@ public class FrSkyHub {
 			break;
 		case 0x10:
 			updateChannel(ChannelTypes.altitude_before,
-					getSigned16BitValue(frame));
+					getUnsigned16BitValue(frame));
 			break;
 		case 0x21:
 			updateChannel(ChannelTypes.altitude_after,

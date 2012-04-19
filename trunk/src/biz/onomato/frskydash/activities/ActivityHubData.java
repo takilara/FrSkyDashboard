@@ -2,6 +2,7 @@ package biz.onomato.frskydash.activities;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -26,6 +27,7 @@ import biz.onomato.frskydash.util.Logger;
  */
 public class ActivityHubData extends Activity {
 
+	private static final int INTERVAL_GUI_UPDATE = 100;
 	public static final String FIELD_VALUE = "value";
 	public static final String FIELD_CHANNEL = "channel-type";
 	private static final int ACTIVITY_PREFERENCES = 1;
@@ -33,6 +35,12 @@ public class ActivityHubData extends Activity {
 	 * receiving intent
 	 */
 	private Intent broadcastIntent;
+
+	/**
+	 * hashmap containing last sensor values, broadcast updates these values,
+	 * gui updates on interval based on these values
+	 */
+	private HashMap<ChannelTypes, Double> sensorValues = new HashMap<ChannelTypes, Double>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +52,31 @@ public class ActivityHubData extends Activity {
 
 		// init all required fields here for performance
 		initTextFields();
+
+		// a thread responsible for updating the values on the gui
+		new Thread(new Runnable() {
+			public void run() {
+				// infinite loop
+				while (true) {
+					// iterate values
+					for (final ChannelTypes type : sensorValues.keySet()) {
+						// back to GUI
+						runOnUiThread(new Runnable() {
+							public void run() {
+								updateUI(type, sensorValues.get(type));
+							}
+						});
+					}
+					// and repeat this on interval
+					try {
+						Thread.sleep(INTERVAL_GUI_UPDATE);
+					} catch (InterruptedException e) {
+						Logger.e(ActivityHubData.this.getClass().toString(),
+								"Sleep for interval GUI update interrupted", e);
+					}
+				}
+			}
+		}).start();
 	}
 
 	private TextView textViewAltBefore, textViewAltAfter, textViewRpm,
@@ -96,9 +129,16 @@ public class ActivityHubData extends Activity {
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			updateUI(intent);
+			// updateUI(intent);
+			updateValues(intent);
 		}
 	};
+
+	private void updateValues(Intent intent) {
+		String channelType = intent.getStringExtra(FIELD_CHANNEL);
+		double value = intent.getDoubleExtra(FIELD_VALUE, 0);
+		sensorValues.put(ChannelTypes.valueOf(channelType), value);
+	}
 
 	@Override
 	public void onResume() {
@@ -125,11 +165,15 @@ public class ActivityHubData extends Activity {
 	 */
 	private NumberFormat decFormat = new DecimalFormat("0.00");
 
-	private void updateUI(Intent intent) {
-		String channelType = intent.getStringExtra(FIELD_CHANNEL);
-		double value = intent.getDoubleExtra(FIELD_VALUE, 0);
+	/**
+	 * actual update of the GUI with new value for given channeltype
+	 * 
+	 * @param type
+	 * @param value
+	 */
+	private void updateUI(ChannelTypes type, double value) {
 		// switch based on type of channel
-		switch (ChannelTypes.valueOf(channelType)) {
+		switch (type) {
 		case altitude_before:
 			textViewAltBefore.setText(intFormat.format(value));
 			break;
@@ -227,7 +271,7 @@ public class ActivityHubData extends Activity {
 		default:
 			// TODO update other fields (NE, WS from gps? new current sensors?)
 			Logger.d(this.getClass().getName(),
-					"non implemented display of channel type: " + channelType);
+					"non implemented display of channel type: " + type);
 		}
 
 	}

@@ -41,6 +41,7 @@ import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.FrSkyHub;
+import biz.onomato.frskydash.sim.Simulator;
 
 
 /**

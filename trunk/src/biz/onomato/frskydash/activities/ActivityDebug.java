@@ -41,6 +41,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	
 	private Button btnSchema,btnChannels,btnModels,btnExportDb;
 	private ToggleButton btnWatchdogEnabled;
+	private CheckBox chkHubEnabled;
 	
 	
 	//chConf_edVoice
@@ -57,11 +58,13 @@ public class ActivityDebug extends Activity implements OnClickListener {
 		// Find all form elements
 		btnExportDb			= (Button) findViewById(R.id.debug_btnExportDb);
 		btnWatchdogEnabled  = (ToggleButton) findViewById(R.id.debug_watchdogEnabled);
+		chkHubEnabled		= (CheckBox) findViewById(R.id.debug_chk_hubEnabled);
 		
 		
 		
 		btnExportDb.setOnClickListener(this);
 		btnWatchdogEnabled.setOnClickListener(this);
+		chkHubEnabled.setOnClickListener(this);
 		
 		// button for showing sensor hub data
 		((Button) findViewById(R.id.button_show_hub_data))
@@ -107,6 +110,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 			Log.i(TAG,"Bound to Service");
 	        // ADD stuff here
 			btnWatchdogEnabled.setChecked(server.getWatchdogEnabled());
+			chkHubEnabled.setChecked(server.getHubEnabled());
 			//server.setWatchdogEnabled(btnWatchdogEnabled.isChecked());
 			// Enable server buttons
 		}
@@ -128,6 +132,9 @@ public class ActivityDebug extends Activity implements OnClickListener {
 			case R.id.debug_btnExportDb:
 				Log.i(TAG,"Exporting DB to sdcard");
 				new ExportDatabaseFileTask().execute();
+				break;
+			case R.id.debug_chk_hubEnabled:
+				server.setHubEnabled(((CheckBox) v).isChecked());
 				break;
 		}
 	}

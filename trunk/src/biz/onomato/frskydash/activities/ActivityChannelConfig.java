@@ -167,9 +167,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	 * eso
 	        	 * 
 	        	 * Add channel list from Hub to source list
-	        	 * set this to false to hide hub channels
 	        	 */
-	        	if(true)
+	        	if(server.getHubEnabled())
 	        	{
 		        	for(Channel ch : FrSkyHub.getInstance().getSourceChannels().values())
 		        	{

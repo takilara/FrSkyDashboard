@@ -25,6 +25,18 @@
 		            android:text="Sensor Hub Data"
 		        />
 
+         <CheckBox
+             android:id="@+id/debug_chk_hubEnabled"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:text="Enable Alfa Hub support" />
+         
+         <CheckBox
+             android:id="@+id/debug_chk_playbackFileEnabled"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:text="Enable File Playback support" />
+
     </LinearLayout>
     </ScrollView>
 </LinearLayout>

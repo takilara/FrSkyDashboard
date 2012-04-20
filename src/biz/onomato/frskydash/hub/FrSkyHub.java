@@ -1,8 +1,11 @@
 package biz.onomato.frskydash.hub;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.TreeMap;
 
 import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.util.Logger;
 
@@ -42,6 +45,10 @@ public class FrSkyHub {
 	/**
 	 * def ctor, singleton use {@link #getInstance()} instead
 	 */
+	
+	
+	
+	
 	private FrSkyHub() {
 
 	}
@@ -52,6 +59,12 @@ public class FrSkyHub {
 			// server = forServer;
 			// not a good idea since parameter will be ignored if instance
 			// already existed, moved to method where needed
+			
+			
+			/**
+			 * eso: Prototype Channel code
+			 */
+			setupFixedChannels();
 		}
 		return instance;
 	}
@@ -362,8 +375,115 @@ public class FrSkyHub {
 		// broadcast channel so GUI can update this value
 		Logger.d(FrSkyServer.TAG, "Data received for channel: " + channel
 				+ ", value: " + value);
-		// let server updat this information
+		
+		
+		/** eso, prototype Channel support
+		 * Update a proper channel rather than broadcast. 
+		 * Allow broadcasts until Channels are fully implemented
+		*/
+		switch (channel){
+		case rpm:
+			_sourceChannelMap.get(CHANNEL_ID_RPM).setRaw(value);
+			break;
+		case temp1:
+			_sourceChannelMap.get(CHANNEL_ID_TEMP1).setRaw(value);
+			break;
+		case altitude_before:
+			///TODO: Proper construction of resulting altitude double needs to be done in handleHubDataFrame or extractUserDataBytes
+			/**
+			 * Temporarily construct double. 
+			 * TODO: Do this properly elsewhere
+			 */
+			
+			double alt = value+(alt_after/100);
+			
+			_sourceChannelMap.get(CHANNEL_ID_TEMP1).setRaw(alt);
+			break;			
+		case altitude_after:
+			// bad method of allowing construction of altitude double
+			alt_after = value;
+		}
+		
+		// let server update this information
 		server.broadcastChannelData(channel, value);
+	}
+	
+	
+	/**
+	 * Prototype Channel support
+	 * eso
+	 */
+
+	/**
+	 * Unique ID for the HUB
+	 */
+	public static final int HUB_ID = -1000;
+	
+	/**
+	 * Unique ID's for the Hubs channels
+	 */
+    public static final int CHANNEL_ID_ALTITUDE = 	0		+ HUB_ID;
+    public static final int CHANNEL_ID_RPM = 		1		+ HUB_ID;
+    public static final int CHANNEL_ID_TEMP1 = 		2		+ HUB_ID;
+    public static final int CHANNEL_ID_TEMP2 = 		3		+ HUB_ID;
+
+    /**
+     * Poor solution for holding decimal part of altitude
+     * 
+     */
+    public static double alt_after = 0;
+    
+    /**
+     * Treemap to hold the Hubs channels
+     */
+    private static TreeMap<Integer,Channel> _sourceChannelMap;
+	
+    /**
+	 * 
+	 * @return a ServerChannel corresponding to the given id
+	 */
+	public static Channel getSourceChannel(int id)
+	{
+		return _sourceChannelMap.get(id);
+	}
+	
+	/**
+	 * 
+	 * @return all the ServerChannels in a TreeMap (key is the id of the Channel) 
+	 */
+	public static TreeMap<Integer,Channel> getSourceChannels()
+	{
+		return _sourceChannelMap;
+	}
+	
+	/**
+	 * Create the _sourceChannelMap
+	 * Populate it with our channels
+	 */
+	public static void setupFixedChannels()
+	{
+		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
+		
+		//Sets up the hardcoded channels (Altitude,RPM)
+		///TODO: Add all channels here, these two are added for reference
+		///TODO: Figure out how to deal with race conditions on "split numbers"
+		Channel altitude =  new Channel("Hub: Altitude", 0, 1, "", "");
+		altitude.setId(CHANNEL_ID_ALTITUDE);
+		altitude.setPrecision(0);
+		altitude.setSilent(true);
+		_sourceChannelMap.put(CHANNEL_ID_ALTITUDE, altitude);
+		
+		Channel rpm =  new Channel("Hub: RPM (pulses)", 0, 1, "", "");
+		rpm.setId(CHANNEL_ID_RPM);
+		rpm.setPrecision(0);
+		rpm.setSilent(true);
+		_sourceChannelMap.put(CHANNEL_ID_RPM, rpm);
+		
+		Channel temp1 =  new Channel("Hub: Temp 1", 0, 1, "", "");
+		temp1.setId(CHANNEL_ID_TEMP1);
+		temp1.setPrecision(0);
+		temp1.setSilent(true);
+		_sourceChannelMap.put(CHANNEL_ID_TEMP1, temp1);
 	}
 
 }

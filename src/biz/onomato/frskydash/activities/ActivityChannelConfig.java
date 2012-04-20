@@ -10,6 +10,7 @@ import biz.onomato.frskydash.R.id;
 import biz.onomato.frskydash.R.layout;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.hub.FrSkyHub;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -161,10 +162,27 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        {
 	        	ArrayList<Channel> sourceChannels = _model.getAllowedSourceChannels();
 	        	
+	        	/**
+	        	 * Prototype Hub support
+	        	 * eso
+	        	 * 
+	        	 * Add channel list from Hub to source list
+	        	 * set this to false to hide hub channels
+	        	 */
+	        	if(true)
+	        	{
+		        	for(Channel ch : FrSkyHub.getInstance().getSourceChannels().values())
+		        	{
+		        		sourceChannels.add(ch);
+		        	}
+	        	}
+	        	
 	        	int n =0;
 	        	
    	
-	        	// eso: remove self from list
+	        	/**
+	        	 * remove self from list
+	        	 */
 	        	sourceChannels.remove(channel);
 
 	        	ArrayAdapter<Channel> channelDescriptionAdapter  = new ArrayAdapter<Channel> (getApplicationContext(),android.R.layout.simple_spinner_item,sourceChannels);

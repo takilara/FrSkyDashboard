@@ -96,12 +96,23 @@ public class Frame {
 			//Log.i(TAG,"Constructor");
 			_frameRaw = frame;
 			// fix bytestuffing
-		// FIXME this is now done on SerialService level but it needs to be
-		// reviewed!
-			// eso: temporary fix to allow frames "that are still longer than 11" (from simulator) to get destuffed
+
+			/**
+			 * eso
+			 * Check if frame endpoints are good (just used for testing, should probably set corrupt..)
+			 */
+			if(frame[0] != frame[frame.length-1])
+			{
+				Log.e(TAG, "Frame start and end not equal: "+   Frame.frameToHuman(frame));
+			}
+			// eso: temporary fix to allow frames "that are still longer than 11" (from simulator) to get destuffed			
 			if(frame.length>11)
 			{
+				Log.d(TAG,"Frame needs to be decoded: ");
+				Log.d(TAG,"\tBefore: "+Frame.frameToHuman(frame,false));
 				frame = frameDecode(frame);
+				Log.d(TAG,"\tAfter: "+Frame.frameToHuman(frame,false));
+				
 			}
 			
 
@@ -240,6 +251,8 @@ public class Frame {
 	 * 
 	 * hcpl: reviewed
 	 * 
+	 * 21.04.2012, eso: Added "truncating" of the output frame so that it is the correct frame
+	 * 
 	 * @param frame
 	 *            integer array
 	 * @return the frame with stuffed bytes replaced so length matches 11 bytes.
@@ -254,9 +267,10 @@ public class Frame {
 		// otherwise we need to handle the bytestuffing here
 		// a new frame in proper size for the decode bytes
 		int[] decodedFrame = new int[frame.length];
+		
 		// set delimiters in decodedFrame, these are fixed
 		decodedFrame[0] = frame[0];
-		decodedFrame[Frame.SIZE_TELEMETRY_FRAME - 1] = frame[frame.length - 1];
+		decodedFrame[Frame.SIZE_TELEMETRY_FRAME - 1] = frame[frame.length - 1]; 
 		// index for decoded frame, start at 1
 		int di = 1;
 		// current byte
@@ -301,7 +315,12 @@ public class Frame {
 			}
 		}
 		// return result
-		return decodedFrame;
+		/**
+		 * Needed to prevent outframe to be too large
+		 */
+		int[] outFrame = new int[di+1];
+		System.arraycopy(decodedFrame, 0, outFrame, 0, di+1);
+		return outFrame;
 		
 		// hcpl: original code
 //			int[] outFrameInitial = new int[frame.length];
@@ -455,53 +474,91 @@ public class Frame {
 		return new Frame(outBuf);
 	}
 	
-	
-	
+	/**
+	 * @see frameToHuman
+	 * @param frame
+	 * @return
+	 */
 	public static String frameToHuman(int[] frame)
+	{
+		return frameToHuman(frame,true);
+	}
+	
+	/**
+	 * Method to output nicely formated string of hex Characters of the given frame
+	 * @param frame frame as int[] that you want decoded
+	 * @param decode set to false to prevent method from doing encoding
+	 * @return a string with hex representation of the frame
+	 * @author eso
+	 */
+	public static String frameToHuman(int[] frame,boolean decode)
 	{
 		//Date startTime = new Date();
 		StringBuffer buf = new StringBuffer();
 		
 		//Log.i(TAG,"Create human raedable string with "+frame.length+" bytes");
 		//int xor = 0x00;
-		for(int n=0;n<frame.length;n++)
+		if(decode)
 		{
-			String hex ="";
-			if(
-					(frame[n]==START_STOP_TELEMETRY_FRAME) 		// delimiter
-					&& (n>1)				// not first or second byte
-					&& (n<frame.length-1) 	// not last byte
-				)
+			for(int n=0;n<frame.length;n++)
 			{
-				hex = "7d 5e";
+				String hex ="";
+				if(
+						(frame[n]==START_STOP_TELEMETRY_FRAME) 		// delimiter
+						&& (n>1)				// not first or second byte
+						&& (n<frame.length-1) 	// not last byte
+					)
+				{
+					hex = "7d 5e";
+				}
+				else if(
+						(frame[n]==STUFFING_TELEMETRY_FRAME) 		// delimiter
+						&& (n>1)				// not first or second byte
+						&& (n<frame.length-1) 	// not last byte
+					)
+				{
+					hex = "7d 5d";
+				}
+				else
+				{
+					hex = Integer.toHexString(frame[n]);
+					if(hex.length()==1)
+					{
+						hex = "0"+hex;
+					}
+				}
+				// Need to append in case it returns 0xf etc
+				//if(hex.length()==1)
+				//{
+	//				buf.append('0');
+				//}
+				buf.append(hex);
+				if(n<frame.length-1)
+				{
+					buf.append(' ');
+				}
+			
 			}
-			else if(
-					(frame[n]==STUFFING_TELEMETRY_FRAME) 		// delimiter
-					&& (n>1)				// not first or second byte
-					&& (n<frame.length-1) 	// not last byte
-				)
+		}
+		else
+		{
+			for(int n=0;n<frame.length;n++)
 			{
-				hex = "7d 5d";
-			}
-			else
-			{
+				String hex ="";
+				
 				hex = Integer.toHexString(frame[n]);
 				if(hex.length()==1)
 				{
 					hex = "0"+hex;
 				}
+				
+				buf.append(hex);
+				if(n<frame.length-1)
+				{
+					buf.append(' ');
+				}
+			
 			}
-			// Need to append in case it returns 0xf etc
-			//if(hex.length()==1)
-			//{
-//				buf.append('0');
-			//}
-			buf.append(hex);
-			if(n<frame.length-1)
-			{
-				buf.append(' ');
-			}
-		
 		}
 
 		//Log.i(TAG,"String is then: "+out);

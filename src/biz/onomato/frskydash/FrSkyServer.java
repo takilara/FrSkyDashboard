@@ -113,7 +113,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     private static BluetoothSerialService mSerialService = null;
     private BluetoothDevice _device = null;
     public boolean reconnectBt = true;
-    private boolean _manualBtDisconnect = false;    
+    private boolean _manualBtDisconnect = false; 
+    private boolean _hubEnabled = false;
     
     private boolean _compareAfterRecord =false;
     private boolean _autoSwitch = false;
@@ -886,6 +887,27 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_btAutoConnect = state;
 		_editor.putBoolean("btAutoConnect", state);
 		_editor.commit();
+	}
+	
+	/**
+	 * Enable/Disable hub support
+	 * 
+	 * @param state true to enable hub support
+	 */
+	public void setHubEnabled(boolean state)
+	{
+		_editor.putBoolean("hubEnabled", state);
+		_editor.commit();
+		_hubEnabled = state;
+	}
+	
+	/**
+	 * Get current hub enabled state
+	 */
+	public boolean getHubEnabled()
+	{
+		_hubEnabled =_settings.getBoolean("hubEnabled",false); 
+		return _hubEnabled;
 	}
 	
 	/**
@@ -1785,6 +1807,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		for(int li = 0 ; li< list.size(); li++){
 			ints[i++] = list.get(li);
 		}
+		
+//		if(ints.length>11)
+//		{
+//			Log.d(TAG,"Incoming list has strange length");
+//			Log.d(TAG,"\tList: "+Frame.frameToHuman(ints));
+//		}
+		
 		//then pass to ctor Frame
 		Frame f = new Frame(ints);
 		// TODO adapt for encoding and accepting all lengths
@@ -1886,7 +1915,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 			case Frame.FRAMETYPE_USER_DATA:
 				// hcpl add handling user data frames!!
 				if(D)Log.d(TAG,"Frametype User Data");
-				FrSkyHub.getInstance().extractUserDataBytes(this, f);
+				// Use menu item Debug to enable hub support
+				if(_hubEnabled)
+				{
+					FrSkyHub.getInstance().extractUserDataBytes(this, f);
+				}
 				break;
 			case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_AD:
 				//Log.d(TAG,"Frametype Request all alarms");

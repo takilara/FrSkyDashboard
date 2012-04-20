@@ -32,7 +32,7 @@
              android:text="Enable Alfa Hub support" />
          
          <CheckBox
-             android:id="@+id/debug_chk_playbackFileEnabled"
+             android:id="@+id/debug_chk_filePlaybackEnabled"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
              android:text="Enable File Playback support" />

@@ -1634,7 +1634,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void wasDisconnected(String source)
 	{
-    	//eso: TODO: what is reset vs channel.setRaw(0) (used in resetChannels) 
+    	//eso: TODO: what is reset vs channel.setRaw(0) (used in resetChannels) ?
+		
+		///TODO: eso: reset any hub channels as well
+		
     	for(Channel c: _sourceChannelMap.values())
     	{
     		c.reset();

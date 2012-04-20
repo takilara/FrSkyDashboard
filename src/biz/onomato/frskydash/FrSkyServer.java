@@ -115,6 +115,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     public boolean reconnectBt = true;
     private boolean _manualBtDisconnect = false; 
     private boolean _hubEnabled = false;
+    private boolean _filePlaybackEnabled = false;
     
     private boolean _compareAfterRecord =false;
     private boolean _autoSwitch = false;
@@ -908,6 +909,23 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		_hubEnabled =_settings.getBoolean("hubEnabled",false); 
 		return _hubEnabled;
+	}
+	
+	/**
+	 * Enable/Disable simulator playback features
+	 * @param state true to enable
+	 */
+	public void setFilePlaybackEnabled(boolean state)
+	{
+		_editor.putBoolean("filePlaybackEnabled", state);
+		_editor.commit();
+		_filePlaybackEnabled = state;
+	}
+	
+	public boolean getFilePlaybackEnabled()
+	{
+		_filePlaybackEnabled = _settings.getBoolean("filePlaybackEnabled",false);
+		return _filePlaybackEnabled;
 	}
 	
 	/**

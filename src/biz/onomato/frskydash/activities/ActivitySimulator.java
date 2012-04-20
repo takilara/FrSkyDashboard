@@ -20,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ public class ActivitySimulator extends Activity implements
 
 	private View btnSend;
 	private ToggleButton btnSimTgl, btnToggleFileSim;
+	private LinearLayout llFilePlayback;
 
 	private Handler tickHandler;
 	private Runnable runnableTick;
@@ -85,6 +87,8 @@ public class ActivitySimulator extends Activity implements
 		ad2_raw_tv = (TextView) findViewById(R.id.sim_ad2raw);
 		rssitx_raw_tv = (TextView) findViewById(R.id.sim_rssitxraw);
 		rssirx_raw_tv = (TextView) findViewById(R.id.sim_rssirxraw);
+		
+		
 
 		chkNoise = (CheckBox) findViewById(R.id.sim_chkNoise);
 		chkSensorData = (CheckBox) findViewById(R.id.sim_chk_sensor_data);
@@ -114,6 +118,8 @@ public class ActivitySimulator extends Activity implements
 		// hcpl simulate using raw log file in intervalled cycle
 		btnToggleFileSim = ((ToggleButton) findViewById(R.id.btn_file_cycle));
 		btnToggleFileSim.setOnClickListener(this);
+		
+		llFilePlayback = (LinearLayout) findViewById(R.id.sim_ll_filePlayback);
 
 		// Code to update GUI cyclic
 		tickHandler = new Handler();
@@ -186,6 +192,20 @@ public class ActivitySimulator extends Activity implements
 				Log.d(TAG, "update progress bars");
 			updateProgressBar();
 
+			
+			/**
+			 * Hide / Unhide file playback features
+			 * 
+			 */
+			if(server.getFilePlaybackEnabled())
+			{
+				llFilePlayback.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				llFilePlayback.setVisibility(View.GONE);
+			}
+			
 		}
 
 		public void onServiceDisconnected(ComponentName className) {

@@ -191,46 +191,52 @@
                 android:layout_height="2dip"
                 android:background="#FF909090" />
 
-            <TextView
-                android:id="@+id/textView6"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="From RAW file (leave empty for log path):" />
-
-            <!-- log file cycle sim input -->
-
-            <EditText
-                android:id="@+id/file_cycle_path"
+			<LinearLayout
+			    android:id="@+id/sim_ll_filePlayback"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:hint="/sdcard/..."
-                android:inputType="text" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Interval in seconds" >
-                </TextView>
-
-                <EditText
-                    android:id="@+id/file_cycle_interval"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number" />
-            </LinearLayout>
-
-            <ToggleButton
-                android:id="@+id/btn_file_cycle"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Cycle File"
-                android:textOff="Cycle File Off"
-                android:textOn="Cycle File On" />
+                android:orientation="vertical" >
+	            <TextView
+	                android:id="@+id/textView6"
+	                android:layout_width="match_parent"
+	                android:layout_height="wrap_content"
+	                android:text="From RAW file (leave empty for log path):" />
+	
+	            <!-- log file cycle sim input -->
+	
+	            <EditText
+	                android:id="@+id/file_cycle_path"
+	                android:layout_width="fill_parent"
+	                android:layout_height="wrap_content"
+	                android:hint="/sdcard/..."
+	                android:inputType="text" />
+	
+	            <LinearLayout
+	                android:layout_width="fill_parent"
+	                android:layout_height="wrap_content"
+	                android:orientation="horizontal" >
+	
+	                <TextView
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:text="Interval in seconds" >
+	                </TextView>
+	
+	                <EditText
+	                    android:id="@+id/file_cycle_interval"
+	                    android:layout_width="fill_parent"
+	                    android:layout_height="wrap_content"
+	                    android:inputType="number" />
+	            </LinearLayout>
+	
+	            <ToggleButton
+	                android:id="@+id/btn_file_cycle"
+	                android:layout_width="fill_parent"
+	                android:layout_height="wrap_content"
+	                android:text="Cycle File"
+	                android:textOff="Cycle File Off"
+	                android:textOn="Cycle File On" />
+	        </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

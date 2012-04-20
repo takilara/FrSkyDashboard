@@ -41,7 +41,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	
 	private Button btnSchema,btnChannels,btnModels,btnExportDb;
 	private ToggleButton btnWatchdogEnabled;
-	private CheckBox chkHubEnabled;
+	private CheckBox chkHubEnabled,chkFilePlaybackEnabled;
 	
 	
 	//chConf_edVoice
@@ -59,12 +59,14 @@ public class ActivityDebug extends Activity implements OnClickListener {
 		btnExportDb			= (Button) findViewById(R.id.debug_btnExportDb);
 		btnWatchdogEnabled  = (ToggleButton) findViewById(R.id.debug_watchdogEnabled);
 		chkHubEnabled		= (CheckBox) findViewById(R.id.debug_chk_hubEnabled);
+		chkFilePlaybackEnabled		= (CheckBox) findViewById(R.id.debug_chk_filePlaybackEnabled);
 		
 		
 		
 		btnExportDb.setOnClickListener(this);
 		btnWatchdogEnabled.setOnClickListener(this);
 		chkHubEnabled.setOnClickListener(this);
+		chkFilePlaybackEnabled.setOnClickListener(this);
 		
 		// button for showing sensor hub data
 		((Button) findViewById(R.id.button_show_hub_data))
@@ -111,6 +113,9 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	        // ADD stuff here
 			btnWatchdogEnabled.setChecked(server.getWatchdogEnabled());
 			chkHubEnabled.setChecked(server.getHubEnabled());
+			chkFilePlaybackEnabled.setChecked(server.getFilePlaybackEnabled());
+			
+			
 			//server.setWatchdogEnabled(btnWatchdogEnabled.isChecked());
 			// Enable server buttons
 		}
@@ -136,6 +141,10 @@ public class ActivityDebug extends Activity implements OnClickListener {
 			case R.id.debug_chk_hubEnabled:
 				server.setHubEnabled(((CheckBox) v).isChecked());
 				break;
+			case R.id.debug_chk_filePlaybackEnabled:
+				server.setFilePlaybackEnabled(((CheckBox) v).isChecked());
+				break;
+				
 		}
 	}
 	

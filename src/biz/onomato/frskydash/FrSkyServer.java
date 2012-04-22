@@ -1931,12 +1931,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 				}
 				break;
 			case Frame.FRAMETYPE_USER_DATA:
-				// hcpl add handling user data frames!!
-				if(D)Log.d(TAG,"Frametype User Data");
-				// Use menu item Debug to enable hub support
-				if(_hubEnabled)
+				if(inBound)	
 				{
-					FrSkyHub.getInstance().extractUserDataBytes(this, f);
+					_framecountTx++;
+					// hcpl add handling user data frames!!
+					if(D)Log.d(TAG,"Frametype User Data");
+					// Use menu item Debug to enable hub support
+					if(_hubEnabled)
+					{
+						FrSkyHub.getInstance().extractUserDataBytes(this, f);
+					}
 				}
 				break;
 			case Frame.FRAMETYPE_INPUT_REQUEST_ALARMS_AD:

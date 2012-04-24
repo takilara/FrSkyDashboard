@@ -87,7 +87,7 @@ public class ActivityHubData extends Activity {
 			textViewLatAfter, textViewCourseBefore, textViewLatBefore,
 			textViewLonAfter, textViewLonBefore, textViewTemp1, textViewTemp2,
 			textViewVoltCell2, textViewVoltCell1, textViewVoltCell3,
-			textViewVoltCell4, textViewVoltCell5, textViewVoltCell6;
+			textViewVoltCell4, textViewVoltCell5, textViewVoltCell6, textViewNS, textViewEW;
 
 	/**
 	 * init all the text fields only once on create of activity
@@ -116,6 +116,8 @@ public class ActivityHubData extends Activity {
 		textViewLatBefore = (TextView) findViewById(R.id.textViewLatBefore);
 		textViewLonAfter = (TextView) findViewById(R.id.textViewLonAfter);
 		textViewLonBefore = (TextView) findViewById(R.id.textViewLonBefore);
+		textViewNS = (TextView) findViewById(R.id.textViewNS);
+		textViewEW = (TextView) findViewById(R.id.textViewEW);
 		textViewTemp1 = (TextView) findViewById(R.id.textViewTemp1);
 		textViewTemp2 = (TextView) findViewById(R.id.textViewTemp2);
 		textViewVoltCell1 = (TextView) findViewById(R.id.textViewVoltCell1);
@@ -267,6 +269,13 @@ public class ActivityHubData extends Activity {
 			break;
 		case volt_5:
 			textViewVoltCell6.setText(decFormat.format(value));
+			break;
+		case ew:
+			textViewEW.setText(intFormat.format(value));
+			break;
+		case ns:
+			textViewNS.setText(intFormat.format(value));
+			
 			break;
 		default:
 			// TODO update other fields (NE, WS from gps? new current sensors?)

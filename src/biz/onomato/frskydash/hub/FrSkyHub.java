@@ -45,10 +45,7 @@ public class FrSkyHub {
 	/**
 	 * def ctor, singleton use {@link #getInstance()} instead
 	 */
-	
-	
-	
-	
+
 	private FrSkyHub() {
 
 	}
@@ -59,8 +56,7 @@ public class FrSkyHub {
 			// server = forServer;
 			// not a good idea since parameter will be ignored if instance
 			// already existed, moved to method where needed
-			
-			
+
 			/**
 			 * eso: Prototype Channel code
 			 */
@@ -206,24 +202,24 @@ public class FrSkyHub {
 		switch (frame[1]) {
 		case 0x01:
 			updateChannel(ChannelTypes.gps_altitude_before,
-					getUnsigned16BitValue(frame));
+					getSignedLE16BitValue(frame));
 			break;
 		case 0x01 + 8:
 			updateChannel(ChannelTypes.gps_altitude_after,
-					getUnsigned16BitValue(frame));
+					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x02:
-			updateChannel(ChannelTypes.temp1, getUnsigned16BitValue(frame));
+			updateChannel(ChannelTypes.temp1, getSignedLE16BitValue(frame));
 			break;
 		case 0x03:
 			// actual RPM value is Frame1*60
-			updateChannel(ChannelTypes.rpm, getUnsigned16BitValue(frame) * 60);
+			updateChannel(ChannelTypes.rpm, getUnsignedLE16BitValue(frame) * 60);
 			break;
 		case 0x04:
-			updateChannel(ChannelTypes.fuel, getUnsigned16BitValue(frame));
+			updateChannel(ChannelTypes.fuel, getUnsignedLE16BitValue(frame));
 			break;
 		case 0x05:
-			updateChannel(ChannelTypes.temp2, getUnsigned16BitValue(frame));
+			updateChannel(ChannelTypes.temp2, getSignedLE16BitValue(frame));
 		case 0x06:
 			// first 4 bit is battery cell number
 			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
@@ -242,49 +238,50 @@ public class FrSkyHub {
 			break;
 		case 0x10:
 			updateChannel(ChannelTypes.altitude_before,
-					getUnsigned16BitValue(frame));
+					getSignedLE16BitValue(frame));
 			break;
 		case 0x21:
 			updateChannel(ChannelTypes.altitude_after,
-					getUnsigned16BitValue(frame));
+					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x11:
 			updateChannel(ChannelTypes.gps_speed_before,
-					getUnsigned16BitValue(frame));
+					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x11 + 8:
 			updateChannel(ChannelTypes.gps_speed_after,
-					getUnsigned16BitValue(frame));
+					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x12:
 			updateChannel(ChannelTypes.longitude_before,
-					getUnsigned16BitValue(frame));
+					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x12 + 8:
 			updateChannel(ChannelTypes.longitude_after,
-					getUnsigned16BitValue(frame));
+					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x1A + 8:
-			updateChannel(ChannelTypes.ew, frame[2]);
+			updateChannel(ChannelTypes.ew, getUnsignedLE16BitValue(frame));
 			break;
 		case 0x13:
 			updateChannel(ChannelTypes.latitude_before,
-					getUnsigned16BitValue(frame));
+					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x13 + 8:
 			updateChannel(ChannelTypes.latitude_after,
-					getUnsigned16BitValue(frame));
+					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x1B + 8:
-			updateChannel(ChannelTypes.ns, frame[2]);
+			updateChannel(ChannelTypes.ns, getUnsignedLE16BitValue(frame));
 			break;
 		case 0x14:
+			// FIXME should be between 0 & 359.99 degrees??
 			updateChannel(ChannelTypes.course_before,
-					getUnsigned16BitValue(frame));
+					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x14 + 8:
 			updateChannel(ChannelTypes.course_after,
-					getUnsigned16BitValue(frame));
+					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x15:
 			updateChannel(ChannelTypes.day, frame[2]);
@@ -302,15 +299,18 @@ public class FrSkyHub {
 			break;
 		case 0x24:
 			// actual 3-axis value is Frame1/1000
-			updateChannel(ChannelTypes.acc_x, getSigned16BitValue(frame) / 1000);
+			updateChannel(ChannelTypes.acc_x,
+					getSignedLE16BitValue(frame) / 1000);
 			break;
 		case 0x25:
 			// actual 3-axis value is Frame1/1000
-			updateChannel(ChannelTypes.acc_y, getSigned16BitValue(frame) / 1000);
+			updateChannel(ChannelTypes.acc_y,
+					getSignedLE16BitValue(frame) / 1000);
 			break;
 		case 0x26:
 			// actual 3-axis value is Frame1/1000
-			updateChannel(ChannelTypes.acc_z, getSigned16BitValue(frame) / 1000);
+			updateChannel(ChannelTypes.acc_z,
+					getSignedLE16BitValue(frame) / 1000);
 			break;
 		default:
 			// TODO add voltage and current sensor data
@@ -319,20 +319,37 @@ public class FrSkyHub {
 		}
 	}
 
-	private int getSigned16BitValue(int[] frame) {
-		// ByteBuffer bb = ByteBuffer.allocate(2);
-		// bb.order(ByteOrder.LITTLE_ENDIAN);
-		// bb.put((byte)frame[3]);
-		// bb.put((byte)frame[2]);
-		// short shortVal = bb.getShort(0);
-		// return shortVal;
+	/**
+	 * translate frame form a Little Endian (LE) Signed 16 Bit value
+	 * 
+	 * @param frame
+	 * @return
+	 */
+	private int getSignedLE16BitValue(int[] frame) {
 		// return 0xFFFF - ( (frame[2] & 0xFF) + ( (frame[3] & 0xFF) * 0x100) );
-		return 0xFFFF - getUnsigned16BitValue(frame);
+		// return 0xFFFF - getUnsigned16BitValue(frame);
+		return (short) getUnsignedLE16BitValue(frame);
 	}
 
-	private int getUnsigned16BitValue(int[] frame) {
+	/**
+	 * translate frame from a little Endian (LE) Unsigned 16 bit value
+	 * 
+	 * @param frame
+	 * @return
+	 */
+	private int getUnsignedLE16BitValue(int[] frame) {
 		// return getSigned16BitValue(frame) & 0xffff;
 		return ((frame[2] & 0xFF) + ((frame[3] & 0xFF) * 0x100));
+	}
+
+	/**
+	 * translate frame from a Big Endian (BE) Unsigned 16 bit value
+	 * 
+	 * @param frame
+	 * @return
+	 */
+	private int getUnsignedBE16BitValue(int[] frame) {
+		return frame[3] + frame[2] * 100;
 	}
 
 	// private int getBCDValue(int[] frame){
@@ -375,13 +392,12 @@ public class FrSkyHub {
 		// broadcast channel so GUI can update this value
 		Logger.d(FrSkyServer.TAG, "Data received for channel: " + channel
 				+ ", value: " + value);
-		
-		
-		/** eso, prototype Channel support
-		 * Update a proper channel rather than broadcast. 
-		 * Allow broadcasts until Channels are fully implemented
-		*/
-		switch (channel){
+
+		/**
+		 * eso, prototype Channel support Update a proper channel rather than
+		 * broadcast. Allow broadcasts until Channels are fully implemented
+		 */
+		switch (channel) {
 		case rpm:
 			_sourceChannelMap.get(CHANNEL_ID_RPM).setRaw(value);
 			break;
@@ -389,97 +405,93 @@ public class FrSkyHub {
 			_sourceChannelMap.get(CHANNEL_ID_TEMP1).setRaw(value);
 			break;
 		case altitude_before:
-			///TODO: Proper construction of resulting altitude double needs to be done in handleHubDataFrame or extractUserDataBytes
+			// /TODO: Proper construction of resulting altitude double needs to
+			// be done in handleHubDataFrame or extractUserDataBytes
 			/**
-			 * Temporarily construct double. 
-			 * TODO: Do this properly elsewhere
+			 * Temporarily construct double. TODO: Do this properly elsewhere
 			 */
-			
-			double alt = value+(alt_after/100);
-			
+
+			double alt = value + (alt_after / 100);
+
 			_sourceChannelMap.get(CHANNEL_ID_TEMP1).setRaw(alt);
-			break;			
+			break;
 		case altitude_after:
 			// bad method of allowing construction of altitude double
 			alt_after = value;
 		}
-		
+
 		// let server update this information
 		server.broadcastChannelData(channel, value);
 	}
-	
-	
+
 	/**
-	 * Prototype Channel support
-	 * eso
+	 * Prototype Channel support eso
 	 */
 
 	/**
 	 * Unique ID for the HUB
 	 */
 	public static final int HUB_ID = -1000;
-	
+
 	/**
 	 * Unique ID's for the Hubs channels
 	 */
-    public static final int CHANNEL_ID_ALTITUDE = 	0		+ HUB_ID;
-    public static final int CHANNEL_ID_RPM = 		1		+ HUB_ID;
-    public static final int CHANNEL_ID_TEMP1 = 		2		+ HUB_ID;
-    public static final int CHANNEL_ID_TEMP2 = 		3		+ HUB_ID;
+	public static final int CHANNEL_ID_ALTITUDE = 0 + HUB_ID;
+	public static final int CHANNEL_ID_RPM = 1 + HUB_ID;
+	public static final int CHANNEL_ID_TEMP1 = 2 + HUB_ID;
+	public static final int CHANNEL_ID_TEMP2 = 3 + HUB_ID;
 
-    /**
-     * Poor solution for holding decimal part of altitude
-     * 
-     */
-    public static double alt_after = 0;
-    
-    /**
-     * Treemap to hold the Hubs channels
-     */
-    private static TreeMap<Integer,Channel> _sourceChannelMap;
-	
-    /**
+	/**
+	 * Poor solution for holding decimal part of altitude
+	 * 
+	 */
+	public static double alt_after = 0;
+
+	/**
+	 * Treemap to hold the Hubs channels
+	 */
+	private static TreeMap<Integer, Channel> _sourceChannelMap;
+
+	/**
 	 * 
 	 * @return a ServerChannel corresponding to the given id
 	 */
-	public static Channel getSourceChannel(int id)
-	{
+	public static Channel getSourceChannel(int id) {
 		return _sourceChannelMap.get(id);
 	}
-	
+
 	/**
 	 * 
-	 * @return all the ServerChannels in a TreeMap (key is the id of the Channel) 
+	 * @return all the ServerChannels in a TreeMap (key is the id of the
+	 *         Channel)
 	 */
-	public static TreeMap<Integer,Channel> getSourceChannels()
-	{
+	public static TreeMap<Integer, Channel> getSourceChannels() {
 		return _sourceChannelMap;
 	}
-	
+
 	/**
-	 * Create the _sourceChannelMap
-	 * Populate it with our channels
+	 * Create the _sourceChannelMap Populate it with our channels
 	 */
-	public static void setupFixedChannels()
-	{
-		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
-		
-		//Sets up the hardcoded channels (Altitude,RPM)
-		///TODO: Add all channels here, these two are added for reference
-		///TODO: Figure out how to deal with race conditions on "split numbers"
-		Channel altitude =  new Channel("Hub: Altitude", 0, 1, "", "");
+	public static void setupFixedChannels() {
+		_sourceChannelMap = new TreeMap<Integer, Channel>(
+				Collections.reverseOrder());
+
+		// Sets up the hardcoded channels (Altitude,RPM)
+		// /TODO: Add all channels here, these two are added for reference
+		// /TODO: Figure out how to deal with race conditions on "split numbers"
+		Channel altitude = new Channel("Hub: Altitude", 0, 1, "", "");
 		altitude.setId(CHANNEL_ID_ALTITUDE);
 		altitude.setPrecision(0);
 		altitude.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_ALTITUDE, altitude);
-		
-		Channel rpm =  new Channel("Hub: RPM (pulses)", 0, 1, "", "");
+
+		Channel rpm = new Channel("Hub: RPM (pulses)", 0, 1, "", "");
 		rpm.setId(CHANNEL_ID_RPM);
 		rpm.setPrecision(0);
 		rpm.setSilent(true);
 		_sourceChannelMap.put(CHANNEL_ID_RPM, rpm);
-		
-		Channel temp1 =  new Channel("Hub: Temp 1", 0, 1, "", "");
+
+		Channel temp1 = new Channel("Hub: Temp 1", 0, 1, "", "");
 		temp1.setId(CHANNEL_ID_TEMP1);
 		temp1.setPrecision(0);
 		temp1.setSilent(true);

@@ -37,7 +37,7 @@ public class FileSimulatorThread extends Thread {
 	/**
 	 * interval set between buffers
 	 */
-	private final int INTERVAL_IN_MS = 100;
+	private final int INTERVAL_IN_MS = 20;
 
 	/**
 	 * default ctor

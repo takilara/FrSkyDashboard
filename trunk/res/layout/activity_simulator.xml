@@ -210,25 +210,7 @@
 	                android:layout_height="wrap_content"
 	                android:hint="/sdcard/..."
 	                android:inputType="text" />
-	
-	            <LinearLayout
-	                android:layout_width="fill_parent"
-	                android:layout_height="wrap_content"
-	                android:orientation="horizontal" >
-	
-	                <TextView
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:text="Interval in seconds" >
-	                </TextView>
-	
-	                <EditText
-	                    android:id="@+id/file_cycle_interval"
-	                    android:layout_width="fill_parent"
-	                    android:layout_height="wrap_content"
-	                    android:inputType="number" />
-	            </LinearLayout>
-	
+		
 	            <ToggleButton
 	                android:id="@+id/btn_file_cycle"
 	                android:layout_width="fill_parent"

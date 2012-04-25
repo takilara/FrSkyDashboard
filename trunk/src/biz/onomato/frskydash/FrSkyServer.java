@@ -43,6 +43,7 @@ import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.sim.FileSimulatorThread;
 import biz.onomato.frskydash.sim.Simulator;
+import biz.onomato.frskydash.util.Logger;
 
 
 /**
@@ -1687,35 +1688,30 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void wasDisconnected(String source)
 	{
-    	//eso: TODO: what is reset vs channel.setRaw(0) (used in resetChannels) ?
-		
-		///TODO: eso: reset any hub channels as well
-		
-    	for(Channel c: _sourceChannelMap.values())
-    	{
-    		c.reset();
-    	}
-    	
-    	
-    	// speak warning
-    	saySomething("Alarm! Alarm! Alarm! Connection Lost!");
-    	Toast.makeText(getApplicationContext(), "Lost connection with "+source, Toast.LENGTH_SHORT).show();
-    	// Get instance of Vibrator from current Context
-    	try
-    	{
-    		Vibrator v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
-	
-			// Start immediately
-			// Vibrate for 200 milliseconds
-			// Sleep for 500 milliseconds
-			long[] pattern = { 0, 200, 500, 200, 500, 200, 500 };
-			v.vibrate(pattern,-1);
-    	}
-    	catch (Exception e)
-    	{
-    	 
-    	}
-    	
+    	///TODO: eso: reset any hub channels as well
+		for (Channel c : _sourceChannelMap.values()) {
+			c.reset();
+		}
+
+		// speak warning, only when not manually disconnected
+		if (!_manualBtDisconnect) {
+			saySomething("Alarm! Alarm! Alarm! Connection Lost!");
+			Toast.makeText(getApplicationContext(),
+					"Lost connection with " + source, Toast.LENGTH_SHORT)
+					.show();
+			// Get instance of Vibrator from current Context
+			try {
+				Vibrator v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
+				// Start immediately
+				// Vibrate for 200 milliseconds
+				// Sleep for 500 milliseconds
+				long[] pattern = { 0, 200, 500, 200, 500, 200, 500 };
+				v.vibrate(pattern, -1);
+			} catch (Exception e) {
+				Logger.e(TAG,
+						"failure on vibrating for connection lost warning", e);
+			}
+		}
 	}
 	
 

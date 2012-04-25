@@ -12,6 +12,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
+import biz.onomato.frskydash.util.Logger;
 
 import java.math.MathContext;
 import java.text.DecimalFormatSymbols;
@@ -617,9 +618,16 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 //		return getDescription()+": "+toValueString()+" "+getLongUnit();
 	}
 	
-	public void reset()
-	{
-		if(FrSkyServer.D)Log.d(TAG,_description+": Resetting self");
+	/**
+	 * reset value of this channel
+	 */
+	public void reset() {
+		// debug logging
+		Logger.d(TAG, _description + ": Resetting self");
+		// first update value the proper way so it is broadcasted and displayed
+		// on the screen
+		setRaw(-1);
+		// next manually ensure all values are reset for later use
 		_raw = -1;
 		_val = -1;
 		_avg = 0;

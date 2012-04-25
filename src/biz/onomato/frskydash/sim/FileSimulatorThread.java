@@ -66,10 +66,7 @@ public class FileSimulatorThread extends Thread {
 	}
 
 	public synchronized boolean isThreadRunning() {
-		// FIXME fails onresume of sim activity if already run
-		// return Thread.currentThread() == runner;
-		// return runner == null;
-		return Thread.currentThread().isAlive();
+		return runner != null;
 	}
 
 	@Override

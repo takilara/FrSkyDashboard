@@ -1,9 +1,6 @@
 package biz.onomato.frskydash.activities;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -176,7 +173,7 @@ public class ActivitySimulator extends Activity implements
 			btnSimTgl.setChecked(server.getSim().running);
 			// simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw,
 			// rssitx_raw);
-			//fileSimThread = new FileSimulatorThread(server);
+			// fileSimThread = new FileSimulatorThread(server);
 
 			// Frame f = new Frame(simFrame);
 			_currentFrame = Frame.FrameFromAnalog(ad1_raw, ad2_raw, rssirx_raw,
@@ -245,11 +242,11 @@ public class ActivitySimulator extends Activity implements
 		}
 	}
 
-	/**
-	 * a thread for cycling the raw file contents providing to server with a
-	 * fixed interval. This is static so we can check state on resume
-	 */
-	private static FileSimulatorThread fileSimThread = null;
+	// /**
+	// * a thread for cycling the raw file contents providing to server with a
+	// * fixed interval. This is static so we can check state on resume
+	// */
+	// private static FileSimulatorThread fileSimThread = null;
 
 	/**
 	 * update file sim thread files setting and running state
@@ -261,19 +258,20 @@ public class ActivitySimulator extends Activity implements
 		try {
 			// start file sim based on state of toggle button
 			if (btnToggleFileSim.isChecked()) {
-				//stop if needed
-				if (fileSimThread != null )
-					fileSimThread.stopThread();
+				// stop if needed
+				if (FrSkyServer.getFileSim() != null)
+					FrSkyServer.getFileSim().stopThread();
 				// first see if we need to create a new thread or not
-				fileSimThread = new FileSimulatorThread(server);
+				FrSkyServer.setFileSim(new FileSimulatorThread(server));
 				// get the file by user input
 				String path = ((TextView) findViewById(R.id.file_cycle_path))
 						.getText().toString();
 				final File[] files = getRawFilesFromPath(path);
 				// Start simulator with these bytes
-				fileSimThread.setFiles(files);
+				FrSkyServer.getFileSim().setFiles(files);
+				// FrSkyServer.getFileSim().setFiles(files);
 				// start the thread
-				fileSimThread.startThread();
+				FrSkyServer.getFileSim().startThread();
 				// inform user
 				Toast.makeText(getApplicationContext(),
 						"File Sim cycle started", Toast.LENGTH_LONG).show();
@@ -281,8 +279,9 @@ public class ActivitySimulator extends Activity implements
 			// otherwise we need to stop the file sim
 			else {
 				// only stop when still alive
-				if (fileSimThread != null && fileSimThread.isThreadRunning())
-					fileSimThread.stopThread();
+				if (FrSkyServer.getFileSim() != null
+						&& FrSkyServer.getFileSim().isThreadRunning())
+					FrSkyServer.getFileSim().stopThread();
 				// inform user
 				Toast.makeText(getApplicationContext(),
 						"File Sim cycle stopped", Toast.LENGTH_LONG).show();
@@ -428,8 +427,9 @@ public class ActivitySimulator extends Activity implements
 		// btnSimTgl.setChecked(server.sim.running);
 
 		// update state of toggle button at this point
-		btnToggleFileSim.setChecked(fileSimThread != null ? fileSimThread
-				.isThreadRunning() : false);
+		btnToggleFileSim
+				.setChecked(FrSkyServer.getFileSim() != null ? FrSkyServer
+						.getFileSim().isThreadRunning() : false);
 	}
 
 	public void onStop() {

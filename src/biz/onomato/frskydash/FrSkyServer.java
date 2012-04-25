@@ -41,6 +41,7 @@ import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.FrSkyHub;
+import biz.onomato.frskydash.sim.FileSimulatorThread;
 import biz.onomato.frskydash.sim.Simulator;
 
 
@@ -167,6 +168,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	// hcpl shouldn't be public, hide properly with setters and getters
 	private Simulator sim;
+	
+	/**
+	 * a thread for cycling the raw file contents providing to server with a
+	 * fixed interval. This is static so we can check state on resume. Moved to
+	 * this location so it can be closed on destroy of the service
+	 */
+	private static FileSimulatorThread fileSimThread = null;
 
 	public boolean statusBt=false;
 	public boolean statusTx=false;
@@ -1220,6 +1228,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		unregisterReceiver(mIntentReceiverBt);
 		//sim.reset();
 		
+		//stop filesim thread also
+		if( fileSimThread != null )
+			fileSimThread.stopThread();
+		
 		// disable bluetooth if it was disabled upon start:
 		
     	if(!bluetoothEnabledAtStart)	// bluetooth was not enabled at start
@@ -2226,7 +2238,6 @@ public class FrSkyServer extends Service implements OnInitListener {
             }
         }
     };
-
     
 	// **************************************************************************************************************
 	//                                   MODEL STUFF
@@ -2329,6 +2340,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_CHANNEL, channel.toString());
 		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_VALUE, value);
 		sendBroadcast(broadcastHubDataIntent);
+	}
+
+	/**
+	 * retrieve the file sim instance
+	 * 
+	 * @return
+	 */
+	public static FileSimulatorThread getFileSim() {
+		return fileSimThread;
+	}
+
+	public static void setFileSim(FileSimulatorThread fileSim) {
+		fileSimThread = fileSim;
 	}
 
 }

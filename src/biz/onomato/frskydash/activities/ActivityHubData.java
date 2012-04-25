@@ -275,7 +275,6 @@ public class ActivityHubData extends Activity {
 			break;
 		case ns:
 			textViewNS.setText(intFormat.format(value));
-			
 			break;
 		default:
 			// TODO update other fields (NE, WS from gps? new current sensors?)

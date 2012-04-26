@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,6 +41,7 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.util.Logger;
 
 public class ActivityDashboard extends Activity implements OnClickListener {
 	private static final String TAG = "Dashboard";
@@ -684,20 +684,19 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 				public void onClick(View v) {
 					// if(DEBUG)
 					// Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
-					if (FrSkyServer.D)
-						Log.d(TAG,
-								"Edit channel "
-										+ currentModel.getChannels()
-												.get(v.getId() - 1000)
-												.getDescription());
+					Logger.d(TAG, "Edit channel "
+							+ currentModel.getChannels().get(v.getId() - 1000)
+									.getDescription());
 					// Launch editchannel with channel attached..
 					Intent i = new Intent(getApplicationContext(),
 							ActivityChannelConfig.class);
 					// i.putExtra("channelId", 1);
-					i.putExtra(
-							"channel",
-							currentModel.getChannels().get(
-									v.getId() - ID_CHANNEL_BUTTON_EDIT));
+//					i.putExtra(
+//							"channel",
+//							currentModel.getChannels().get(
+//									v.getId() - ID_CHANNEL_BUTTON_EDIT));
+					i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_REF,
+							v.getId() - ID_CHANNEL_BUTTON_EDIT);
 					// i.putExtra("idInModel",
 					// v.getId()-ID_CHANNEL_BUTTON_EDIT);
 					startActivityForResult(i, CHANNEL_CONFIG_RETURN);

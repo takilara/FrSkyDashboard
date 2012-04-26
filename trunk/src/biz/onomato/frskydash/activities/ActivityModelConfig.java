@@ -198,6 +198,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				
 				Intent editChannelIntent = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 				editChannelIntent.putExtra("channel", c);
+				//editChannelIntent.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_REF, c.getId());
 				editChannelIntent.putExtra("modelId", (int) _model.getId());	// Should edit existing model
 				Logger.d(TAG,"Launch channel edit with modelId: "+_model.getId());	
 				//editChannelIntent.putExtra("idInModel", v.getId()-1000);
@@ -278,7 +279,8 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 					// Launch editchannel with channel attached.. 
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
-					i.putExtra("channel", _model.getChannels().get(v.getId()-1000));
+					//i.putExtra("channel", _model.getChannels().get(v.getId()-1000));
+					i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_REF, v.getId()-1000);
 					//i.putExtra("modelId", (int) _model.getId());	// Should edit existing model
 					//i.putExtra("idInModel", v.getId()-1000);
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);

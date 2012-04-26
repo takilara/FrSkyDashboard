@@ -1,21 +1,29 @@
 package biz.onomato.frskydash.domain;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.R.array;
+import biz.onomato.frskydash.util.Logger;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.database.Cursor;
-import android.util.Log;
-
+/**
+ * A Model as it is configured by the user. A Model should be of a certain type
+ * (car, airplane, helicopter, quad, ...) and have a certain name so the user
+ * can recognize it.
+ * 
+ * For the frsky telemetry part a Model also has a collection of {@link Channel}
+ * objects that are listening for incoming values. And a collection of
+ * {@link Alarm} configurations that can be set to the FrSky Module.
+ * 
+ * @author Espen Solbu
+ */
 public class Model {
 	
 	private static final String TAG="ModelClass";
+	
+	// TODO create enum for this instead
+	private String[] _modelTypes;
 	
 	public static final int MODEL_TYPE_HELICOPTER=0;
 	public static final int MODEL_TYPE_FIXEDWING=1;
@@ -23,33 +31,61 @@ public class Model {
 	public static final int MODEL_TYPE_BOAT=3;
 	public static final int MODEL_TYPE_MULTIROTOR=4;
 	public static final int MODEL_TYPE_UNKNOWN=-1;
-	 
-	
-	
 	
 	//private ArrayList<Channel> _channels;
+	/**
+	 * collection of channels for this model
+	 */
 	private TreeMap<Integer,Channel> channelMap;
-	private String[] _modelTypes;
 	
+	/**
+	 * type of a model 
+	 */
 	private String _type;
+	
+	/**
+	 * name of a model
+	 */
 	private String _name;
+	
+	/**
+	 * ID of a model
+	 */
 	private int _id;
+	
 	//private Context _context;
 	//public Alarm[] alarms;
+	
+	/**
+	 * collection of alarms for this model
+	 */
 	public TreeMap<Integer,Alarm> frSkyAlarms;
+	
+	/**
+	 * ? number of alarms counted for this Model ? 
+	 */
 	public int alarmCount = 0;
 	
-	public boolean dirty=false;
+	/**
+	 * indicates if this Model needs to be saved or not
+	 */
+	public boolean dirty = false;
 
-	
-	
 	//private static DBAdapterModel db;
-	
 
-	// Constructor
+	/**
+	 * Default Constructor
+	 * 
+	 * @param modelName
+	 *            String name for the model
+	 * @param modelType
+	 *            String type for this model
+	 */
 	public Model(String modelName,String modelType)
 	{
 		//_context = context;
+		// let user select from a fixed set of modeltypes
+		// TODO make an Enum for this instead
 		_modelTypes = FrSkyServer.getContext().getResources().getStringArray(R.array.model_types);
 		// create if neccessary
 		//db = new DBAdapterModel(context);
@@ -59,37 +95,32 @@ public class Model {
 		frSkyAlarms = new TreeMap<Integer, Alarm>();
 		channelMap = new TreeMap<Integer,Channel>();
 		
-		
 		// populate FrSky Alarms with defaults
 		//initiateFrSkyAlarms();
 		
-		
 		_id = -1; 
 		setName(modelName);
-		if(modelType.equals(""))
-		{
-			setType(_modelTypes[0]);
-		}
-		else
-		{
-			setType(modelType);
-		}
+		//set some default modeltype if none was set by the user
+		setType(modelType.equals("") ? _modelTypes[0] : modelType);
 		//_channels = new ArrayList<Channel>();
 		//setId(-1);
 	}
-	
 
-	
-	public Model(String modelName)
-	{
-		
-		this(modelName,"");
+	/**
+	 * Ctor
+	 * 
+	 * @param modelName
+	 */
+	public Model(String modelName) {
+		this(modelName, "");
 	}
-	public Model()
-	{
-		this("Model 1","");
+
+	/**
+	 * ctor
+	 */
+	public Model() {
+		this("Model 1", "");
 	}
-	
 
 	/**
 	 * Should be called when you want to "release" a model
@@ -100,79 +131,109 @@ public class Model {
 	 */
 	public void close()
 	{
-		if(FrSkyServer.D)Log.d(TAG,_name+": Resetting myself and all my components");
+		Logger.d(TAG,_name+": Resetting myself and all my components");
 		for(Channel c: getChannels().values())
 		{
 			c.reset();
-			c= null;
+			c = null;
 		}
 		channelMap.clear();
 	}
 	
 	
+	/**
+	 * retrieve the type of this model
+	 * 
+	 * @return
+	 */
 	public String getType() {
 		return _type;
 	}
 
-
+	/**
+	 * set the type for this model
+	 * 
+	 * @param modelType
+	 */
 	public void setType(String modelType) {
-		if(FrSkyServer.D)Log.d(TAG,"Setting model type to: "+modelType);
+		Logger.d(TAG,"Setting model type to: "+modelType);
 		this._type = modelType;
 	}
 
-
+	/**
+	 * update ID for this model
+	 * 
+	 * @param id
+	 */
 	public void setId(int id)
 	{
 		_id = id;
 	}
 	
+	/**
+	 * retrieve ID for this model
+	 * 
+	 * @return
+	 */
 	public int getId()
 	{
 		return _id;
 	}
 
+	/**
+	 * get the name of this model
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return _name;
 	}
 
-
+	/**
+	 * set the name of this model 
+	 * 
+	 * @param modelName
+	 */
 	public void setName(String modelName) {
 		this._name = modelName;
 	}
 
-	public void initializeDefaultChannels()
-	{
-		Channel ad1raw = new Channel();
-		ad1raw.setDescription("AD1 raw");
-		ad1raw.setModelId(_id);
-		ad1raw.setSourceChannel(FrSkyServer.CHANNEL_ID_AD1);
-		ad1raw.setId(-1);
-		ad1raw.setSilent(true);
-		ad1raw.setLongUnit("");
-		ad1raw.setShortUnit("");
-		ad1raw.setPrecision(0);
-		ad1raw.setMovingAverage(0);
-		// save to force id update
-		//FrSkyServer.database.saveChannel(ad1raw);
-		addChannel(ad1raw);
-		
-		Channel ad2raw = new Channel();
-		ad2raw.setDescription("AD2 raw");
-		ad2raw.setModelId(_id);
-		ad2raw.setSourceChannel(FrSkyServer.CHANNEL_ID_AD2);
-		ad2raw.setId(-1);
-		ad2raw.setSilent(true);
-		ad2raw.setLongUnit("");
-		ad2raw.setShortUnit("");
-		ad2raw.setPrecision(0);
-		ad2raw.setMovingAverage(0);
-		// save to force id update		
-		//FrSkyServer.database.saveChannel(ad2raw);
-		addChannel(ad2raw);
+	/**
+	 * By default a Model has 2 channels, AD1 and AD2. Use this method to
+	 * initialize these.
+	 */
+	public void initializeDefaultChannels() {
+		// AD 1
+		addChannel(createChannel("AD1 raw", _id, FrSkyServer.CHANNEL_ID_AD1));
+		// AD 2
+		addChannel(createChannel("AD2 raw", _id, FrSkyServer.CHANNEL_ID_AD2));
+		// indicate model is dirty, needs saving
 		dirty=true;
 	}
+	
+	/**
+	 * helper to create a single channel with mostly default values
+	 * 
+	 * @return
+	 */
+	private Channel createChannel(String description, int id, int sourceChannel){
+		Channel channel = new Channel();
+		channel.setDescription(description);
+		channel.setModelId(id);
+		channel.setSourceChannel(sourceChannel);
+		channel.setId(-1);
+		channel.setSilent(true);
+		channel.setLongUnit("");
+		channel.setShortUnit("");
+		channel.setPrecision(0);
+		channel.setMovingAverage(0);
+		return channel;
+	}
 
-	// I need to be able to add channels to this model
+	/**
+	 * I need to be able to add channels to this model
+	 * @param channel
+	 */
 	public void addChannel(Channel channel)
 	{
 		if(channel.getId()==-1)
@@ -182,7 +243,11 @@ public class Model {
 		channelMap.put(channel.getId(), channel);
 	}
 	
-	// I need to be able to delete channels from this model
+	/**
+	 * I need to be able to delete channels from this model
+	 * @param channel
+	 * @return
+	 */
 	public boolean removeChannel(Channel channel)
 	{
 		channel.unregisterListener();
@@ -191,13 +256,21 @@ public class Model {
 		//return _channels.remove(channel);
 	}
 	
-	// I need to be able to set a given channel for this model
+	/**
+	 * I need to be able to set a given channel for this model
+	 * @param channel
+	 */
 	//public void setChannel(int id, Channel channel)
 	public void setChannel(Channel channel)
 	{
 		addChannel(channel);
 	}
 	
+	/**
+	 * Update collection of channels for this model 
+	 * 
+	 * @param channels
+	 */
 	public void setChannels(ArrayList<Channel> channels)
 	{
 		for(Channel c : channels)
@@ -206,12 +279,20 @@ public class Model {
 		}
 	}
 	
+	/**
+	 * Update collection of channels for this model 
+	 * 
+	 * @param channels
+	 */
 	public void setChannels(TreeMap<Integer,Channel> channels)
 	{
 		channelMap = channels;
 	}
 	
-	// I need to be able to return list of channels from this model
+	/**
+	 *  I need to be able to return list of channels from this model
+	 * @return
+	 */
 	//public ArrayList<Channel> getChannels()
 	public TreeMap<Integer,Channel> getChannels()
 	{
@@ -219,7 +300,10 @@ public class Model {
 		//return _channels;
 	}
 	
-	// I need to be able to add alarms to this model
+	/**
+	 * I need to be able to add alarms to this model
+	 * @param alarm
+	 */
 	public void addAlarm(Alarm alarm)
 	{
 		//if(DEBUG)Log.i(TAG,"Adding alarm: "+alarm);
@@ -231,16 +315,27 @@ public class Model {
 		}
 		else
 		{
-			Log.e(TAG,"Unhandled Alarm Type");
+			Logger.e(TAG,"Unhandled Alarm Type");
 			
 		}
 
 	}
+	
+	/**
+	 * get the {@link Alarm}s set to this model
+	 * 
+	 * @return
+	 */
 	public TreeMap<Integer,Alarm> getFrSkyAlarms()
 	{
 		return frSkyAlarms;
 	}
 	
+	/**
+	 * update the {@link Alarm}s for this model
+	 * 
+	 * @param alarmMap
+	 */
 	public void setFrSkyAlarms(TreeMap<Integer,Alarm> alarmMap)
 	{
 		if(alarmMap.size()>0)
@@ -259,18 +354,21 @@ public class Model {
 	}
 	
 	
-	// I need to be able to delete alarms from this model
+	/**
+	 * TODO I need to be able to delete alarms from this model
+	 * @param alarm
+	 */
 	public void deleteAlarm(Alarm alarm)
 	{
-		
+		//TODO
 	}
 	
-	
-	
-	// I need to be able to load settings from file or config storage
+	/**
+	 * TODO I need to be able to load settings from file or config storage
+	 */
 	public void loadSettings()
 	{
-		
+		//TODO
 	}
 	
 	public ArrayList<Channel> getAllowedSourceChannels()
@@ -341,7 +439,7 @@ public class Model {
 	 */
 	public void registerListeners()
 	{
-		if(FrSkyServer.D)Log.d(TAG,_name+": Registrering listeners");
+		Logger.d(TAG,_name+": Registering listeners");
 		for(Channel c: getChannels().values())
 		{
 			c.registerListener();

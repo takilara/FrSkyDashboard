@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import android.app.Service;
 import android.os.Handler;
-import android.util.Log;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.domain.Frame;
+import biz.onomato.frskydash.util.Logger;
 
 /**
  * Simulator for faking streams so we can test application without actual
@@ -39,7 +39,7 @@ public class Simulator {
 	public Simulator(Service srv)
 	{
 		server = (FrSkyServer) srv;
-		if(FrSkyServer.D)Log.i(TAG,"constructor");
+		Logger.i(TAG,"constructor");
 		
 		// init
 		running = false;
@@ -131,7 +131,7 @@ public class Simulator {
 	}
 	
 	public void start(){
-		if(FrSkyServer.D)Log.i(TAG,"Starting sim thread");
+		Logger.i(TAG,"Starting sim thread");
 		simHandler.removeCallbacks(runnableSimulator);
 		simHandler.postDelayed(runnableSimulator, 30);
 		running = true;
@@ -139,7 +139,7 @@ public class Simulator {
 	}
 	
 	public void stop(){
-		if(FrSkyServer.D)Log.i(TAG,"Stopping sim thread");
+		Logger.i(TAG,"Stopping sim thread");
 		try
 		{
 			simHandler.removeCallbacks(runnableSimulator);
@@ -210,14 +210,14 @@ public class Simulator {
 				buf[i]=0x7d;
 				buf[i+1]=0x5e;
 				i++;
-				if(FrSkyServer.D)Log.i(TAG,"Bytestuffing 7E to 7d 5e");
+				Logger.i(TAG,"Bytestuffing 7E to 7d 5e");
 			}
 			else if (inBuf[n]==0x7d)
 			{
 				buf[i]=0x7d;
 				buf[i+1]=0x5d;
 				i++;
-				if(FrSkyServer.D)Log.i(TAG,"Bytestuffing 7D to 7d 5d");
+				Logger.i(TAG,"Bytestuffing 7D to 7d 5d");
 			}
 			else
 			{

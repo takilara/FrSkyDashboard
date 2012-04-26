@@ -4,8 +4,7 @@ import java.util.Date;
 
 import biz.onomato.frskydash.BluetoothSerialService;
 import biz.onomato.frskydash.FrSkyServer;
-
-import android.util.Log;
+import biz.onomato.frskydash.util.Logger;
 
 public class Frame {
 	private static final String TAG="Frame";
@@ -84,16 +83,16 @@ public class Frame {
 //		if (frame.length != Frame.SIZE_TELEMETRY_FRAME
 //				|| frame[0] != Frame.START_STOP_TELEMETRY_FRAME
 //				|| frame[Frame.SIZE_TELEMETRY_FRAME - 1] != Frame.START_STOP_TELEMETRY_FRAME) {
-//			//drop frame and log information
-//			Log.d(TAG, "Invalid frame format received: "+Arrays.toString(frame));
-//			Log.d(TAG, "Invalid frame format received(hex): "+Frame.frameToHuman(frame));
+//			//drop frame and Logger information
+//			Logger.d(TAG, "Invalid frame format received: "+Arrays.toString(frame));
+//			Logger.d(TAG, "Invalid frame format received(hex): "+Frame.frameToHuman(frame));
 //			return;
 //		}
 		
 		//if((frame.length>10) && (frame.length<30))
 		//{
 			timestamp = new Date();
-			//Log.i(TAG,"Constructor");
+			//Logger.i(TAG,"Constructor");
 			_frameRaw = frame;
 			// fix bytestuffing
 
@@ -103,15 +102,15 @@ public class Frame {
 			 */
 			if(frame[0] != frame[frame.length-1])
 			{
-				Log.e(TAG, "Frame start and end not equal: "+   Frame.frameToHuman(frame));
+				Logger.e(TAG, "Frame start and end not equal: "+   Frame.frameToHuman(frame));
 			}
 			// eso: temporary fix to allow frames "that are still longer than 11" (from simulator) to get destuffed			
 			if(frame.length>11)
 			{
-				Log.d(TAG,"Frame needs to be decoded: ");
-				Log.d(TAG,"\tBefore: "+Frame.frameToHuman(frame,false));
+				Logger.d(TAG,"Frame needs to be decoded: ");
+				Logger.d(TAG,"\tBefore: "+Frame.frameToHuman(frame,false));
 				frame = frameDecode(frame);
-				Log.d(TAG,"\tAfter: "+Frame.frameToHuman(frame,false));
+				Logger.d(TAG,"\tAfter: "+Frame.frameToHuman(frame,false));
 				
 			}
 			
@@ -128,7 +127,7 @@ public class Frame {
 			if(frame.length!=Frame.SIZE_TELEMETRY_FRAME)
 			{
 				frametype=FRAMETYPE_CORRUPT;
-				Log.w(TAG,"Found corrupt frame");
+				Logger.w(TAG,"Found corrupt frame");
 			}
 			else
 			{
@@ -136,7 +135,7 @@ public class Frame {
 				frameHeaderByte =frame[1]; 
 				switch(frame[1])
 				{
-					// Analog values
+					// AnaLogger values
 					case FRAMETYPE_ANALOG:
 						frametype=FRAMETYPE_ANALOG;
 						ad1 = frame[2];
@@ -189,13 +188,13 @@ public class Frame {
 					default:
 						frametype=FRAMETYPE_UNDEFINED;
 						
-						if(FrSkyServer.D)Log.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
+						if(FrSkyServer.D)Logger.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
 						break;
 				}
 				if(frametype==FRAMETYPE_FRSKY_ALARM)
 				{
 					// Value of <AlarmChannel> alarm <AlarmNumber> is <greater> than <alarmthreshold>, and is at level <alarmlevel>
-					//Log.w(TAG,"Incoming frame is alarmframe");
+					//Logger.w(TAG,"Incoming frame is alarmframe");
 					_threshold = frame[2];
 					_greaterthan = frame[3];
 					String _greaterthanhuman;
@@ -214,7 +213,7 @@ public class Frame {
 					alarmThreshold=_threshold;
 					alarmGreaterThan = _greaterthan;
 					alarmGreaterThanString = _greaterthanhuman;
-					//Log.i(TAG,alarmChannel+" alarm "+alarmNumber+": Fires if value is "+_greaterthanhuman+" than "+_threshold+", and is at level "+_level);
+					//Logger.i(TAG,alarmChannel+" alarm "+alarmNumber+": Fires if value is "+_greaterthanhuman+" than "+_threshold+", and is at level "+_level);
 					
 					
 				}
@@ -284,7 +283,7 @@ public class Frame {
 			// the start and stop bytes
 			if (di >= Frame.SIZE_TELEMETRY_FRAME - 1) {
 				// inform about this issues
-//				if(FrSkyServer.D)Log.e(TAG, "Invalid frame length, can't decode frame: " + frameToHuman(frame));
+//				if(FrSkyServer.D)Logger.e(TAG, "Invalid frame length, can't decode frame: " + frameToHuman(frame));
 //				// no need to continue here, this will return a wrong formatted
 //				// frame now... Maybe best to replace the stop bit with this out
 //				// of range byte so we can detect this problem later on
@@ -352,8 +351,8 @@ public class Frame {
 //				outFrame[n]=outFrameInitial[n];
 //			}
 //			
-//			Log.i("FRAME decode","Pre:  "+frameToHuman(frame));
-//			Log.i("FRAME decode","Post: "+frameToHuman(outFrame));
+//			Logger.i("FRAME decode","Pre:  "+frameToHuman(frame));
+//			Logger.i("FRAME decode","Post: "+frameToHuman(outFrame));
 //			
 //			return outFrame;
 //		}
@@ -370,7 +369,7 @@ public class Frame {
 	public Frame()
 	{
 		this(new int[11]);
-		//Log.i(TAG,"Constructor");
+		//Logger.i(TAG,"Constructor");
 	}
 	
 	public static Frame InputRequestADAlarms()
@@ -407,8 +406,8 @@ public class Frame {
 	/**
 	 * Create a valide Frame object based on the given values. 
 	 * 
-	 * @param ad1 Analog value 1 or A1
-	 * @param ad2 Analog value 2 or A2
+	 * @param ad1 AnaLogger value 1 or A1
+	 * @param ad2 AnaLogger value 2 or A2
 	 * @param rssirx RX signal 
 	 * @param rssitx TX signal
 	 * @return a single valid frame
@@ -496,7 +495,7 @@ public class Frame {
 		//Date startTime = new Date();
 		StringBuffer buf = new StringBuffer();
 		
-		//Log.i(TAG,"Create human raedable string with "+frame.length+" bytes");
+		//Logger.i(TAG,"Create human raedable string with "+frame.length+" bytes");
 		//int xor = 0x00;
 		if(decode)
 		{
@@ -561,11 +560,11 @@ public class Frame {
 			}
 		}
 
-		//Log.i(TAG,"String is then: "+out);
+		//Logger.i(TAG,"String is then: "+out);
 		
 		//Date endTime = new Date();
 		//long duration = endTime.getTime()-startTime.getTime();
-		//Log.d(TAG,"Constructing human frame took: "+duration+" ms");
+		//Logger.d(TAG,"Constructing human frame took: "+duration+" ms");
 		return buf.toString();
 	}
 	

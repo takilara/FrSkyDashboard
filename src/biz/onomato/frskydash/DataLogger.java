@@ -1,27 +1,23 @@
 package biz.onomato.frskydash;
 
-import android.os.AsyncTask;
-import android.os.Environment;
-import android.os.Handler;
-import android.text.format.DateFormat;
-import android.text.format.Time;
-import android.util.Log;
-import android.content.Context;
-import biz.onomato.frskydash.domain.Channel;
-import biz.onomato.frskydash.domain.Frame;
-import biz.onomato.frskydash.domain.Model;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import android.content.Context;
+import android.os.Environment;
+import android.os.Handler;
+import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Frame;
+import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.util.Logger;
 
 public class DataLogger {
 	private static final String TAG="Logger";
@@ -78,7 +74,7 @@ public class DataLogger {
 		_logHuman = LogHuman;
 		_context = Context;
 		//_path = _context.getExternalFilesDir(null); 
-		if(FrSkyServer.D)Log.i(TAG,"STorage dir: "+_path);
+		Logger.i(TAG,"STorage dir: "+_path);
 		
 		_prefix = makePrefix();  
 
@@ -151,7 +147,7 @@ public class DataLogger {
 			return tFile;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			Log.e(TAG,e.getMessage());
+			Logger.e(TAG,e.getMessage());
 			return null;
 		}
 	}
@@ -247,7 +243,7 @@ public class DataLogger {
 	
 	public void stop()
 	{
-		if(FrSkyServer.D)Log.i(TAG,"Stopping any running loggers");
+		Logger.i(TAG,"Stopping any running loggers");
 		// Cancel (wait for) any pending writes
 //		try {rawTask.cancel(false);} catch (Exception e){}
 //		try {humanTask.cancel(false);} catch (Exception e){}
@@ -307,7 +303,7 @@ public class DataLogger {
 				{
 					_fileHuman = new File(_context.getExternalFilesDir(null), filename+".asc");
 					if(!_fileHuman.exists())
-						try {_fileHuman.createNewFile();} catch (IOException e1) {Log.e(TAG,e1.getMessage());}
+						try {_fileHuman.createNewFile();} catch (IOException e1) {Logger.e(TAG,e1.getMessage());}
 					startDateAsc = new Date();
 					// assume first frame here has first date...
 					startDateAsc = frameTimeStamp; 
@@ -320,7 +316,7 @@ public class DataLogger {
 		void consume(Frame f) {
 			if(_fileHuman==null || !_fileHuman.canWrite())
 			{
-				if(FrSkyServer.D)Log.d(TAG,"NOT Allowed to write to file, make new file/stream (ASC)");
+				Logger.d(TAG,"NOT Allowed to write to file, make new file/stream (ASC)");
 				openFile(makePrefix(),f.timestamp);
 			}
 		   
@@ -335,7 +331,7 @@ public class DataLogger {
 				}
 				catch (IOException e)
 				{
-					if(FrSkyServer.D)Log.w(TAG, "failure to write");
+					Logger.w(TAG, "failure to write");
 				}
 			}
 		}
@@ -368,7 +364,7 @@ public class DataLogger {
 				{
 					_fileRaw = new File(_context.getExternalFilesDir(null), filename+".raw");
 					if(!_fileRaw.exists())
-						try {_fileRaw.createNewFile();} catch (IOException e1) {Log.e(TAG,e1.getMessage());}
+						try {_fileRaw.createNewFile();} catch (IOException e1) {Logger.e(TAG,e1.getMessage());}
 					_streamRaw = openStream(_fileRaw);
 				}
 			}
@@ -377,7 +373,7 @@ public class DataLogger {
 		void consume(Frame f) {
 			if(_fileRaw==null || !_fileRaw.canWrite())
 			{
-				if(FrSkyServer.D)Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+				Logger.d(TAG,"NOT Allowed to write to file, make new file/stream");
 				openFile(makePrefix());
 			}
 		   
@@ -389,7 +385,7 @@ public class DataLogger {
 				}
 				catch (IOException e)
 				{
-					if(FrSkyServer.D)Log.w(TAG, "failure to write");
+					Logger.w(TAG, "failure to write");
 				}
 			}
 		}
@@ -424,7 +420,7 @@ public class DataLogger {
 					
 					_fileCsv = new File(_context.getExternalFilesDir(null), filename+".csv");
 					if(!_fileCsv.exists())
-						try {_fileCsv.createNewFile();} catch (IOException e1) {Log.e(TAG,e1.getMessage());}
+						try {_fileCsv.createNewFile();} catch (IOException e1) {Logger.e(TAG,e1.getMessage());}
 					_streamCsv = openStream(_fileCsv);
 					
 					startDateCsv = new Date();
@@ -468,7 +464,7 @@ public class DataLogger {
 		void consume(String line) {
 			if(_fileCsv==null || !_fileCsv.canWrite())
 			{
-				if(FrSkyServer.D)Log.d(TAG,"NOT Allowed to write to file, make new file/stream");
+				Logger.d(TAG,"NOT Allowed to write to file, make new file/stream");
 				openFile(makePrefix());
 			}
 		   
@@ -486,7 +482,7 @@ public class DataLogger {
 				}
 				catch (IOException e)
 				{
-					if(FrSkyServer.D)Log.w(TAG, "failure to write");
+					Logger.w(TAG, "failure to write");
 				}
 			}
 		}

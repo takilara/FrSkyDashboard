@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import biz.onomato.frskydash.activities.ActivityDashboard;
+import biz.onomato.frskydash.util.Logger;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -30,7 +31,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 /**
  * This class does all the work for setting up and managing Bluetooth
@@ -83,7 +83,7 @@ public class BluetoothSerialService {
      * @param state  An integer defining the current connection state
      */
     private synchronized void setState(int state) {
-    	if(FrSkyServer.D) Log.d(TAG, "setState() " + mState + " -> " + state);
+    	Logger.d(TAG, "setState() " + mState + " -> " + state);
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
@@ -101,7 +101,7 @@ public class BluetoothSerialService {
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume() */
     public synchronized void start() {
-    	if(FrSkyServer.D) Log.d(TAG, "start");
+    	Logger.d(TAG, "start");
 
         // Cancel any thread attempting to make a connection
         if (mConnectThread != null) {
@@ -123,7 +123,7 @@ public class BluetoothSerialService {
      * @param device  The BluetoothDevice to connect
      */
     public synchronized void connect(BluetoothDevice device) {
-    	if(FrSkyServer.D) Log.d(TAG, "connect to: " + device);
+    	Logger.d(TAG, "connect to: " + device);
         _deviceName = device.getName();
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
@@ -145,7 +145,7 @@ public class BluetoothSerialService {
      * @param device  The BluetoothDevice that has been connected
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
-    	if(FrSkyServer.D) Log.d(TAG, "connected");
+    	Logger.d(TAG, "connected");
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
@@ -179,7 +179,7 @@ public class BluetoothSerialService {
      * Stop all threads
      */
     public synchronized void stop() {
-    	if(FrSkyServer.D)Log.d(TAG, "stop threads");
+    	Logger.d(TAG, "stop threads");
 
 
         if (mConnectThread != null) {
@@ -284,14 +284,14 @@ public class BluetoothSerialService {
             	
             	
             } catch (Exception e) {
-            	if(FrSkyServer.D)Log.e(TAG, "create() failed", e);
+            	Logger.e(TAG, "create() failed", e);
             } 
 
             mmSocket = tmp;
         }
 
         public void run() {
-        	if(FrSkyServer.D)Log.i(TAG, "BEGIN mConnectThread");
+        	Logger.i(TAG, "BEGIN mConnectThread");
             setName("ConnectThread");
 
             // Always cancel discovery because it will slow down a connection
@@ -303,13 +303,13 @@ public class BluetoothSerialService {
                 // successful connection or an exception
                 mmSocket.connect();
             } catch (IOException e) {
-            	if(FrSkyServer.D)Log.e(TAG, "unable to connect, exception", e);
+            	Logger.e(TAG, "unable to connect, exception", e);
                 connectionFailed();
                 // Close the socket
                 try {
                     mmSocket.close();
                 } catch (IOException e2) {
-                	if(FrSkyServer.D)Log.e(TAG, "unable to close() socket during connection failure", e2);
+                	Logger.e(TAG, "unable to close() socket during connection failure", e2);
                 }
                 // Start the service over to restart listening mode
                 //BluetoothSerialService.this.start();
@@ -329,7 +329,7 @@ public class BluetoothSerialService {
             try {
                 mmSocket.close();
             } catch (IOException e) {
-            	if(FrSkyServer.D)Log.e(TAG, "close() of connect socket failed", e);
+            	Logger.e(TAG, "close() of connect socket failed", e);
             }
         }
     }
@@ -345,7 +345,7 @@ public class BluetoothSerialService {
         
 
         public ConnectedThread(BluetoothSocket socket) {
-        	if(FrSkyServer.D)Log.d(TAG, "create ConnectedThread");
+        	Logger.d(TAG, "create ConnectedThread");
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -355,7 +355,7 @@ public class BluetoothSerialService {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) {
-            	if(FrSkyServer.D)Log.e(TAG, "temp sockets not created", e);
+            	Logger.e(TAG, "temp sockets not created", e);
             }
 
             mmInStream = tmpIn;
@@ -365,7 +365,7 @@ public class BluetoothSerialService {
         }
 
         public void run() {
-        	if(FrSkyServer.D)Log.i(TAG, "BEGIN mConnectedThread");
+        	Logger.i(TAG, "BEGIN mConnectedThread");
             // the buffer we read in 
             byte[] buffer = new byte[1024];
             // the number of bytes that were read
@@ -392,7 +392,7 @@ public class BluetoothSerialService {
                     break;
                 }
                 catch (Exception e) {
-                	if(FrSkyServer.D)Log.e(TAG,e.toString());
+                	Logger.e(TAG,e.toString());
                 	break;
                 }
             }
@@ -410,7 +410,7 @@ public class BluetoothSerialService {
                 //mHandler.obtainMessage(Frskydash.MESSAGE_WRITE, buffer.length, -1, buffer).sendToTarget();
                 mHandler.obtainMessage(ActivityDashboard.MESSAGE_WRITE, buffer.length, -1, buffer).sendToTarget();
             } catch (IOException e) {
-            	if(FrSkyServer.D)Log.e(TAG, "Exception during write", e);
+            	Logger.e(TAG, "Exception during write", e);
             }
         }
 
@@ -427,7 +427,7 @@ public class BluetoothSerialService {
             try {
                 mmSocket.close();
             } catch (IOException e) {
-            	if(FrSkyServer.D)Log.e(TAG, "close() of connect socket failed", e);
+            	Logger.e(TAG, "close() of connect socket failed", e);
             }
             mmSocket = null;
         }

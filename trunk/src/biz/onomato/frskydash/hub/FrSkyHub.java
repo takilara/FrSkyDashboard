@@ -413,7 +413,7 @@ public class FrSkyHub {
 
 			double alt = value + (alt_after / 100);
 
-			_sourceChannelMap.get(CHANNEL_ID_TEMP1).setRaw(alt);
+			_sourceChannelMap.get(CHANNEL_ID_ALTITUDE).setRaw(alt);
 			break;
 		case altitude_after:
 			// bad method of allowing construction of altitude double

@@ -6,19 +6,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.FrSkyServer.MyBinder;
-import biz.onomato.frskydash.R.id;
-import biz.onomato.frskydash.R.layout;
-
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,13 +17,13 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.util.Logger;
 
 public class ActivityDebug extends Activity implements OnClickListener {
 	private static final String TAG = "DebugActivity";
@@ -84,9 +75,9 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	
 	
 	void doBindService() {
-		Log.i(TAG,"Start the server service if it is not already started");
+		Logger.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		Log.i(TAG,"Try to bind to the service");
+		Logger.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -109,7 +100,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			Log.i(TAG,"Bound to Service");
+			Logger.i(TAG,"Bound to Service");
 	        // ADD stuff here
 			btnWatchdogEnabled.setChecked(server.getWatchdogEnabled());
 			chkHubEnabled.setChecked(server.getHubEnabled());
@@ -135,7 +126,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 				}
 				break;
 			case R.id.debug_btnExportDb:
-				Log.i(TAG,"Exporting DB to sdcard");
+				Logger.i(TAG,"Exporting DB to sdcard");
 				new ExportDatabaseFileTask().execute();
 				break;
 			case R.id.debug_chk_hubEnabled:
@@ -166,11 +157,11 @@ public class ActivityDebug extends Activity implements OnClickListener {
            try {
               file.createNewFile();
               this.copyFile(dbFile, file);
-              Log.d(TAG,"Database exported");
+              Logger.d(TAG,"Database exported");
               //Toast.makeText(getApplicationContext(),"Database exported", Toast.LENGTH_LONG).show();
               return true;
            } catch (IOException e) {
-              Log.e(TAG, e.getMessage(), e);
+              Logger.e(TAG, e.getMessage(), e);
               return false;
            }
         }

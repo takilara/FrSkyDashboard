@@ -1,26 +1,10 @@
 package biz.onomato.frskydash.activities;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeMap;
 
-import biz.onomato.frskydash.BluetoothSerialService;
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.FrSkyServer.MyBinder;
-import biz.onomato.frskydash.R.array;
-import biz.onomato.frskydash.R.id;
-import biz.onomato.frskydash.R.layout;
-import biz.onomato.frskydash.domain.Alarm;
-import biz.onomato.frskydash.domain.Channel;
-import biz.onomato.frskydash.domain.Frame;
-import biz.onomato.frskydash.domain.Model;
-
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,7 +14,6 @@ import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -42,7 +25,14 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
+import biz.onomato.frskydash.BluetoothSerialService;
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.domain.Alarm;
+import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Frame;
+import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.util.Logger;
 
 public class ActivityModuleSettings extends Activity implements OnClickListener {
 
@@ -127,7 +117,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	public void onResume()
 	{
 		super.onResume();
-		if(FrSkyServer.D)Log.i(TAG,"onResume");
+		Logger.i(TAG,"onResume");
 		
 
 	}
@@ -146,9 +136,9 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	}
 
 	void doBindService() {
-		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
+		Logger.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		if(FrSkyServer.D)Log.i(TAG,"Try to bind to the service");
+		Logger.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -176,18 +166,18 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		    mIntentFilter.addAction(FrSkyServer.MESSAGE_BLUETOOTH_STATE_CHANGED);			// listen for bt messages
 		    registerReceiver(mIntentReceiver, mIntentFilter);
 		    
-		    if(FrSkyServer.D)Log.i(TAG,"Bound to Service");
+		    Logger.i(TAG,"Bound to Service");
 			
 			
 			if(_modelId==-1)
 			{
-				if(FrSkyServer.D) Log.d(TAG,"Configure new Model object");
+				Logger.d(TAG,"Configure new Model object");
 				//_model = new Model(getApplicationContext());
 				_model = server.getCurrentModel();
 			}
 			else
 			{
-				if(FrSkyServer.D) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+				Logger.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
 				//_model = FrSkyServer.database.getModel(_modelId);
@@ -227,8 +217,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			btnSend.setEnabled(_btSendButtonsEnabled);
 			btnGetAlarmsFromModule.setEnabled(_btSendButtonsEnabled);
 			
-			if(FrSkyServer.D)Log.d(TAG,"Try to set up spinners for model: "+_model.getName());
-			if(FrSkyServer.D)Log.d(TAG,"This model has this many alarms: "+_alarmMap.size());
+			Logger.d(TAG,"Try to set up spinners for model: "+_model.getName());
+			Logger.d(TAG,"This model has this many alarms: "+_alarmMap.size());
 			if(_alarmMap.size()==0)
 			{
 				_alarmMap = server.initializeFrSkyAlarms();
@@ -309,7 +299,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 
     			break;
     		case R.id.FrSkySettings_btnGetFromModule:
-    			if(FrSkyServer.D)Log.d(TAG,"Try to fetch alarms from the module");
+    			Logger.d(TAG,"Try to fetch alarms from the module");
     			btnGetAlarmsFromModule.setEnabled(false);
     			server.recordAlarmsFromModule(_model.getId());
     			// register a listener for a full update
@@ -562,8 +552,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
         public void onReceive(Context context, Intent intent) {
         	String msg = intent.getAction();
         	Bundle extras = intent.getExtras();
-        	if(FrSkyServer.D)Log.i(TAG,"Received Broadcast: '"+msg+"'");
-        	if(FrSkyServer.D)Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE+"'");
+        	Logger.i(TAG,"Received Broadcast: '"+msg+"'");
+        	Logger.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE+"'");
         	if(msg.equals(FrSkyServer.MESSAGE_ALARM_RECORDING_COMPLETE))
         	{
         		if(server!=null)
@@ -576,7 +566,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	        				{
 		        				try
 		        				{
-		        					Log.w(TAG,"Got recorded alarm: "+a.getFrSkyFrameType()+": "+
+		        					Logger.w(TAG,"Got recorded alarm: "+a.getFrSkyFrameType()+": "+
 		        				server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
 	//		        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
 	//		        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
@@ -586,8 +576,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		        				}
 		        				catch(Exception e)
 		        				{
-		        					if(FrSkyServer.D)Log.e(TAG,"Failed to get alarms from the server..");
-		        					//if(FrSkyServer.D)Log.e(TAG,e.getMessage());
+		        					Logger.e(TAG,"Failed to get alarms from the server..");
+		        					//Logger.e(TAG,e.getMessage());
 		        				}
 	        				}
 	        			

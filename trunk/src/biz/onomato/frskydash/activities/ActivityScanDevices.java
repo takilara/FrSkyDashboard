@@ -1,22 +1,15 @@
 package biz.onomato.frskydash.activities;
 
-import java.io.IOException;
 import java.util.Set;
-import java.util.UUID;
-
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.R.id;
-import biz.onomato.frskydash.R.layout;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.util.Logger;
 
 public class ActivityScanDevices extends Activity {
 	 private static final String TAG = "ScanActivity";
@@ -46,7 +39,7 @@ public class ActivityScanDevices extends Activity {
 				        // Add the name and address to an array adapter to show in a ListView
 				        //mArrayAdapter.add(device.getName() +  "\n" + device.getAddress());
 				        //device.
-				    	if(FrSkyServer.D)Log.i(TAG,device.getAddress()+":"+device.getName());
+				    	Logger.i(TAG,device.getAddress()+":"+device.getName());
 				        if(device.getName()=="FrSky1")
 				        {
 				        	Toast.makeText(this, "MAC: "+device.getAddress(), Toast.LENGTH_LONG).show();

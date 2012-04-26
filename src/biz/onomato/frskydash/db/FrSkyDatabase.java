@@ -7,11 +7,11 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.domain.Alarm;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.util.Logger;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
 public class FrSkyDatabase extends AbstractDBAdapter {
     private static final String TAG = "Database";
@@ -28,7 +28,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 
     public ArrayList<Model> getModels()
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Getting all models from database");
+    	Logger.d(TAG,"Getting all models from database");
     	open();
     	Cursor cu = db.query(DATABASE_TABLE_MODELS, MODEL_COLUMNS, 
 	            null, null, null, null, null);
@@ -39,9 +39,9 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         //while(!cu.isAfterLast())
         for(int i=0;i<len;i++)
 		{
-        	if(FrSkyServer.D)Log.i(TAG,"Getting the "+i+"'th model, from position "+cu.getPosition());
+        	Logger.i(TAG,"Getting the "+i+"'th model, from position "+cu.getPosition());
         	Model m = getModel(cu);
-        	if(FrSkyServer.D)Log.i(TAG,"  This model is: "+m.getName());
+        	Logger.i(TAG,"  This model is: "+m.getName());
 			mList.add(m);
 			cu.moveToNext();
 		}
@@ -49,10 +49,10 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		close();
 		
 		//debug
-		if(FrSkyServer.D)Log.e(TAG,"Our Model list now contains: ");
+		Logger.e(TAG,"Our Model list now contains: ");
 		for(Model m : mList)
 		{
-			if(FrSkyServer.D)Log.e(TAG,"  "+m.getName());
+			Logger.e(TAG,"  "+m.getName());
 		}
 		
 		return mList;
@@ -79,7 +79,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	}
         else
         {
-        	if(FrSkyServer.D)Log.e(TAG,"Model with id: "+modelId+" was not found, try to get first model");
+        	Logger.e(TAG,"Model with id: "+modelId+" was not found, try to get first model");
         	m = getModel();
         }
         cu.deactivate();
@@ -90,7 +90,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     public Model getModel()
     {
     	// Get the first model
-    	if(FrSkyServer.D)Log.i(TAG,"Try to get first model");
+    	Logger.i(TAG,"Try to get first model");
     	open();
     	Cursor cu =
                 db.query(true, DATABASE_TABLE_MODELS, MODEL_COLUMNS,           		 
@@ -115,10 +115,10 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public Model getModel(Cursor cu)
     {
-    	if(FrSkyServer.D)Log.i(TAG,"Pickup the model info from the cursor: "+cu.getColumnNames());
+    	Logger.i(TAG,"Pickup the model info from the cursor: "+cu.getColumnNames());
     	Model m = new Model();
     	//cu.moveToFirst();
-    	if(FrSkyServer.D)Log.i(TAG,"cursor id: "+cu.getInt(0));
+    	Logger.i(TAG,"cursor id: "+cu.getInt(0));
     	
 		m.setId(cu.getInt(cu.getColumnIndexOrThrow(KEY_ROWID)));
 		m.setName(cu.getString(cu.getColumnIndexOrThrow(KEY_NAME)));
@@ -126,7 +126,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 
 		// Add Channels to the model
 		ArrayList<Channel> channelList = getChannelsForModel(m.getId());
-		if(FrSkyServer.D)Log.i(TAG,"Found "+channelList.size()+" channels for model with id "+m.getId());
+		Logger.i(TAG,"Found "+channelList.size()+" channels for model with id "+m.getId());
 		m.setChannels(channelList);
 		
 		// Add Alarms to the model
@@ -148,7 +148,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		}
     		else
     		{
-    			if(FrSkyServer.D)Log.e(TAG,"Inserting the model failed");
+    			Logger.e(TAG,"Inserting the model failed");
     			result = false;
     		}
     	}
@@ -156,7 +156,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	{
     		if(!updateModel(model))
     		{
-    			if(FrSkyServer.D)Log.e(TAG,"Updating the model failed");
+    			Logger.e(TAG,"Updating the model failed");
     			result = false;
     		}
     	}
@@ -174,7 +174,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         	}
     		
     		// Update the channels
-    		if(FrSkyServer.D)Log.i(TAG,"Saving channels");
+    		Logger.i(TAG,"Saving channels");
     		
     		// no good
     		//deleteAllChannelsForModel(model);
@@ -194,7 +194,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		}
     		
     		// Update the alarms
-    		if(FrSkyServer.D)Log.i(TAG,"Saving alarms");
+    		Logger.i(TAG,"Saving alarms");
     		setAlarmsForModel(model);
     		
     	}
@@ -202,7 +202,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     private boolean updateModel(Model model)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Update Model '"+model.getName()+"' in the database, at id "+model.getId());
+    	Logger.d(TAG,"Update Model '"+model.getName()+"' in the database, at id "+model.getId());
     	open();
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, model.getName());
@@ -215,7 +215,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     private int insertModel(Model model)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Insert Model '"+model.getName()+"' into the database");
+    	Logger.d(TAG,"Insert Model '"+model.getName()+"' into the database");
     	open();
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_NAME, model.getName());
@@ -223,14 +223,14 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         //initialValues.put(KEY_TITLE, title);
         
         int newId = (int) db.insert(DATABASE_TABLE_MODELS, null, initialValues);
-        if(FrSkyServer.D)Log.d(TAG," The id for '"+model.getName()+"' is "+newId);
+        Logger.d(TAG," The id for '"+model.getName()+"' is "+newId);
         close();
         return newId;
     }
     
     public boolean deleteModel(int modelId) 
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Deleting from the database");
+    	Logger.d(TAG,"Deleting from the database");
     	
     	open();
     	boolean result = db.delete(DATABASE_TABLE_MODELS, KEY_ROWID + 
@@ -279,7 +279,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 
     public ArrayList<Channel> getChannels()
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Getting all channels from database");
+    	Logger.d(TAG,"Getting all channels from database");
     	open();
     	Cursor cu = db.query(DATABASE_TABLE_CHANNELS, CHANNEL_COLUMNS, 
 	            null, null, null, null, null);
@@ -313,14 +313,14 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		ch.setDirtyFlag(false);
 		//db.close();
 		
-		if(FrSkyServer.D) Log.d(TAG,"Loaded '"+ch.getDescription()+"' from database");
-		if(FrSkyServer.D) Log.d(TAG,"\tSilent:\t"+ch.getSilent());
+		Logger.d(TAG,"Loaded '"+ch.getDescription()+"' from database");
+		Logger.d(TAG,"\tSilent:\t"+ch.getSilent());
 		return ch;
     }
     
     public Channel getChannel(int channelId)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Get one channel from the database (channelid: "+channelId+")");
+    	Logger.d(TAG,"Get one channel from the database (channelid: "+channelId+")");
     	open();
         Cursor cu = db.query(true, DATABASE_TABLE_CHANNELS, CHANNEL_COLUMNS, 
                 		KEY_ROWID + "=" + channelId, 
@@ -342,7 +342,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	if(channel.getId()==-1)
     	{
     		// save using insert
-    		if(FrSkyServer.D)Log.d(TAG,"Save channel using insert");
+    		Logger.d(TAG,"Save channel using insert");
     		int id = insertChannel(channel);
     		if(id!=-1)
     		{
@@ -350,7 +350,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		}
     		else
     		{
-    			if(FrSkyServer.D)Log.e(TAG,"Inserting channel failed");
+    			Logger.e(TAG,"Inserting channel failed");
     			result = false;
     		}
     	}
@@ -359,14 +359,14 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		// save using update
     		if(!updateChannel(channel))
     		{
-    			if(FrSkyServer.D)Log.e(TAG,"Channel Update failed");
+    			Logger.e(TAG,"Channel Update failed");
     		}
     	}
     }
     
     private int insertChannel(Channel channel)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Insert Channel into the database");
+    	Logger.d(TAG,"Insert Channel into the database");
     	open();
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_DESCRIPTION, channel.getDescription());
@@ -387,7 +387,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     private boolean updateChannel(Channel channel)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Update one channel in the database");
+    	Logger.d(TAG,"Update one channel in the database");
     	open();
         ContentValues args = new ContentValues();
         int rowId = channel.getId();
@@ -410,7 +410,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public boolean deleteChannel(int rowId) 
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Deleting from the database");
+    	Logger.d(TAG,"Deleting from the database");
     	open();
     	boolean result =db.delete(DATABASE_TABLE_CHANNELS, KEY_ROWID + 
         		"=" + rowId, null) > 0;
@@ -420,13 +420,13 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public boolean deleteChannel(Channel channel) 
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Deleting from the database");
+    	Logger.d(TAG,"Deleting from the database");
         return deleteChannel(channel.getId());
     }
     
     public void deleteAllChannelsForModel(int modelId)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Deleting from the database where modelId="+modelId);
+    	Logger.d(TAG,"Deleting from the database where modelId="+modelId);
     	open();
     	db.delete(DATABASE_TABLE_CHANNELS,KEY_MODELID+"="+modelId,null);
     	close();
@@ -434,7 +434,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public void deleteAllChannelsForModel(Model model)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Deleting from the database where modelId="+model.getId());
+    	Logger.d(TAG,"Deleting from the database where modelId="+model.getId());
     	open();
     	db.delete(DATABASE_TABLE_CHANNELS,KEY_MODELID+"="+model.getId(),null);
     	close();
@@ -465,8 +465,8 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		
     	// loop getChannel(Cursor)
 		
-		if(FrSkyServer.D)Log.d(TAG,"Loading alarms for modelid: "+modelId);
-		if(FrSkyServer.D)Log.d(TAG,"  found: "+cu.getCount()+" alarms");
+		Logger.d(TAG,"Loading alarms for modelid: "+modelId);
+		Logger.d(TAG,"  found: "+cu.getCount()+" alarms");
 		
 		TreeMap<Integer,Alarm> mAlarms = new TreeMap<Integer,Alarm>();
 		
@@ -494,7 +494,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	a.setAlarmLevel(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_ALARMLEVEL)));
     	a.setUnitChannel(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_UNITSOURCECHANNEL)));
 		
-    	if(FrSkyServer.D) Log.d(TAG,"Loaded alarm '"+a+"' from database");
+    	Logger.d(TAG,"Loaded alarm '"+a+"' from database");
 		return a;
     }
     
@@ -519,7 +519,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     
     public int insertAlarm(Alarm alarm)
     {
-    	if(FrSkyServer.D)Log.d(TAG,"Insert Alarm into the database: (ModelId,Frskyframe) ("+alarm.getModelId()+","+alarm.getFrSkyFrameType()+")");
+    	Logger.d(TAG,"Insert Alarm into the database: (ModelId,Frskyframe) ("+alarm.getModelId()+","+alarm.getFrSkyFrameType()+")");
     	open();
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_MODELID, alarm.getModelId());
@@ -531,7 +531,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         
         int id = (int) db.insert(DATABASE_TABLE_FRSKYALARMS, null, initialValues);
         close();
-        if(FrSkyServer.D)Log.d(TAG,"  This alarm got the id: "+id);
+        Logger.d(TAG,"  This alarm got the id: "+id);
         return id;
     }
     
@@ -544,7 +544,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     {
 
     	open();
-    	if(FrSkyServer.D)Log.d(TAG,"Delete alarms for model "+modelId+" from database");
+    	Logger.d(TAG,"Delete alarms for model "+modelId+" from database");
     	db.delete(DATABASE_TABLE_FRSKYALARMS,KEY_MODELID+"="+modelId,null);
     	close();
     }

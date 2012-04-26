@@ -552,19 +552,18 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 				
 			}
 			
-			
 			mIntentFilter = new IntentFilter();
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+_sourceChannelId;
 			
 			Logger.d(TAG,_description+": Added broadcast listener");
 			
 		    mIntentFilter.addAction(bCastAction);
-		    listening=true;
 		    
 		    // TODO: try to use "this" as receiver instead of mChannelUpdateReceiver
-		    
 		    FrSkyServer.getContext().registerReceiver(mChannelUpdateReceiver, mIntentFilter);	  // Used to receive messages from Server
 
+		    //hcpl: moved this after registerReceiver in case of error state is then still fine
+		    listening=true;
 		}
 		else
 		{

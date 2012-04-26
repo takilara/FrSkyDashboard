@@ -1,45 +1,51 @@
 package biz.onomato.frskydash.domain;
 
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Locale;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 import biz.onomato.frskydash.util.Logger;
 
-import java.math.MathContext;
-import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-
+/**
+ * A Channel is a value that can be updated through the Telemetry protocol. The
+ * intention is to use this in a generic way for both Analog values (AD1 and
+ * AD2), signal values (RSSI) and hub data.
+ * 
+ * @author Espen Solbu
+ * 
+ */
 public class Channel implements Parcelable, Comparator<Channel>  {
+	
 	private static final String TAG = "Channel";
-	
-	
-	
+
+	//TODO change towards enum, also I saw this before in the Model class for instance
 	public static final int CHANNELTYPE_AD1=0;
 	public static final int CHANNELTYPE_AD2=1;
 	public static final int CHANNELTYPE_RSSI=2;
+	
 	public static final String MESSAGE_CHANNEL_UPDATED = "biz.onomato.frskydash.update.channel.";
+	
 	//public static final String crlf="\r\n";
 	public static final String delim=";";
+
+	/**
+	 * indicates if this channel is currently listening or not. This is an
+	 * important property since this will be used to unregister in case of
+	 * channel updates etc.
+	 */
+	private boolean listening = false;
 	
-	
-	public boolean listening = false;
-	
-	
-	
+	/**
+	 * the actual values
+	 */
 	public double raw,rawAvg;
 	public double eng,engAvg;
 	private double _raw;
@@ -68,8 +74,15 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	
 //	public Alarm[] alarms;
 //	public int alarmCount = 0;
+	/**
+	 * identifiers
+	 */
 	private int _modelId = -1;
 	private int _channelId = -1;
+	
+	/**
+	 * if this object is dirty or not
+	 */
 	private boolean _dirty = false;
 	
 //	private static DBAdapterChannel db;
@@ -79,23 +92,41 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	//public static final Channel AD1 = new Channel("ad1","FrSky AD1",(float)0,(float)1,"","");
 	//public static final Channel AD2 = new Channel("ad2","FrSky AD2",(float)0,(float)1,"","");
 	
+	/**
+	 * keep a stack of values for moving average etc.
+	 */
 	private MyStack _stack;
 	//SharedPreferences _settings;
 	//SharedPreferences.Editor editor;
 
+	/**
+	 * Def ctor
+	 */
 	public Channel()
 	{
 		this("description",(float)0,(float)1,"Symbol","UnitName");
 	}
 	
+	/**
+	 * ctor
+	 * 
+	 * @param in
+	 */
 	public Channel(Parcel in)
 	{
 		readFromParcel(in);
 		//_context = FrSkyServer.getContext();
 	}
 	
-	
-	
+	/**
+	 * ctor 
+	 * 
+	 * @param description
+	 * @param offset
+	 * @param factor
+	 * @param unit
+	 * @param longUnit
+	 */
 	public Channel(String description,float offset,float factor,String unit,String longUnit)
 	{
 		// instanciate listeners list
@@ -319,6 +350,11 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		setDirtyFlag(true);
 	}
 
+	/**
+	 * @deprecated use {@link FrSkyServer#getContext()} instead
+	 * 
+	 * @return the context this channel is in
+	 */
 	public Context getContext()
 	{
 		
@@ -377,49 +413,41 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		return outVal;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
 	public double getValue()
 	{
 		return getValue(false);
 	}
 	
-	public double getValue(boolean average)
-	{
-		//Log.i(TAG, _name+" Try to calculate new outValue");
-		double tVal;
-		if(average)
-		{
-			//tVal = Math.round(_val*100f)/100f;
-			return convert(_avg);
-			
-		}
-		else
-		{
-			return convert(_raw);
-		}
-		//return getValue(_avg);
+	/**
+	 * get value for this channel
+	 * 
+	 * @param average
+	 *            pass true if you need the average
+	 * @return
+	 */
+	public double getValue(boolean average) {
+		// tVal = Math.round(_val*100f)/100f;
+		return average ? convert(_avg) : convert(_raw);
 	}
 	
-	public double getRaw()
-	{
+	/**
+	 * get the raw value for this channel
+	 * 
+	 * @return
+	 */
+	public double getRaw() {
 		return getRaw(false);
 	}
-	public double getRaw(boolean average)
-	{
-		if(average)
-		{
-			return _avg;
-		}
-		else
-		{
-			return _raw;
-		}
+
+	/**
+	 * get raw value for this channel
+	 * 
+	 * @param average
+	 *            use true if you want to retrieve the average value
+	 * @return
+	 */
+	public double getRaw(boolean average) {
+		return average ? _avg : _raw;
 	}
 	
 	/**
@@ -439,11 +467,13 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 
 	public String toValueString()
 	{
+		//TODO DecimalFormat is probably faster
 		return String.format("%."+_precision+"f", _val);
 	}
 
 	public String toString(int inputValue)
 	{
+		//TODO DecimalFormat is probably faster
 		return String.format("%."+_precision+"f", convert(inputValue));
 	}
 	
@@ -488,9 +518,6 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 //	}
 
 	
-	
-	
-	
 	// ==========================================================================================
 	// ====                        INTER CHANNEL COMMUNICATION                              =====
 	// ==========================================================================================
@@ -510,7 +537,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	{
 		if(_sourceChannelId != -1)
 		{
-			if(FrSkyServer.D)Log.d(TAG,_description+" Registering listener");
+			Logger.d(TAG,_description+" Registering listener");
 			if(listening)	// already listening to something
 			{
 				// remove existing listener before allowing to add new one
@@ -519,7 +546,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 					FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
 				}
 				catch (Exception e){
-					Log.e(TAG,e.getMessage());
+					Logger.e(TAG,e.getMessage());
 					
 				}				
 				
@@ -529,7 +556,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			mIntentFilter = new IntentFilter();
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+_sourceChannelId;
 			
-			if(FrSkyServer.D)Log.d(TAG,_description+": Added broadcast listener");
+			Logger.d(TAG,_description+": Added broadcast listener");
 			
 		    mIntentFilter.addAction(bCastAction);
 		    listening=true;
@@ -550,22 +577,22 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	public void unregisterListener()
 	{
 
-		if(FrSkyServer.D)Log.d(TAG,_description+": Removing broadcast listener");
+		Logger.d(TAG,_description+": Removing broadcast listener");
 		try
 		{
 			FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
-			if(FrSkyServer.D)Log.d(TAG,_description+": Removed Listener Success");
+			Logger.d(TAG,_description+": Removed Listener Success");
 			listening=false;
 		}
-		catch (Exception e){Log.e(TAG,e.getMessage());}
+		catch (Exception e){Logger.e(TAG,e.getMessage());}
 
 	}
 	
 	private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-        	String msg = intent.getAction();
-        	Bundle extras = intent.getExtras();
+//        	String msg = intent.getAction();
+//        	Bundle extras = intent.getExtras();
         	//Log.i(TAG,"Received Broadcast: '"+msg+"'");
         	// no purpose to compare msg, since we should only listen to relevant broadcasts..
         	//Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
@@ -575,7 +602,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
         	double val = intent.getDoubleExtra("channelValue", -1);
         	//if(FrSkyServer.D) Log.w(TAG,_description +" on model "+_modelId+" received broadcast input value "+val);
         	
-        	double v = setRaw(val);
+        	/*double oldValue = */ setRaw(val);
     		//Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
 
         }
@@ -610,16 +637,13 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 //		
 //		if(FrSkyServer.D)Log.d(TAG,"Local decimal symbol: '"+decDefault+"', US decimal symbol: '"+decUS+"'");
 		// toValueString should perform replace of Locale's decimal point with Locale.US decimal point
-		
-		
-		String outString =  getDescription()+": "+String.format(Locale.US,"%."+_precision+"f", _val)+getLongUnit();
-		
-		return outString;
+		// TODO DecimalFormat probably faster
+		return getDescription()+": "+String.format(Locale.US,"%."+_precision+"f", _val)+getLongUnit();
 //		return getDescription()+": "+toValueString()+" "+getLongUnit();
 	}
 	
 	/**
-	 * reset value of this channel
+	 * reset this channel
 	 */
 	public void reset() {
 		// debug logging
@@ -641,6 +665,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	
 	/**
 	 * Converts a raw value to engineering units, and performs "rounding" on it.
+	 * 
 	 * @param inputValue the raw value to convert
 	 * @return the value in engineering units
 	 * @author eso
@@ -674,9 +699,9 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	public String toCsvHeader()
 	{
 		StringBuilder sb = new StringBuilder();
+		// TODO decimalFormat probably faster
 		sb.append(String.format("%s (%s)",_description,_longUnit)+delim);
 		sb.append(String.format("%s (Averaged) (%s)",_description,_longUnit)+delim);
-		
 		return sb.toString();
 	}
 	
@@ -684,7 +709,6 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	// ==========================================================================================
 	// ====                        COMPAREABLE                                              =====
 	// ==========================================================================================
-
 
 	@Override
 	public int compare(Channel lhs, Channel rhs) {
@@ -694,9 +718,9 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		if(lhs.getId()<rhs.getId()) return -1;
 		else return 1;
 	}
-
 	
-	@Override public boolean equals(Object o) {
+	@Override 
+	public boolean equals(Object o) {
 		if (this == o) {
 		   return true;
 		}
@@ -750,9 +774,12 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 
 	}
  
-
+	/**
+	 * get information from {@link Parcel}
+	 * 
+	 * @param in
+	 */
 	private void readFromParcel(Parcel in) {
- 
 		// We just need to read back each
 		// field in the order that it was
 		// written to the parcel

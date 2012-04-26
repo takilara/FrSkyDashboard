@@ -1,10 +1,5 @@
 package biz.onomato.frskydash.activities;
 
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.FrSkyServer.MyBinder;
-import biz.onomato.frskydash.R.id;
-import biz.onomato.frskydash.R.layout;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -12,13 +7,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,12 +18,14 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.util.Logger;
 
 public class ActivityApplicationSettings extends Activity implements OnClickListener, OnEditorActionListener, OnFocusChangeListener {
 
@@ -61,7 +54,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		setContentView(R.layout.activity_applicationsettings);
 
 		// Setup components from screen
-		if(FrSkyServer.D)Log.i(TAG,"Setup widgets");
+		Logger.i(TAG,"Setup widgets");
 		btnDeleteLogs = findViewById(R.id.btnDeleteLogs);
 		chkCyclicSpeakerEnabled = (CheckBox) findViewById(R.id.chkCyclicSpeakerEnabled);
 		chkLogToRaw = (CheckBox) findViewById(R.id.chkLogToRaw); 
@@ -80,7 +73,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		btnSave.setVisibility(View.GONE);
 		
 		// Add listeners
-		if(FrSkyServer.D)Log.i(TAG,"Add Listeners");
+		Logger.i(TAG,"Add Listeners");
 		btnDeleteLogs.setOnClickListener(this);
 		chkCyclicSpeakerEnabled.setOnClickListener(this);
 		chkLogToRaw.setOnClickListener(this);
@@ -173,7 +166,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 				server.setAutoSendAlarms(((CheckBox) v).isChecked());
 				break;
 			case R.id.btnSave:
-				if(FrSkyServer.D)Log.i(TAG,"Store new interval");
+				Logger.i(TAG,"Store new interval");
 				save();
 				break;
 		}
@@ -181,7 +174,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	
 	private void save()
 	{
-		if(FrSkyServer.D)Log.i(TAG,"Save current settings");
+		Logger.i(TAG,"Save current settings");
 		try
 		{
 			server.setCyclicSpeechEnabledAtStartup(chkCyclicSpeakerEnabled.isChecked());
@@ -209,7 +202,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	
 	private void showDeleteDialog()
 	{
-		if(FrSkyServer.D)Log.i(TAG,"Delete all logs please");
+		Logger.i(TAG,"Delete all logs please");
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
 		dialog.setTitle("Delete Logs");
 
@@ -231,7 +224,7 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
             public void onClick(DialogInterface dialog, int which) {
 
                 //Stop the activity
-            	if(FrSkyServer.D)Log.i(TAG,"Cancel Deletion");
+            	Logger.i(TAG,"Cancel Deletion");
             }
 
         });
@@ -239,9 +232,9 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	}
 	
 	void doBindService() {
-		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
+		Logger.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		if(FrSkyServer.D)Log.i(TAG,"Try to bind to the service");
+		Logger.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -264,11 +257,11 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			if(FrSkyServer.D)Log.i(TAG,"Bound to Service");
+			Logger.i(TAG,"Bound to Service");
 			
 	        int interval = server.getCyclicSpeechInterval();
-	        if(FrSkyServer.D)Log.i(TAG,"Set interval to +"+interval);
-	        if(FrSkyServer.D)Log.i(TAG,"Edit field currently at +"+edCyclicInterval.getText().toString());
+	        Logger.i(TAG,"Set interval to +"+interval);
+	        Logger.i(TAG,"Edit field currently at +"+edCyclicInterval.getText().toString());
 	        edCyclicInterval.setText(String.valueOf(interval));
 	        //edCyclicInterval.setText(interval);
 	        chkCyclicSpeakerEnabled.setChecked(server.getCyclicSpeechEnabledAtStartup());

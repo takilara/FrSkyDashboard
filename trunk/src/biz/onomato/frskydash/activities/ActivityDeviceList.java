@@ -18,12 +18,6 @@ package biz.onomato.frskydash.activities;
 
 import java.util.Set;
 
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.R.id;
-import biz.onomato.frskydash.R.layout;
-import biz.onomato.frskydash.R.string;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -32,16 +26,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.util.Logger;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and
@@ -142,7 +138,7 @@ public class ActivityDeviceList extends Activity {
      * Start device discover with the BluetoothAdapter
      */
     private void doDiscovery() {
-    	if(FrSkyServer.D) Log.d(TAG, "doDiscovery()");
+    	Logger.d(TAG, "doDiscovery()");
 
         // Indicate scanning in the title
         setProgressBarIndeterminateVisibility(true);

@@ -23,10 +23,17 @@ public class Logger {
 	}
 
 	public static void e(String tag, String msg) {
-		Log.e(tag, msg);
+		if (FrSkyServer.D)
+			Log.e(tag, msg);
 	}
 
 	public static void e(String tag, String msg, Exception e) {
-		Log.e(tag, msg, e);
+		if (FrSkyServer.D)
+			Log.e(tag, msg, e);
+	}
+
+	public static void w(String tag, String msg) {
+		if (FrSkyServer.D)
+			Log.w(tag, msg);
 	}
 }

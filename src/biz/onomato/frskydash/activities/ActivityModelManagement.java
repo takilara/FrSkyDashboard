@@ -2,43 +2,29 @@ package biz.onomato.frskydash.activities;
 
 import java.util.ArrayList;
 
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.FrSkyServer.MyBinder;
-import biz.onomato.frskydash.R.drawable;
-import biz.onomato.frskydash.R.id;
-import biz.onomato.frskydash.R.layout;
-import biz.onomato.frskydash.domain.Model;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.util.Logger;
 
 public class ActivityModelManagement extends Activity implements OnClickListener {
 	private static final String TAG = "Model Management";
@@ -59,16 +45,16 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
 		rbList = new ArrayList<RadioButton>();
 		// Setup components from screen
-		if(FrSkyServer.D) Log.i(TAG,"Setup widgets");
+		Logger.i(TAG,"Setup widgets");
 		llModelsLayout = (LinearLayout) findViewById(R.id.llModelsLayout);
 		btnAddModel = (Button) findViewById(R.id.btnAddModel);
 		
 		// Add listeners
-		if(FrSkyServer.D) Log.i(TAG,"Add Listeners");
+		Logger.i(TAG,"Add Listeners");
 		//btnAddModel.setOnClickListener(this);
 		btnAddModel.setOnClickListener(new OnClickListener() {
 			public void onClick(View v){
-				if(FrSkyServer.D) Log.d(TAG,"User Clicked Add Model");
+				Logger.d(TAG,"User Clicked Add Model");
 				Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
 	    		i.putExtra("modelId", (int) -1);	// Should create new model
 	    		startActivityForResult(i,MODEL_CONFIG_RETURN);
@@ -128,7 +114,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		else if(id>100) // DELETE
 		{
 			int ii=id-100;
-			if(FrSkyServer.D) Log.d(TAG,"Delete model with id:"+ii);
+			Logger.d(TAG,"Delete model with id:"+ii);
 			showDeleteDialog(ii);
 			
 		}
@@ -177,7 +163,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		int modelCount = FrSkyServer.modelMap.size();
 		for(Model m : FrSkyServer.modelMap.values())
 		{
-			if(FrSkyServer.D)Log.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
+			Logger.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
 			LinearLayout ll = new LinearLayout(getApplicationContext());
 			
 			
@@ -213,7 +199,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 			//btnDelete.setOnClickListener(this);
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
-					if(FrSkyServer.D) Log.d(TAG,"Delete model with id:"+(v.getId()-100));
+					Logger.d(TAG,"Delete model with id:"+(v.getId()-100));
 					showDeleteDialog(v.getId()-100);
 				}
 			});
@@ -274,7 +260,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		//m.loadFromDatabase(id);
 		//final Model m = server.database.getModel(id); 
 		final Model m = FrSkyServer.modelMap.get(id);
-		if(FrSkyServer.D)Log.i(TAG,"Delete model with id:"+id);
+		Logger.i(TAG,"Delete model with id:"+id);
 		_deleteId = id;
 		AlertDialog dialog = new AlertDialog.Builder(this).create();
 		dialog.setTitle("Delete "+m.getName()+"?");
@@ -323,7 +309,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
                 //Stop the activity
             	_deleteId=-1;
-            	if(FrSkyServer.D)Log.i(TAG,"Cancel Deletion");
+            	Logger.i(TAG,"Cancel Deletion");
             }
 
         });
@@ -331,9 +317,9 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	}
 	
 	void doBindService() {
-		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
+		Logger.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		if(FrSkyServer.D)Log.i(TAG,"Try to bind to the service");
+		Logger.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -356,7 +342,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			if(FrSkyServer.D)Log.i(TAG,"Bound to Service");
+			Logger.i(TAG,"Bound to Service");
 			
 			populateModelList();
 			
@@ -379,10 +365,10 @@ public class ActivityModelManagement extends Activity implements OnClickListener
     			switch(resultCode)
 	        	{
 	        		case RESULT_OK:
-	        			if(FrSkyServer.D) Log.i(TAG,"User saved new settings");
+	        			Logger.i(TAG,"User saved new settings");
 	        			break;
 	        		case RESULT_CANCELED:
-	        			if(FrSkyServer.D) Log.i(TAG,"User cancelled with back");
+	        			Logger.i(TAG,"User cancelled with back");
 	        			break;
 	        	}
     			break;

@@ -11,7 +11,6 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
@@ -62,8 +61,7 @@ public class ActivitySimulator extends Activity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		if (FrSkyServer.D)
-			Log.i(TAG, "onCreate");
+		Logger.i(TAG, "onCreate");
 		setContentView(R.layout.activity_simulator);
 
 		// float newVal = globals.setChannelById(AD1, 200);
@@ -142,11 +140,9 @@ public class ActivitySimulator extends Activity implements
 	void doBindService() {
 		// bindService(new Intent(this, FrSkyServer.class), mConnection,
 		// Context.BIND_AUTO_CREATE);
-		if (FrSkyServer.D)
-			Log.i(TAG, "Start the server service if it is not already started");
+		Logger.i(TAG, "Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		if (FrSkyServer.D)
-			Log.i(TAG, "Try to bind to the service");
+		Logger.i(TAG, "Try to bind to the service");
 		getApplicationContext().bindService(
 				new Intent(this, FrSkyServer.class), mConnection, 0);
 		// bindService(new Intent(this, FrSkyServer.class), mConnection,
@@ -168,8 +164,7 @@ public class ActivitySimulator extends Activity implements
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			if (FrSkyServer.D)
-				Log.i(TAG, "Bound to Service");
+			Logger.i(TAG, "Bound to Service");
 			btnSimTgl.setChecked(server.getSim().running);
 			// simFrame = server.sim.genFrame(ad1_raw,ad2_raw,rssirx_raw,
 			// rssitx_raw);
@@ -180,14 +175,12 @@ public class ActivitySimulator extends Activity implements
 					rssitx_raw);
 			// Frame f = Frame.FrameFromAnalog(ad1_raw,ad2_raw,rssirx_raw,
 			// rssitx_raw);
-			if (FrSkyServer.D)
-				Log.i(TAG, "FC (member): " + _currentFrame.toHuman());
+			Logger.i(TAG, "FC (member): " + _currentFrame.toHuman());
 			// Log.i(TAG,"FC (class ): "+Frame.frameToHuman(simFrame));
 
 			outFrame_tv.setText(_currentFrame.toHuman());
 
-			if (FrSkyServer.D)
-				Log.d(TAG, "update progress bars");
+			Logger.d(TAG, "update progress bars");
 			updateProgressBar();
 
 			/**
@@ -380,8 +373,7 @@ public class ActivitySimulator extends Activity implements
 
 	public void onDestroy() {
 		super.onDestroy();
-		if (FrSkyServer.D)
-			Log.i(TAG, "onDestroy");
+		Logger.i(TAG, "onDestroy");
 		doUnbindService();
 		// mTts.stop();
 		// globals.sim.stop();
@@ -407,8 +399,7 @@ public class ActivitySimulator extends Activity implements
 	public void onPause() {
 
 		super.onPause();
-		if (FrSkyServer.D)
-			Log.i(TAG, "onPause");
+		Logger.i(TAG, "onPause");
 		// mTts.stop();
 		// doUnbindService();
 		tickHandler.removeCallbacks(runnableTick);
@@ -422,8 +413,7 @@ public class ActivitySimulator extends Activity implements
 
 		tickHandler.removeCallbacks(runnableTick);
 		tickHandler.post(runnableTick);
-		if (FrSkyServer.D)
-			Log.i(TAG, "onResume");
+		Logger.i(TAG, "onResume");
 		// btnSimTgl.setChecked(server.sim.running);
 
 		// update state of toggle button at this point
@@ -435,7 +425,6 @@ public class ActivitySimulator extends Activity implements
 	public void onStop() {
 		super.onStop();
 		// mTts.stop();
-		if (FrSkyServer.D)
-			Log.i(TAG, "onStop");
+		Logger.i(TAG, "onStop");
 	}
 }

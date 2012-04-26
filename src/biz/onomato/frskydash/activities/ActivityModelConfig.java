@@ -1,40 +1,38 @@
 package biz.onomato.frskydash.activities;
 
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.FrSkyServer.MyBinder;
-import biz.onomato.frskydash.R.array;
-import biz.onomato.frskydash.R.drawable;
-import biz.onomato.frskydash.R.id;
-import biz.onomato.frskydash.R.layout;
-import biz.onomato.frskydash.domain.Channel;
-import biz.onomato.frskydash.domain.Model;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
-import android.util.Log;
-import android.util.TypedValue;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.util.Logger;
 
+/**
+ * Activity for crud actions on Model
+ * 
+ * @author Espen Solbu
+ *
+ */
 public class ActivityModelConfig extends Activity implements OnClickListener {
 	private static final String TAG = "ModelConfig";
 	//private static final boolean DEBUG=true;
@@ -58,14 +56,11 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		doBindService();
 	
-		
 		///TODO: Use intent to get initial Model object?
 		Intent launcherIntent = getIntent();
 		_modelId = launcherIntent.getIntExtra("modelId", -1);
-		if(FrSkyServer.D) Log.d(TAG,"Editing the model with id:"+_modelId);
+		Logger.d(TAG,"Editing the model with id:"+_modelId);
 //		Log.d(TAG, "Channel Id is: "+_channelId);
-		
-		
 		
 		// Show the form
 		setContentView(R.layout.activity_modelconfig);
@@ -83,9 +78,6 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		btnSave.setVisibility(View.GONE);
 		btnAddChannel.setOnClickListener(this);
 		btnFrSkyAlarms.setOnClickListener(this);
-		
-		
-		
 	}
 	
 	@Override
@@ -96,9 +88,9 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	}
 	
 	void doBindService() {
-		if(FrSkyServer.D)Log.i(TAG,"Start the server service if it is not already started");
+		Logger.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
-		if(FrSkyServer.D)Log.i(TAG,"Try to bind to the service");
+		Logger.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
     
@@ -113,20 +105,15 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
         }
     }
     
-    
-    
-
-    
     private ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
-			if(FrSkyServer.D)Log.i(TAG,"Bound to Service");
-			
+			Logger.i(TAG,"Bound to Service");
 			
 			if(_modelId==-1)
 			{
-				if(FrSkyServer.D) Log.d(TAG,"Configure new Model object");
+				Logger.d(TAG,"Configure new Model object");
 				//int len = FrSkyServer.database.getModels().size();
 				int len = FrSkyServer.modelMap.size();
 				_model = new Model("Model "+(len+1));
@@ -138,22 +125,18 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				// save again to persist
 				//FrSkyServer.database.saveModel(_model);
 				FrSkyServer.addModel(_model);
-				
-				
 			}
 			else
 			{
-				if(FrSkyServer.D) Log.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+				Logger.d(TAG,"Configure existing Model object (id:"+_modelId+")");
 				//_model = new Model(getApplicationContext());
 				//_model.loadFromDatabase(_modelId);
 				//_model = FrSkyServer.database.getModel(_modelId);
 				_model = FrSkyServer.modelMap.get(_modelId);
 				
-				
 //				_model = new Model(getApplicationContext());
 //				_model.loadFromSettings(_modelId);
 				//_model = Model.createFromSettings(getApplicationContext(), _modelId);
-				
 			}
 			
 			edName.setText(_model.getName());
@@ -174,7 +157,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			int n=0;
 			for(int i=0;i<modelTypes.length;i++)
 			{
-				if(FrSkyServer.D)Log.i(TAG,"Comparing "+modelTypes[i]+" to "+_model.getType());
+				Logger.i(TAG,"Comparing "+modelTypes[i]+" to "+_model.getType());
 				if(modelTypes[i].equals(_model.getType()))
 				{
 					spType.setSelection(i);
@@ -183,8 +166,6 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				
 			}
 			//spType.setSelection(modelTypes);
-			
-			
 			
 			populateChannelList();
 		}
@@ -204,7 +185,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				this.finish();
 				break;
 			case R.id.modConf_btnAddChannel:
-				if(FrSkyServer.D) Log.d(TAG,"Add a channel");
+				Logger.d(TAG,"Add a channel");
 				Channel c = new Channel();
 //				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
 //				c.setDescription("Description"+(_model.getChannels().length+1));
@@ -218,10 +199,9 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				Intent editChannelIntent = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 				editChannelIntent.putExtra("channel", c);
 				editChannelIntent.putExtra("modelId", (int) _model.getId());	// Should edit existing model
-				if(FrSkyServer.D)Log.d(TAG,"Launch channel edit with modelId: "+_model.getId());	
+				Logger.d(TAG,"Launch channel edit with modelId: "+_model.getId());	
 				//editChannelIntent.putExtra("idInModel", v.getId()-1000);
 	    		startActivityForResult(editChannelIntent,CHANNEL_CONFIG_RETURN);
-				
 				
 				//populateChannelList();
 				break;
@@ -235,7 +215,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	
 	public void saveModel()
 	{
-		if(FrSkyServer.D)Log.d(TAG,"Save this model");
+		Logger.d(TAG,"Save this model");
 
 		// Save the model
 		_model.setName(edName.getText().toString());
@@ -257,15 +237,14 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	
 	private void populateChannelList()
 	{
-		if(FrSkyServer.D) Log.d(TAG,"Populate list of channels");
+		Logger.d(TAG,"Populate list of channels");
 		llChannelsLayout.removeAllViews();
 		
 		for(Channel c:_model.getChannels().values())
 		{
-			if(FrSkyServer.D) Log.i(TAG,c.getDescription());
+			Logger.i(TAG,c.getDescription());
 			
 			LinearLayout ll = new LinearLayout(getApplicationContext());
-			
 			
 			TextView tvDesc = new TextView(getApplicationContext());
 			tvDesc.setText(c.getDescription());
@@ -280,7 +259,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			btnDelete.setId(10000+c.getId());
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
-					if(FrSkyServer.D) Log.d(TAG,"Delete channel "+_model.getChannels().get(v.getId()-10000).getDescription());
+					Logger.d(TAG,"Delete channel "+_model.getChannels().get(v.getId()-10000).getDescription());
 					showDeleteChannelDialog(_model.getChannels().get(v.getId()-10000));
 				}
 			});
@@ -295,7 +274,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			//btnEdit.setOnClickListener(this);
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
-					if(FrSkyServer.D) Log.d(TAG,"Edit channel "+_model.getChannels().get(v.getId()-1000).getDescription());
+					Logger.d(TAG,"Edit channel "+_model.getChannels().get(v.getId()-1000).getDescription());
 					// Launch editchannel with channel attached.. 
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
 		    		//i.putExtra("channelId", 1);
@@ -310,13 +289,10 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			ll.addView(btnEdit);
 			ll.addView(btnDelete);
 			
-			
 			ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 			//ll.setGravity();
-
 			
 			llChannelsLayout.addView(ll);
-			
 		}
 	}
 	
@@ -326,12 +302,12 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	    	switch (requestCode)
 	    	{
 	            case CHANNEL_CONFIG_RETURN:
-	            	if(FrSkyServer.D) Log.d(TAG,"Done editing the channel");
+	            	Logger.d(TAG,"Done editing the channel");
 	            	Channel returnChannel = null;
 	            	try
 	            	{
 	            		returnChannel = data.getParcelableExtra("channel");
-	            		if(FrSkyServer.D) Log.d(TAG,"   This channel has id: "+returnChannel.getId());
+	            		Logger.d(TAG,"   This channel has id: "+returnChannel.getId());
 	            		//int idInModel = data.getIntExtra("idInModel",-1);
 	            		//if(idInModel>-1)
 	            		//{
@@ -344,18 +320,18 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            			
 	            		//}
 	            			//_model.getChannels().get(returnChannel.getSourceChannelId()).registerListener();
-	            			if(FrSkyServer.D) Log.d(TAG,"Received channel from ActivityChannelConfig: channel:"+returnChannel.getDescription()+", silent: "+returnChannel.getSilent());
+	            			Logger.d(TAG,"Received channel from ActivityChannelConfig: channel:"+returnChannel.getDescription()+", silent: "+returnChannel.getSilent());
 	            		
 	            	}
 	            	catch (Exception e)
 	            	{
-	            		Log.e(TAG,"No return channel");
+	            		Logger.e(TAG,"No return channel");
 	            	}
 	            	
 	            	populateChannelList();
 	            	break;
 	            case MODULE_CONFIG_RETURN:
-	            	if(FrSkyServer.D) Log.d(TAG,"Done editing FrSky alarms");
+	            	Logger.d(TAG,"Done editing FrSky alarms");
 	            	
 	            	break;
 	    	}
@@ -364,7 +340,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	 private void showDeleteChannelDialog(final Channel channel)
 		{
 			///TODO: Modify for deletion of models
-		 	if(FrSkyServer.D)Log.i(TAG,"Delete channel "+channel.getDescription());
+		 	Logger.i(TAG,"Delete channel "+channel.getDescription());
 			AlertDialog dialog = new AlertDialog.Builder(this).create();
 			dialog.setTitle("Delete "+channel.getDescription()+"?");
 
@@ -387,7 +363,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 
 	                //Stop the activity
 	            	//_deleteId=-1;
-	            	if(FrSkyServer.D)Log.i(TAG,"Cancel Deletion");
+	            	Logger.i(TAG,"Cancel Deletion");
 	            }
 
 	        });

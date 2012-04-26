@@ -35,6 +35,11 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	
 	private static final String TAG = "ChannelConfig";
 	//private static final boolean DEBUG=true;
+
+	/**
+	 * use this to get the channel reference (from currentModel) 
+	 */
+	protected static final String EXTRA_CHANNEL_REF = "channelRef";
 	
 	/**
 	 * identifiers
@@ -63,27 +68,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		doBindService();
 		
-		Intent launcherIntent = getIntent();
-		try
-		{
-			channel = launcherIntent.getParcelableExtra("channel");
-			//_idInModel = launcherIntent.getIntExtra("idInModel", -1);
-			_channelId = channel.getId();
-			_modelId = channel.getModelId();
-			Logger.d(TAG,"Channel config launched with attached channel: "+channel.getDescription());
-			Logger.d(TAG,"channel context is: "+FrSkyServer.getContext());
-			//channel.setContext(getApplicationContext());
-			Logger.d(TAG,"channel context is: "+FrSkyServer.getContext());
-
-		}
-		catch(Exception e)
-		{
-			Logger.d(TAG,"Channel config launched without attached channel");
-			channel = null;
-			_channelId = launcherIntent.getIntExtra("channelId", -1);
-			_modelId = -1;
-			
-		}
+		// hcpl: moved selection of channel to onBind method since server
+		// instance is then known
 		
 		//_modelId = launcherIntent.getIntExtra("modelId", -1);
 		//if(DEBUG)Log.d(TAG, "working model has id: "+_modelId);
@@ -132,12 +118,46 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		}
     }
     
+	/**
+	 * helper to retrieve selected channel that came with intent
+	 */
+	private void getSelectedChannel() {
+		Intent launcherIntent = getIntent();
+		try {
+			// hcpl: do not use this or you'll get a new, different object
+			// instance
+			channel = server.getCurrentModel().getChannels()
+					.get(launcherIntent.getIntExtra(EXTRA_CHANNEL_REF, 0));
+			// in case this is a new channel creation rely on previous system
+			if( channel == null )
+				channel = launcherIntent.getParcelableExtra("channel");
+			// _idInModel = launcherIntent.getIntExtra("idInModel", -1);
+			_channelId = channel.getId();
+			_modelId = channel.getModelId();
+			Logger.d(TAG, "Channel config launched with attached channel: "
+					+ channel.getDescription());
+			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
+			// channel.setContext(getApplicationContext());
+			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
+
+		} catch (Exception e) {
+			Logger.d(TAG, "Channel config launched without attached channel");
+			//channel = null;
+			channel = new Channel();
+			_channelId = launcherIntent.getIntExtra("channelId", -1);
+			_modelId = -1;
+
+		}
+	}
+    
     private ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Logger.i(TAG,"Bound to Service");
 			Logger.i(TAG,"Fetch channel "+_channelId+" from Server");
+			
+			getSelectedChannel();			
 			
 			settings = server.getSettings();
 	        editor = settings.edit();

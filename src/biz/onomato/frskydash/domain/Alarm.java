@@ -1,10 +1,7 @@
 package biz.onomato.frskydash.domain;
 
-
-
 import biz.onomato.frskydash.FrSkyServer;
-import android.util.Log;
-
+import biz.onomato.frskydash.util.Logger;
 
 public class Alarm {
 
@@ -58,7 +55,7 @@ public class Alarm {
 		_greaterthan = alarmgreaterthan;
 		_threshold = alarmthreshold;
 		_frSkyFrameType= -1;
-		if(FrSkyServer.D)Log.i(TAG,"Created Alarm: "+toString());
+		Logger.i(TAG,"Created Alarm: "+toString());
 	}
 	
 	public Alarm(Frame frame)
@@ -319,8 +316,8 @@ public class Alarm {
 	
 	public String[] getThresholds()
 	{
-		if(FrSkyServer.D)Log.i(TAG,"get thresholds: ");
-		if(FrSkyServer.D)Log.i(TAG,"sourcechannel: "+_unitChannelId);
+		Logger.i(TAG,"get thresholds: ");
+		Logger.i(TAG,"sourcechannel: "+_unitChannelId);
 		if(_unitChannelId==-1)
 		{
 			String[] out = new String[_maxThreshold-_minThreshold];
@@ -328,7 +325,7 @@ public class Alarm {
 			{
 				out[i] = String.valueOf(i+_minThreshold);
 			}
-			if(FrSkyServer.D)Log.i(TAG,"Thresholds: "+out.toString());
+			Logger.i(TAG,"Thresholds: "+out.toString());
 			return out;
 		}
 		else
@@ -338,7 +335,7 @@ public class Alarm {
 			{
 				out[i] = String.format("%s %s",(((i+_minThreshold)*_unitChannelFactor)+_unitChannelOffset),_unitChannelUnit);
 			}
-			if(FrSkyServer.D)Log.i(TAG,"Thresholds: "+out.toString());
+			Logger.i(TAG,"Thresholds: "+out.toString());
 			return out;
 		}
 	}

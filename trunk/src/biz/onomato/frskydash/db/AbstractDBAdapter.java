@@ -2,12 +2,12 @@ package biz.onomato.frskydash.db;
 
 
 import biz.onomato.frskydash.FrSkyServer;
+import biz.onomato.frskydash.util.Logger;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public abstract class AbstractDBAdapter {
 	//protected static final boolean DEBUG=true;
@@ -141,7 +141,7 @@ public abstract class AbstractDBAdapter {
         @Override
         public void onCreate(SQLiteDatabase db) 
         {
-        	if(FrSkyServer.D)Log.d(TAG,"Creating the database");
+        	Logger.d(TAG,"Creating the database");
             db.execSQL(DATABASE_CREATE_MODELS);
             db.execSQL(DATABASE_CREATE_CHANNELS);
             db.execSQL(DATABASE_CREATE_FRSKYALARMS);
@@ -150,7 +150,7 @@ public abstract class AbstractDBAdapter {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) 
         {
-        	if(FrSkyServer.D)Log.d(TAG,"Upgrade the database");
+        	Logger.d(TAG,"Upgrade the database");
         	// Should perform alter table statements..
 //            Log.w(TAG, "Upgrading database from version " + oldVersion 
 //                    + " to "
@@ -172,7 +172,7 @@ public abstract class AbstractDBAdapter {
 //    	_prevOpen = _open;
 //    	if(!_open)
 //    	{
-    		if(FrSkyServer.D)Log.d(TAG,"Open the database:"+this.getClass().getName());
+    		Logger.d(TAG,"Open the database:"+this.getClass().getName());
         	db = DBHelper.getWritableDatabase();
         	_open = true;
 //    	}
@@ -188,7 +188,7 @@ public abstract class AbstractDBAdapter {
     {
 //    	if(_prevOpen)
 //    	{
-    		if(FrSkyServer.D)Log.d(TAG,"Close the database:"+this.getClass().getName());
+    		Logger.d(TAG,"Close the database:"+this.getClass().getName());
     		db.close();
     		_open = false;
         	DBHelper.close();
@@ -206,7 +206,7 @@ public abstract class AbstractDBAdapter {
 
     public Cursor schema()
     {
-    	if(FrSkyServer.D)Log.d(TAG,"DATABASE SCHEMA");
+    	Logger.d(TAG,"DATABASE SCHEMA");
     	try
     	{
     		Cursor cursor = DBHelper.getReadableDatabase().rawQuery("SELECT type,tbl_name,sql from sqlite_master;",null);
@@ -214,7 +214,7 @@ public abstract class AbstractDBAdapter {
     	}
     	catch(Exception e)
     	{
-    		if(FrSkyServer.D)Log.e(TAG,e.toString());
+    		Logger.e(TAG,e.toString());
     		return null;
     	}
     	

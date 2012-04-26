@@ -23,6 +23,7 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -190,8 +191,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	 */
 	        	if(server.getHubEnabled())
 	        	{
-		        	//for(Channel ch : FrSkyHub.getInstance().getSourceChannels().values())
-	        		for(Channel ch : FrSkyServer.getSourceChannels().values())
+		        	for(Channel ch : FrSkyHub.getInstance().getSourceChannels().values())
+	        		//for(Channel ch : FrSkyServer.getSourceChannels().values())
 		        	{
 		        		sourceChannels.add(ch);
 		        	}

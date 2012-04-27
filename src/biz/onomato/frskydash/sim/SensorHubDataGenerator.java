@@ -148,7 +148,8 @@ public class SensorHubDataGenerator {
 		// calculate what the integer voltage value was
 		int volt = (int) (voltage * 500);
 		// based on that update frame
-		bytes[1] = volt - ((volt >> 8) << 8);
+		//bytes[1] = volt - ((volt >> 8) << 8);
+		bytes[1] = volt & 0xFF; // mask bits instead
 		bytes[0] = (cell << 4) + (volt >> 8);
 		return bytes;
 	}

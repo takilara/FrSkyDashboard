@@ -20,15 +20,30 @@ public class Simulator {
     
     public int _ad1,_ad2,_rssirx,_rssitx;
     private int[] _simFrame;
+    
+    /**
+     * if simulator is currently running or not
+     */
     public boolean running;
     
-    // hcpl: shouldn't be public, hide properly with getters and setters
+    /**
+     * if this simulator should create error frames or not
+     */
     private boolean noise = false;
     
+	/**
+	 * If this is enabled the simulator will also create sensor hub data frames
+	 */
     private boolean sensorData = false;
-    
+        
+	/**
+     * a reference to the server (service running in the background)
+     */
     private FrSkyServer server;
     
+    /**
+     * tag used for logging
+     */
     private static final String TAG="Simulator Class";
 
     /**
@@ -55,22 +70,35 @@ public class Simulator {
 			//@Override
 			public void run()
 			{
+				// init
+				Frame f = null;
 				
-				//TODO implement creation of sensor hub data frames also
-				
-				// increase A1 value for simulator use only
-				_ad1 = _ad1 >= 255 ? 0 : _ad1 + 1;
-				// decrease A2 value for simulator use only
-				_ad2 = _ad2 <= 0 ? _ad2 = 255 : _ad2 - 1;
-				
-				//Log.i("SIM","Automatic post new frame");
-				
-				//_simFrame = genFrame(_ad1,_ad2,_rssirx,_rssitx);
-				Frame f = Frame.FrameFromAnalog(_ad1,_ad2,_rssirx,_rssitx);
+				// create either sensor hub data or other data on a 50/50 basis
+				// if sensor data generation is enabled
+				if (sensorData && Math.random() > 0.5) {
+					// generate sensor hub data
+					_simFrame = SensorHubDataGenerator
+							.generateSimulatedSensorHubData();
+					f = new Frame(_simFrame);
+				}
+				// original frsky data sim
+				else {
+					// increase A1 value for simulator use only
+					_ad1 = _ad1 >= 255 ? 0 : _ad1 + 1;
+					// decrease A2 value for simulator use only
+					_ad2 = _ad2 <= 0 ? _ad2 = 255 : _ad2 - 1;
+
+					// Log.i("SIM","Automatic post new frame");
+
+					// _simFrame = genFrame(_ad1,_ad2,_rssirx,_rssitx);
+					f = Frame.FrameFromAnalog(_ad1, _ad2, _rssirx,
+							_rssitx);
+
+					// convert
+					_simFrame = f.toInts();
+				}
+
 				//deliberately break the frame
-
-				_simFrame = f.toInts();
-
 				// Corrupt data
 				if(noise)
 					{
@@ -167,6 +195,10 @@ public class Simulator {
 	 */
 	public void setSensorData(boolean sensorData) {
 		this.sensorData = sensorData;
+	}
+	
+    public boolean isSensorData() {
+		return sensorData;
 	}
 
 	/**

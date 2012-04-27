@@ -31,6 +31,10 @@ import biz.onomato.frskydash.util.Logger;
 
 public class ActivitySimulator extends Activity implements
 		OnSeekBarChangeListener, OnClickListener {
+	
+	/**
+	 * tag for logging
+	 */
 	private static final String TAG = "SimulatorActivity";
 
 	private SeekBar sb_ad1;
@@ -182,17 +186,17 @@ public class ActivitySimulator extends Activity implements
 
 			Logger.d(TAG, "update progress bars");
 			updateProgressBar();
-
-			/**
-			 * Hide / Unhide file playback features
-			 * 
-			 */
-			if (server.getFilePlaybackEnabled()) {
-				llFilePlayback.setVisibility(View.VISIBLE);
-			} else {
-				llFilePlayback.setVisibility(View.GONE);
-			}
-
+			
+			// Hide / Unhide file playback features
+			llFilePlayback
+					.setVisibility(server.getFilePlaybackEnabled() ? View.VISIBLE
+							: View.GONE);
+			chkSensorData.setVisibility(server.getHubEnabled() ? View.VISIBLE
+					: View.GONE);
+			// update sensor data checkbox based on what is set on sim
+			chkSensorData
+					.setChecked(server != null && server.getSim() != null ? server
+							.getSim().isSensorData() : false);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {

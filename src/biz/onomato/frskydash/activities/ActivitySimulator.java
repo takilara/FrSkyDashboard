@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.view.View;
@@ -239,12 +240,6 @@ public class ActivitySimulator extends Activity implements
 		}
 	}
 
-	// /**
-	// * a thread for cycling the raw file contents providing to server with a
-	// * fixed interval. This is static so we can check state on resume
-	// */
-	// private static FileSimulatorThread fileSimThread = null;
-
 	/**
 	 * update file sim thread files setting and running state
 	 */
@@ -287,9 +282,10 @@ public class ActivitySimulator extends Activity implements
 		// handle exceptions
 		catch (Exception e) {
 			// problem fetching the file
-			Toast.makeText(getApplicationContext(),
-					"Problem reading file or iterating content",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(
+					getApplicationContext(),
+					"Problem reading file or iterating content: "
+							+ e.getMessage(), Toast.LENGTH_LONG).show();
 			Logger.e(TAG, "Problem reading file or iterating content", e);
 		}
 	}
@@ -300,9 +296,13 @@ public class ActivitySimulator extends Activity implements
 	 * @param path
 	 * @return
 	 */
-	private File[] getRawFilesFromPath(String path) {
-		// FIXME check if sdcard is mounted!!
-		// ...
+	private File[] getRawFilesFromPath(String path) throws Exception {
+		// check if sdcard is mounted!!
+		String state = Environment.getExternalStorageState();
+		// should be mounted, at least read only
+		if (!(Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY
+				.equals(state)))
+			throw new Exception("sdcard not available for file simulator");
 		// if pat is given and ends with .raw than just add this file only
 		if (path != null && !"".equals(path) && path.endsWith(".raw")) {
 			File[] files = new File[1];

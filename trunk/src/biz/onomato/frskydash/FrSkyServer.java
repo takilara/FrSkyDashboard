@@ -44,7 +44,6 @@ import biz.onomato.frskydash.sim.FileSimulatorThread;
 import biz.onomato.frskydash.sim.Simulator;
 import biz.onomato.frskydash.util.Logger;
 
-
 /**
  * Main server service.
  * This service will get started by the first Activity launched. It will stay alive
@@ -79,19 +78,28 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private AudioManager _audiomanager;
 	//private boolean _scoConnected = false;
 	
-	// Things for Bluetooth
+	/**
+	 * Things for Bluetooth
+	 */
 	//private static final int REQUEST_ENABLE_BT = 2;
 	private IntentFilter mIntentFilterBt;
 	private boolean bluetoothEnabledAtStart;
 	private boolean _connecting=false;
     private BluetoothAdapter mBluetoothAdapter = null;
 	
-    //private int MY_DATA_CHECK_CODE;
+    /**
+     * user preferences
+     */
     private SharedPreferences _settings=null;
-	//SharedPreferences settings;
-	private SharedPreferences.Editor _editor;
 
-	
+    /**
+     * editor for preferences
+     */
+    private SharedPreferences.Editor _editor;
+
+    /**
+     * current time
+     */
 	//private Long counter = 0L; 
 	//private NotificationManager nm;
 	//private Timer timer = new Timer();
@@ -103,7 +111,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static final int CMD_STOP_SIM		=	 1;
 	public static final int CMD_START_SPEECH	=	 2;
 	public static final int CMD_STOP_SPEECH		=	 3;
-	
 		
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
@@ -124,7 +131,9 @@ public class FrSkyServer extends Service implements OnInitListener {
     private boolean _compareAfterRecord =false;
     private boolean _autoSwitch = false;
     
-    // FPS
+    /**
+     * FPS
+     */
     public int fps,fpsRx,fpsTx=0;
     public static int badFrames = 0;
     private MyStack fpsStack;
@@ -133,8 +142,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private static final int FRAMES_FOR_FPS_CALC=2;
     
     private DataLogger logger;
+
+	/**
+	 * current {@link Model} selected by the user. This Model has
+	 * {@link Channel} instances that are registered to listen for updates
+	 */
     private Model _currentModel=null;
     
+	/**
+	 * A collection of {@link Model} instances available
+	 */
     public static TreeMap<Integer,Model> modelMap;
     
     private boolean _watchdogEnabled = true;
@@ -148,16 +165,42 @@ public class FrSkyServer extends Service implements OnInitListener {
     private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
     
     // server Channels, add constants for all known source channels
-//eso: refactor to ChannelMap
+    //eso: refactor to ChannelMap
     public static final int CHANNEL_ID_NONE = -1;
     public static final int CHANNEL_ID_AD1 = -100;
     public static final int CHANNEL_ID_AD2 = -101;
     public static final int CHANNEL_ID_RSSIRX = -102;
     public static final int CHANNEL_ID_RSSITX = -103;
-    
-    
-    private static TreeMap<Integer,Channel> _sourceChannelMap;
-    
+
+	/**
+	 * <p>
+	 * A collection of {@link Channel} objects as sources. These Channels are
+	 * available technical Channels used as source. This means it matches a
+	 * certain type of sensor, analog value or rssi value. These are not
+	 * registered for listening. Only the Channels the user creates are
+	 * registered for listening.
+	 * </p>
+	 * 
+	 * <p>
+	 * The Channels created by a user are stored on the {@link Model} instance
+	 * and hold a certain configuration for these source channels.
+	 * </p>
+	 * 
+	 * <p>
+	 * <b><u>Example:</u></b> If a user for instance wants the Analog port 1 to
+	 * be displayed as a voltage divided by 3 (1 cell for a 3 cell lipo being
+	 * connected) he can configure this Channel with the divider and then it
+	 * will be registered listening and displaying the adapted value. The same
+	 * source channel (for Analog port 1) can then also be configured as an
+	 * actual channel on the model without divider showing the complete lipo
+	 * pack voltage.
+	 * </p>
+	 */
+	private static TreeMap<Integer, Channel> _sourceChannelMap;
+   
+	/**
+	 * backend
+	 */
     private static FrSkyDatabase database;
     
     private boolean _dying=false;
@@ -169,7 +212,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	//private MyApp globals;
 	private static Context context;
 	
-	// hcpl shouldn't be public, hide properly with setters and getters
+	/**
+	 * The simulator can be used to create simulate Analog values in a loop for
+	 * testing.
+	 */
 	private Simulator sim;
 	
 	/**
@@ -177,7 +223,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * fixed interval. This is static so we can check state on resume. Moved to
 	 * this location so it can be closed on destroy of the service
 	 */
-	private static FileSimulatorThread fileSimThread = null;
+	private static FileSimulatorThread fileSim = null;
 
 	public boolean statusBt=false;
 	public boolean statusTx=false;
@@ -195,7 +241,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int _minimumVolumeLevel;
 	private boolean _autoSetVolume;
 
-	
+	/**
+	 * map of alarms as found on the module. These can be different from the
+	 * alarms set on the Model {@link Model#frSkyAlarms}.
+	 */
 	private TreeMap<Integer,Alarm> _alarmMap;
 	private boolean _recordingAlarms = false;
 	private int _recordingModelId = -1;
@@ -211,6 +260,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	/**
 	 * hcpl: intent used to broadcast hub data info
+	 * 
+	 * TODO update visibility
 	 */
 	Intent broadcastHubDataIntent;
 
@@ -225,7 +276,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	/**
 	 * the current user frame we are working on. This is used to pass data
-	 * between incompletes frames.
+	 * between incomplete frames.
 	 */
 	private List<Integer> frSkyFrame = new ArrayList<Integer>(Frame.SIZE_TELEMETRY_FRAME);
 //	private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
@@ -253,15 +304,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_alarmMap = new TreeMap<Integer,Alarm>();
 		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
 		
-		
-		
-		
 		_audiomanager = 
         	    (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		
-	
-		
-		NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		//hcpl: commented since no longer in use
+		//NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
 		
 		Logger.i(TAG,"Try to load settings");
@@ -271,14 +318,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 		showNotification();		
 		
 		setupFixedChannels();
-
-
 		
 		//String _prevModel = "FunCub 1";
 		int _prevModelId;
 		try
 		{
-			
 			_prevModelId= _settings.getInt("prevModelId", -1);
 		}
 		catch(Exception e)
@@ -287,12 +331,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		
 		Logger.i(TAG,"Previous ModelId was: "+_prevModelId);
-	//	_currentModel = new Model(context);
+		//	_currentModel = new Model(context);
 		
 		// DEBUG, List all channels for the model using new databaseadapter
-		
-		
-		
 		
 		modelMap = new TreeMap<Integer,Model>();
 		database = new FrSkyDatabase(getApplicationContext());
@@ -306,7 +347,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		//_currentModel = database.getModel(_prevModelId);
 		
-		
 		if(cm==null)
 		{
 			Logger.e(TAG,"No model exists, make a new one");
@@ -317,7 +357,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 			cm.setFrSkyAlarms(initializeFrSkyAlarms());
 			// Create Default model channels.
 			cm.initializeDefaultChannels();
-			
 			
 			//_model.addChannel(c);
 			
@@ -334,12 +373,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 			database.saveModel(cm);
 		}
 		
-		
 		_prevModelId = cm.getId();
 		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
-		
-		
 		
 		Logger.d(TAG,"The current model is: "+cm.getName()+" and has id: "+cm.getId());
 		Logger.d(TAG,"Activating the model");
@@ -352,18 +388,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		logger.setLogToCsv(getLogToCsv());
 		logger.setLogToHuman(getLogToHuman());
 		
-
-		
-
-		
-		
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 		mIntentFilterBt.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
 		
 		//mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
-		
 		
 		Logger.i(TAG,"Broadcast that i've started");
 		Intent i = new Intent();
@@ -374,15 +404,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
 		 getWakeLock();
 		 
-		 
 		 mSerialService = new BluetoothSerialService(this, mHandlerBT);
 		 
 		 sim = new Simulator(this);
 		 
 		 _cyclicSpeechEnabled = false;
 		 _speakDelay = 30000;
-		
-		 
 		
 		 // Cyclic job to "speak out" the channel values
 		 speakHandler = new Handler();
@@ -404,7 +431,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		 	}
 		 };
 		
-
 		 // Cyclic handler to calculate FPS, and set the various connection statuses
 		 
 		 fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
@@ -416,18 +442,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 			//@Override
 			public void run()
 			{
-
-				
 				fpsStack.push(_framecount);
 				fpsRxStack.push(_framecountRx);
 				fpsTxStack.push(_framecountTx);
-				
 				
 				fps = (int) Math.floor(fpsStack.average());
 				fpsRx = (int) Math.floor(fpsRxStack.average());
 				fpsTx = (int) Math.floor(fpsTxStack.average());
 				
-				
+				//TODO this might be optimized, would need proper testing though
 				if(fpsRx>0)	// receiving frames from Rx, means Tx comms is up as well 
 				{
 					// check if we should restart the cyclic speaker
@@ -595,7 +618,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * <li>RSSI Alarm 1 and 2 <i>(Note, RSSI alarms are undocumented)</i>
 	 * </ul>
 	 * 
-	 * FIXME: Get the proper default values<br>
+	 * FIXME: Get the proper default values => hcpl: I believe the default values are 72<br>
 	 * FIXME: consider if this should be moved to Model
 	 */
 	public TreeMap<Integer,Alarm> initializeFrSkyAlarms()
@@ -1232,8 +1255,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//sim.reset();
 		
 		//stop filesim thread also
-		if( fileSimThread != null )
-			fileSimThread.stopThread();
+		if( fileSim != null )
+			fileSim.stopThread();
 		
 		// disable bluetooth if it was disabled upon start:
 		
@@ -1403,32 +1426,41 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		
 	}
-	
+
 	/**
-	 * Compares the recorded alarms to the alarm set of a model
-	 * @param model the model to compare to
+	 * Compares the recorded {@link Alarm}s to the alarm set of a {@link Model}.
+	 * If no model is given this method will return false. If a model is given
+	 * this method will iterate all alarms on that model and return false on the
+	 * first mismatch.
+	 * 
+	 * TODO: as is this method returns true if no alarms are set on the model or
+	 * (and this is correct) if all alarms are the same. Wouldn't it be better
+	 * to return false if no alarms were set?
+	 * 
+	 * @param model
+	 *            the model to compare to
 	 * @return true if the alarms match
 	 */
 	public boolean alarmsSameAsModel(Model model)
 	{
-		boolean equal = false;
-		if(model!=null)
-		{
-			equal = true;
-			for(Alarm a: _alarmMap.values())
-			{
-				//Log.w(TAG,"Checking "+a.getFrSkyFrameType());
-				if(!model.getFrSkyAlarms().containsValue(a))
-				{
-					//Log.w(TAG," Not equal!");
-					equal = false;
-					break;
-				}
-				//Log.w(TAG," equal");
-				// compare a to _currentModel.alarms.get(a.getFrameType)
+		// makes no sense if no model is given
+		if(model==null)
+			return false;
+		//otherwise we can check the alarms set
+		//iterate all alarms on the current model
+		for (Alarm a : _alarmMap.values()) {
+			// Log.w(TAG,"Checking "+a.getFrSkyFrameType());
+			//as soon as we spot a difference
+			if (!model.getFrSkyAlarms().containsValue(a)) {
+				// Log.w(TAG," Not equal!");
+				// mark this and break the loop
+				return false;
 			}
+			// Log.w(TAG," equal");
+			// compare a to _currentModel.alarms.get(a.getFrameType)
 		}
-		return equal;
+		// hcpl: again why is default set to true?  
+		return true;
 	}
 	
 	/**
@@ -1438,10 +1470,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void compareAlarms()
 	{
-		
+		// hcpl: isn't it better to start from not being equal? Otherwise on
+		// error you might end up with equal while check hasn't passed = false
+		// positive
 		boolean equal = true;
-		if(_currentModel!=null)
-		{
+		// we can only check if the current model is set
+		if(_currentModel!=null){
+			//return;
+		//at this point the model available so we can compare the alarms
 			equal = alarmsSameAsModel(_currentModel);
 			if(equal)
 			{
@@ -2344,11 +2380,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * @return
 	 */
 	public static FileSimulatorThread getFileSim() {
-		return fileSimThread;
+		return fileSim;
 	}
 
-	public static void setFileSim(FileSimulatorThread fileSim) {
-		fileSimThread = fileSim;
+	/**
+	 * set the file sim instance
+	 * 
+	 * @param fileSimThread
+	 */
+	public static void setFileSim(FileSimulatorThread fileSimThread) {
+		fileSim = fileSimThread;
 	}
 
 }

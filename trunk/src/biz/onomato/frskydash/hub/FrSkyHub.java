@@ -213,6 +213,8 @@ public class FrSkyHub {
 			break;
 		case 0x03:
 			// actual RPM value is Frame1*60
+			// also needs to be divided by the number of blades of the prop! (=>
+			// TODO for settings)
 			updateChannel(ChannelTypes.rpm, getUnsignedLE16BitValue(frame) * 60);
 			break;
 		case 0x04:
@@ -275,7 +277,8 @@ public class FrSkyHub {
 			updateChannel(ChannelTypes.ns, getUnsignedLE16BitValue(frame));
 			break;
 		case 0x14:
-			// FIXME should be between 0 & 359.99 degrees??
+			// should be between 0 & 359.99 degrees??
+			// FIXME seems to work but with much noise
 			updateChannel(ChannelTypes.course_before,
 					getUnsignedLE16BitValue(frame));
 			break;
@@ -313,7 +316,7 @@ public class FrSkyHub {
 					getSignedLE16BitValue(frame) / 1000);
 			break;
 		default:
-			// TODO add voltage and current sensor data
+			// TODO add current sensor data
 			Logger.d(FrSkyServer.TAG, "Unknown sensor type for frame: "
 					+ Arrays.toString(frame));
 		}
@@ -461,11 +464,13 @@ public class FrSkyHub {
 	}
 
 	/**
+	 * TODO Should not be static since this relies on data initialised in the
+	 * ctor, need to review this.
 	 * 
 	 * @return all the ServerChannels in a TreeMap (key is the id of the
 	 *         Channel)
 	 */
-	public static TreeMap<Integer, Channel> getSourceChannels() {
+	public TreeMap<Integer, Channel> getSourceChannels() {
 		return _sourceChannelMap;
 	}
 

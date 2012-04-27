@@ -24,6 +24,9 @@ import biz.onomato.frskydash.util.Logger;
  */
 public class Channel implements Parcelable, Comparator<Channel>  {
 	
+	/**
+	 * tag for debug messages
+	 */
 	private static final String TAG = "Channel";
 
 	//TODO change towards enum, also I saw this before in the Model class for instance
@@ -108,7 +111,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 	
 	/**
-	 * ctor
+	 * ctor using a {@link Parcel}
 	 * 
 	 * @param in
 	 */
@@ -119,7 +122,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 	
 	/**
-	 * ctor 
+	 * ctor using the most common properties for a channel object
 	 * 
 	 * @param description
 	 * @param offset
@@ -351,23 +354,15 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 
 	/**
-	 * @deprecated use {@link FrSkyServer#getContext()} instead
+	 * @deprecated use {@link FrSkyServer#getContext()} instead. This is only a
+	 *             wrapper method. Can be removed.
 	 * 
 	 * @return the context this channel is in
 	 */
-	public Context getContext()
-	{
-		
+	public Context getContext() {
+		// redirect only
 		return FrSkyServer.getContext();
-		//return FrSkyDash.getContext();
-		//return _context;
 	}
-	
-//	public void setContext(Context context)
-//	{
-//		_context = context;
-//	}
-	
 	
 	// ==========================================================================================
 	// ====                        CHANNEL METHODS                                          =====
@@ -376,18 +371,24 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	{
 		return setRaw((double) value);
 	}
-	
+
+	/**
+	 * set new raw value for this channel. This will update stack for average
+	 * and other calculations and also send a broadcast.
+	 * 
+	 * @param value
+	 * @return
+	 */
 	public double setRaw(double value)
 	{
 		timestamp = new Date();
 		_avg = _stack.push(value);
 
-		
 		//Log.d(TAG,_name+" setting new input value to "+value);
 		_raw = value;
 		//_val = (_avg * _factor)+_offset;
 		_val = convert(_avg);
-		double outVal =getValue(true);
+		double outVal = getValue(true);
 		//Log.d(TAG,_name+" new outValue should now be "+outVal);
 		
 		// send new avg value to listeners
@@ -412,7 +413,12 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		}
 		return outVal;
 	}
-	
+
+	/**
+	 * Retrieve the last value (not an average).
+	 * 
+	 * @return
+	 */
 	public double getValue()
 	{
 		return getValue(false);
@@ -797,8 +803,12 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		_modelId = in.readInt();
 	}
 	
-	public static final Parcelable.Creator CREATOR =
-	    	new Parcelable.Creator() {
+	/**
+	 * create a new Channel object based on Parcel implementation. Note that the
+	 * resulting object will be a completely different object in memory
+	 */
+	public static final Parcelable.Creator<Channel> CREATOR =
+	    	new Parcelable.Creator<Channel>() {
 	            public Channel createFromParcel(Parcel in) {
 	                return new Channel(in);
 	            }

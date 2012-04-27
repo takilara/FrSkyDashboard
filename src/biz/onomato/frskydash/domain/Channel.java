@@ -19,6 +19,8 @@ import biz.onomato.frskydash.util.Logger;
  * intention is to use this in a generic way for both Analog values (AD1 and
  * AD2), signal values (RSSI) and hub data.
  * 
+ * Channels support averaging, and scaling
+ * 
  * @author Espen Solbu
  * 
  */

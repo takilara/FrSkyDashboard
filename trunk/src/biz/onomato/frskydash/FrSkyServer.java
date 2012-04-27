@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.TreeMap;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;

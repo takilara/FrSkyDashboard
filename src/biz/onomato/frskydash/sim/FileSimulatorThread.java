@@ -17,8 +17,6 @@ import biz.onomato.frskydash.util.Logger;
  * http://stackoverflow.com/questions/680180/where-to-stop-destroy
  * -threads-in-android-service-class
  * 
- * FIXME: keeps running on closing app
- * 
  * @author hcpl
  * 
  */

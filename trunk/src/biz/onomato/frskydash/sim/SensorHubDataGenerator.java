@@ -26,6 +26,8 @@ import java.util.HashMap;
  */
 public class SensorHubDataGenerator {
 
+	// TODO not tested with signed information
+
 	/**
 	 * the current sensorHubDataFrame we are working on. If this one isn't empty
 	 * then we need to continue working with it
@@ -75,29 +77,45 @@ public class SensorHubDataGenerator {
 		return frame;
 	}
 
+	private static int alt = 100;
+	private static final int MAX_ALT = 250;
+	private static int alt_after = 0;
+	private static final int MAX_ALT_AFTER = 99;
+	private static int temp1 = 10;
+	private static final int MAX_TEMP1 = 25;
+	private static int temp2 = 10;
+	private static final int MAX_TEMP2 = 25;
+
 	/**
 	 * helper to create some simulated sensor hub data frame. See
 	 * http://www.frsky-rc.com/uploadfile/201111/20111124233818462.pdf for more
 	 * information on valid frames
 	 */
 	private static void createSensorHubData() {
-		// TODO add some randomness and more dataIds here
-		// sensorHubDataFrame.add(0x5E); // start/stop byte
-		// sensorHubDataFrame.add(0x10); // dataID vario before ,
-		// sensorHubDataFrame.add(generateSignedLE16Bit(200)[0]); // value vario
-		// sensorHubDataFrame.add(generateSignedLE16Bit(200)[1]); // value vario
-		//
-		// sensorHubDataFrame.add(0x5E); // start/stop byte
-		// sensorHubDataFrame.add(0x21); // dataID vario after ,
-		// sensorHubDataFrame.add(generateUnSignedLE16Bit(10)[0]); // value
-		// vario
-		// sensorHubDataFrame.add(generateUnSignedLE16Bit(10)[1]); // value
-		// vario
-		//
-		// sensorHubDataFrame.add(0x5E); // start/stop byte
-		// sensorHubDataFrame.add(0x02); // dataId temp1
-		// sensorHubDataFrame.add(generateSignedLE16Bit(18)[0]); // value temp1
-		// sensorHubDataFrame.add(generateSignedLE16Bit(18)[1]); // value temp1
+		// TODO add more dataIds here
+		sensorHubDataFrame.add(0x5E); // start/stop byte
+		sensorHubDataFrame.add(0x10); // dataID vario before ,
+		sensorHubDataFrame.add(generateSignedLE16Bit(alt)[0]); // value vario
+		sensorHubDataFrame.add(generateSignedLE16Bit(alt)[1]); // value vario
+		alt = (alt >= MAX_ALT ? 0 : alt + 1); // update value
+
+		sensorHubDataFrame.add(0x5E); // start/stop byte
+		sensorHubDataFrame.add(0x21); // dataID vario after ,
+		sensorHubDataFrame.add(generateUnsignedLE16Bit(alt_after)[0]); // value
+		sensorHubDataFrame.add(generateUnsignedLE16Bit(alt_after++)[1]); // value
+		alt_after = (alt_after >= MAX_ALT_AFTER ? 0 : alt_after + 1);
+
+		sensorHubDataFrame.add(0x5E); // start/stop byte
+		sensorHubDataFrame.add(0x02); // dataId temp1
+		sensorHubDataFrame.add(generateSignedLE16Bit(temp1)[0]);
+		sensorHubDataFrame.add(generateSignedLE16Bit(temp1)[1]);
+		temp1 = temp1 >= MAX_TEMP1 ? 0 : temp1 + 1;
+		
+		sensorHubDataFrame.add(0x5E); // start/stop byte
+		sensorHubDataFrame.add(0x05); // dataId temp1
+		sensorHubDataFrame.add(generateSignedLE16Bit(temp2)[0]);
+		sensorHubDataFrame.add(generateSignedLE16Bit(temp2)[1]);
+		temp2 = temp2 >= MAX_TEMP2 ? 0 : temp2 + 1;
 
 		sensorHubDataFrame.add(0x5E); // start/stop byte
 		sensorHubDataFrame.add(0x06); // voltage sensor
@@ -123,14 +141,16 @@ public class SensorHubDataGenerator {
 
 	// TODO make constants for dataIDs or add this to enum ChannelTypes
 
-	private static void generateSignedLE16Bit() {
-		// return (short) getUnsignedLE16BitValue(frame);
-		// TODO
+	private static int[] generateSignedLE16Bit(int value) {
+		// return 0xFFFF - ( (frame[2] & 0xFF) + ( (frame[3] & 0xFF) * 0x100) );
+		// return 0xFFFF - getUnsigned16BitValue(frame);
+		return new int[] { (value & 0x00FF), (value >> 8) };
 	}
 
-	private static void generateUnsignedLE16Bit() {
-		// return ((frame[2] & 0xFF) + ((frame[3] & 0xFF) * 0x100));
-		// TODO
+	private static int[] generateUnsignedLE16Bit(int value) {
+		// return getSigned16BitValue(frame) & 0xffff;
+		// ((frame[2] & 0xFF) + ((frame[3] & 0xFF) * 0x100));
+		return new int[] { (value & 0x00FF), (value >> 8) };
 	}
 
 	private static int[] generateUnsignedBE16Bit(int value) {
@@ -148,7 +168,7 @@ public class SensorHubDataGenerator {
 		// calculate what the integer voltage value was
 		int volt = (int) (voltage * 500);
 		// based on that update frame
-		//bytes[1] = volt - ((volt >> 8) << 8);
+		// bytes[1] = volt - ((volt >> 8) << 8);
 		bytes[1] = volt & 0xFF; // mask bits instead
 		bytes[0] = (cell << 4) + (volt >> 8);
 		return bytes;

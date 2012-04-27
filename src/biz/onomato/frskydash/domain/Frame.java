@@ -3,7 +3,6 @@ package biz.onomato.frskydash.domain;
 import java.util.Date;
 
 import biz.onomato.frskydash.BluetoothSerialService;
-import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.util.Logger;
 
 public class Frame {
@@ -187,8 +186,7 @@ public class Frame {
 						break;
 					default:
 						frametype=FRAMETYPE_UNDEFINED;
-						
-						if(FrSkyServer.D)Logger.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
+						Logger.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
 						break;
 				}
 				if(frametype==FRAMETYPE_FRSKY_ALARM)

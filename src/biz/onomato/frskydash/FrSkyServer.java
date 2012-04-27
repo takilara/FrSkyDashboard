@@ -68,9 +68,12 @@ import biz.onomato.frskydash.util.Logger;
  *
  */
 public class FrSkyServer extends Service implements OnInitListener {
-	    
+	 
+	/**
+	 * tag used for logging
+	 */
 	public static final String TAG="FrSkyServerService";
-	public static boolean D = true;
+	
 	//private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int NOTIFICATION_ID=56;
 	private AudioManager _audiomanager;
@@ -2047,8 +2050,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * @see Simulator
 	 */
 	public void simStart() {
-		if (D)
-			Logger.i(TAG, "Sim Start");
+		Logger.i(TAG, "Sim Start");
 		sim.start();
 	}
 
@@ -2058,8 +2060,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * @see Simulator
 	 */
 	public void simStop() {
-		if (D)
-			Logger.i(TAG, "Sim Stop");
+		Logger.i(TAG, "Sim Stop");
 		sim.reset();
 	}
 

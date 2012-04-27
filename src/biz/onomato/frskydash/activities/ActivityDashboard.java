@@ -403,9 +403,12 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		return dialog;
 	}
 
+	/**
+	 * enable logging by updating flag on {@link Logger} class
+	 */
 	public void enableDebugging() {
 		// _enableDebugActivity=true;
-		FrSkyServer.D = true;
+		Logger.D = true;
 	}
 
 	// Check for bluetooth capabilities, request if no capabilities
@@ -989,8 +992,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			tConItem.setVisible(false);
 			tDisConItem.setVisible(true);
 		}
-
-		if (FrSkyServer.D) {
+		// check if logging is currently activated or not
+		if (Logger.D) {
 			tDebug.setVisible(true);
 		} else {
 			tDebug.setVisible(false);

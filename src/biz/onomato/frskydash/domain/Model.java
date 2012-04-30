@@ -250,7 +250,8 @@ public class Model {
 	 */
 	public boolean removeChannel(Channel channel)
 	{
-		channel.unregisterListener();
+		//channel.unregisterListener();
+		channel.removeAllListeners();
 		channelMap.remove(channel.getId());
 		return true;
 		//return _channels.remove(channel);

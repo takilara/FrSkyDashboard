@@ -70,6 +70,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	private int _textViewId=-1;
 	
 	private IntentFilter mIntentFilter;
+	private IntentFilter mIntentFilterCommands;
 	
 	private String _shortUnit;
 	private String _longUnit;
@@ -166,6 +167,12 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 //		alarms = new Alarm[2];
 		
 		//db = new DBAdapterChannel(context);
+		
+		
+		//TODO: listen for FrSkyServer.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS
+		mIntentFilterCommands = new IntentFilter();
+	    mIntentFilterCommands.addAction(FrSkyServer.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
+		FrSkyServer.getContext().registerReceiver(mCommandReceiver, mIntentFilterCommands);	  // Used to receive messages from Server
 	}
 	
 	
@@ -595,6 +602,17 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 
 	}
 	
+	/**
+	 * Used to remove all listeners (for deletion)
+	 */
+	public void removeAllListeners()
+	{
+		// remove the channel update messages 
+		unregisterListener();
+		// remove the command messages
+		FrSkyServer.getContext().unregisterReceiver(mCommandReceiver);
+	}
+	
 	private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -614,6 +632,17 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 
         }
     };	
+    
+    private BroadcastReceiver mCommandReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	//TODO: Currently only supports reset command
+        	Logger.i(TAG,"Received RESET broadcast");
+        	reset();
+        }
+    };	
+    
+    
 	
     //TODO: Deprecate
 //  	public void onSourceUpdate(double sourceValue)
@@ -657,7 +686,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		Logger.d(TAG, _description + ": Resetting self");
 		// first update value the proper way so it is broadcasted and displayed
 		// on the screen
-		setRaw(-1);
+		//setRaw(-1);
 		// next manually ensure all values are reset for later use
 		_raw = -1;
 		_val = -1;

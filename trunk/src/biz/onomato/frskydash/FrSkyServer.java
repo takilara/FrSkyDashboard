@@ -269,6 +269,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public static final String BROADCAST_ACTION_HUB_DATA = "biz.onomato.frskydash.intent.action.BROADCAST_HUB_DATA";
 
+	/**
+	 * Broadcast event to trigger a channel reset
+	 */
+	public static final String BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS = "biz.onomato.frskydash.intent.action.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS";
 	// hcpl: these are class members now since we have to collect the data over
 	// several method executions since the bytes could be spread over several
 	// telemetry 11 bytes frames
@@ -1726,9 +1730,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public void wasDisconnected(String source)
 	{
     	///TODO: eso: reset any hub channels as well
-		for (Channel c : _sourceChannelMap.values()) {
-			c.reset();
-		}
+		//TODO: eso: this only resets source channels, should reset ALL channels
+//		for (Channel c : _sourceChannelMap.values()) {
+//			c.reset();
+//		}
+		
+		Intent i = new Intent();
+		i.setAction(BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
+		sendBroadcast(i);
+		
+		
 
 		// speak warning, only when not manually disconnected
 		if (!_manualBtDisconnect) {

@@ -180,9 +180,11 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		//deleteAllChannelsForModel(model);
     		for(Channel c:getChannelsForModel(model))
     		{
+    			Logger.d(TAG,"Checking model for database channel '"+c.getDescription()+"'");
     			if(!model.getChannels().containsValue(c))
     			{
     				// Channel no longer in model, delete it
+    				Logger.d(TAG,c.getDescription()+" not in the model, delete it");
     				deleteChannel(c);
     			}
     		}

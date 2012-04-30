@@ -61,6 +61,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private Button btnSave;
 	private boolean first=true;
 	
+	ArrayList<Channel> sourceChannels;
+	
 	//chConf_edVoice
     
 	@Override
@@ -181,7 +183,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			
 	        if(channel!=null)
 	        {
-	        	ArrayList<Channel> sourceChannels = _model.getAllowedSourceChannels();
+	        	// ArrayList<Channel> sourceChannels = _model.getAllowedSourceChannels();
+	        	sourceChannels = _model.getAllowedSourceChannels();
 	        	
 	        	/**
 	        	 * Prototype Hub support
@@ -289,23 +292,21 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				
 				//Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
 	    		//i.putExtra("channelId", 1);
-				Intent i = new Intent();
-				i.putExtra("channel", channel);
-				//i.putExtra("idInModel",_idInModel);
 				
-				Logger.i(TAG,"Go back to dashboard");
-				if(server.getCurrentModel().getId() == channel.getModelId())
+				//Only add channel to return if new channel (id=-1)
+				if(_channelId==-1)
 				{
-					//if(DEBUG) Log.d(TAG,"This is the current model, please replace run setChannel ");
-					//server.getCurrentModel().setChannel(_idInModel,channel);
-					//server.getCurrentModel().setChannel(channel);
+					Intent i = new Intent();
+					i.putExtra("channel", channel);
+					//i.putExtra("idInModel",_idInModel);
+	
+					Logger.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
+					this.setResult(RESULT_OK,i);
 				}
 				else
 				{
-					//if(DEBUG) Log.d(TAG,"This is NOT the current model");
+					this.setResult(RESULT_OK);
 				}
-				Logger.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
-				this.setResult(RESULT_OK,i);
 				
 				this.finish();
 				break;
@@ -368,4 +369,21 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			Logger.d(TAG,"This is a new model, delay saving");
 		}
 	}
+	
+	public void onPause() {
+
+		super.onPause();
+		Logger.i(TAG, "onPause");
+		// remove all source channels to prevent holding reference 
+		sourceChannels.clear();
+		
+		finish();
+		
+		
+		// mTts.stop();
+		// doUnbindService();
+		
+
+	}
+
 }

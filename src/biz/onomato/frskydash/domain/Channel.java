@@ -48,6 +48,8 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	 */
 	private boolean listening = false;
 	
+	private boolean _closed = false;
+	
 	/**
 	 * the actual values
 	 */
@@ -603,33 +605,38 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 	
 	/**
-	 * Used to remove all listeners (for deletion)
+	 * Used to prepare Channel for deletion
 	 */
-	public void removeAllListeners()
+	public void close()
 	{
-		// remove the channel update messages 
+		// remove the channel update messages
+		Logger.i(TAG, "Try to close me");
 		unregisterListener();
 		// remove the command messages
-		FrSkyServer.getContext().unregisterReceiver(mCommandReceiver);
+		try
+		{
+			FrSkyServer.getContext().unregisterReceiver(mCommandReceiver);
+		}
+		catch(Exception e)
+		{
+			
+		}
+		_closed=true;
 	}
 	
 	private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-//        	String msg = intent.getAction();
-//        	Bundle extras = intent.getExtras();
-        	//Log.i(TAG,"Received Broadcast: '"+msg+"'");
-        	// no purpose to compare msg, since we should only listen to relevant broadcasts..
-        	//Log.i(TAG,"Comparing '"+msg+"' to '"+FrSkyServer.MESSAGE_SPEAKERCHANGE+"'");
-        	//if(msg.equals(FrSkyServer.MESSAGE_STARTED))
-        	//	Log.i(TAG,"I have received BroadCast that the server has started");
-        	// Get the value..
-        	double val = intent.getDoubleExtra("channelValue", -1);
-        	//if(FrSkyServer.D) Log.w(TAG,_description +" on model "+_modelId+" received broadcast input value "+val);
-        	
-        	/*double oldValue = */ setRaw(val);
-    		//Log.d(TAG,_name+" updated by parent to "+val+" -> "+v+" "+_shortUnit);
-
+        	if(!_closed)
+        	{
+        		double val = intent.getDoubleExtra("channelValue", -1);
+        		setRaw(val);
+        	}
+        	else
+        	{
+        		// kill self somehow
+        		Logger.e(TAG, "Still receiving messages after i should be gone");
+        	}
         }
     };	
     
@@ -637,7 +644,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
         @Override
         public void onReceive(Context context, Intent intent) {
         	//TODO: Currently only supports reset command
-        	Logger.i(TAG,"Received RESET broadcast");
+        	Logger.i(TAG,getDescription()+" (id: "+_channelId+", ModelId: "+_modelId+"): Received RESET broadcast");
         	reset();
         }
     };	

@@ -1737,6 +1737,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		Intent i = new Intent();
 		i.setAction(BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
+		Logger.i(TAG, "Sending Reset Broadcast");
 		sendBroadcast(i);
 		
 		

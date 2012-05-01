@@ -20,6 +20,12 @@ import biz.onomato.frskydash.util.Logger;
  * AD2), signal values (RSSI) and hub data.
  * 
  * Channels support averaging, and scaling 
+ * Term "raw" is used for incoming values
+ * Term "value" is used for calculated values (values calculated to engineering units)
+ * 
+ * @see setRaw setRaw() to update a channel
+ * @see getRaw getRaw() to get the incoming value (averaged or not)
+ * @see getValue getValue() to get the calculated value (average or not)
  * 
  * @author Espen Solbu
  * 
@@ -36,9 +42,12 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	public static final int CHANNELTYPE_AD2=1;
 	public static final int CHANNELTYPE_RSSI=2;
 	
+	/**
+	 * Broadcast message used for capturing and sending value updates
+	 */
 	public static final String MESSAGE_CHANNEL_UPDATED = "biz.onomato.frskydash.update.channel.";
 	
-	//public static final String crlf="\r\n";
+	//TODO: Refactor to use Locale.US's delimiter
 	public static final String delim=";";
 
 	/**
@@ -50,19 +59,32 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	
 	private boolean _closed = false;
 	
+//	/**
+//	 * the actual values
+//	 */
+//	public double raw,rawAvg;
+//	public double eng,engAvg;
+//	
+	
 	/**
-	 * the actual values
+	 * Holds the last incoming raw value
 	 */
-	public double raw,rawAvg;
-	public double eng,engAvg;
 	private double _raw;
+
+	/**
+	 * Holds the average of the incoming values
+	 */
+	private double _avg;
+	
+	/**
+	 * Holds the average outgoing converted value
+	 */
+	private double _val;
+	
+
+	
 	
 	public double rounder;
-	
-	private double _val;
-	//private long _id;
-	private double _avg;
-	//private String _name;
 	private String _description;
 	private long _sourceChannelId;
 	private float _offset;
@@ -364,20 +386,21 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		setDirtyFlag(true);
 	}
 
-	/**
-	 * @deprecated use {@link FrSkyServer#getContext()} instead. This is only a
-	 *             wrapper method. Can be removed.
-	 * 
-	 * @return the context this channel is in
-	 */
-	public Context getContext() {
-		// redirect only
-		return FrSkyServer.getContext();
-	}
+//	/**
+//	 * @deprecated use {@link FrSkyServer#getContext()} instead. This is only a
+//	 *             wrapper method. Can be removed.
+//	 * 
+//	 * @return the context this channel is in
+//	 */
+//	public Context getContext() {
+//		// redirect only
+//		return FrSkyServer.getContext();
+//	}
 	
 	// ==========================================================================================
 	// ====                        CHANNEL METHODS                                          =====
 	// ==========================================================================================	
+
 	public double setRaw(int value)
 	{
 		return setRaw((double) value);
@@ -395,23 +418,16 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		timestamp = new Date();
 		_avg = _stack.push(value);
 
-		//Log.d(TAG,_name+" setting new input value to "+value);
 		_raw = value;
-		//_val = (_avg * _factor)+_offset;
 		_val = convert(_avg);
-		double outVal = getValue(true);
-		//Log.d(TAG,_name+" new outValue should now be "+outVal);
 		
-		// send new avg value to listeners
-		// do not use direct listeners
-//		for(OnChannelListener ch : _listeners)
-//		{
-//			//Log.d(TAG,"\t"+_name+" send to listener");
-//			ch.onSourceUpdate(outVal);
-//		}
+//		// Update public properties
+//		raw = _raw;
+//		rawAvg = _avg;
+//		eng = convert(_raw);
+//		engAvg = _val;
 		
-		// send to broadcast receivers
-		//if((_context!=null) && (_channelId!=-1))
+
 		if(_channelId!=-1)
 		{
 			String bCastAction = MESSAGE_CHANNEL_UPDATED+_channelId;
@@ -419,14 +435,14 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 			
 			Intent i = new Intent();
 			i.setAction(bCastAction);
-			i.putExtra("channelValue", outVal);
+			i.putExtra("channelValue", _val);
 			FrSkyServer.getContext().sendBroadcast(i);
 		}
-		return outVal;
+		return _val;
 	}
 
 	/**
-	 * Retrieve the last value (not an average).
+	 * Retrieve the last calculated value (not an average).
 	 * 
 	 * @return
 	 */
@@ -436,10 +452,10 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 	
 	/**
-	 * get value for this channel
+	 * Retrieve the calculated value for this channel
 	 * 
 	 * @param average
-	 *            pass true if you need the average
+	 *            pass true if you want to retrieve the average raw value
 	 * @return
 	 */
 	public double getValue(boolean average) {
@@ -448,7 +464,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 	
 	/**
-	 * get the raw value for this channel
+	 * Retrieve the last raw value for this channel (not an average)
 	 * 
 	 * @return
 	 */
@@ -457,10 +473,10 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 
 	/**
-	 * get raw value for this channel
+	 * Retrieve the raw value for this channel
 	 * 
 	 * @param average
-	 *            use true if you want to retrieve the average value
+	 *            pass true if you want to retrieve the average value
 	 * @return
 	 */
 	public double getRaw(boolean average) {
@@ -482,57 +498,28 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 //				+ _channelId + "]";
 	}
 
+	/**
+	 * Used to return the value as a nicely formatted string
+	 * @return the formatted string
+	 */
 	public String toValueString()
 	{
 		//TODO DecimalFormat is probably faster
 		return String.format("%."+_precision+"f", _val);
 	}
 
+	/**
+	 * Used to return a nicely formatted string for an arbitrary input value
+	 * @param inputValue a raw value you want to retrieve the string for
+	 * @return the formatted string
+	 */
 	public String toString(int inputValue)
 	{
 		//TODO DecimalFormat is probably faster
 		return String.format("%."+_precision+"f", convert(inputValue));
 	}
 	
-	//return String.format("%."+_precision+"f",(inputValue*_factor)+_offset);
 	
-//	public String toEng()
-//	{
-//		//return String.format("%s %s", getValue(),_shortUnit);
-//		return toEng(_avg,false);
-//	}
-//	
-//	public String toEng(boolean longUnit)
-//	{
-//		//return String.format("%s %s", getValue(),_shortUnit);
-//		return toEng(_avg,longUnit);
-//	}
-//	
-//
-//	public String toEng(double inputValue)
-//	{
-//		//return String.format("%s %s", getValue(inputValue),_shortUnit);
-//		return toEng(inputValue,false);
-//	}
-//	
-//	public String toEng(double inputValue,boolean longUnit)
-//	{
-//		if(longUnit==true)
-//		{
-//			return String.format("%."+_precision+"f %s", convert(inputValue),getLongUnit());
-//		}
-//		else
-//		{
-//			return String.format("%."+_precision+"f %s", convert(inputValue),_shortUnit);
-//		}
-//	}
-
-//	public void setFrSkyAlarm(int number,int threshold,int greaterthan,int level)
-//	{
-//		alarms[number] = new Alarm(Alarm.ALARMTYPE_FRSKY,level,greaterthan,threshold);
-//		alarmCount += 1;
-//		setDirtyFlag(true);
-//	}
 
 	
 	// ==========================================================================================
@@ -543,7 +530,6 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	public void setSourceChannel(Channel channel)
 	{
 		_sourceChannelId = channel.getId(); 
-		//listenTo(channel.getId());
 	}
 	public void setSourceChannel(long channelId)
 	{
@@ -698,9 +684,9 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 		_raw = -1;
 		_val = -1;
 		_avg = 0;
-		raw = _raw;
-		rawAvg = _avg;
-		eng = _val;
+//		raw = _raw;
+//		rawAvg = _avg;
+//		eng = _val;
 		_stack = new MyStack(_movingAverage);
 		setSourceChannel(-1);	// force unregister receiver
 		setDirtyFlag(true);

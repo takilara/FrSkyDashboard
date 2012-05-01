@@ -17,12 +17,13 @@ import biz.onomato.frskydash.util.Logger;
 /**
  * A Channel is a value that can be updated through the Telemetry protocol. The
  * intention is to use this in a generic way for both Analog values (AD1 and
- * AD2), signal values (RSSI) and hub data.
- * 
- * Channels support averaging, and scaling 
- * Term "raw" is used for incoming values
- * Term "value" is used for calculated values (values calculated to engineering units)
- * 
+ * AD2), signal values (RSSI) and hub data.<br>
+ * <br>
+ * Channels support averaging, and scaling
+ * <ul>
+ * <li>Term "raw" is used for incoming values
+ * <li>Term "value" is used for calculated values (values calculated to engineering units)
+ * </ul>
  * @see setRaw setRaw() to update a channel
  * @see getRaw getRaw() to get the incoming value (averaged or not)
  * @see getValue getValue() to get the calculated value (average or not)

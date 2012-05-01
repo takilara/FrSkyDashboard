@@ -499,7 +499,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	}
 
 	/**
-	 * Used to return the value as a nicely formatted string
+	 * Used to return the calculated value (average) as a nicely formatted string
 	 * @return the formatted string
 	 */
 	public String toValueString()
@@ -513,7 +513,7 @@ public class Channel implements Parcelable, Comparator<Channel>  {
 	 * @param inputValue a raw value you want to retrieve the string for
 	 * @return the formatted string
 	 */
-	public String toString(int inputValue)
+	public String toValueString(int inputValue)
 	{
 		//TODO DecimalFormat is probably faster
 		return String.format("%."+_precision+"f", convert(inputValue));

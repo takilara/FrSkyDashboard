@@ -1,24 +1,31 @@
 package biz.onomato.frskydash.db;
 
 
-import biz.onomato.frskydash.FrSkyServer;
-import biz.onomato.frskydash.util.Logger;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import biz.onomato.frskydash.util.Logger;
 
+/**
+ * general methods for DB management. Holds the SQL statements and methods for
+ * managing connections
+ * 
+ */
 public abstract class AbstractDBAdapter {
+	
 	//protected static final boolean DEBUG=true;
 	
 //    public static final String KEY_TYPE = "type";
     
+	/**
+	 * tag for debug messages
+	 */
     private static final String TAG = "AbstractDBAdapter";
     
     private static final String DATABASE_NAME = "frsky";
     private static final int DATABASE_VERSION = 4;
-    
     
     protected static final String DATABASE_TABLE_MODELS = "models";
     protected static final String KEY_ROWID = "_id";
@@ -35,9 +42,6 @@ public abstract class AbstractDBAdapter {
     protected static final String KEY_UNITSOURCECHANNEL = "unitsourcechannel";
     
     //
-    
-    
-    
     protected static final String DATABASE_TABLE_CHANNELS = "channels";
     protected static final String KEY_DESCRIPTION = "description";
     protected static final String KEY_LONGUNIT = "longunit";
@@ -88,7 +92,6 @@ public abstract class AbstractDBAdapter {
 			KEY_GREATERTHAN,
 			KEY_ALARMLEVEL,
 			KEY_UNITSOURCECHANNEL};
-	
     
     private static final String DATABASE_CREATE_CHANNELS =
             "create table "
@@ -119,12 +122,17 @@ public abstract class AbstractDBAdapter {
     		KEY_SILENT,
     		KEY_MODELID};
 
-        
     protected final Context context; 
     
     protected static DatabaseHelper DBHelper;
+    
     protected static SQLiteDatabase db;
 
+    /**
+     * def ctor
+     * 
+     * @param ctx
+     */
     public AbstractDBAdapter(Context ctx) 
     {
         this.context = ctx;
@@ -166,7 +174,12 @@ public abstract class AbstractDBAdapter {
         }
     }    
 	    
-    //---opens the database---
+    /**
+     * open database connection 
+     * 
+     * @return
+     * @throws SQLException
+     */
     public AbstractDBAdapter open() throws SQLException 
     {
 //    	_prevOpen = _open;
@@ -183,7 +196,9 @@ public abstract class AbstractDBAdapter {
         return this;
     }
 
-    //---closes the database---    
+    /**
+     * close database connection    
+     */
     public void close() 
     {
 //    	if(_prevOpen)
@@ -199,11 +214,21 @@ public abstract class AbstractDBAdapter {
 //    	}
     }
     
+	/**
+	 * verify if the database is open or not
+	 * 
+	 * @return
+	 */
     public boolean isOpen()
     {
     	return _open;
     }
 
+    /**
+     * get database schema, returns null on exceptions
+     * 
+     * @return
+     */
     public Cursor schema()
     {
     	Logger.d(TAG,"DATABASE SCHEMA");

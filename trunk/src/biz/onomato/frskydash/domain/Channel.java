@@ -200,6 +200,7 @@ public class Channel implements Parcelable, Comparator<Channel> {
 				.addAction(FrSkyServer.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
 		FrSkyServer.getContext().registerReceiver(mCommandReceiver,
 				mIntentFilterCommands); // Used to receive messages from Server
+		Logger.d(TAG, "Channel "+this.toString()+" registered for commands. Channel Object ID: "+this.hashCode());
 	}
 
 	// ==========================================================================================
@@ -556,14 +557,14 @@ public class Channel implements Parcelable, Comparator<Channel> {
 	 */
 	public void close() {
 		// remove the channel update messages
-		Logger.i(TAG, "Try to close me");
+		Logger.i(TAG, "Try to close Channel "+this.toString());
 		unregisterListener();
 		// remove the command messages
 		try {
 			FrSkyServer.getContext().unregisterReceiver(mCommandReceiver);
+			Logger.d(TAG, "Channel "+this.toString()+" unregistered for commands. Channel Object ID: "+this.hashCode());
 		} catch (Exception e) {
-			Logger.e(Channel.this.getClass().toString(),
-					"unregister reset broadcast receiver on channel failed", e);
+			Logger.e(TAG, "Channel "+this.toString()+" unregistered for commands FAILED. Channel Object ID: "+this.hashCode());
 		}
 		_closed = true;
 	}
@@ -576,7 +577,7 @@ public class Channel implements Parcelable, Comparator<Channel> {
 				setRaw(val);
 			} else {
 				// kill self somehow
-				Logger.e(TAG, "Still receiving messages after i should be gone");
+				Logger.e(TAG, "Channel "+this.toString()+" still receiving commands while it should be unregistered. Channel Object ID: "+this.hashCode());
 			}
 		}
 	};

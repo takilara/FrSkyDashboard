@@ -121,6 +121,19 @@
 		<item>Multirotor</item>
 		
 	</string-array>
+	
+    <string-array name="rpm_blade_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="rpm_blade_labels">
+        <item>1 blade</item>
+        <item>2 blades</item>
+        <item>3 blades</item>
+        <item>4 blades</item>
+    </string-array>
     
         
 </resources>

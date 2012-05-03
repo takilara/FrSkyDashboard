@@ -41,6 +41,11 @@ public class FrSkyHub {
 	 * is bound to a single server instance
 	 */
 	private static FrSkyServer server;
+	
+	/**
+	 * 2 blades by default
+	 */
+	private int nrOfPropBlades = 2;
 
 	/**
 	 * def ctor, singleton use {@link #getInstance()} instead
@@ -213,9 +218,8 @@ public class FrSkyHub {
 			break;
 		case 0x03:
 			// actual RPM value is Frame1*60
-			// also needs to be divided by the number of blades of the prop! (=>
-			// TODO for settings)
-			updateChannel(ChannelTypes.rpm, getUnsignedLE16BitValue(frame) * 60);
+			// also needs to be divided by the number of blades of the prop!
+			updateChannel(ChannelTypes.rpm, getUnsignedLE16BitValue(frame) * 60 / nrOfPropBlades);
 			break;
 		case 0x04:
 			updateChannel(ChannelTypes.fuel, getUnsignedLE16BitValue(frame));
@@ -505,5 +509,11 @@ public class FrSkyHub {
 		temp1.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_TEMP1, temp1);
 	}
+
+	public void setNrOfPropBlades(int nrOfPropBlades) {
+		this.nrOfPropBlades = nrOfPropBlades;
+	}
+	
+	
 
 }

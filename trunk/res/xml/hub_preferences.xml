@@ -11,6 +11,9 @@
             android:title="List Preference" /-->
         
         <!-- hub version, nr of prop blades, date format, alarms, what options to show, ... -->
+        <ListPreference android:entries="@array/rpm_blade_labels" android:entryValues="@array/rpm_blade_values" android:key="rpm_blades" android:summary="The number of blades of your propeller" android:title="RPM nr of blades"/>
+        
+        
         
     </PreferenceCategory>
     <PreferenceCategory android:title="Personal Settings" >

@@ -9,7 +9,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -17,6 +19,7 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.EditPreferences;
+import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -148,6 +151,9 @@ public class ActivityHubData extends Activity {
 		// startService(broadcastIntent);
 		registerReceiver(broadcastReceiver, new IntentFilter(
 				FrSkyServer.BROADCAST_ACTION_HUB_DATA));
+		// update prefs
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		FrSkyHub.getInstance().setNrOfPropBlades(Integer.parseInt(prefs.getString("rpm_blades", "2")));
 	}
 
 	@Override

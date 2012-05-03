@@ -1389,6 +1389,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		ad1.setId(CHANNEL_ID_AD1);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
+		ad1.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_AD1, ad1);
 		
 		
@@ -1396,6 +1397,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		ad2.setId(CHANNEL_ID_AD2);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
+		ad2.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_AD2, ad2);
 
 		Channel rssirx =  new Channel("RSSIrx", 0, 1, "", "");
@@ -1405,6 +1407,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssirx.setLongUnit("dBm");
 		rssirx.setShortUnit("dBm");
 		rssirx.setSilent(true);
+		rssirx.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_RSSIRX, rssirx);
 		
 		Channel rssitx =  new Channel("RSSItx", 0, 1, "", "");
@@ -1414,6 +1417,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssitx.setLongUnit("dBm");
 		rssitx.setShortUnit("dBm");
 		rssitx.setSilent(true);
+		rssitx.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_RSSITX, rssitx);
 	}
 	

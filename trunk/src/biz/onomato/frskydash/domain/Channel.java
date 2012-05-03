@@ -186,9 +186,6 @@ public class Channel implements Comparator<Channel> {
 		mIntentFilterCommands = new IntentFilter();
 		mIntentFilterCommands
 				.addAction(FrSkyServer.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
-		FrSkyServer.getContext().registerReceiver(mCommandReceiver,
-				mIntentFilterCommands); // Used to receive messages from Server
-		Logger.d(TAG, "Channel "+this.toString()+" registered for commands. Channel Object ID: "+this.hashCode());
 	}
 
 	// ==========================================================================================
@@ -489,7 +486,12 @@ public class Channel implements Comparator<Channel> {
 		_sourceChannelId = channelId;
 	}
 
-	public void registerListener() {
+	public void registerListenerForServerCommands() {
+		FrSkyServer.getContext().registerReceiver(mCommandReceiver,
+				mIntentFilterCommands); // Used to receive messages from Server
+		Logger.d(TAG, "Channel "+this.toString()+" registered for commands. Channel Object ID: "+this.hashCode());
+	}
+	public void registerListenerForChannelUpdates() {
 		if (_sourceChannelId != -1) {
 			Logger.d(TAG, _description + " Registering listener");
 			if (listening) // already listening to something
@@ -522,14 +524,13 @@ public class Channel implements Comparator<Channel> {
 			listening = true;
 		} else {
 			// Log.e(TAG,"SourceChannel was -1!");
-			unregisterListener();
+			unregisterListenerForChannelUpdates();
 		}
 		setDirtyFlag(true);
 	}
 
-	public void unregisterListener() {
-
-		Logger.d(TAG, _description + ": Removing broadcast listener");
+	public void unregisterListenerForChannelUpdates() {
+		Logger.d(TAG, _description + ": Removing Channel update broadcast listener");
 		try {
 			FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
 			Logger.d(TAG, _description + ": Removed Listener Success");
@@ -537,8 +538,18 @@ public class Channel implements Comparator<Channel> {
 		} catch (Exception e) {
 			Logger.e(TAG, e.getMessage());
 		}
-
 	}
+
+	public void unregisterListenerForServerCommands() {
+		Logger.d(TAG, _description + ": Removing Server Commands broadcast listener");
+		try {
+			FrSkyServer.getContext().unregisterReceiver(mCommandReceiver);
+			Logger.d(TAG, "Channel "+this.toString()+" unregistered for commands. Channel Object ID: "+this.hashCode());
+		} catch (Exception e) {
+			Logger.e(TAG, "Channel "+this.toString()+" unregistered for commands FAILED. Channel Object ID: "+this.hashCode());
+		}
+	}
+
 
 	/**
 	 * Used to prepare Channel for deletion
@@ -546,14 +557,8 @@ public class Channel implements Comparator<Channel> {
 	public void close() {
 		// remove the channel update messages
 		Logger.i(TAG, "Try to close Channel "+this.toString());
-		unregisterListener();
-		// remove the command messages
-		try {
-			FrSkyServer.getContext().unregisterReceiver(mCommandReceiver);
-			Logger.d(TAG, "Channel "+this.toString()+" unregistered for commands. Channel Object ID: "+this.hashCode());
-		} catch (Exception e) {
-			Logger.e(TAG, "Channel "+this.toString()+" unregistered for commands FAILED. Channel Object ID: "+this.hashCode());
-		}
+		unregisterListenerForChannelUpdates();
+		unregisterListenerForServerCommands();
 		_closed = true;
 	}
 

@@ -488,18 +488,21 @@ public class FrSkyHub {
 		altitude.setId(CHANNEL_ID_ALTITUDE);
 		altitude.setPrecision(0);
 		altitude.setSilent(true);
+		altitude.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_ALTITUDE, altitude);
 
 		Channel rpm = new Channel("Hub: RPM (pulses)", 0, 1, "", "");
 		rpm.setId(CHANNEL_ID_RPM);
 		rpm.setPrecision(0);
 		rpm.setSilent(true);
+		rpm.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_RPM, rpm);
 
 		Channel temp1 = new Channel("Hub: Temp 1", 0, 1, "", "");
 		temp1.setId(CHANNEL_ID_TEMP1);
 		temp1.setPrecision(0);
 		temp1.setSilent(true);
+		temp1.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_TEMP1, temp1);
 	}
 

@@ -431,7 +431,8 @@ public class Model {
 	{
 		for(Channel c: getChannels().values())
 		{
-			c.unregisterListener();
+			c.unregisterListenerForChannelUpdates();
+			c.unregisterListenerForServerCommands();
 		}
 	}
 	
@@ -443,7 +444,8 @@ public class Model {
 		Logger.d(TAG,_name+": Registering listeners");
 		for(Channel c: getChannels().values())
 		{
-			c.registerListener();
+			c.registerListenerForChannelUpdates();
+			c.registerListenerForServerCommands();
 		}
 	}
 	

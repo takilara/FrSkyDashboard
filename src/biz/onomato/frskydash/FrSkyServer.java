@@ -1923,8 +1923,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		if(inBound) // only log inbound frames
 		{
 			logger.logFrame(f);
+			_framecount++;
 		}
-		if(inBound)	_framecount++;
 		//Log.w(TAG,f.toHuman());
 		switch(f.frametype)
 		{
@@ -2004,7 +2004,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			case Frame.FRAMETYPE_USER_DATA:
 				if(inBound)	
 				{
-					_framecountTx++;
+					_framecountRx++;
 					// hcpl add handling user data frames!!
 					Logger.d(TAG,"Frametype User Data");
 					// Use menu item Debug to enable hub support

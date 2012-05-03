@@ -1297,7 +1297,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		fpsHandler.removeCallbacks(runnableFps);
 		
 		Logger.i(TAG,"Reset channels");
-		zeroChannels();
+		destroyChannels();
 		
 		Logger.i(TAG,"Stop Logger");
 		try{
@@ -1422,16 +1422,26 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 	
 	/**
-	 * Set the value of all channels to 0
-	 * FIXME: Purpose of this, only used in onDestroy
+	 * Destroy all channels
 	 */
-	private void zeroChannels()
+	private void destroyChannels()
 	{
-		for(Channel c : _sourceChannelMap.values())
+		// loop all models
+			// loop all channels
+				// channel.close()
+		for(Model m : modelMap.values())
 		{
-			c.setRaw(0);
+			for(Channel c : m.getChannels().values())
+			{
+				c.close();
+			}
 		}
 		
+		for(Channel c : _sourceChannelMap.values())
+		{
+			//c.setRaw(0);
+			c.close();
+		}
 	}
 
 	/**

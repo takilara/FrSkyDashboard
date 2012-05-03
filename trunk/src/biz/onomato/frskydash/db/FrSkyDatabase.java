@@ -3,181 +3,230 @@ package biz.onomato.frskydash.db;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import biz.onomato.frskydash.FrSkyServer;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import biz.onomato.frskydash.domain.Alarm;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.util.Logger;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-
+/**
+ * <p>
+ * All database access should go through this class. This clas provides methods
+ * for retrieving {@link Model}s with their {@link Channel}s and {@link Alarm}s
+ * and all required CRUD operations on these objects.
+ * </p>
+ * 
+ * <p>
+ * From outside the saveX methods should be used for both new entries (inserts)
+ * and updates.</p>
+ * 
+ */
 public class FrSkyDatabase extends AbstractDBAdapter {
-    private static final String TAG = "Database";
+   
+	/**
+	 * identifier for logging
+	 */
+	private static final String TAG = "Database";
     
+	/**
+	 * default ctor, needs a context
+	 * 
+	 * @param context
+	 *            the context for this database
+	 */
     public FrSkyDatabase(Context context) 
     {
         super(context);
     }
 
-    
     // ***********************************************************
-    // ********************  CHANNELS  ***************************
+    // ********************  MODELS    ***************************
     // ***********************************************************
 
+    /**
+     * retrieve a list of all available models
+     * 
+     */
     public ArrayList<Model> getModels()
     {
+    	// debug information
     	Logger.d(TAG,"Getting all models from database");
+    	// open the DB connection
     	open();
-    	Cursor cu = db.query(DATABASE_TABLE_MODELS, MODEL_COLUMNS, 
+    	//retrieve a cursor for all models
+    	Cursor cursor = db.query(DATABASE_TABLE_MODELS, MODEL_COLUMNS, 
 	            null, null, null, null, null);
-    	
-        ArrayList<Model> mList = new ArrayList<Model>();
-        cu.moveToFirst();
-        int len = cu.getCount();
-        //while(!cu.isAfterLast())
-        for(int i=0;i<len;i++)
-		{
-        	Logger.i(TAG,"Getting the "+i+"'th model, from position "+cu.getPosition());
-        	Model m = getModel(cu);
-        	Logger.i(TAG,"  This model is: "+m.getName());
-			mList.add(m);
-			cu.moveToNext();
-		}
-		cu.deactivate();
+    	// prepare collection of proper size
+        ArrayList<Model> mList = new ArrayList<Model>(cursor.getCount());
+        //go to first position
+        if( cursor.moveToFirst()){
+	        //int len = cursor.getCount();
+	        //while(!cu.isAfterLast())
+	        //for(int i=0;i<len;i++)
+			do{
+	        	Logger.i(TAG,"Getting the model from position "+cursor.getPosition());
+	        	Model m = getModel(cursor);
+	        	Logger.i(TAG,"  This model is: "+m.getName());
+				mList.add(m);
+				//cursor.moveToNext();
+			} while(cursor.moveToNext());
+        }
+		//close cursor & DB connection
+		cursor.deactivate();
 		close();
-		
 		//debug
 		Logger.e(TAG,"Our Model list now contains: ");
-		for(Model m : mList)
-		{
-			Logger.e(TAG,"  "+m.getName());
-		}
-		
+		// log al collected models , already done on getting model
+//		for(Model m : mList) {
+//			Logger.e(TAG,"  "+m.getName());
+//		}
+		// return the collection
 		return mList;
     }
     
+    /**
+     * Retrieve details of a Model for the given ID
+     * 
+     * @param modelId
+     * @return
+     */
     public Model getModel(int modelId)
     {
+    	// open connection
     	open();
-
+    	// get cursor
     	Cursor cu =
                 db.query(true, DATABASE_TABLE_MODELS, MODEL_COLUMNS, 
                 		KEY_ROWID + "=" + modelId, 
                 		null,null,null,null,null);
-        if (cu != null) {
+        //if (cu != null) {
 //        	Log.d(TAG,"Found the model..");
 //        	Log.d(TAG,"Count: "+mCursor.getCount());
-            cu.moveToFirst();
-        }
-        Model m;
-        if(cu.getCount()!=0)
+        //    cu.moveToFirst();
+        //}
+    	// init model as null
+        Model m = null;
+        if( cu.moveToFirst() )
         {	
 	        m = getModel(cu);
-	        
     	}
+        // if no model available by selection on ID rely on getting first model (can also be null?)
         else
         {
         	Logger.e(TAG,"Model with id: "+modelId+" was not found, try to get first model");
         	m = getModel();
         }
+        // close
         cu.deactivate();
         close();
         return m;
     }
     
-    public Model getModel()
+    /**
+     * helper to get the first model from database
+     * 
+     * @return the first model from database if available, if none available this method will return null
+     */
+    private Model getModel()
     {
     	// Get the first model
     	Logger.i(TAG,"Try to get first model");
+    	// open db connection
     	open();
+    	// retrieve the first model 
     	Cursor cu =
                 db.query(true, DATABASE_TABLE_MODELS, MODEL_COLUMNS,           		 
                 		null,null,null,null,KEY_ROWID,"1");
-    	
-    	Model m;
-    	cu.moveToFirst();
-    	if(cu.getCount()!=0)
-        {	
+    	// init model as null so we can return if nothing available
+    	Model m = null;
+    	// go to first element (moveToFirst will return false if nothing available)
+    	if( cu != null && cu.moveToFirst() ) {	
 	        m = getModel(cu);
     	}
-    	else
-    	{
-    		m = null;
-    	}
+    	// close cursor
     	cu.deactivate();
+    	// and connection
     	close();
+    	// then return the found model
     	return m;
     }
-    
-    
-    
-    public Model getModel(Cursor cu)
+
+    /**
+     * helper to get model from a cursor
+     * 
+     * @param cu
+     * @return
+     */
+    private Model getModel(Cursor cu)
     {
+    	//debug information
     	Logger.i(TAG,"Pickup the model info from the cursor: "+cu.getColumnNames());
+    	// init this model as an empty model so we always have something to return
     	Model m = new Model();
     	//cu.moveToFirst();
     	Logger.i(TAG,"cursor id: "+cu.getInt(0));
-    	
+    	// complete model based on information from give cursor
 		m.setId(cu.getInt(cu.getColumnIndexOrThrow(KEY_ROWID)));
 		m.setName(cu.getString(cu.getColumnIndexOrThrow(KEY_NAME)));
 		m.setType(cu.getString(cu.getColumnIndexOrThrow(KEY_MODELTYPE)));
-
 		// Add Channels to the model
 		ArrayList<Channel> channelList = getChannelsForModel(m.getId());
 		Logger.i(TAG,"Found "+channelList.size()+" channels for model with id "+m.getId());
 		m.setChannels(channelList);
-		
 		// Add Alarms to the model
 		TreeMap<Integer,Alarm> alarmMap = getAlarmsForModel(m.getId());
 		m.setFrSkyAlarms(alarmMap);
-		
+		// return this information
 		return m;
     }
     
+	/**
+	 * save a model. This is either an update or insert based on the
+	 * availability in the backend
+	 * 
+	 * @param model
+	 */
     public void saveModel(Model model)
     {
-    	boolean result = true;
+    	// if the model is -1 then this is a non saved object that needs to be inserted in the backend
     	if(model.getId()==-1)
     	{
-    		int id = insertModel(model);
-    		if(id!=-1)
+    		// insert and retrieve the generated model id, if this is still negative than insert failed
+    		if( insertModel(model) == -1)
     		{	
-    			model.setId(id);
-    		}
-    		else
-    		{
+    			//TODO why not return an exception instead of null? Than we can react on that exception? Same for other save methods 
     			Logger.e(TAG,"Inserting the model failed");
-    			result = false;
+    			return;
     		}
     	}
-    	else
+    	// otherwise this is an existing model so we can perform an update instead
+    	else if(!updateModel(model))
     	{
-    		if(!updateModel(model))
-    		{
-    			Logger.e(TAG,"Updating the model failed");
-    			result = false;
-    		}
+    		Logger.e(TAG,"Updating the model failed");
+    		return;
     	}
-    	if(model.getId()!=-1) // Insert/update did not fail
-    	{
+    	// at this point Insert/update did not fail
     		// first, make sure the channels have the correct modelId
         	//Make sure all the models channels modelid is correct
         	int mId = model.getId();
-        	if(mId!=-1)
-        	{
+        	//if(mId!=-1)
+        	//{
         		for(Channel c : model.getChannels().values())
         		{
         			c.setModelId(mId);
         		}
-        	}
+        	//}
     		
     		// Update the channels
     		Logger.i(TAG,"Saving channels");
     		
     		// no good
     		//deleteAllChannelsForModel(model);
+    		
+    		// iterate channels for a model in database, all these channels that are no longer found in the Model in memory are deleted channels
+    		// TODO review this
     		for(Channel c:getChannelsForModel(model))
     		{
     			Logger.d(TAG,"Checking model for database channel '"+c.getDescription()+"'");
@@ -189,7 +238,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     			}
     		}
     		
-    		// update or add channels
+    		// update or add channels based on the channels on the model in memory
     		for(Channel ch:model.getChannels().values())
     		{
     			saveChannel(ch);
@@ -198,10 +247,14 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		// Update the alarms
     		Logger.i(TAG,"Saving alarms");
     		setAlarmsForModel(model);
-    		
-    	}
     }
-    
+
+    /**
+     * helper for updating an existing model
+     * 
+     * @param model
+     * @return
+     */
     private boolean updateModel(Model model)
     {
     	Logger.d(TAG,"Update Model '"+model.getName()+"' in the database, at id "+model.getId());
@@ -215,21 +268,42 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         return result;
     }
     
+	/**
+	 * insert a model into database. By doing so an id is generated and set to
+	 * the model reference.
+	 * 
+	 * @param model
+	 * @return
+	 */
     private int insertModel(Model model)
     {
+    	// debug information
     	Logger.d(TAG,"Insert Model '"+model.getName()+"' into the database");
+    	// open connection
     	open();
+    	// create content
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_NAME, model.getName());
         initialValues.put(KEY_MODELTYPE, model.getType());
         //initialValues.put(KEY_TITLE, title);
-        
+        // insert and retrieve the generated id
         int newId = (int) db.insert(DATABASE_TABLE_MODELS, null, initialValues);
+        // log information
         Logger.d(TAG," The id for '"+model.getName()+"' is "+newId);
+        // update model object
+        model.setId(newId);
+        // close connection
         close();
+        // return the new id
         return newId;
     }
     
+    /**
+     * delete a model from backend
+     * 
+     * @param modelId
+     * @return
+     */
     public boolean deleteModel(int modelId) 
     {
     	Logger.d(TAG,"Deleting from the database");
@@ -242,11 +316,14 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         
     }
     
-    
-    
     // ***********************************************************
     // ********************  CHANNELS  ***************************
     // ***********************************************************
+
+    /**
+     * get all channels for the given model
+     * 
+     */
     public ArrayList<Channel> getChannelsForModel(int modelId)
     {
     	// Query for this modelid
@@ -254,10 +331,9 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		Cursor cu = db.query(DATABASE_TABLE_CHANNELS, CHANNEL_COLUMNS, 
 				KEY_MODELID + "=" + modelId,
 	            null, null, null, null, null);
-
-		
     	// loop getChannel(Cursor)
-		ArrayList<Channel> mList = new ArrayList<Channel>();
+		// create collection of the right size
+		ArrayList<Channel> mList = new ArrayList<Channel>(cu.getCount());
 		cu.moveToFirst();
         while(!cu.isAfterLast())
 		{
@@ -265,40 +341,56 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 			mList.add(ch);
 			cu.moveToNext();
 		}
+        //close all
 		cu.deactivate();
 		close();
 		return mList;
     }
     
-    
+	/**
+	 * wrapper method to retrieve all channels for a model
+	 * 
+	 * @param model
+	 * @return
+	 */
     public ArrayList<Channel> getChannelsForModel(Model model)
     {
     	return getChannelsForModel(model.getId());
     }
     
-   
-    
-
+    /**
+     * retrieve all available channels from backend
+     * 
+     * @return
+     */
     public ArrayList<Channel> getChannels()
     {
     	Logger.d(TAG,"Getting all channels from database");
     	open();
     	Cursor cu = db.query(DATABASE_TABLE_CHANNELS, CHANNEL_COLUMNS, 
 	            null, null, null, null, null);
-    	
-        ArrayList<Channel> mList = new ArrayList<Channel>();
+    	// collection of right size
+        ArrayList<Channel> mList = new ArrayList<Channel>(cu.getCount());
+        // iterate
         while(!cu.isAfterLast())
 		{
         	Channel ch = getChannel(cu);
 			mList.add(ch);
 			cu.moveToNext();
 		}
+        // close
 		cu.deactivate();
 		close();
 		return mList;
     }
     
-    public Channel getChannel(Cursor c)
+    /**
+     * helper to create a channel from cursor
+     * 
+     * @param c
+     * @return
+     */
+    private Channel getChannel(Cursor c)
     {
     	Channel ch = new Channel();
     	ch.setId(c.getInt(c.getColumnIndexOrThrow(KEY_ROWID)));
@@ -313,13 +405,19 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		ch.setModelId(c.getInt(c.getColumnIndexOrThrow(KEY_MODELID)));
 		ch.setSourceChannel(c.getInt(c.getColumnIndexOrThrow(KEY_SOURCECHANNELID)));
 		ch.setDirtyFlag(false);
-		//db.close();
 		
 		Logger.d(TAG,"Loaded '"+ch.getDescription()+"' from database");
 		Logger.d(TAG,"\tSilent:\t"+ch.getSilent());
 		return ch;
     }
     
+	/**
+	 * get a channel from backend based on ID. Will return null if the channel
+	 * doesn't exist
+	 * 
+	 * @param channelId
+	 * @return
+	 */
     public Channel getChannel(int channelId)
     {
     	Logger.d(TAG,"Get one channel from the database (channelid: "+channelId+")");
@@ -327,45 +425,52 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         Cursor cu = db.query(true, DATABASE_TABLE_CHANNELS, CHANNEL_COLUMNS, 
                 		KEY_ROWID + "=" + channelId, 
                 		null, null,	null, null, null);
-        if (cu != null) {
+        // init as null reference
+        Channel ch = null;
+        // try to retrieve object data
+        if (cu != null && cu.moveToFirst()) {
 //        	Log.d(TAG,"Found the model..");
 //        	Log.d(TAG,"Count: "+mCursor.getCount());
-            cu.moveToFirst();
+//            cu.moveToFirst();
+        	ch = getChannel(cu);
         }
-        Channel ch = getChannel(cu);
+        // close
         cu.deactivate();
         close();
         return ch;
     }
     
+	/**
+	 * save (insert or update) a channel object
+	 * 
+	 * @param channel
+	 */
     public void saveChannel(Channel channel)
     {
-    	boolean result = true;
+    	// if channel id is -1 then this is a new channel that needs insert
     	if(channel.getId()==-1)
     	{
     		// save using insert
     		Logger.d(TAG,"Save channel using insert");
-    		int id = insertChannel(channel);
-    		if(id!=-1)
-    		{
-    			channel.setId(id);
-    		}
-    		else
+    		if( insertChannel(channel) == -1)
     		{
     			Logger.e(TAG,"Inserting channel failed");
-    			result = false;
+    			return;
     		}
     	}
-    	else
-    	{
-    		// save using update
-    		if(!updateChannel(channel))
+    	// save using update
+    	else if(!updateChannel(channel))
     		{
     			Logger.e(TAG,"Channel Update failed");
     		}
-    	}
     }
     
+    /**
+     * insert of a channel object
+     * 
+     * @param channel
+     * @return
+     */
     private int insertChannel(Channel channel)
     {
     	Logger.d(TAG,"Insert Channel into the database");
@@ -383,10 +488,19 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         initialValues.put(KEY_SILENT, channel.getSilent());
         
         int id = (int) db.insert(DATABASE_TABLE_CHANNELS, null, initialValues);
+        // update channel id
+        channel.setId(id);
+        
         close();
         return id;
     }
     
+    /**
+     * update channel object in database
+     * 
+     * @param channel
+     * @return
+     */
     private boolean updateChannel(Channel channel)
     {
     	Logger.d(TAG,"Update one channel in the database");
@@ -410,6 +524,12 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         return result;
     }
     
+    /**
+     * delete a channel from db
+     * 
+     * @param rowId
+     * @return
+     */
     public boolean deleteChannel(int rowId) 
     {
     	Logger.d(TAG,"Deleting from the database");
@@ -420,12 +540,23 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         return result;
     }
     
+    /**
+     * delete a channel from db
+     * 
+     * @param channel
+     * @return
+     */
     public boolean deleteChannel(Channel channel) 
     {
     	Logger.d(TAG,"Deleting from the database");
         return deleteChannel(channel.getId());
     }
     
+	/**
+	 * delete all channels for a model
+	 * 
+	 * @param modelId
+	 */
     public void deleteAllChannelsForModel(int modelId)
     {
     	Logger.d(TAG,"Deleting from the database where modelId="+modelId);
@@ -434,12 +565,14 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	close();
     }
     
+    /**
+     * delete all channels for given model 
+     * 
+     * @param model
+     */
     public void deleteAllChannelsForModel(Model model)
     {
-    	Logger.d(TAG,"Deleting from the database where modelId="+model.getId());
-    	open();
-    	db.delete(DATABASE_TABLE_CHANNELS,KEY_MODELID+"="+model.getId(),null);
-    	close();
+    	deleteAlarmsForModel(model.getId());
     }
     
     
@@ -451,11 +584,21 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     // Always get and change all alarms for a model at the same time
     // UNIQUE(modelId,FrSkyFrametype), so no real need for ~id
     
+    /**
+     * get all alarms for a given model
+     * 
+     */
     public TreeMap<Integer,Alarm> getAlarmsForModel(Model model)
     {
     	return getAlarmsForModel(model.getId());
     }
     
+    /**
+     * get all alarms for given model 
+     * 
+     * @param modelId
+     * @return
+     */
     public TreeMap<Integer, Alarm> getAlarmsForModel(int modelId)
     {
     	// Query for this modelid
@@ -463,30 +606,33 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		Cursor cu = db.query(DATABASE_TABLE_FRSKYALARMS, FRSKYALARM_COLUMNS, 
 				KEY_MODELID + "=" + modelId,
 	            null, null, null, null, null);
-
 		
     	// loop getChannel(Cursor)
-		
 		Logger.d(TAG,"Loading alarms for modelid: "+modelId);
 		Logger.d(TAG,"  found: "+cu.getCount()+" alarms");
-		
+		// init collection
 		TreeMap<Integer,Alarm> mAlarms = new TreeMap<Integer,Alarm>();
-		
-		cu.moveToFirst();
-		int len = cu.getCount();
-        for(int i=0;i<len;i++)
-		{
-        	Alarm a = getAlarm(cu);
-        	a.setModelId(modelId);
-			mAlarms.put(a.getFrSkyFrameType(), a);
-			cu.moveToNext();
-		}
+		// go to first element
+		if (cu.moveToFirst())
+			do {
+				Alarm a = getAlarm(cu);
+				a.setModelId(modelId);
+				mAlarms.put(a.getFrSkyFrameType(), a);
+			} while (cu.moveToNext());
+		// clean up
 		cu.deactivate();
 		close();
+		// return 
 		return mAlarms;
     }
     
-    public Alarm getAlarm(Cursor cursor)
+    /**
+     * get information for a single alarm
+     * 
+     * @param cursor
+     * @return
+     */
+    private Alarm getAlarm(Cursor cursor)
     {
     	Alarm a = new Alarm(Alarm.ALARMTYPE_FRSKY);
     	a.setModelId(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_MODELID)));
@@ -500,11 +646,24 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		return a;
     }
     
+    /**
+     * update alarms for a model
+     * 
+     * @param model
+     * @return
+     */
     public boolean setAlarmsForModel(Model model)
     {
     	return setAlarmsForModel(model.getId(),model.getFrSkyAlarms());
     }
     
+    /**
+     * update alarms for a model
+     * 
+     * @param modelId
+     * @param alarmMap
+     * @return
+     */
     public boolean setAlarmsForModel(int modelId,TreeMap<Integer,Alarm> alarmMap)
     {
     	// delete all the existing alarms
@@ -519,7 +678,13 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     	return false;
     }
     
-    public int insertAlarm(Alarm alarm)
+    /**
+     * insert a single alarm
+     * 
+     * @param alarm
+     * @return
+     */
+    private int insertAlarm(Alarm alarm)
     {
     	Logger.d(TAG,"Insert Alarm into the database: (ModelId,Frskyframe) ("+alarm.getModelId()+","+alarm.getFrSkyFrameType()+")");
     	open();
@@ -537,14 +702,23 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         return id;
     }
     
+    /**
+     * delete all alarms for a model
+     * 
+     * @param model
+     */
     public void deleteAlarmsForModel(Model model)
     {
     	deleteAlarmsForModel(model.getId());
     }
     
+    /**
+     * delete all alarms for model
+     * 
+     * @param modelId
+     */
     public void deleteAlarmsForModel(int modelId)
     {
-
     	open();
     	Logger.d(TAG,"Delete alarms for model "+modelId+" from database");
     	db.delete(DATABASE_TABLE_FRSKYALARMS,KEY_MODELID+"="+modelId,null);

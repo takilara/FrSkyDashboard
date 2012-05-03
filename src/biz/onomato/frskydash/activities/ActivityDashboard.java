@@ -613,7 +613,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		Logger.d(TAG, "Should add this amount of channels: "
 					+ currentModel.getChannels().size());
 		for (Channel c : currentModel.getChannels().values()) {
+			Logger.i(TAG, "Id: "+c.getId());
 			Logger.i(TAG, c.getDescription());
+			Logger.i(TAG, "SourceChannelId: "+c.getSourceChannelId());
 			Logger.i(TAG, "Precicion: " + c.getPrecision());
 			Logger.i(TAG, "Moving Average: " + c.getMovingAverage());
 

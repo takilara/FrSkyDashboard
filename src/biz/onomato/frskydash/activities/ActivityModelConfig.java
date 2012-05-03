@@ -186,21 +186,27 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				break;
 			case R.id.modConf_btnAddChannel:
 				Logger.d(TAG,"Add a channel");
-				Channel c = new Channel();
-//				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
-//				c.setDescription("Description"+(_model.getChannels().length+1));
-				//c.setName(_model.getName()+"_"+(_model.getChannels().size()+1));
-				c.setDescription("Description"+(_model.getChannels().size()+1));
-				c.setModelId(_model.getId());
-				c.setId(-1);
-				
-				//_model.addChannel(c);
-				
+				// hcpl let activity create a new channel instead, only pass model
+				// id so we avoid the use of parcellable objects
+//				Channel c = new Channel();
+////				c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
+////				c.setDescription("Description"+(_model.getChannels().length+1));
+//				//c.setName(_model.getName()+"_"+(_model.getChannels().size()+1));
+//				c.setDescription("Description"+(_model.getChannels().size()+1));
+//				c.setModelId(_model.getId());
+//				c.setId(-1);
+				//_model.addChannel(c);				
 				Intent editChannelIntent = new Intent(getApplicationContext(), ActivityChannelConfig.class);
-				editChannelIntent.putExtra("channel", c);
-				//editChannelIntent.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_REF, c.getId());
-				editChannelIntent.putExtra("modelId", (int) _model.getId());	// Should edit existing model
-				Logger.d(TAG,"Launch channel edit with modelId: "+_model.getId());	
+//				editChannelIntent.putExtra("channel", c);
+				// editChannelIntent.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_REF,
+				// c.getId());
+				editChannelIntent.putExtra(ActivityChannelConfig.EXTRA_MODEL_ID,
+					(int) _model.getId()); // Should edit existing model
+				// also add the nr of channels
+				editChannelIntent.putExtra(
+					ActivityChannelConfig.EXTRA_MODEL_NR_CHANNELS, _model
+							.getChannels().size()); 
+				Logger.d(TAG, "Launch channel edit with modelId: " + _model.getId());
 				//editChannelIntent.putExtra("idInModel", v.getId()-1000);
 	    		startActivityForResult(editChannelIntent,CHANNEL_CONFIG_RETURN);
 				
@@ -308,7 +314,12 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	            	Channel returnChannel = null;
 	            	try
 	            	{
-	            		returnChannel = data.getParcelableExtra("channel");
+	            		//returnChannel = data.getParcelableExtra("channel");
+						returnChannel = server
+								.getCurrentModel()
+								.getChannels()
+								.get(data.getExtras().getInt(
+										ActivityChannelConfig.EXTRA_CHANNEL_REF, -1));
 	            		Logger.d(TAG,"   This channel has id: "+returnChannel.getId());
 	            		//int idInModel = data.getIntExtra("idInModel",-1);
 	            		//if(idInModel>-1)

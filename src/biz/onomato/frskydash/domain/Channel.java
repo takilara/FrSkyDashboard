@@ -8,8 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Parcel;
-import android.os.Parcelable;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 import biz.onomato.frskydash.util.Logger;
@@ -33,7 +31,7 @@ import biz.onomato.frskydash.util.Logger;
  * @author Espen Solbu
  * 
  */
-public class Channel implements Parcelable, Comparator<Channel> {
+public class Channel implements Comparator<Channel> {
 
 	/**
 	 * tag for debug messages
@@ -138,16 +136,6 @@ public class Channel implements Parcelable, Comparator<Channel> {
 	 */
 	public Channel() {
 		this("description", (float) 0, (float) 1, "Symbol", "UnitName");
-	}
-
-	/**
-	 * ctor using a {@link Parcel}
-	 * 
-	 * @param in
-	 */
-	public Channel(Parcel in) {
-		readFromParcel(in);
-		// _context = FrSkyServer.getContext();
 	}
 
 	/**
@@ -729,73 +717,4 @@ public class Channel implements Parcelable, Comparator<Channel> {
 		}
 
 	}
-
-	// ==========================================================================================
-	// ==== PARCELABLE =====
-	// ==========================================================================================
-
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-
-		// We just need to write each field into the
-		// parcel. When we read from parcel, they
-		// will come back in the same order
-
-		dest.writeInt(_channelId);
-		// dest.writeString(_name);
-		dest.writeString(_description);
-		dest.writeString(_longUnit);
-		dest.writeString(_shortUnit);
-		dest.writeFloat(_factor);
-		dest.writeFloat(_offset);
-		dest.writeInt(_movingAverage);
-		dest.writeInt(_precision);
-		dest.writeByte((byte) (_silent ? 1 : 0));
-		dest.writeLong(_sourceChannelId);
-		dest.writeInt(_modelId);
-
-	}
-
-	/**
-	 * get information from {@link Parcel}
-	 * 
-	 * @param in
-	 */
-	private void readFromParcel(Parcel in) {
-		// We just need to read back each
-		// field in the order that it was
-		// written to the parcel
-		_channelId = in.readInt();
-		// _name = in.readString();
-		_description = in.readString();
-		_longUnit = in.readString();
-		_shortUnit = in.readString();
-		_factor = in.readFloat();
-		_offset = in.readFloat();
-		setMovingAverage(in.readInt());
-		setPrecision(in.readInt());
-		_silent = in.readByte() == 1;
-		_sourceChannelId = in.readLong();
-		// listenTo(in.readLong());
-		_modelId = in.readInt();
-	}
-
-	/**
-	 * create a new Channel object based on Parcel implementation. Note that the
-	 * resulting object will be a completely different object in memory
-	 */
-	public static final Parcelable.Creator<Channel> CREATOR = new Parcelable.Creator<Channel>() {
-		public Channel createFromParcel(Parcel in) {
-			return new Channel(in);
-		}
-
-		public Channel[] newArray(int size) {
-			return new Channel[size];
-		}
-	};
 }

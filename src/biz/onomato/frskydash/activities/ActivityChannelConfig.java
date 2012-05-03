@@ -34,13 +34,25 @@ import biz.onomato.frskydash.util.Logger;
  */
 public class ActivityChannelConfig extends Activity implements OnClickListener {
 	
+	/**
+	 * identifier for logging
+	 */
 	private static final String TAG = "ChannelConfig";
-	//private static final boolean DEBUG=true;
 
 	/**
 	 * use this to get the channel reference (from currentModel) 
 	 */
 	protected static final String EXTRA_CHANNEL_REF = "channelRef";
+
+	/**
+	 * use this to reference the current model we want to create a channel for
+	 */
+	protected static final String EXTRA_MODEL_ID = "modelId";
+
+	/**
+	 * use this to pass the number of channels on an existing model
+	 */
+	protected static final String EXTRA_MODEL_NR_CHANNELS = "modelNrChannels";
 	
 	/**
 	 * identifiers
@@ -69,13 +81,15 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
+		// connect to server
 		doBindService();
 		
 		// hcpl: moved selection of channel to onBind method since server
 		// instance is then known
 		
 		//_modelId = launcherIntent.getIntExtra("modelId", -1);
-		//if(DEBUG)Log.d(TAG, "working model has id: "+_modelId);
+		//Logger.d(TAG, "working model has id: "+_modelId);
 		
 		Logger.d(TAG, "Channel Id is: "+_channelId);
 		
@@ -99,14 +113,22 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		btnSave.setOnClickListener(this);
 	}
 	
-	void doBindService() {
+	/**
+	 * Helper to connect with {@link FrSkyServer} instance
+	 */
+	private void doBindService() {
 		Logger.i(TAG,"Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
 		Logger.i(TAG,"Try to bind to the service");
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
-    
-    void doUnbindService() {
+
+	/**
+	 * Helper to disconnect from {@link FrSkyServer} instance
+	 */
+    private void doUnbindService() {
+    	// FIXME no longer in use? Why not on destroy?
+    	// always check if server available 
 		if (server != null) {
 			// Detach our existing connection.
 			try {
@@ -127,22 +149,23 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	private void getSelectedChannel() {
 		Intent launcherIntent = getIntent();
 		try {
-			// hcpl: do not use this or you'll get a new, different object
-			// instance
+			// hcpl: do not use parcelling or you'll get a new, different object
+			// instance. Instead pass a reference and with that reference
+			// collect the same object from the current model channels map
 			channel = server.getCurrentModel().getChannels()
 					.get(launcherIntent.getIntExtra(EXTRA_CHANNEL_REF, 0));
 			// in case this is a new channel creation rely on previous system
-			if( channel == null )
-				channel = launcherIntent.getParcelableExtra("channel");
-			// _idInModel = launcherIntent.getIntExtra("idInModel", -1);
+			// (since I don't think it hurts there) 
+			if( channel == null ){
+				channel = prepareNewChannel(launcherIntent);
+			}
+			// update local references (needed for?)
 			_channelId = channel.getId();
 			_modelId = channel.getModelId();
 			Logger.d(TAG, "Channel config launched with attached channel: "
 					+ channel.getDescription());
 			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
 			// channel.setContext(getApplicationContext());
-			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
-
 		} catch (Exception e) {
 			Logger.d(TAG, "Channel config launched without attached channel");
 			//channel = null;
@@ -151,6 +174,24 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			_modelId = -1;
 
 		}
+	}
+	
+	/**
+	 * prepare a new Channel object instance
+	 * 
+	 * @param intent
+	 * @return
+	 */
+	private Channel prepareNewChannel(Intent intent){
+		// FIXME this will register for commands right away, not needed
+		Channel c = new Channel();
+//		c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
+//		c.setDescription("Description"+(_model.getChannels().length+1));
+		//c.setName(_model.getName()+"_"+(_model.getChannels().size()+1));
+		c.setDescription("Description"+(intent.getIntExtra(EXTRA_MODEL_NR_CHANNELS, 0)+1));
+		c.setModelId(intent.getIntExtra(EXTRA_MODEL_ID,0));
+		c.setId(-1);
+		return c;
 	}
     
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -297,8 +338,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				if(_channelId==-1)
 				{
 					Intent i = new Intent();
-					i.putExtra("channel", channel);
+					//i.putExtra("channel", channel);
 					//i.putExtra("idInModel",_idInModel);
+					//pass channel and model id instead
+					i.putExtra(EXTRA_CHANNEL_REF, channel.getId());
 	
 					Logger.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
 					this.setResult(RESULT_OK,i);
@@ -379,7 +422,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		
 		finish();
 		
-		
+		// hcpl: is this no longer needed?
 		// mTts.stop();
 		// doUnbindService();
 		

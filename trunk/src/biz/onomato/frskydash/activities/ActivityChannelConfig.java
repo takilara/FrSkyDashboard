@@ -156,13 +156,15 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 					.get(launcherIntent.getIntExtra(EXTRA_CHANNEL_REF, 0));
 			// in case this is a new channel creation rely on previous system
 			// (since I don't think it hurts there) 
+			Logger.i(TAG, "Channel config launched with attached channel id: "+launcherIntent.getIntExtra(EXTRA_CHANNEL_REF, 0));
 			if( channel == null ){
+				Logger.i(TAG, "New channel, creating a new one");
 				channel = prepareNewChannel(launcherIntent);
 			}
 			// update local references (needed for?)
 			_channelId = channel.getId();
 			_modelId = channel.getModelId();
-			Logger.d(TAG, "Channel config launched with attached channel: "
+			Logger.d(TAG, "The current channel is: "
 					+ channel.getDescription());
 			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
 			// channel.setContext(getApplicationContext());
@@ -199,7 +201,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		public void onServiceConnected(ComponentName className, IBinder binder) {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Logger.i(TAG,"Bound to Service");
-			Logger.i(TAG,"Fetch channel "+_channelId+" from Server");
+			//Logger.i(TAG,"Fetch channel "+_channelId+" from Server");
 			
 			getSelectedChannel();			
 			

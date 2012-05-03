@@ -249,7 +249,9 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		
 		for(Channel c:_model.getChannels().values())
 		{
+			Logger.i(TAG,"Id: "+ c.getId());
 			Logger.i(TAG,c.getDescription());
+			Logger.i(TAG,"SourceChannelId: "+ c.getSourceChannelId());
 			
 			LinearLayout ll = new LinearLayout(getApplicationContext());
 			

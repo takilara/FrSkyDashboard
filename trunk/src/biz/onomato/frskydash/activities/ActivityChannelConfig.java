@@ -421,7 +421,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		super.onPause();
 		Logger.i(TAG, "onPause");
 		// remove all source channels to prevent holding reference 
-		sourceChannels.clear();
+		if( sourceChannels != null )
+			sourceChannels.clear();
 		
 		finish();
 		

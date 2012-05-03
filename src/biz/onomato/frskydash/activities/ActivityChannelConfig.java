@@ -167,6 +167,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			Logger.d(TAG, "The current channel is: "
 					+ channel.getDescription());
 			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
+			Logger.d(TAG,"SourceChannelId: "+channel.getSourceChannelId());
 			// channel.setContext(getApplicationContext());
 		} catch (Exception e) {
 			Logger.d(TAG, "Channel config launched without attached channel");

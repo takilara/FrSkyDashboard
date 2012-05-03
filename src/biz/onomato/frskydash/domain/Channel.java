@@ -640,7 +640,7 @@ public class Channel implements Comparator<Channel> {
 		// rawAvg = _avg;
 		// eng = _val;
 		_stack = new MyStack(_movingAverage);
-		setSourceChannel(-1); // force unregister receiver
+		//setSourceChannel(-1); // force unregister receiver
 		setDirtyFlag(true);
 	}
 

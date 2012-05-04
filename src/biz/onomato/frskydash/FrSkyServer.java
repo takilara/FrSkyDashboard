@@ -37,8 +37,8 @@ import biz.onomato.frskydash.domain.Alarm;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.domain.Model;
-import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.FrSkyHub;
+import biz.onomato.frskydash.hub.SensorTypes;
 import biz.onomato.frskydash.sim.FileSimulatorThread;
 import biz.onomato.frskydash.sim.Simulator;
 import biz.onomato.frskydash.util.Logger;
@@ -2393,7 +2393,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * 
 	 * @param channel
 	 */
-	public void broadcastChannelData(ChannelTypes channel, double value) {
+	public void broadcastChannelData(SensorTypes channel, double value) {
 		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_CHANNEL, channel.toString());
 		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_VALUE, value);
 		sendBroadcast(broadcastHubDataIntent);

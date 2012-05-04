@@ -85,6 +85,9 @@ public class SensorHubDataGenerator {
 	private static final int MAX_TEMP1 = 25;
 	private static int temp2 = 10;
 	private static final int MAX_TEMP2 = 25;
+	private static final int MIN_RPM = 250;
+	private static final int MAX_RPM = 2500;
+	private static int rpm = MIN_RPM;
 
 	/**
 	 * helper to create some simulated sensor hub data frame. See
@@ -110,7 +113,7 @@ public class SensorHubDataGenerator {
 		sensorHubDataFrame.add(generateSignedLE16Bit(temp1)[0]);
 		sensorHubDataFrame.add(generateSignedLE16Bit(temp1)[1]);
 		temp1 = temp1 >= MAX_TEMP1 ? 0 : temp1 + 1;
-		
+
 		sensorHubDataFrame.add(0x5E); // start/stop byte
 		sensorHubDataFrame.add(0x05); // dataId temp1
 		sensorHubDataFrame.add(generateSignedLE16Bit(temp2)[0]);
@@ -131,6 +134,12 @@ public class SensorHubDataGenerator {
 		sensorHubDataFrame.add(0x06); // voltage sensor
 		sensorHubDataFrame.add(generateVoltByte(2, 3.82)[0]);
 		sensorHubDataFrame.add(generateVoltByte(2, 3.82)[1]);
+
+		sensorHubDataFrame.add(0x5E); // start/stop byte
+		sensorHubDataFrame.add(0x03); // rpm sensor
+		sensorHubDataFrame.add(generateUnsignedLE16Bit(rpm/60)[0]);
+		sensorHubDataFrame.add(generateUnsignedLE16Bit(rpm/60)[1]);
+		rpm = rpm >= MAX_RPM ? 0 : rpm + 100;
 
 		sensorHubDataFrame.add(0x5E); // start/stop byte
 		// ...

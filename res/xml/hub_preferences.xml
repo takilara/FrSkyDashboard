@@ -1,24 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="Hub Settings" >
-        <!-- ListPreference
+    <PreferenceCategory android:title="Hub Sensor Settings" >
+
+        <!--
+             ListPreference
             android:defaultValue="v1"
             android:entries="@array/listArray"
             android:entryValues="@array/listValues"
             android:key="listPref"
             android:summary="This preference allows to select an item in a array"
-            android:title="List Preference" /-->
-        
-        <!-- hub version, nr of prop blades, date format, alarms, what options to show, ... -->
-        <ListPreference android:entries="@array/rpm_blade_labels" android:entryValues="@array/rpm_blade_values" android:key="rpm_blades" android:summary="The number of blades of your propeller" android:title="RPM nr of blades"/>
-        
-        
-        
-    </PreferenceCategory>
-    <PreferenceCategory android:title="Personal Settings" >
-       
+            android:title="List Preference" /
+        -->
 
+
+        <!-- hub version, nr of prop blades, date format, alarms, what options to show, ... -->
+        <ListPreference
+            android:entries="@array/rpm_blade_labels"
+            android:entryValues="@array/rpm_blade_values"
+            android:key="rpm_blades"
+            android:summary="The number of blades of your propeller"
+            android:title="RPM nr of blades" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Display sensors" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_fvas"
+            android:title="FVAS-01 Altitude" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_rpms"
+            android:title="RPMS-01 RPM" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_tems1"
+            android:title="TEMS-01 Temp 1" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_tems2"
+            android:title="TEMS-02 Temp 2" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_fgs"
+            android:title="FGS-01 Fuel" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_tas"
+            android:title="TAS-01 Accl.(x,y,z)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_flvs"
+            android:title="FLVS-01 Cell 1 - 6" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="visible_gps"
+            android:title="GPS-01 GPS Data" />
     </PreferenceCategory>
 
 </PreferenceScreen>

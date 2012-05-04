@@ -14,12 +14,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.EditPreferences;
-import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -45,6 +47,16 @@ public class ActivityHubData extends Activity {
 	 */
 	private HashMap<ChannelTypes, Double> sensorValues = new HashMap<ChannelTypes, Double>();
 
+	/**
+	 * some user specific settings
+	 */
+	private int nrOfBlades = 2;
+
+	/**
+	 * offset for height set by user, always init as zero
+	 */
+	private double altitudeOffset = 0;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,6 +67,28 @@ public class ActivityHubData extends Activity {
 
 		// init all required fields here for performance
 		initTextFields();
+
+		Button zeroAlt = (Button) findViewById(R.id.buttonZeroAltitude);
+		zeroAlt.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View paramView) {
+				// Auto-generated method stub
+				altitudeOffset = Integer.parseInt(textViewAltBefore.getText()
+						.toString())
+						+ Double.parseDouble("0."
+								+ textViewAltAfter.getText().toString());
+			}
+		});
+		Button removeOffsetAlt = (Button) findViewById(R.id.buttonRemoveAltOffset);
+		removeOffsetAlt.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View paramView) {
+				// Auto-generated method stub
+				altitudeOffset = 0;
+			}
+		});
 
 		// a thread responsible for updating the values on the gui
 		new Thread(new Runnable() {
@@ -90,7 +124,8 @@ public class ActivityHubData extends Activity {
 			textViewLatAfter, textViewCourseBefore, textViewLatBefore,
 			textViewLonAfter, textViewLonBefore, textViewTemp1, textViewTemp2,
 			textViewVoltCell2, textViewVoltCell1, textViewVoltCell3,
-			textViewVoltCell4, textViewVoltCell5, textViewVoltCell6, textViewNS, textViewEW;
+			textViewVoltCell4, textViewVoltCell5, textViewVoltCell6,
+			textViewNS, textViewEW;
 
 	/**
 	 * init all the text fields only once on create of activity
@@ -152,8 +187,36 @@ public class ActivityHubData extends Activity {
 		registerReceiver(broadcastReceiver, new IntentFilter(
 				FrSkyServer.BROADCAST_ACTION_HUB_DATA));
 		// update prefs
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		FrSkyHub.getInstance().setNrOfPropBlades(Integer.parseInt(prefs.getString("rpm_blades", "2")));
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		nrOfBlades = Integer.parseInt(prefs.getString("rpm_blades", "2"));
+
+		// also update visibility of sensor data
+		// FIXME this way still updating in the background
+		findViewById(R.id.fgs).setVisibility(
+				prefs.getBoolean("visible_fgs", true) ? View.VISIBLE
+						: View.GONE);
+		findViewById(R.id.flvs).setVisibility(
+				prefs.getBoolean("visible_flvs", true) ? View.VISIBLE
+						: View.GONE);
+		findViewById(R.id.rpms).setVisibility(
+				prefs.getBoolean("visible_rpms", true) ? View.VISIBLE
+						: View.GONE);
+		findViewById(R.id.temp1).setVisibility(
+				prefs.getBoolean("visible_tems1", true) ? View.VISIBLE
+						: View.GONE);
+		findViewById(R.id.temp2).setVisibility(
+				prefs.getBoolean("visible_tems2", true) ? View.VISIBLE
+						: View.GONE);
+		findViewById(R.id.tas).setVisibility(
+				prefs.getBoolean("visible_tas", true) ? View.VISIBLE
+						: View.GONE);
+		findViewById(R.id.gps).setVisibility(
+				prefs.getBoolean("visible_gps", true) ? View.VISIBLE
+						: View.GONE);
+		findViewById(R.id.fvas).setVisibility(
+				prefs.getBoolean("visible_fvas", true) ? View.VISIBLE
+						: View.GONE);
 	}
 
 	@Override
@@ -183,13 +246,15 @@ public class ActivityHubData extends Activity {
 		// switch based on type of channel
 		switch (type) {
 		case altitude_before:
-			textViewAltBefore.setText(intFormat.format(value));
+			textViewAltBefore.setText(intFormat.format(value
+					- Math.round(altitudeOffset)));
 			break;
 		case altitude_after:
-			textViewAltAfter.setText(intFormat.format(value));
+			textViewAltAfter.setText(intFormat.format(value
+					- (altitudeOffset - Math.round(altitudeOffset))));
 			break;
 		case rpm:
-			textViewRpm.setText(intFormat.format(value));
+			textViewRpm.setText(intFormat.format(value / nrOfBlades));
 			break;
 		case acc_x:
 			textViewAccX.setText(intFormat.format(value));

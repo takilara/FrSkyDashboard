@@ -2,6 +2,7 @@ package biz.onomato.frskydash.activities;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -20,8 +21,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.hub.ChannelTypes;
 import biz.onomato.frskydash.hub.EditPreferences;
+import biz.onomato.frskydash.hub.SensorTypes;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -45,7 +46,7 @@ public class ActivityHubData extends Activity {
 	 * hashmap containing last sensor values, broadcast updates these values,
 	 * gui updates on interval based on these values
 	 */
-	private HashMap<ChannelTypes, Double> sensorValues = new HashMap<ChannelTypes, Double>();
+	private HashMap<SensorTypes, Double> sensorValues = new HashMap<SensorTypes, Double>();
 
 	/**
 	 * some user specific settings
@@ -74,10 +75,7 @@ public class ActivityHubData extends Activity {
 			@Override
 			public void onClick(View paramView) {
 				// Auto-generated method stub
-				altitudeOffset = Integer.parseInt(textViewAltBefore.getText()
-						.toString())
-						+ Double.parseDouble("0."
-								+ textViewAltAfter.getText().toString());
+				altitudeOffset = Double.parseDouble(textViewAlt.getText().toString().replace(",", "."));
 			}
 		});
 		Button removeOffsetAlt = (Button) findViewById(R.id.buttonRemoveAltOffset);
@@ -96,7 +94,7 @@ public class ActivityHubData extends Activity {
 				// infinite loop
 				while (true) {
 					// iterate values
-					for (final ChannelTypes type : sensorValues.keySet()) {
+					for (final SensorTypes type : sensorValues.keySet()) {
 						// back to GUI
 						runOnUiThread(new Runnable() {
 							public void run() {
@@ -116,29 +114,24 @@ public class ActivityHubData extends Activity {
 		}).start();
 	}
 
-	private TextView textViewAltBefore, textViewAltAfter, textViewRpm,
-			textViewAccX, textViewAccY, textViewAccZ, textViewCourseAfter,
-			textViewDay, textViewMonth, textViewYear, textViewFuel,
-			textViewHour, textViewMinute, textViewSecond, textViewGpsAltAfter,
-			textViewGpsAltBefore, textViewSpeedAfter, textViewSpeedBefore,
-			textViewLatAfter, textViewCourseBefore, textViewLatBefore,
-			textViewLonAfter, textViewLonBefore, textViewTemp1, textViewTemp2,
-			textViewVoltCell2, textViewVoltCell1, textViewVoltCell3,
-			textViewVoltCell4, textViewVoltCell5, textViewVoltCell6,
-			textViewNS, textViewEW;
+	private TextView textViewAlt, textViewRpm, textViewAccX, textViewAccY,
+			textViewAccZ, textViewDay, textViewMonth, textViewYear,
+			textViewFuel, textViewHour, textViewMinute, textViewSecond,
+			textViewGpsAlt, textViewSpeed, textViewCourse, textViewLat,
+			textViewLon, textViewTemp1, textViewTemp2, textViewVoltCell2,
+			textViewVoltCell1, textViewVoltCell3, textViewVoltCell4,
+			textViewVoltCell5, textViewVoltCell6, textViewNS, textViewEW;
 
 	/**
 	 * init all the text fields only once on create of activity
 	 */
 	private void initTextFields() {
-		textViewAltBefore = (TextView) findViewById(R.id.textViewAltBefore);
-		textViewAltAfter = (TextView) findViewById(R.id.textViewAltAfter);
+		textViewAlt = (TextView) findViewById(R.id.textViewAlt);
 		textViewRpm = (TextView) findViewById(R.id.textViewRpm);
 		textViewAccX = (TextView) findViewById(R.id.textViewAccX);
 		textViewAccY = (TextView) findViewById(R.id.textViewAccY);
 		textViewAccZ = (TextView) findViewById(R.id.textViewAccZ);
-		textViewCourseAfter = (TextView) findViewById(R.id.textViewCourseAfter);
-		textViewCourseBefore = (TextView) findViewById(R.id.textViewCourseBefore);
+		textViewCourse = (TextView) findViewById(R.id.textViewCourse);
 		textViewDay = (TextView) findViewById(R.id.textViewDay);
 		textViewMonth = (TextView) findViewById(R.id.textViewMonth);
 		textViewYear = (TextView) findViewById(R.id.textViewYear);
@@ -146,14 +139,10 @@ public class ActivityHubData extends Activity {
 		textViewHour = (TextView) findViewById(R.id.textViewHour);
 		textViewMinute = (TextView) findViewById(R.id.textViewMinute);
 		textViewSecond = (TextView) findViewById(R.id.textViewSecond);
-		textViewGpsAltAfter = (TextView) findViewById(R.id.textViewGpsAltAfter);
-		textViewGpsAltBefore = (TextView) findViewById(R.id.textViewGpsAltBefore);
-		textViewSpeedAfter = (TextView) findViewById(R.id.textViewSpeedAfter);
-		textViewSpeedBefore = (TextView) findViewById(R.id.textViewSpeedBefore);
-		textViewLatAfter = (TextView) findViewById(R.id.textViewLatAfter);
-		textViewLatBefore = (TextView) findViewById(R.id.textViewLatBefore);
-		textViewLonAfter = (TextView) findViewById(R.id.textViewLonAfter);
-		textViewLonBefore = (TextView) findViewById(R.id.textViewLonBefore);
+		textViewGpsAlt = (TextView) findViewById(R.id.textViewGpsAlt);
+		textViewSpeed = (TextView) findViewById(R.id.textViewSpeed);
+		textViewLat = (TextView) findViewById(R.id.textViewLat);
+		textViewLon = (TextView) findViewById(R.id.textViewLon);
 		textViewNS = (TextView) findViewById(R.id.textViewNS);
 		textViewEW = (TextView) findViewById(R.id.textViewEW);
 		textViewTemp1 = (TextView) findViewById(R.id.textViewTemp1);
@@ -177,7 +166,7 @@ public class ActivityHubData extends Activity {
 	private void updateValues(Intent intent) {
 		String channelType = intent.getStringExtra(FIELD_CHANNEL);
 		double value = intent.getDoubleExtra(FIELD_VALUE, 0);
-		sensorValues.put(ChannelTypes.valueOf(channelType), value);
+		sensorValues.put(SensorTypes.valueOf(channelType), value);
 	}
 
 	@Override
@@ -235,6 +224,11 @@ public class ActivityHubData extends Activity {
 	 * number format for decimals
 	 */
 	private NumberFormat decFormat = new DecimalFormat("0.00");
+	
+	/**
+	 * a date to keep collecting date information from sensors
+	 */
+	private Calendar calendar = Calendar.getInstance();
 
 	/**
 	 * actual update of the GUI with new value for given channeltype
@@ -242,19 +236,17 @@ public class ActivityHubData extends Activity {
 	 * @param type
 	 * @param value
 	 */
-	private void updateUI(ChannelTypes type, double value) {
+	private void updateUI(SensorTypes type, double value) {
 		// switch based on type of channel
 		switch (type) {
 		case altitude_before:
-			textViewAltBefore.setText(intFormat.format(value
-					- Math.round(altitudeOffset)));
+			textViewAlt.setText(decFormat.format(value-altitudeOffset));
 			break;
 		case altitude_after:
-			textViewAltAfter.setText(intFormat.format(value
-					- (altitudeOffset - Math.round(altitudeOffset))));
+			textViewAlt.setText(decFormat.format(value-altitudeOffset));
 			break;
 		case rpm:
-			textViewRpm.setText(intFormat.format(value / nrOfBlades));
+			textViewRpm.setText(intFormat.format(value/nrOfBlades));
 			break;
 		case acc_x:
 			textViewAccX.setText(intFormat.format(value));
@@ -266,55 +258,59 @@ public class ActivityHubData extends Activity {
 			textViewAccZ.setText(intFormat.format(value));
 			break;
 		case course_after:
-			textViewCourseAfter.setText(intFormat.format(value));
+			textViewCourse.setText(decFormat.format(value));
 			break;
 		case course_before:
-			textViewCourseBefore.setText(intFormat.format(value));
+			textViewCourse.setText(decFormat.format(value));
 			break;
-		case day:
-			textViewDay.setText(intFormat.format(value));
-			break;
-		case month:
-			textViewMonth.setText(intFormat.format(value));
+		case day_month:
+			// this is a long now representing date
+			calendar.setTimeInMillis((long)value);
+			textViewDay.setText(calendar.get(Calendar.DAY_OF_MONTH));
+			textViewMonth.setText(calendar.get(Calendar.MONTH)+1);
 			break;
 		case year:
-			textViewYear.setText(intFormat.format(value));
+			// this is a long now representing date
+			calendar.setTimeInMillis((long)value);
+			textViewYear.setText(calendar.get(Calendar.YEAR));
 			break;
 		case fuel:
 			textViewFuel.setText(intFormat.format(value));
 			break;
-		case hour:
-			textViewHour.setText(intFormat.format(value));
-			break;
-		case minute:
-			textViewMinute.setText(intFormat.format(value));
+		case hour_minute:
+			// this is a long now representing date
+			calendar.setTimeInMillis((long)value);
+			textViewHour.setText(calendar.get(Calendar.HOUR));
+			textViewMinute.setText(calendar.get(Calendar.MINUTE));
 			break;
 		case second:
-			textViewSecond.setText(intFormat.format(value));
+			// this is a long now representing date
+			calendar.setTimeInMillis((long)value);
+			textViewSecond.setText(calendar.get(Calendar.SECOND));
 			break;
 		case gps_altitude_after:
-			textViewGpsAltAfter.setText(intFormat.format(value));
+			textViewGpsAlt.setText(decFormat.format(value));
 			break;
 		case gps_altitude_before:
-			textViewGpsAltBefore.setText(intFormat.format(value));
+			textViewGpsAlt.setText(decFormat.format(value));
 			break;
 		case gps_speed_after:
-			textViewSpeedAfter.setText(intFormat.format(value));
+			textViewSpeed.setText(decFormat.format(value));
 			break;
 		case gps_speed_before:
-			textViewSpeedBefore.setText(intFormat.format(value));
+			textViewSpeed.setText(decFormat.format(value));
 			break;
 		case latitude_after:
-			textViewLatAfter.setText(intFormat.format(value));
+			textViewLat.setText(decFormat.format(value));
 			break;
 		case latitude_before:
-			textViewLatBefore.setText(intFormat.format(value));
+			textViewLat.setText(decFormat.format(value));
 			break;
 		case longitude_after:
-			textViewLonAfter.setText(intFormat.format(value));
+			textViewLon.setText(decFormat.format(value));
 			break;
 		case longitude_before:
-			textViewLonBefore.setText(intFormat.format(value));
+			textViewLon.setText(decFormat.format(value));
 			break;
 		case temp1:
 			textViewTemp1.setText(intFormat.format(value));
@@ -323,22 +319,22 @@ public class ActivityHubData extends Activity {
 			textViewTemp2.setText(intFormat.format(value));
 			break;
 		// for voltage values per cell
-		case volt_0:
+		case CELL_0:
 			textViewVoltCell1.setText(decFormat.format(value));
 			break;
-		case volt_1:
+		case CELL_1:
 			textViewVoltCell2.setText(decFormat.format(value));
 			break;
-		case volt_2:
+		case CELL_2:
 			textViewVoltCell3.setText(decFormat.format(value));
 			break;
-		case volt_3:
+		case CELL_3:
 			textViewVoltCell4.setText(decFormat.format(value));
 			break;
-		case volt_4:
+		case CELL_4:
 			textViewVoltCell5.setText(decFormat.format(value));
 			break;
-		case volt_5:
+		case CELL_5:
 			textViewVoltCell6.setText(decFormat.format(value));
 			break;
 		case ew:
@@ -352,7 +348,6 @@ public class ActivityHubData extends Activity {
 			Logger.d(this.getClass().getName(),
 					"non implemented display of channel type: " + type);
 		}
-
 	}
 
 	@Override

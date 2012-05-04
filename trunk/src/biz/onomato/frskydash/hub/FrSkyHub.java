@@ -45,22 +45,14 @@ public class FrSkyHub {
 	/**
 	 * def ctor, singleton use {@link #getInstance()} instead
 	 */
-
 	private FrSkyHub() {
-
+		// eso: Prototype Channel code
+		setupFixedChannels();
 	}
 
-	public static FrSkyHub getInstance(/* FrSkyServer forServer */) {
+	public static FrSkyHub getInstance() {
 		if (instance == null) {
 			instance = new FrSkyHub();
-			// server = forServer;
-			// not a good idea since parameter will be ignored if instance
-			// already existed, moved to method where needed
-
-			/**
-			 * eso: Prototype Channel code
-			 */
-			setupFixedChannels();
 		}
 		return instance;
 	}
@@ -198,30 +190,56 @@ public class FrSkyHub {
 					"Wrong hub frame format: " + Arrays.toString(frame));
 			return;
 		}
+		// retrieve sensor type
+		SensorTypes sensorType = TranslatorFactory.getInstance().getSensorType(frame);
+		// translate value
+		double value = TranslatorFactory.getInstance().getTranslatorForFrame(sensorType).translateValue(sensorType, frame);
+		// FIXME now there is one exception for volt sensor so far
+		if( sensorType == SensorTypes.volt){
+			// get the right cell for specific update
+			// first 4 bit is battery cell number
+			int cell = FrSkyHub.getBatteryCell(frame);
+			// if (cell < 1 || cell > 6) { CHECK RANGE OF CELL
+			if (cell < 0 || cell > 5) {
+				Logger.d(this.getClass().toString(),
+						"failed to handle cell nr out of range: " + cell);
+				return;
+			}
+			// now we can update a specific cell
+			String channelType = "CELL_" + cell;
+			// and update
+			updateChannel(SensorTypes.valueOf(channelType), value);
+		}
+		// and update channel
+		else 
+			updateChannel(sensorType, value);
+		
+		/*
+		
 		// check data ID and update correct channel
 		switch (frame[1]) {
 		case 0x01:
-			updateChannel(ChannelTypes.gps_altitude_before,
+			updateChannel(SensorTypes.gps_altitude_before,
 					getSignedLE16BitValue(frame));
 			break;
 		case 0x01 + 8:
-			updateChannel(ChannelTypes.gps_altitude_after,
+			updateChannel(SensorTypes.gps_altitude_after,
 					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x02:
-			updateChannel(ChannelTypes.temp1, getSignedLE16BitValue(frame));
+			updateChannel(SensorTypes.temp1, getSignedLE16BitValue(frame));
 			break;
 		case 0x03:
 			// actual RPM value is Frame1*60
-			// also needs to be divided by the number of blades of the prop! =>
-			// in activity
-			updateChannel(ChannelTypes.rpm, getUnsignedLE16BitValue(frame) * 60);
+			// also needs to be divided by the number of blades of the prop! (=>
+			// TODO for settings)
+			updateChannel(SensorTypes.rpm, getUnsignedLE16BitValue(frame) * 60);
 			break;
 		case 0x04:
-			updateChannel(ChannelTypes.fuel, getUnsignedLE16BitValue(frame));
+			updateChannel(SensorTypes.fuel, getUnsignedLE16BitValue(frame));
 			break;
 		case 0x05:
-			updateChannel(ChannelTypes.temp2, getSignedLE16BitValue(frame));
+			updateChannel(SensorTypes.temp2, getSignedLE16BitValue(frame));
 		case 0x06:
 			// first 4 bit is battery cell number
 			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
@@ -236,90 +254,93 @@ public class FrSkyHub {
 			// get the right channeltype based on cell nr
 			String channelType = "volt_" + cell;
 			// and update
-			updateChannel(ChannelTypes.valueOf(channelType), value);
+			updateChannel(SensorTypes.valueOf(channelType), value);
 			break;
 		case 0x10:
-			updateChannel(ChannelTypes.altitude_before,
+			updateChannel(SensorTypes.altitude_before,
 					getSignedLE16BitValue(frame));
 			break;
 		case 0x21:
-			updateChannel(ChannelTypes.altitude_after,
+			updateChannel(SensorTypes.altitude_after,
 					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x11:
-			updateChannel(ChannelTypes.gps_speed_before,
+			updateChannel(SensorTypes.gps_speed_before,
 					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x11 + 8:
-			updateChannel(ChannelTypes.gps_speed_after,
+			updateChannel(SensorTypes.gps_speed_after,
 					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x12:
-			updateChannel(ChannelTypes.longitude_before,
+			updateChannel(SensorTypes.longitude_before,
 					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x12 + 8:
-			updateChannel(ChannelTypes.longitude_after,
+			updateChannel(SensorTypes.longitude_after,
 					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x1A + 8:
-			updateChannel(ChannelTypes.ew, getUnsignedLE16BitValue(frame));
+			updateChannel(SensorTypes.ew, getUnsignedLE16BitValue(frame));
 			break;
 		case 0x13:
-			updateChannel(ChannelTypes.latitude_before,
+			updateChannel(SensorTypes.latitude_before,
 					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x13 + 8:
-			updateChannel(ChannelTypes.latitude_after,
+			updateChannel(SensorTypes.latitude_after,
 					getUnsignedBE16BitValue(frame));
 			break;
 		case 0x1B + 8:
-			updateChannel(ChannelTypes.ns, getUnsignedLE16BitValue(frame));
+			updateChannel(SensorTypes.ns, getUnsignedLE16BitValue(frame));
 			break;
 		case 0x14:
 			// should be between 0 & 359.99 degrees??
 			// FIXME seems to work but with much noise
-			updateChannel(ChannelTypes.course_before,
+			updateChannel(SensorTypes.course_before,
 					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x14 + 8:
-			updateChannel(ChannelTypes.course_after,
+			updateChannel(SensorTypes.course_after,
 					getUnsignedLE16BitValue(frame));
 			break;
 		case 0x15:
-			updateChannel(ChannelTypes.day, frame[2]);
-			updateChannel(ChannelTypes.month, frame[3]);
+			updateChannel(SensorTypes.day, frame[2]);
+			updateChannel(SensorTypes.month, frame[3]);
 			break;
 		case 0x16:
-			updateChannel(ChannelTypes.year, 2000 + frame[2]);
+			updateChannel(SensorTypes.year, 2000 + frame[2]);
 			break;
 		case 0x17:
-			updateChannel(ChannelTypes.hour, frame[2]);
-			updateChannel(ChannelTypes.minute, frame[3]);
+			updateChannel(SensorTypes.hour, frame[2]);
+			updateChannel(SensorTypes.minute, frame[3]);
 			break;
 		case 0x18:
-			updateChannel(ChannelTypes.second, frame[2]);
+			updateChannel(SensorTypes.second, frame[2]);
 			break;
 		case 0x24:
 			// actual 3-axis value is Frame1/1000
-			updateChannel(ChannelTypes.acc_x,
+			updateChannel(SensorTypes.acc_x,
 					getSignedLE16BitValue(frame) / 1000);
 			break;
 		case 0x25:
 			// actual 3-axis value is Frame1/1000
-			updateChannel(ChannelTypes.acc_y,
+			updateChannel(SensorTypes.acc_y,
 					getSignedLE16BitValue(frame) / 1000);
 			break;
 		case 0x26:
 			// actual 3-axis value is Frame1/1000
-			updateChannel(ChannelTypes.acc_z,
+			updateChannel(SensorTypes.acc_z,
 					getSignedLE16BitValue(frame) / 1000);
 			break;
 		default:
 			// TODO add current sensor data
 			Logger.d(FrSkyServer.TAG, "Unknown sensor type for frame: "
 					+ Arrays.toString(frame));
+					
+		
 		}
+		*/
 	}
 
 	/**
@@ -328,7 +349,7 @@ public class FrSkyHub {
 	 * @param frame
 	 * @return
 	 */
-	private int getSignedLE16BitValue(int[] frame) {
+	public static int getSignedLE16BitValue(int[] frame) {
 		// return 0xFFFF - ( (frame[2] & 0xFF) + ( (frame[3] & 0xFF) * 0x100) );
 		// return 0xFFFF - getUnsigned16BitValue(frame);
 		return (short) getUnsignedLE16BitValue(frame);
@@ -340,7 +361,7 @@ public class FrSkyHub {
 	 * @param frame
 	 * @return
 	 */
-	private int getUnsignedLE16BitValue(int[] frame) {
+	public static int getUnsignedLE16BitValue(int[] frame) {
 		// return getSigned16BitValue(frame) & 0xffff;
 		return ((frame[2] & 0xFF) + ((frame[3] & 0xFF) * 0x100));
 	}
@@ -351,7 +372,7 @@ public class FrSkyHub {
 	 * @param frame
 	 * @return
 	 */
-	private int getUnsignedBE16BitValue(int[] frame) {
+	public static int getUnsignedBE16BitValue(int[] frame) {
 		return frame[3] + frame[2] * 100;
 	}
 
@@ -365,7 +386,7 @@ public class FrSkyHub {
 	 * @param frame
 	 * @return
 	 */
-	private int getBatteryCell(int[] frame) {
+	public static int getBatteryCell(int[] frame) {
 		// only need the first 4 bits to get cell number
 		int cellNumber = frame[2] >> 4;
 		return cellNumber;
@@ -377,7 +398,7 @@ public class FrSkyHub {
 	 * @param frame
 	 * @return
 	 */
-	private double getCellVoltage(int[] frame) {
+	public static double getCellVoltage(int[] frame) {
 		// the last 12 bits are a value between 0-2100 representing voltage
 		// 0-4.2v (so /500)
 		double voltage = (double) ((frame[2] << 8 & 0xFFF) + frame[3]) / 500;
@@ -390,7 +411,7 @@ public class FrSkyHub {
 	 * @param channel
 	 * @param value
 	 */
-	private void updateChannel(ChannelTypes channel, double value) {
+	private void updateChannel(SensorTypes channel, double value) {
 		// TODO create a channel here for the correct type of information and
 		// broadcast channel so GUI can update this value
 		Logger.d(FrSkyServer.TAG, "Data received for channel: " + channel
@@ -504,6 +525,18 @@ public class FrSkyHub {
 		temp1.setSilent(true);
 		temp1.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_TEMP1, temp1);
+	}
+	
+	public static int getBefore(double value) {
+		return (int) Math.round(value);
+	}
+
+	public static int getAfter(double value) {
+		return (int) (value - Math.round(value));
+	}
+
+	public static double convertToAfter(int value) {
+		return Double.parseDouble("0." + value);
 	}
 
 }

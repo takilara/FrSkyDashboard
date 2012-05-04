@@ -28,25 +28,12 @@
                     android:textAppearance="@android:style/TextAppearance.Large" />
 
                 <TextView
-                    android:id="@+id/textViewAltBefore"
+                    android:id="@+id/textViewAlt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:text="0"
-                    android:textAppearance="@android:style/TextAppearance.Large" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="."
-                    android:textAppearance="@android:style/TextAppearance.Large" />
-
-                <TextView
-                    android:id="@+id/textViewAltAfter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
+                    android:text="0.0"
                     android:textAppearance="@android:style/TextAppearance.Large" />
 
                 <Button
@@ -357,23 +344,10 @@
                         android:textAppearance="@android:style/TextAppearance.Large" />
 
                     <TextView
-                        android:id="@+id/textViewLatBefore"
+                        android:id="@+id/textViewLat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="."
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewLatAfter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="0.0"
                         android:textAppearance="@android:style/TextAppearance.Large" />
                 </LinearLayout>
 
@@ -389,23 +363,10 @@
                         android:textAppearance="@android:style/TextAppearance.Large" />
 
                     <TextView
-                        android:id="@+id/textViewLonBefore"
+                        android:id="@+id/textViewLon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="."
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewLonAfter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="0.0"
                         android:textAppearance="@android:style/TextAppearance.Large" />
                 </LinearLayout>
 
@@ -421,23 +382,10 @@
                         android:textAppearance="@android:style/TextAppearance.Large" />
 
                     <TextView
-                        android:id="@+id/textViewGpsAltBefore"
+                        android:id="@+id/textViewGpsAlt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="."
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewGpsAltAfter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="0.0"
                         android:textAppearance="@android:style/TextAppearance.Large" />
                 </LinearLayout>
 
@@ -453,23 +401,10 @@
                         android:textAppearance="@android:style/TextAppearance.Large" />
 
                     <TextView
-                        android:id="@+id/textViewSpeedBefore"
+                        android:id="@+id/textViewSpeed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="."
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewSpeedAfter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="0.0"
                         android:textAppearance="@android:style/TextAppearance.Large" />
                 </LinearLayout>
 
@@ -485,23 +420,10 @@
                         android:textAppearance="@android:style/TextAppearance.Large" />
 
                     <TextView
-                        android:id="@+id/textViewCourseBefore"
+                        android:id="@+id/textViewCourse"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="."
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewCourseAfter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="0.0"
                         android:textAppearance="@android:style/TextAppearance.Large" />
                 </LinearLayout>
 

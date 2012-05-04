@@ -37,10 +37,6 @@ public class ActivityHubData extends Activity {
 	public static final String FIELD_VALUE = "value";
 	public static final String FIELD_CHANNEL = "channel-type";
 	private static final int ACTIVITY_PREFERENCES = 1;
-	/**
-	 * receiving intent
-	 */
-	private Intent broadcastIntent;
 
 	/**
 	 * hashmap containing last sensor values, broadcast updates these values,
@@ -63,8 +59,6 @@ public class ActivityHubData extends Activity {
 		super.onCreate(savedInstanceState);
 		// set layout
 		setContentView(R.layout.activity_hubdata);
-		// register the receiving intent
-		broadcastIntent = new Intent(this, FrSkyServer.class);
 
 		// init all required fields here for performance
 		initTextFields();

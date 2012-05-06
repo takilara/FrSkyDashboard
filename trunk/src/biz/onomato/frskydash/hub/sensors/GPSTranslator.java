@@ -42,58 +42,58 @@ public class GPSTranslator implements UserDataTranslator {
 					+ FrSkyHub.convertToAfter(FrSkyHub
 							.getUnsignedLE16BitValue(frame));
 			return speed;
-		case longitude_before:
+		case gps_longitude_before:
 			longitude = FrSkyHub.getAfter(longitude)
 					+ FrSkyHub.getUnsignedBE16BitValue(frame);
 			return longitude;
-		case longitude_after:
+		case gps_longitude_after:
 			longitude = FrSkyHub.getBefore(longitude)
 					+ FrSkyHub.convertToAfter(FrSkyHub
 							.getUnsignedBE16BitValue(frame));
 			return longitude;
-		case ew:
+		case gps_ew:
 			return FrSkyHub.getUnsignedLE16BitValue(frame);
-		case latitude_before:
+		case gps_latitude_before:
 			latitude = FrSkyHub.getAfter(latitude)
 					+ FrSkyHub.getUnsignedBE16BitValue(frame);
 			return latitude;
-		case latitude_after:
+		case gps_latitude_after:
 			latitude = FrSkyHub.getBefore(latitude)
 					+ FrSkyHub.convertToAfter(FrSkyHub
 							.getUnsignedBE16BitValue(frame));
 			return latitude;
-		case ns:
+		case gps_ns:
 			return FrSkyHub.getUnsignedLE16BitValue(frame);
-		case course_before:
+		case gps_course_before:
 			// should be between 0 & 359.99 degrees??
 			// FIXME seems to work but with much noise
 			course = FrSkyHub.getAfter(course)
 					+ FrSkyHub.getUnsignedLE16BitValue(frame);
 			return course;
-		case course_after:
+		case gps_course_after:
 			course = FrSkyHub.getBefore(course)
 					+ FrSkyHub.convertToAfter(FrSkyHub
 							.getUnsignedLE16BitValue(frame));
 			return course;
-		case day_month:
+		case gps_day_month:
 			int day = frame[2];
 			int month = frame[3];
 			date.set(Calendar.DAY_OF_MONTH, day);
 			date.set(Calendar.MONTH, month - 1);
 			// combine
 			return date.getTimeInMillis();
-		case year:
+		case gps_year:
 			int year = 2000 + frame[2];
 			date.set(Calendar.YEAR, year);
 			return date.getTimeInMillis();
-		case hour_minute:
+		case gps_hour_minute:
 			int hour = frame[2];
 			int minute = frame[3];
 			date.set(Calendar.HOUR, hour);
 			date.set(Calendar.MINUTE, minute);
 			// combine
 			return date.getTimeInMillis();
-		case second:
+		case gps_second:
 			int second = frame[2];
 			date.set(Calendar.SECOND, second);
 			return date.getTimeInMillis();

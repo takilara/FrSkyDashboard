@@ -191,11 +191,14 @@ public class FrSkyHub {
 			return;
 		}
 		// retrieve sensor type
-		SensorTypes sensorType = TranslatorFactory.getInstance().getSensorType(frame);
+		SensorTypes sensorType = TranslatorFactory.getInstance().getSensorType(
+				frame);
 		// translate value
-		double value = TranslatorFactory.getInstance().getTranslatorForFrame(sensorType).translateValue(sensorType, frame);
+		double value = TranslatorFactory.getInstance()
+				.getTranslatorForFrame(sensorType)
+				.translateValue(sensorType, frame);
 		// FIXME now there is one exception for volt sensor so far
-		if( sensorType == SensorTypes.volt){
+		if (sensorType == SensorTypes.volt) {
 			// get the right cell for specific update
 			// first 4 bit is battery cell number
 			int cell = FrSkyHub.getBatteryCell(frame);
@@ -211,136 +214,73 @@ public class FrSkyHub {
 			updateChannel(SensorTypes.valueOf(channelType), value);
 		}
 		// and update channel
-		else 
+		else
 			updateChannel(sensorType, value);
-		
+
 		/*
-		
-		// check data ID and update correct channel
-		switch (frame[1]) {
-		case 0x01:
-			updateChannel(SensorTypes.gps_altitude_before,
-					getSignedLE16BitValue(frame));
-			break;
-		case 0x01 + 8:
-			updateChannel(SensorTypes.gps_altitude_after,
-					getUnsignedLE16BitValue(frame));
-			break;
-		case 0x02:
-			updateChannel(SensorTypes.temp1, getSignedLE16BitValue(frame));
-			break;
-		case 0x03:
-			// actual RPM value is Frame1*60
-			// also needs to be divided by the number of blades of the prop! (=>
-			// TODO for settings)
-			updateChannel(SensorTypes.rpm, getUnsignedLE16BitValue(frame) * 60);
-			break;
-		case 0x04:
-			updateChannel(SensorTypes.fuel, getUnsignedLE16BitValue(frame));
-			break;
-		case 0x05:
-			updateChannel(SensorTypes.temp2, getSignedLE16BitValue(frame));
-		case 0x06:
-			// first 4 bit is battery cell number
-			// last 12 bit refer to voltage range 0-2100 corresponding 0-4.2V
-			int cell = getBatteryCell(frame);
-			// if (cell < 1 || cell > 6) {
-			if (cell < 0 || cell > 5) {
-				Logger.d(this.getClass().toString(),
-						"failed to handle cell nr out of range: " + cell);
-				break;
-			}
-			double value = getCellVoltage(frame);
-			// get the right channeltype based on cell nr
-			String channelType = "volt_" + cell;
-			// and update
-			updateChannel(SensorTypes.valueOf(channelType), value);
-			break;
-		case 0x10:
-			updateChannel(SensorTypes.altitude_before,
-					getSignedLE16BitValue(frame));
-			break;
-		case 0x21:
-			updateChannel(SensorTypes.altitude_after,
-					getUnsignedLE16BitValue(frame));
-			break;
-		case 0x11:
-			updateChannel(SensorTypes.gps_speed_before,
-					getUnsignedLE16BitValue(frame));
-			break;
-		case 0x11 + 8:
-			updateChannel(SensorTypes.gps_speed_after,
-					getUnsignedLE16BitValue(frame));
-			break;
-		case 0x12:
-			updateChannel(SensorTypes.longitude_before,
-					getUnsignedBE16BitValue(frame));
-			break;
-		case 0x12 + 8:
-			updateChannel(SensorTypes.longitude_after,
-					getUnsignedBE16BitValue(frame));
-			break;
-		case 0x1A + 8:
-			updateChannel(SensorTypes.ew, getUnsignedLE16BitValue(frame));
-			break;
-		case 0x13:
-			updateChannel(SensorTypes.latitude_before,
-					getUnsignedBE16BitValue(frame));
-			break;
-		case 0x13 + 8:
-			updateChannel(SensorTypes.latitude_after,
-					getUnsignedBE16BitValue(frame));
-			break;
-		case 0x1B + 8:
-			updateChannel(SensorTypes.ns, getUnsignedLE16BitValue(frame));
-			break;
-		case 0x14:
-			// should be between 0 & 359.99 degrees??
-			// FIXME seems to work but with much noise
-			updateChannel(SensorTypes.course_before,
-					getUnsignedLE16BitValue(frame));
-			break;
-		case 0x14 + 8:
-			updateChannel(SensorTypes.course_after,
-					getUnsignedLE16BitValue(frame));
-			break;
-		case 0x15:
-			updateChannel(SensorTypes.day, frame[2]);
-			updateChannel(SensorTypes.month, frame[3]);
-			break;
-		case 0x16:
-			updateChannel(SensorTypes.year, 2000 + frame[2]);
-			break;
-		case 0x17:
-			updateChannel(SensorTypes.hour, frame[2]);
-			updateChannel(SensorTypes.minute, frame[3]);
-			break;
-		case 0x18:
-			updateChannel(SensorTypes.second, frame[2]);
-			break;
-		case 0x24:
-			// actual 3-axis value is Frame1/1000
-			updateChannel(SensorTypes.acc_x,
-					getSignedLE16BitValue(frame) / 1000);
-			break;
-		case 0x25:
-			// actual 3-axis value is Frame1/1000
-			updateChannel(SensorTypes.acc_y,
-					getSignedLE16BitValue(frame) / 1000);
-			break;
-		case 0x26:
-			// actual 3-axis value is Frame1/1000
-			updateChannel(SensorTypes.acc_z,
-					getSignedLE16BitValue(frame) / 1000);
-			break;
-		default:
-			// TODO add current sensor data
-			Logger.d(FrSkyServer.TAG, "Unknown sensor type for frame: "
-					+ Arrays.toString(frame));
-					
-		
-		}
-		*/
+		 * 
+		 * // check data ID and update correct channel switch (frame[1]) { case
+		 * 0x01: updateChannel(SensorTypes.gps_altitude_before,
+		 * getSignedLE16BitValue(frame)); break; case 0x01 + 8:
+		 * updateChannel(SensorTypes.gps_altitude_after,
+		 * getUnsignedLE16BitValue(frame)); break; case 0x02:
+		 * updateChannel(SensorTypes.temp1, getSignedLE16BitValue(frame));
+		 * break; case 0x03: // actual RPM value is Frame1*60 // also needs to
+		 * be divided by the number of blades of the prop! (=> // TODO for
+		 * settings) updateChannel(SensorTypes.rpm,
+		 * getUnsignedLE16BitValue(frame) * 60); break; case 0x04:
+		 * updateChannel(SensorTypes.fuel, getUnsignedLE16BitValue(frame));
+		 * break; case 0x05: updateChannel(SensorTypes.temp2,
+		 * getSignedLE16BitValue(frame)); case 0x06: // first 4 bit is battery
+		 * cell number // last 12 bit refer to voltage range 0-2100
+		 * corresponding 0-4.2V int cell = getBatteryCell(frame); // if (cell <
+		 * 1 || cell > 6) { if (cell < 0 || cell > 5) {
+		 * Logger.d(this.getClass().toString(),
+		 * "failed to handle cell nr out of range: " + cell); break; } double
+		 * value = getCellVoltage(frame); // get the right channeltype based on
+		 * cell nr String channelType = "volt_" + cell; // and update
+		 * updateChannel(SensorTypes.valueOf(channelType), value); break; case
+		 * 0x10: updateChannel(SensorTypes.altitude_before,
+		 * getSignedLE16BitValue(frame)); break; case 0x21:
+		 * updateChannel(SensorTypes.altitude_after,
+		 * getUnsignedLE16BitValue(frame)); break; case 0x11:
+		 * updateChannel(SensorTypes.gps_speed_before,
+		 * getUnsignedLE16BitValue(frame)); break; case 0x11 + 8:
+		 * updateChannel(SensorTypes.gps_speed_after,
+		 * getUnsignedLE16BitValue(frame)); break; case 0x12:
+		 * updateChannel(SensorTypes.longitude_before,
+		 * getUnsignedBE16BitValue(frame)); break; case 0x12 + 8:
+		 * updateChannel(SensorTypes.longitude_after,
+		 * getUnsignedBE16BitValue(frame)); break; case 0x1A + 8:
+		 * updateChannel(SensorTypes.ew, getUnsignedLE16BitValue(frame)); break;
+		 * case 0x13: updateChannel(SensorTypes.latitude_before,
+		 * getUnsignedBE16BitValue(frame)); break; case 0x13 + 8:
+		 * updateChannel(SensorTypes.latitude_after,
+		 * getUnsignedBE16BitValue(frame)); break; case 0x1B + 8:
+		 * updateChannel(SensorTypes.ns, getUnsignedLE16BitValue(frame)); break;
+		 * case 0x14: // should be between 0 & 359.99 degrees?? // FIXME seems
+		 * to work but with much noise updateChannel(SensorTypes.course_before,
+		 * getUnsignedLE16BitValue(frame)); break; case 0x14 + 8:
+		 * updateChannel(SensorTypes.course_after,
+		 * getUnsignedLE16BitValue(frame)); break; case 0x15:
+		 * updateChannel(SensorTypes.day, frame[2]);
+		 * updateChannel(SensorTypes.month, frame[3]); break; case 0x16:
+		 * updateChannel(SensorTypes.year, 2000 + frame[2]); break; case 0x17:
+		 * updateChannel(SensorTypes.hour, frame[2]);
+		 * updateChannel(SensorTypes.minute, frame[3]); break; case 0x18:
+		 * updateChannel(SensorTypes.second, frame[2]); break; case 0x24: //
+		 * actual 3-axis value is Frame1/1000 updateChannel(SensorTypes.acc_x,
+		 * getSignedLE16BitValue(frame) / 1000); break; case 0x25: // actual
+		 * 3-axis value is Frame1/1000 updateChannel(SensorTypes.acc_y,
+		 * getSignedLE16BitValue(frame) / 1000); break; case 0x26: // actual
+		 * 3-axis value is Frame1/1000 updateChannel(SensorTypes.acc_z,
+		 * getSignedLE16BitValue(frame) / 1000); break; default: // TODO add
+		 * current sensor data Logger.d(FrSkyServer.TAG,
+		 * "Unknown sensor type for frame: " + Arrays.toString(frame));
+		 * 
+		 * 
+		 * }
+		 */
 	}
 
 	/**
@@ -417,7 +357,7 @@ public class FrSkyHub {
 		Logger.d(FrSkyServer.TAG, "Data received for channel: " + channel
 				+ ", value: " + value);
 
-		/**
+		/*
 		 * eso, prototype Channel support Update a proper channel rather than
 		 * broadcast. Allow broadcasts until Channels are fully implemented
 		 */
@@ -428,20 +368,76 @@ public class FrSkyHub {
 		case temp1:
 			_sourceChannelMap.get(CHANNEL_ID_TEMP1).setRaw(value);
 			break;
+		case temp2:
+			_sourceChannelMap.get(CHANNEL_ID_TEMP2).setRaw(value);
+			break;
 		case altitude_before:
 			// /TODO: Proper construction of resulting altitude double needs to
 			// be done in handleHubDataFrame or extractUserDataBytes
-			/**
-			 * Temporarily construct double. TODO: Do this properly elsewhere
-			 */
-
-			double alt = value + (alt_after / 100);
-
-			_sourceChannelMap.get(CHANNEL_ID_ALTITUDE).setRaw(alt);
+			_sourceChannelMap.get(CHANNEL_ID_ALTITUDE).setRaw(value);
 			break;
 		case altitude_after:
-			// bad method of allowing construction of altitude double
-			alt_after = value;
+			_sourceChannelMap.get(CHANNEL_ID_ALTITUDE).setRaw(value);
+		case acc_x:
+			_sourceChannelMap.get(CHANNEL_ID_ACCELERATOR_X).setRaw(value);
+			break;
+		case acc_y:
+			_sourceChannelMap.get(CHANNEL_ID_ACCELERATOR_Y).setRaw(value);
+			break;
+		case acc_z:
+			_sourceChannelMap.get(CHANNEL_ID_ACCELERATOR_Z).setRaw(value);
+			break;
+		case fuel:
+			_sourceChannelMap.get(CHANNEL_ID_FUEL).setRaw(value);
+			break;
+		case CELL_0:
+			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_1).setRaw(value);
+			break;
+		case CELL_1:
+			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_2).setRaw(value);
+			break;
+		case CELL_2:
+			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_3).setRaw(value);
+			break;
+		case CELL_3:
+			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_4).setRaw(value);
+			break;
+		case CELL_4:
+			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_5).setRaw(value);
+			break;
+		case CELL_5:
+			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_6).setRaw(value);
+			break;
+		case gps_altitude_after:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
+			break;
+		case gps_altitude_before:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
+			break;
+		case gps_speed_after:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_SPEED).setRaw(value);
+			break;
+		case gps_speed_before:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_SPEED).setRaw(value);
+			break;
+		case course_after:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_COURSE).setRaw(value);
+			break;
+		case course_before:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_COURSE).setRaw(value);
+			break;
+		case latitude_after:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
+			break;
+		case latitude_before:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
+			break;
+		case longitude_after:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
+			break;
+		case longitude_before:
+			_sourceChannelMap.get(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
+			break;
 		}
 
 		// let server update this information
@@ -464,6 +460,25 @@ public class FrSkyHub {
 	public static final int CHANNEL_ID_RPM = 1 + HUB_ID;
 	public static final int CHANNEL_ID_TEMP1 = 2 + HUB_ID;
 	public static final int CHANNEL_ID_TEMP2 = 3 + HUB_ID;
+	// acc sensor
+	public static final int CHANNEL_ID_ACCELERATOR_X = 4 + HUB_ID;
+	public static final int CHANNEL_ID_ACCELERATOR_Y = 5 + HUB_ID;
+	public static final int CHANNEL_ID_ACCELERATOR_Z = 6 + HUB_ID;
+	public static final int CHANNEL_ID_FUEL = 7 + HUB_ID;
+	// lipo sensor, to be registered per cell (required for cannonical values,
+	// unless we implement compositive values support)
+	public static final int CHANNEL_ID_LIPO_CELL_1 = 10 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_2 = 11 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_3 = 12 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_4 = 13 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_5 = 14 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_6 = 15 + HUB_ID;
+	// gps sensor values
+	public static final int CHANNEL_ID_GPS_COURSE = 21 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_ALTITUDE = 22 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_SPEED = 23 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_LATITUDE = 24 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_LONGITUDE = 25 + HUB_ID;
 
 	/**
 	 * Poor solution for holding decimal part of altitude
@@ -498,35 +513,48 @@ public class FrSkyHub {
 	/**
 	 * Create the _sourceChannelMap Populate it with our channels
 	 */
-	public static void setupFixedChannels() {
+	private void setupFixedChannels() {
 		_sourceChannelMap = new TreeMap<Integer, Channel>(
 				Collections.reverseOrder());
 
 		// Sets up the hardcoded channels (Altitude,RPM)
-		// /TODO: Add all channels here, these two are added for reference
-		// /TODO: Figure out how to deal with race conditions on "split numbers"
-		Channel altitude = new Channel("Hub: Altitude", 0, 1, "", "");
-		altitude.setId(CHANNEL_ID_ALTITUDE);
-		altitude.setPrecision(0);
-		altitude.setSilent(true);
-		altitude.registerListenerForServerCommands();
-		_sourceChannelMap.put(CHANNEL_ID_ALTITUDE, altitude);
-
-		Channel rpm = new Channel("Hub: RPM (pulses)", 0, 1, "", "");
-		rpm.setId(CHANNEL_ID_RPM);
-		rpm.setPrecision(0);
-		rpm.setSilent(true);
-		rpm.registerListenerForServerCommands();
-		_sourceChannelMap.put(CHANNEL_ID_RPM, rpm);
-
-		Channel temp1 = new Channel("Hub: Temp 1", 0, 1, "", "");
-		temp1.setId(CHANNEL_ID_TEMP1);
-		temp1.setPrecision(0);
-		temp1.setSilent(true);
-		temp1.registerListenerForServerCommands();
-		_sourceChannelMap.put(CHANNEL_ID_TEMP1, temp1);
+		// TODO: Figure out how to deal with race conditions on "split numbers"
+		// TODO create enums with descruption etc or proper factory instead
+		configureChannelForSensor(CHANNEL_ID_ALTITUDE, "Hub: Altitude");
+		configureChannelForSensor(CHANNEL_ID_RPM, "Hub: RPM (pulses)");
+		configureChannelForSensor(CHANNEL_ID_TEMP1, "Hub: Temp 1");
+		configureChannelForSensor(CHANNEL_ID_TEMP2, "Hub: Temp 2");
+		configureChannelForSensor(CHANNEL_ID_ACCELERATOR_X, "Hub: Acc. X");
+		configureChannelForSensor(CHANNEL_ID_ACCELERATOR_Y, "Hub: Acc. Y");
+		configureChannelForSensor(CHANNEL_ID_ACCELERATOR_Z, "Hub: Acc. Z");
+		configureChannelForSensor(CHANNEL_ID_FUEL, "Hub: Fuel");
+		configureChannelForSensor(CHANNEL_ID_GPS_ALTITUDE, "Hub: GPS Altitude");
+		configureChannelForSensor(CHANNEL_ID_GPS_COURSE, "Hub: GPS Course");
+		configureChannelForSensor(CHANNEL_ID_GPS_LATITUDE, "Hub: GPS Latitude");
+		configureChannelForSensor(CHANNEL_ID_GPS_LONGITUDE,
+				"Hub: GPS Longitude");
+		configureChannelForSensor(CHANNEL_ID_GPS_SPEED, "Hub: GPS Speed");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_1, "Hub: Lipo Cell 1");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_2, "Hub: Lipo Cell 2");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_3, "Hub: Lipo Cell 3");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_4, "Hub: Lipo Cell 4");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_5, "Hub: Lipo Cell 5");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_6, "Hub: Lipo Cell 6");
 	}
-	
+
+	/**
+	 * helper to create the preconfigured channels for sensors
+	 */
+	private void configureChannelForSensor(int channelID, String description) {
+		Channel channel = new Channel(description, 0, 1, "", "");
+		channel.setId(channelID);
+		// all double values, need at least precision 2
+		channel.setPrecision(2);
+		channel.setSilent(true);
+		channel.registerListenerForServerCommands();
+		_sourceChannelMap.put(channelID, channel);
+	}
+
 	public static int getBefore(double value) {
 		return (int) Math.round(value);
 	}

@@ -251,19 +251,19 @@ public class ActivityHubData extends Activity {
 		case acc_z:
 			textViewAccZ.setText(intFormat.format(value));
 			break;
-		case course_after:
+		case gps_course_after:
 			textViewCourse.setText(decFormat.format(value));
 			break;
-		case course_before:
+		case gps_course_before:
 			textViewCourse.setText(decFormat.format(value));
 			break;
-		case day_month:
+		case gps_day_month:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
 			textViewDay.setText(calendar.get(Calendar.DAY_OF_MONTH));
 			textViewMonth.setText(calendar.get(Calendar.MONTH)+1);
 			break;
-		case year:
+		case gps_year:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
 			textViewYear.setText(calendar.get(Calendar.YEAR));
@@ -271,13 +271,13 @@ public class ActivityHubData extends Activity {
 		case fuel:
 			textViewFuel.setText(intFormat.format(value));
 			break;
-		case hour_minute:
+		case gps_hour_minute:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
 			textViewHour.setText(calendar.get(Calendar.HOUR));
 			textViewMinute.setText(calendar.get(Calendar.MINUTE));
 			break;
-		case second:
+		case gps_second:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
 			textViewSecond.setText(calendar.get(Calendar.SECOND));
@@ -294,16 +294,16 @@ public class ActivityHubData extends Activity {
 		case gps_speed_before:
 			textViewSpeed.setText(decFormat.format(value));
 			break;
-		case latitude_after:
+		case gps_latitude_after:
 			textViewLat.setText(decFormat.format(value));
 			break;
-		case latitude_before:
+		case gps_latitude_before:
 			textViewLat.setText(decFormat.format(value));
 			break;
-		case longitude_after:
+		case gps_longitude_after:
 			textViewLon.setText(decFormat.format(value));
 			break;
-		case longitude_before:
+		case gps_longitude_before:
 			textViewLon.setText(decFormat.format(value));
 			break;
 		case temp1:
@@ -331,10 +331,10 @@ public class ActivityHubData extends Activity {
 		case CELL_5:
 			textViewVoltCell6.setText(decFormat.format(value));
 			break;
-		case ew:
+		case gps_ew:
 			textViewEW.setText(intFormat.format(value));
 			break;
-		case ns:
+		case gps_ns:
 			textViewNS.setText(intFormat.format(value));
 			break;
 		default:

@@ -420,22 +420,22 @@ public class FrSkyHub {
 		case gps_speed_before:
 			_sourceChannelMap.get(CHANNEL_ID_GPS_SPEED).setRaw(value);
 			break;
-		case course_after:
+		case gps_course_after:
 			_sourceChannelMap.get(CHANNEL_ID_GPS_COURSE).setRaw(value);
 			break;
-		case course_before:
+		case gps_course_before:
 			_sourceChannelMap.get(CHANNEL_ID_GPS_COURSE).setRaw(value);
 			break;
-		case latitude_after:
+		case gps_latitude_after:
 			_sourceChannelMap.get(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
 			break;
-		case latitude_before:
+		case gps_latitude_before:
 			_sourceChannelMap.get(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
 			break;
-		case longitude_after:
+		case gps_longitude_after:
 			_sourceChannelMap.get(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
 			break;
-		case longitude_before:
+		case gps_longitude_before:
 			_sourceChannelMap.get(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
 			break;
 		}

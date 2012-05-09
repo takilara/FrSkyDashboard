@@ -234,12 +234,16 @@ public class ActivityHubData extends Activity {
 		// switch based on type of channel
 		switch (type) {
 		case altitude_before:
+			//FIXME: The following two textViewAlt.setText's must be wrong. This textfield should only
+			//be set once, and with the combined value of before.after.
+			//FIXME: altitude offset should be property of a derived channel and not exist in hub at all
 			textViewAlt.setText(decFormat.format(value-altitudeOffset));
 			break;
 		case altitude_after:
 			textViewAlt.setText(decFormat.format(value-altitudeOffset));
 			break;
 		case rpm:
+			//FIXME: nrOfBlades should be property of a derived channel and not exist in hub at all
 			textViewRpm.setText(intFormat.format(value/nrOfBlades));
 			break;
 		case acc_x:

@@ -2391,6 +2391,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	/**
 	 * use this to broadcast new channel information
 	 * 
+	 * Comment: Please do not use this method to communicate from hub to consumers
+	 * @deprecated
+	 * 
 	 * @param channel
 	 */
 	public void broadcastChannelData(SensorTypes channel, double value) {

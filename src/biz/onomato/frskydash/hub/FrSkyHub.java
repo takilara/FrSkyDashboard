@@ -209,9 +209,9 @@ public class FrSkyHub {
 				return;
 			}
 			// now we can update a specific cell
-			String channelType = "CELL_" + cell;
+			String type = "CELL_" + cell;
 			// and update
-			updateChannel(SensorTypes.valueOf(channelType), value);
+			updateChannel(SensorTypes.valueOf(type), value);
 		}
 		// and update channel
 		else
@@ -348,20 +348,20 @@ public class FrSkyHub {
 	/**
 	 * update a single channel with a single value
 	 * 
-	 * @param channel
+	 * @param sensorType
 	 * @param value
 	 */
-	private void updateChannel(SensorTypes channel, double value) {
+	private void updateChannel(SensorTypes sensorType, double value) {
 		// TODO create a channel here for the correct type of information and
 		// broadcast channel so GUI can update this value
-		Logger.d(FrSkyServer.TAG, "Data received for channel: " + channel
+		Logger.d(FrSkyServer.TAG, "Data received for channel: " + sensorType
 				+ ", value: " + value);
 
 		/*
 		 * eso, prototype Channel support Update a proper channel rather than
 		 * broadcast. Allow broadcasts until Channels are fully implemented
 		 */
-		switch (channel) {
+		switch (sensorType) {
 		case rpm:
 			_sourceChannelMap.get(CHANNEL_ID_RPM).setRaw(value);
 			break;
@@ -441,7 +441,7 @@ public class FrSkyHub {
 		}
 
 		// let server update this information
-		server.broadcastChannelData(channel, value);
+		server.broadcastChannelData(sensorType, value);
 	}
 
 	/**

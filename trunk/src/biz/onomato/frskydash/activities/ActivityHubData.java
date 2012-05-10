@@ -35,7 +35,7 @@ public class ActivityHubData extends Activity {
 
 	private static final int INTERVAL_GUI_UPDATE = 100;
 	public static final String FIELD_VALUE = "value";
-	public static final String FIELD_CHANNEL = "channel-type";
+	public static final String FIELD_SENSORTYPE = "channel-type";
 	private static final int ACTIVITY_PREFERENCES = 1;
 
 	/**
@@ -158,9 +158,9 @@ public class ActivityHubData extends Activity {
 	};
 
 	private void updateValues(Intent intent) {
-		String channelType = intent.getStringExtra(FIELD_CHANNEL);
+		String sensorType = intent.getStringExtra(FIELD_SENSORTYPE);
 		double value = intent.getDoubleExtra(FIELD_VALUE, 0);
-		sensorValues.put(SensorTypes.valueOf(channelType), value);
+		sensorValues.put(SensorTypes.valueOf(sensorType), value);
 	}
 
 	@Override
@@ -227,12 +227,12 @@ public class ActivityHubData extends Activity {
 	/**
 	 * actual update of the GUI with new value for given channeltype
 	 * 
-	 * @param type
+	 * @param sensorType
 	 * @param value
 	 */
-	private void updateUI(SensorTypes type, double value) {
+	private void updateUI(SensorTypes sensorType, double value) {
 		// switch based on type of channel
-		switch (type) {
+		switch (sensorType) {
 		case altitude_before:
 			//FIXME: The following two textViewAlt.setText's must be wrong. This textfield should only
 			//be set once, and with the combined value of before.after.
@@ -344,7 +344,7 @@ public class ActivityHubData extends Activity {
 		default:
 			// TODO update other fields (NE, WS from gps? new current sensors?)
 			Logger.d(this.getClass().getName(),
-					"non implemented display of channel type: " + type);
+					"non implemented display of channel type: " + sensorType);
 		}
 	}
 

@@ -2394,10 +2394,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * Comment: Please do not use this method to communicate from hub to consumers
 	 * @deprecated
 	 * 
-	 * @param channel
+	 * @param sensorType
 	 */
-	public void broadcastChannelData(SensorTypes channel, double value) {
-		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_CHANNEL, channel.toString());
+	public void broadcastChannelData(SensorTypes sensorType, double value) {
+		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_SENSORTYPE, sensorType.toString());
 		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_VALUE, value);
 		sendBroadcast(broadcastHubDataIntent);
 	}

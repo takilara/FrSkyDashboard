@@ -264,13 +264,13 @@ public class ActivityHubData extends Activity {
 		case gps_day_month:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
-			textViewDay.setText(calendar.get(Calendar.DAY_OF_MONTH));
-			textViewMonth.setText(calendar.get(Calendar.MONTH)+1);
+			textViewDay.setText(String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)));
+			textViewMonth.setText(String.valueOf(calendar.get(Calendar.MONTH)+1));
 			break;
 		case gps_year:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
-			textViewYear.setText(calendar.get(Calendar.YEAR));
+			textViewYear.setText(String.valueOf(calendar.get(Calendar.YEAR)));
 			break;
 		case fuel:
 			textViewFuel.setText(intFormat.format(value));
@@ -278,13 +278,13 @@ public class ActivityHubData extends Activity {
 		case gps_hour_minute:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
-			textViewHour.setText(calendar.get(Calendar.HOUR));
-			textViewMinute.setText(calendar.get(Calendar.MINUTE));
+			textViewHour.setText(String.valueOf(calendar.get(Calendar.HOUR)));
+			textViewMinute.setText(String.valueOf(calendar.get(Calendar.MINUTE)));
 			break;
 		case gps_second:
 			// this is a long now representing date
 			calendar.setTimeInMillis((long)value);
-			textViewSecond.setText(calendar.get(Calendar.SECOND));
+			textViewSecond.setText(String.valueOf(calendar.get(Calendar.SECOND)));
 			break;
 		case gps_altitude_after:
 			textViewGpsAlt.setText(decFormat.format(value));

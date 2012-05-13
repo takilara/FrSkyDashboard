@@ -90,14 +90,14 @@ public class ActivityHubData extends Activity {
 
 		// Update GUI cyclically
 		tickHandler = new Handler();
-		tickHandler.postDelayed(runnableTick, 100);
+		tickHandler.postDelayed(runnableTick, INTERVAL_GUI_UPDATE);
 		runnableTick = new Runnable() {
 			@Override
 			public void run() {
 				for (final SensorTypes type : sensorValues.keySet()) {
 					updateUI(type, sensorValues.get(type));
 				}
-				tickHandler.postDelayed(this, 100);
+				tickHandler.postDelayed(this, INTERVAL_GUI_UPDATE);
 			}
 		};
 

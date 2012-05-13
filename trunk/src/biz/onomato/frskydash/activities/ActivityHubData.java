@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +38,11 @@ public class ActivityHubData extends Activity {
 	public static final String FIELD_VALUE = "value";
 	public static final String FIELD_SENSORTYPE = "channel-type";
 	private static final int ACTIVITY_PREFERENCES = 1;
+	
+	// Used for GUI updates
+	private Handler tickHandler;
+	private Runnable runnableTick;
+
 
 	/**
 	 * hashmap containing last sensor values, broadcast updates these values,
@@ -82,30 +88,44 @@ public class ActivityHubData extends Activity {
 			}
 		});
 
-		// a thread responsible for updating the values on the gui
-		new Thread(new Runnable() {
+		// Update GUI cyclically
+		tickHandler = new Handler();
+		tickHandler.postDelayed(runnableTick, 100);
+		runnableTick = new Runnable() {
+			@Override
 			public void run() {
-				// infinite loop
-				while (true) {
-					// iterate values
-					for (final SensorTypes type : sensorValues.keySet()) {
-						// back to GUI
-						runOnUiThread(new Runnable() {
-							public void run() {
-								updateUI(type, sensorValues.get(type));
-							}
-						});
-					}
-					// and repeat this on interval
-					try {
-						Thread.sleep(INTERVAL_GUI_UPDATE);
-					} catch (InterruptedException e) {
-						Logger.e(ActivityHubData.this.getClass().toString(),
-								"Sleep for interval GUI update interrupted", e);
-					}
+				for (final SensorTypes type : sensorValues.keySet()) {
+					updateUI(type, sensorValues.get(type));
 				}
+				tickHandler.postDelayed(this, 100);
 			}
-		}).start();
+		};
+
+		
+		// a thread responsible for updating the values on the gui
+//		new Thread(new Runnable() {
+//			public void run() {
+//				// infinite loop
+//				while (true) {
+//					// iterate values
+//					for (final SensorTypes type : sensorValues.keySet()) {
+//						// back to GUI
+//						runOnUiThread(new Runnable() {
+//							public void run() {
+//								updateUI(type, sensorValues.get(type));
+//							}
+//						});
+//					}
+//					// and repeat this on interval
+//					try {
+//						Thread.sleep(INTERVAL_GUI_UPDATE);
+//					} catch (InterruptedException e) {
+//						Logger.e(ActivityHubData.this.getClass().toString(),
+//								"Sleep for interval GUI update interrupted", e);
+//					}
+//				}
+//			}
+//		}).start();
 	}
 
 	private TextView textViewAlt, textViewRpm, textViewAccX, textViewAccY,
@@ -166,6 +186,11 @@ public class ActivityHubData extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		
+		tickHandler.removeCallbacks(runnableTick);
+		tickHandler.post(runnableTick);
+
+		
 		// startService(broadcastIntent);
 		registerReceiver(broadcastReceiver, new IntentFilter(
 				FrSkyServer.BROADCAST_ACTION_HUB_DATA));
@@ -206,6 +231,7 @@ public class ActivityHubData extends Activity {
 	public void onPause() {
 		super.onPause();
 		unregisterReceiver(broadcastReceiver);
+		tickHandler.removeCallbacks(runnableTick);
 		// stopService(broadcastIntent);
 	}
 

@@ -37,6 +37,7 @@ public class Frame {
 	public int frameHeaderByte;
 	private int[] _frame;
 	private int[] _frameRaw;
+	private int[] mUserBytes;
 	
 	public int alarmChannel;
 	public int alarmNumber;
@@ -87,7 +88,7 @@ public class Frame {
 //			Logger.d(TAG, "Invalid frame format received(hex): "+Frame.frameToHuman(frame));
 //			return;
 //		}
-		
+		mUserBytes = null;
 		//if((frame.length>10) && (frame.length<30))
 		//{
 			timestamp = new Date();
@@ -182,6 +183,9 @@ public class Frame {
 					case FRAMETYPE_USER_DATA:
 						//hcpl handle sensor hub information
 						frametype=FRAMETYPE_USER_DATA;
+						int nrOfValidBytesInFrame = frame[2];
+						mUserBytes = new int[nrOfValidBytesInFrame];
+						System.arraycopy(frame, 4, mUserBytes, 0, nrOfValidBytesInFrame);
 						//parsing is done in parseFrame method using Frame object and 
 						break;
 					default:
@@ -219,27 +223,15 @@ public class Frame {
 		//}
 	}
 	
-	// hcpl sensor hub data frame parameters
 	/**
-	 * size for user data frames
+	 * Get the userbytes if they exist from the frame
+	 * @return
 	 */
-	public static final int SIZE_HUB_FRAME = 5;
+	public int[] getUserBytes()
+	{
+		return mUserBytes;
+	}
 	
-	/**
-	 * delimiter byte for user data frames
-	 */
-	public static final int START_STOP_HUB_FRAME = 0x5E;
-	
-	/**
-	 * stuffing indicator for the user data frames
-	 */
-	public static final int STUFFING_HUB_FRAME = 0x5D;
-	
-	/**
-	 * first byte after stuffing indicator should be XORed with this value
-	 */
-	public static final int XOR_HUB_FRAME = 0x60;
-
 	/**
 	 * Handle byte stuffing in case frame has more then 11 bytes
 	 * 

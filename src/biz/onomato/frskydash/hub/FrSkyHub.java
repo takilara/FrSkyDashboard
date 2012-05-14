@@ -13,8 +13,31 @@ import biz.onomato.frskydash.util.Logger;
  * responsible for parsing FrSky Hub Sensor Data
  * 
  */
-public class FrSkyHub {
+public class FrSkyHub extends Hub{
 
+	public final String TAG="FrSkyHub";
+	
+	// hcpl sensor hub data frame parameters
+	/**
+	 * size for user data frames
+	 */
+	public static final int SIZE_HUB_FRAME = 5;
+	
+	/**
+	 * delimiter byte for user data frames
+	 */
+	public static final int START_STOP_HUB_FRAME = 0x5E;
+	
+	/**
+	 * stuffing indicator for the user data frames
+	 */
+	public static final int STUFFING_HUB_FRAME = 0x5D;
+	
+	/**
+	 * first byte after stuffing indicator should be XORed with this value
+	 */
+	public static final int XOR_HUB_FRAME = 0x60;
+	
 	/**
 	 * singleton instance
 	 */
@@ -24,7 +47,7 @@ public class FrSkyHub {
 	 * the current user frame we are working on. This is used to pass data
 	 * between incompletes frames.
 	 */
-	private static int[] hubFrame = new int[Frame.SIZE_HUB_FRAME];
+	private static int[] hubFrame = new int[SIZE_HUB_FRAME];
 
 	/**
 	 * index of the current user frame. If set to -1 no user frame is under
@@ -47,7 +70,7 @@ public class FrSkyHub {
 	 */
 	private FrSkyHub() {
 		// eso: Prototype Channel code
-		setupFixedChannels();
+		initializeChannels();
 	}
 
 	public static FrSkyHub getInstance() {
@@ -57,11 +80,14 @@ public class FrSkyHub {
 		return instance;
 	}
 
+	
+	// FIXME: shall be deprecated when addUserBytes is properly implemented
 	/**
 	 * Extract user data bytes from telemetry data frame. This subframe is
 	 * delimited by the 0x5E byte, included in the frame argument for this
 	 * method. A single call can contain incomplete user data frames so need to
 	 * keep track of previous frame also.
+	 * 
 	 * 
 	 * @param frame
 	 */
@@ -69,6 +95,8 @@ public class FrSkyHub {
 		// init
 		// FIXME can't this be implemented in another way so we don't have to
 		// pass the server instance?
+		// eso: server is currently used for broadcasts from the hub, this shall be removed
+		// as the hub shall not broadcast
 		server = paramServer;
 		int b;
 		int[] ints = frame.toInts();
@@ -92,22 +120,22 @@ public class FrSkyHub {
 		for (int i = 4; i < 4 + nrOfValidBytesInFrame; i++) {
 			b = ints[i];
 			// handle byte stuffing first
-			if (b == Frame.STUFFING_HUB_FRAME) {
+			if (b == STUFFING_HUB_FRAME) {
 				hubXOR = true;
 				// drop this byte
 				continue;
 			}
 			if (hubXOR) {
-				b ^= Frame.XOR_HUB_FRAME;
+				b ^= XOR_HUB_FRAME;
 				// don't unset the xor flag yet since we'll have to check on
 				// this for start/stop bit detection
 				// xor = false;
-				Logger.d(FrSkyServer.TAG, "XOR operation, unstuffed to "
+				Logger.d(TAG, "XOR operation, unstuffed to "
 						+ Integer.toHexString(b));
 			}
 			// if we encounter a start byte we need to indicate we're in a
 			// frame or if at the end handle the frame and continue
-			if (b == Frame.START_STOP_HUB_FRAME && !hubXOR) {
+			if (b == START_STOP_HUB_FRAME && !hubXOR) {
 				// if currentFrameIndex is not set we have to start a new
 				// frame here
 				if (currentHubFrameIndex < 0) {
@@ -119,13 +147,13 @@ public class FrSkyHub {
 				// otherwise we were already collecting a frame so this
 				// indicates we are at the end now. At this point a frame is
 				// available that we can send over.
-				else if (currentHubFrameIndex == Frame.SIZE_HUB_FRAME - 1) {
+				else if (currentHubFrameIndex == SIZE_HUB_FRAME - 1) {
 					// just complete the frame we were collecting
 					hubFrame[currentHubFrameIndex] = b;
 					// this way the length is confirmed
 					handleHubDataFrame(hubFrame);
 					// once information is handled we can reset the frame
-					hubFrame = new int[Frame.SIZE_HUB_FRAME];
+					hubFrame = new int[SIZE_HUB_FRAME];
 					currentHubFrameIndex = 0;
 					// unlike the telemetry frames where 126 is on each side of
 					// the frame (126, x, y, 126, 126, x, y, 126) the 94 bit of
@@ -142,13 +170,13 @@ public class FrSkyHub {
 				else {
 					// log debug info here
 					Logger.d(
-							FrSkyServer.TAG,
+							TAG,
 							"Start/stop byte at wrong position: 0x"
 									+ Integer.toHexString(b)
 									+ " frame so far: "
 									+ Arrays.toString(hubFrame));
 					currentHubFrameIndex = 0;
-					hubFrame = new int[Frame.SIZE_HUB_FRAME];
+					hubFrame = new int[SIZE_HUB_FRAME];
 					hubFrame[currentHubFrameIndex++] = b;
 				}
 			}
@@ -156,14 +184,14 @@ public class FrSkyHub {
 			// the frame we are collecting. But only when we are currently
 			// working on a frame!
 			else if (currentHubFrameIndex >= 0
-					&& currentHubFrameIndex < Frame.SIZE_HUB_FRAME - 1) {
+					&& currentHubFrameIndex < SIZE_HUB_FRAME - 1) {
 				hubFrame[currentHubFrameIndex++] = b;
 			}
 			// finally it's possible that we receive bytes without being in
 			// a frame, just discard them for now
 			else {
 				// log debug info here
-				Logger.d(FrSkyServer.TAG,
+				Logger.d(TAG,
 						"Received data outside frame, dropped byte: 0x"
 								+ Integer.toHexString(b));
 			}
@@ -182,11 +210,11 @@ public class FrSkyHub {
 		// some validation first
 		// all frames are delimited by the 0x5e start and end byte and should be
 		// 5 bytes long. We can validate this before doing any parsing
-		if (frame.length != Frame.SIZE_HUB_FRAME
-				|| frame[0] != Frame.START_STOP_HUB_FRAME
-				|| frame[Frame.SIZE_HUB_FRAME - 1] != Frame.START_STOP_HUB_FRAME) {
+		if (frame.length != SIZE_HUB_FRAME
+				|| frame[0] != START_STOP_HUB_FRAME
+				|| frame[SIZE_HUB_FRAME - 1] != START_STOP_HUB_FRAME) {
 			// log exception here
-			Logger.d(FrSkyServer.TAG,
+			Logger.d(TAG,
 					"Wrong hub frame format: " + Arrays.toString(frame));
 			return;
 		}
@@ -354,7 +382,7 @@ public class FrSkyHub {
 	private void updateChannel(SensorTypes sensorType, double value) {
 		// TODO create a channel here for the correct type of information and
 		// broadcast channel so GUI can update this value
-		Logger.d(FrSkyServer.TAG, "Data received for channel: " + sensorType
+		Logger.d(TAG, "Data received for channel: " + sensorType
 				+ ", value: " + value);
 
 		/*
@@ -363,80 +391,80 @@ public class FrSkyHub {
 		 */
 		switch (sensorType) {
 		case rpm:
-			_sourceChannelMap.get(CHANNEL_ID_RPM).setRaw(value);
+			getChannel(CHANNEL_ID_RPM).setRaw(value);
 			break;
 		case temp1:
-			_sourceChannelMap.get(CHANNEL_ID_TEMP1).setRaw(value);
+			getChannel(CHANNEL_ID_TEMP1).setRaw(value);
 			break;
 		case temp2:
-			_sourceChannelMap.get(CHANNEL_ID_TEMP2).setRaw(value);
+			getChannel(CHANNEL_ID_TEMP2).setRaw(value);
 			break;
 		case altitude_before:
 			// /TODO: Proper construction of resulting altitude double needs to
 			// be done in handleHubDataFrame or extractUserDataBytes
-			_sourceChannelMap.get(CHANNEL_ID_ALTITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_ALTITUDE).setRaw(value);
 			break;
 		case altitude_after:
-			_sourceChannelMap.get(CHANNEL_ID_ALTITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_ALTITUDE).setRaw(value);
 		case acc_x:
-			_sourceChannelMap.get(CHANNEL_ID_ACCELERATOR_X).setRaw(value);
+			getChannel(CHANNEL_ID_ACCELERATOR_X).setRaw(value);
 			break;
 		case acc_y:
-			_sourceChannelMap.get(CHANNEL_ID_ACCELERATOR_Y).setRaw(value);
+			getChannel(CHANNEL_ID_ACCELERATOR_Y).setRaw(value);
 			break;
 		case acc_z:
-			_sourceChannelMap.get(CHANNEL_ID_ACCELERATOR_Z).setRaw(value);
+			getChannel(CHANNEL_ID_ACCELERATOR_Z).setRaw(value);
 			break;
 		case fuel:
-			_sourceChannelMap.get(CHANNEL_ID_FUEL).setRaw(value);
+			getChannel(CHANNEL_ID_FUEL).setRaw(value);
 			break;
 		case CELL_0:
-			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_1).setRaw(value);
+			getChannel(CHANNEL_ID_LIPO_CELL_1).setRaw(value);
 			break;
 		case CELL_1:
-			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_2).setRaw(value);
+			getChannel(CHANNEL_ID_LIPO_CELL_2).setRaw(value);
 			break;
 		case CELL_2:
-			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_3).setRaw(value);
+			getChannel(CHANNEL_ID_LIPO_CELL_3).setRaw(value);
 			break;
 		case CELL_3:
-			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_4).setRaw(value);
+			getChannel(CHANNEL_ID_LIPO_CELL_4).setRaw(value);
 			break;
 		case CELL_4:
-			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_5).setRaw(value);
+			getChannel(CHANNEL_ID_LIPO_CELL_5).setRaw(value);
 			break;
 		case CELL_5:
-			_sourceChannelMap.get(CHANNEL_ID_LIPO_CELL_6).setRaw(value);
+			getChannel(CHANNEL_ID_LIPO_CELL_6).setRaw(value);
 			break;
 		case gps_altitude_after:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
 			break;
 		case gps_altitude_before:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
 			break;
 		case gps_speed_after:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_SPEED).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_SPEED).setRaw(value);
 			break;
 		case gps_speed_before:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_SPEED).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_SPEED).setRaw(value);
 			break;
 		case gps_course_after:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_COURSE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_COURSE).setRaw(value);
 			break;
 		case gps_course_before:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_COURSE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_COURSE).setRaw(value);
 			break;
 		case gps_latitude_after:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
 			break;
 		case gps_latitude_before:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
 			break;
 		case gps_longitude_after:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
 			break;
 		case gps_longitude_before:
-			_sourceChannelMap.get(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
+			getChannel(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
 			break;
 		}
 
@@ -451,11 +479,14 @@ public class FrSkyHub {
 	/**
 	 * Unique ID for the HUB
 	 */
-	public static final int HUB_ID = -1000;
+	public static final int HUB_ID =-1000;
 
 	/**
 	 * Unique ID's for the Hubs channels
+	 * FIXME: Id for hubs and channels should be changed. Preferrably so that hub can
+	 * be oblivious to channel id's
 	 */
+	
 	public static final int CHANNEL_ID_ALTITUDE = 0 + HUB_ID;
 	public static final int CHANNEL_ID_RPM = 1 + HUB_ID;
 	public static final int CHANNEL_ID_TEMP1 = 2 + HUB_ID;
@@ -489,15 +520,15 @@ public class FrSkyHub {
 	/**
 	 * Treemap to hold the Hubs channels
 	 */
-	private static TreeMap<Integer, Channel> _sourceChannelMap;
+	//private static TreeMap<Integer, Channel> _sourceChannelMap;
 
 	/**
 	 * 
 	 * @return a ServerChannel corresponding to the given id
 	 */
-	public static Channel getSourceChannel(int id) {
-		return _sourceChannelMap.get(id);
-	}
+//	public static Channel getSourceChannel(int id) {
+//		return _sourceChannelMap.get(id);
+//	}
 
 	/**
 	 * TODO Should not be static since this relies on data initialised in the
@@ -506,16 +537,16 @@ public class FrSkyHub {
 	 * @return all the ServerChannels in a TreeMap (key is the id of the
 	 *         Channel)
 	 */
-	public TreeMap<Integer, Channel> getSourceChannels() {
-		return _sourceChannelMap;
-	}
+//	public TreeMap<Integer, Channel> getSourceChannels() {
+//		return _sourceChannelMap;
+//	}
 
 	/**
 	 * Create the _sourceChannelMap Populate it with our channels
 	 */
-	private void setupFixedChannels() {
-		_sourceChannelMap = new TreeMap<Integer, Channel>(
-				Collections.reverseOrder());
+	protected void initializeChannels() {
+//		_sourceChannelMap = new TreeMap<Integer, Channel>(
+//				Collections.reverseOrder());
 
 		// Sets up the hardcoded channels (Altitude,RPM)
 		// TODO: Figure out how to deal with race conditions on "split numbers"
@@ -552,7 +583,8 @@ public class FrSkyHub {
 		channel.setPrecision(2);
 		channel.setSilent(true);
 		channel.registerListenerForServerCommands();
-		_sourceChannelMap.put(channelID, channel);
+		//_sourceChannelMap.put(channelID, channel);
+		addChannel(channel);
 	}
 
 	public static int getBefore(double value) {
@@ -565,6 +597,36 @@ public class FrSkyHub {
 
 	public static double convertToAfter(int value) {
 		return Double.parseDouble("0." + value);
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.hub.Hub#getId()
+	 */
+	@Override
+	public int getId() {
+		return HUB_ID;
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.hub.Hub#addUserBytes(int[])
+	 */
+	@Override
+	public void addUserBytes(int[] ints) {
+		// FIXME incomplete
+		// shall take user bytes
+		// decode (destuff) them, and add to internal queue
+		// then identify hub frames within this queue
+		// and pass them to handleHubDataFrame
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.hub.Hub#addUserBytes(byte[])
+	 */
+	@Override
+	public void addUserBytes(byte[] bytes) {
+		// FIXME incomplete
+		
 	}
 
 }

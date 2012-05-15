@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
+
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -20,6 +22,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -468,7 +471,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 				else		// not receiving frames from Rx
 				{
 					// make sure user knows if state changed from ok to not ok
-					if(statusRx==true)
+					// only do this if Bt connection is up
+					if((statusRx==true) && (statusBt==true))
 					{
 						wasDisconnected("Rx");
 					}
@@ -1906,7 +1910,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//then pass to ctor Frame
 		Frame f = new Frame(ints);
 		// TODO adapt for encoding and accepting all lengths
+		//Debug.startMethodTracing("parseframe");
     	parseFrame(f);
+    	//Debug.stopMethodTracing();
 	}
 	
 	/**
@@ -2015,7 +2021,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 						FrSkyHub.getInstance().extractUserDataBytes(this, f);
 
 						// FIXME: Temporary to add userbytes on hub
-						FrSkyHub.getInstance().addUserBytes(f.getUserBytes());
+						//FrSkyHub.getInstance().addUserBytes(f.getUserBytes());
 //						Logger.d(TAG,"Testing Frame.getUserBytes() on f: "+f.toHuman());
 //						String s = "";
 //						for(int i: f.getUserBytes())
@@ -2236,6 +2242,7 @@ public class FrSkyServer extends Service implements OnInitListener {
                 switch (msg.arg1) {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Logger.d(TAG,"BT connected");
+                	//Debug.startMethodTracing("frskydash");
                 	setConnecting(false);
                 	statusBt = true;
                 	
@@ -2271,7 +2278,7 @@ public class FrSkyServer extends Service implements OnInitListener {
                 	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1
-                	
+                	//Debug.stopMethodTracing();
                 	
                 	logger.stop();
                 }

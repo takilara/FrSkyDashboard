@@ -98,8 +98,9 @@ public class FrSkyHub extends Hub{
 		// eso: server is currently used for broadcasts from the hub, this shall be removed
 		// as the hub shall not broadcast
 		server = paramServer;
-		int b;
-		int[] ints = frame.toInts();
+		//int b;
+		//int[] ints = frame.toInts();
+		//int[] ints = frame.getUserBytes();
 		// iterate elements in frame
 		// for (int b : frame) {
 		// don't handle all the bytes, skip header (0), prim(1), size(2),
@@ -115,10 +116,11 @@ public class FrSkyHub extends Hub{
 		// 4 => first user data byte
 		// ...
 		// 10 => stop byte frame
-		int nrOfValidBytesInFrame = ints[2];
+		//int nrOfValidBytesInFrame = ints[2];
 		// for (int i = 4; i < Frame.SIZE_TELEMETRY_FRAME - 1; i++) {
-		for (int i = 4; i < 4 + nrOfValidBytesInFrame; i++) {
-			b = ints[i];
+		//for (int i = 4; i < 4 + nrOfValidBytesInFrame; i++) {
+		for(int b : frame.getUserBytes()){
+			//b = ints[i];
 			// handle byte stuffing first
 			if (b == STUFFING_HUB_FRAME) {
 				hubXOR = true;

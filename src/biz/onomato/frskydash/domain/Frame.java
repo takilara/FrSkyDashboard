@@ -45,7 +45,7 @@ public class Frame {
 	public int alarmThreshold;
 	public int alarmGreaterThan;
 	public String alarmGreaterThanString;
-	public String humanFrame;
+	//public String humanFrame;
 	public Date timestamp;
 	
 	public int ad1,ad2,rssirx,rssitx = 0;
@@ -102,29 +102,35 @@ public class Frame {
 			 */
 			if(frame[0] != frame[frame.length-1])
 			{
-				Logger.e(TAG, "Frame start and end not equal: "+   Frame.frameToHuman(frame));
+				//Logger.e(TAG, "Frame start and end not equal: "+   Frame.frameToHuman(frame));
+				Logger.e(TAG, "Frame start and end not equal: "+   toHuman());
 			}
 			// eso: temporary fix to allow frames "that are still longer than 11" (from simulator) to get destuffed			
 			if(frame.length>11)
 			{
 				Logger.d(TAG,"Frame needs to be decoded: ");
-				Logger.d(TAG,"\tBefore: "+Frame.frameToHuman(frame,false));
-				frame = frameDecode(frame);
-				Logger.d(TAG,"\tAfter: "+Frame.frameToHuman(frame,false));
+				//Logger.d(TAG,"\tBefore: "+Frame.frameToHuman(frame,false));
+				Logger.d(TAG,"\tBefore: "+toHuman());
+				_frame = frameDecode(frame);
+				//Logger.d(TAG,"\tAfter: "+Frame.frameToHuman(frame,false));
+				Logger.d(TAG,"\tAfter: "+toHuman(false));
+				
 				
 			}
+			else
+			{
+				_frame = frame;
+			}
 			
-
 			
-			_frame = frame;
-			
-			humanFrame = Frame.frameToHuman(frame);
+			//humanFrame = Frame.frameToHuman(frame);
+			//humanFrame=toHuman();
 			
 			int _threshold;
 			int _greaterthan;
 			int _level;
 			
-			if(frame.length!=Frame.SIZE_TELEMETRY_FRAME)
+			if(_frame.length!=Frame.SIZE_TELEMETRY_FRAME)
 			{
 				frametype=FRAMETYPE_CORRUPT;
 				Logger.w(TAG,"Found corrupt frame");
@@ -132,16 +138,16 @@ public class Frame {
 			else
 			{
 			
-				frameHeaderByte =frame[1]; 
-				switch(frame[1])
+				frameHeaderByte =_frame[1]; 
+				switch(_frame[1])
 				{
 					// AnaLogger values
 					case FRAMETYPE_ANALOG:
 						frametype=FRAMETYPE_ANALOG;
-						ad1 = frame[2];
-						ad2 = frame[3];
-						rssirx = frame[4];
-						rssitx = (int) frame[5]/2;
+						ad1 = _frame[2];
+						ad2 = _frame[3];
+						rssirx = _frame[4];
+						rssitx = (int) _frame[5]/2;
 						break;
 					case FRAMETYPE_INPUT_REQUEST_ALARMS_AD:
 						frametype=FRAMETYPE_INPUT_REQUEST_ALARMS_AD;
@@ -183,22 +189,23 @@ public class Frame {
 					case FRAMETYPE_USER_DATA:
 						//hcpl handle sensor hub information
 						frametype=FRAMETYPE_USER_DATA;
-						int nrOfValidBytesInFrame = frame[2];
+						int nrOfValidBytesInFrame = _frame[2];
 						mUserBytes = new int[nrOfValidBytesInFrame];
-						System.arraycopy(frame, 4, mUserBytes, 0, nrOfValidBytesInFrame);
+						System.arraycopy(_frame, 4, mUserBytes, 0, nrOfValidBytesInFrame);
 						//parsing is done in parseFrame method using Frame object and 
 						break;
 					default:
 						frametype=FRAMETYPE_UNDEFINED;
-						Logger.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
+						//Logger.i(TAG,"Unknown frame:\n"+frameToHuman(frame));
+						Logger.i(TAG,"Unknown frame:\n"+toHuman());
 						break;
 				}
 				if(frametype==FRAMETYPE_FRSKY_ALARM)
 				{
 					// Value of <AlarmChannel> alarm <AlarmNumber> is <greater> than <alarmthreshold>, and is at level <alarmlevel>
 					//Logger.w(TAG,"Incoming frame is alarmframe");
-					_threshold = frame[2];
-					_greaterthan = frame[3];
+					_threshold = _frame[2];
+					_greaterthan = _frame[3];
 					String _greaterthanhuman;
 					if(_greaterthan==1)
 					{
@@ -209,7 +216,7 @@ public class Frame {
 						_greaterthanhuman="lower";
 					}
 					
-					_level = frame[4];
+					_level = _frame[4];
 					
 					alarmLevel = _level;
 					alarmThreshold=_threshold;
@@ -468,84 +475,157 @@ public class Frame {
 	 * @param frame
 	 * @return
 	 */
-	public static String frameToHuman(int[] frame)
+//	public static String frameToHuman(int[] frame)
+//	{
+//		return frameToHuman(frame,true);
+//	}
+//	
+//	/**
+//	 * Method to output nicely formated string of hex Characters of the given frame
+//	 * @param frame frame as int[] that you want decoded
+//	 * @param decode set to false to prevent method from doing encoding
+//	 * @return a string with hex representation of the frame
+//	 * @author eso
+//	 */
+//	public static String frameToHuman(int[] frame,boolean decode)
+//	{
+//		//Date startTime = new Date();
+//		StringBuffer buf = new StringBuffer();
+//		
+//		//Logger.i(TAG,"Create human raedable string with "+frame.length+" bytes");
+//		//int xor = 0x00;
+//		if(decode)
+//		{
+//			for(int n=0;n<frame.length;n++)
+//			{
+//				String hex ="";
+//				if(
+//						(frame[n]==START_STOP_TELEMETRY_FRAME) 		// delimiter
+//						&& (n>1)				// not first or second byte
+//						&& (n<frame.length-1) 	// not last byte
+//					)
+//				{
+//					hex = "7d 5e";
+//				}
+//				else if(
+//						(frame[n]==STUFFING_TELEMETRY_FRAME) 		// delimiter
+//						&& (n>1)				// not first or second byte
+//						&& (n<frame.length-1) 	// not last byte
+//					)
+//				{
+//					hex = "7d 5d";
+//				}
+//				else
+//				{
+//					hex = Integer.toHexString(frame[n]);
+//					if(hex.length()==1)
+//					{
+//						hex = "0"+hex;
+//					}
+//				}
+//				// Need to append in case it returns 0xf etc
+//				//if(hex.length()==1)
+//				//{
+//	//				buf.append('0');
+//				//}
+//				buf.append(hex);
+//				if(n<frame.length-1)
+//				{
+//					buf.append(' ');
+//				}
+//			
+//			}
+//		}
+//		else
+//		{
+//			for(int n=0;n<frame.length;n++)
+//			{
+//				String hex ="";
+//				
+//				hex = Integer.toHexString(frame[n]);
+//				if(hex.length()==1)
+//				{
+//					hex = "0"+hex;
+//				}
+//				
+//				buf.append(hex);
+//				if(n<frame.length-1)
+//				{
+//					buf.append(' ');
+//				}
+//			
+//			}
+//		}
+//
+//		//Logger.i(TAG,"String is then: "+out);
+//		
+//		//Date endTime = new Date();
+//		//long duration = endTime.getTime()-startTime.getTime();
+//		//Logger.d(TAG,"Constructing human frame took: "+duration+" ms");
+//		return buf.toString();
+//	}
+	
+	public String toHuman()
 	{
-		return frameToHuman(frame,true);
+		return toHuman(true); // returns human representation of raw frame by default
 	}
 	
-	/**
-	 * Method to output nicely formated string of hex Characters of the given frame
-	 * @param frame frame as int[] that you want decoded
-	 * @param decode set to false to prevent method from doing encoding
-	 * @return a string with hex representation of the frame
-	 * @author eso
-	 */
-	public static String frameToHuman(int[] frame,boolean decode)
+	public String toHuman(boolean showRaw)
 	{
-		//Date startTime = new Date();
-		StringBuffer buf = new StringBuffer();
+		//boolean decode=true;
+		StringBuilder  buf = new StringBuilder(64);
 		
-		//Logger.i(TAG,"Create human raedable string with "+frame.length+" bytes");
-		//int xor = 0x00;
-		if(decode)
+		if(showRaw) 
 		{
-			for(int n=0;n<frame.length;n++)
+			//for(int n=0;n<_frameRaw.length;n++)
+			for(int b:_frameRaw)
 			{
-				String hex ="";
-				if(
-						(frame[n]==START_STOP_TELEMETRY_FRAME) 		// delimiter
-						&& (n>1)				// not first or second byte
-						&& (n<frame.length-1) 	// not last byte
-					)
+				if(b<0x10)
 				{
-					hex = "7d 5e";
+					buf.append("0");
 				}
-				else if(
-						(frame[n]==STUFFING_TELEMETRY_FRAME) 		// delimiter
-						&& (n>1)				// not first or second byte
-						&& (n<frame.length-1) 	// not last byte
-					)
-				{
-					hex = "7d 5d";
-				}
-				else
-				{
-					hex = Integer.toHexString(frame[n]);
-					if(hex.length()==1)
-					{
-						hex = "0"+hex;
-					}
-				}
-				// Need to append in case it returns 0xf etc
-				//if(hex.length()==1)
-				//{
-	//				buf.append('0');
-				//}
-				buf.append(hex);
-				if(n<frame.length-1)
-				{
+				
+				buf.append(Integer.toHexString(b));
+//				if(n<_frameRaw.length-1)
+//				{
 					buf.append(' ');
-				}
-			
+//				}
+				
+
+//				if(_frameRaw[n]<0x10)
+//				{
+//					buf.append("0");
+//				}
+//				
+//				buf.append(Integer.toHexString(_frameRaw[n]));
+//				if(n<_frameRaw.length-1)
+//				{
+//					buf.append(' ');
+//				}
 			}
 		}
 		else
 		{
-			for(int n=0;n<frame.length;n++)
+			//for(int n=0;n<_frame.length;n++)
+			for(int b : _frame)
 			{
-				String hex ="";
-				
-				hex = Integer.toHexString(frame[n]);
-				if(hex.length()==1)
+				if(b<0x10)
 				{
-					hex = "0"+hex;
+					buf.append("0");
 				}
 				
-				buf.append(hex);
-				if(n<frame.length-1)
-				{
+				buf.append(Integer.toHexString(b));
+				
+//				if(_frame[n]<0x10)
+//				{
+//					buf.append("0");
+//				}
+//				
+//				buf.append(Integer.toHexString(_frame[n]));
+//				if(n<_frame.length-1)
+//				{
 					buf.append(' ');
-				}
+//				}
 			
 			}
 		}
@@ -555,12 +635,10 @@ public class Frame {
 		//Date endTime = new Date();
 		//long duration = endTime.getTime()-startTime.getTime();
 		//Logger.d(TAG,"Constructing human frame took: "+duration+" ms");
+		//Logger.d(TAG,"ToHuman Frame length:"+buf.length());
 		return buf.toString();
-	}
-	
-	public String toHuman()
-	{
-		return frameToHuman(_frame);
+		
+		//return frameToHuman(_frame);
 	}
 	
 	public int[] toInts()

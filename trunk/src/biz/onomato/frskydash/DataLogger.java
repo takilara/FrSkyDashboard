@@ -327,7 +327,7 @@ public class DataLogger {
 				{
 					_streamHuman.write((timeElapsed+"\t").getBytes());
 					//_streamHuman.write((f.toHuman()+crlf).getBytes());
-					_streamHuman.write((f.humanFrame+crlf).getBytes());
+					_streamHuman.write((f.toHuman()+crlf).getBytes());
 				}
 				catch (IOException e)
 				{

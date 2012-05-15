@@ -1,5 +1,7 @@
 package biz.onomato.frskydash.domain;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
@@ -89,6 +91,7 @@ public class Channel implements Comparator<Channel> {
 	private float _offset;
 	private float _factor;
 	private int _precision;
+	private NumberFormat decFormat;
 	// private Context _context;
 	private int _textViewId = -1;
 
@@ -294,8 +297,14 @@ public class Channel implements Comparator<Channel> {
 	}
 
 	public void setPrecision(int precision) {
-		if (precision >= 0) {
+		String df = "0";
+		if (precision > 0) {
+			df = df + ".";
 			_precision = precision;
+			for(int n=0;n<_precision;n++)
+			{
+				df = df+"0";
+			}
 		} else {
 			_precision = 0;
 		}
@@ -303,6 +312,9 @@ public class Channel implements Comparator<Channel> {
 		for (int i = 0; i < _precision; i++) {
 			rounder = rounder * 10;
 		}
+		
+		
+		decFormat = new DecimalFormat(df);
 		setDirtyFlag(true);
 	}
 
@@ -451,6 +463,8 @@ public class Channel implements Comparator<Channel> {
 		// + _channelId + "]";
 	}
 
+	
+	
 	/**
 	 * Used to return the calculated value (average) as a nicely formatted
 	 * string
@@ -459,7 +473,8 @@ public class Channel implements Comparator<Channel> {
 	 */
 	public String toValueString() {
 		// TODO DecimalFormat is probably faster
-		return String.format("%." + _precision + "f", _val);
+		//return String.format("%." + _precision + "f", _val);
+		return decFormat.format(_val);
 	}
 
 	/**
@@ -471,7 +486,9 @@ public class Channel implements Comparator<Channel> {
 	 */
 	public String toValueString(int inputValue) {
 		// TODO DecimalFormat is probably faster
-		return String.format("%." + _precision + "f", convert(inputValue));
+		//return String.format("%." + _precision + "f", convert(inputValue));
+		return decFormat.format(convert(inputValue));
+		
 	}
 
 	// ==========================================================================================
@@ -618,7 +635,8 @@ public class Channel implements Comparator<Channel> {
 		// Locale.US decimal point
 		// TODO DecimalFormat probably faster
 		return getDescription() + ": "
-				+ String.format(Locale.US, "%." + _precision + "f", _val)
+				+ decFormat.format(_val)
+				//+ String.format(Locale.US, "%." + _precision + "f", _val)
 				+ getLongUnit();
 		// return getDescription()+": "+toValueString()+" "+getLongUnit();
 	}

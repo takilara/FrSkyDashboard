@@ -1,12 +1,15 @@
 package biz.onomato.frskydash;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 
@@ -33,6 +36,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
+import biz.onomato.frskydash.DataLogger.RawLogger;
 import biz.onomato.frskydash.activities.ActivityDashboard;
 import biz.onomato.frskydash.activities.ActivityHubData;
 import biz.onomato.frskydash.db.FrSkyDatabase;
@@ -132,6 +136,12 @@ public class FrSkyServer extends Service implements OnInitListener {
     
     private boolean _compareAfterRecord =false;
     private boolean _autoSwitch = false;
+    
+    /**
+     * Holds frames for threaded handling
+     */
+    private BlockingQueue<Frame> mFrameBuffer;
+    private static int mDroppedFrames = 0;
     
     /**
      * FPS
@@ -307,6 +317,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 		broadcastManager = LocalBroadcastManager.getInstance(context);
 		//_serverChannels = new HashMap<String,Channel>();
 		
+		//TODO: setting max buffer size to 100 frames for now. Might need to tune this
+		mFrameBuffer = new LinkedBlockingQueue <Frame>(100);
+		FrameParser frameParser = new FrameParser(mFrameBuffer);
+		
+		Thread frameParserThread = new Thread(frameParser,"FrameParserThread");
+		frameParserThread.setDaemon(true);
+		frameParserThread.start();
+		
+		
 		_alarmMap = new TreeMap<Integer,Alarm>();
 		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
 		
@@ -339,7 +358,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Logger.i(TAG,"Previous ModelId was: "+_prevModelId);
 		//	_currentModel = new Model(context);
 		
-		// DEBUG, List all channels for the model using new databaseadapter
+
 		
 		modelMap = new TreeMap<Integer,Model>();
 		database = new FrSkyDatabase(getApplicationContext());
@@ -569,6 +588,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 	//                                   GETTERS AND SETTERS
 	// **************************************************************************************************************
 	
+	/**
+	 * Get dropped frame count
+	 * @return count of dropped frames since last connect
+	 */
+	public static int getDroppedFrames()
+	{
+		return mDroppedFrames;
+	}
 	
 	/**
 	 * 
@@ -1596,6 +1623,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void connect(BluetoothDevice device)
 	{
+		
 		setConnecting(true);
 		
 		logger.stop();		// stop the logger (will force creation of new files)
@@ -1885,7 +1913,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	// **************************************************************************************************************
 	
 	/**
-	 * Handle a single parsed frame. This frame is expected to be exactly 11 bytes long and in proper format.
+	 * Converts a list of ints corresponding to a frame, to a Frame instance.
 	 * @param list
 	 * 
 	 * NOTE: eso: we could add Frame(List<Integer>) ctor
@@ -1909,10 +1937,32 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		//then pass to ctor Frame
 		Frame f = new Frame(ints);
-		// TODO adapt for encoding and accepting all lengths
-		//Debug.startMethodTracing("parseframe");
-    	parseFrame(f);
-    	//Debug.stopMethodTracing();
+		// Code for threaded parsing
+
+		// If buffer is full, try to drop oldest frame to make room for new frame
+		if(mFrameBuffer.remainingCapacity()==0)
+		{
+			try
+			{
+				Frame of = mFrameBuffer.take();
+				mDroppedFrames++;
+				Logger.w(TAG, "Dropped oldest Frame");
+			}
+			catch(Exception e)
+			{
+				
+			}
+				
+		}
+		if(!mFrameBuffer.offer(f))
+		{
+			// The buffer was still unable to take the frame, so this one got dropped as well
+			mDroppedFrames++;
+			//Logger.e(TAG, "Dropped newest Frame");
+		}
+		
+		// old unthreaded parsing
+		//parseFrame(f);
 	}
 	
 	/**
@@ -1966,7 +2016,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 					// don't copy the entire alarm, as that would kill off sourcechannel
 					//TODO: Compare to existing
 					//TODO: Ask to load into the alarms
-//					Alarm a = _currentModel.getFrSkyAlarms().get(aIn.getFrSkyFrameType());
+//					Alarm  a = _currentModel.getFrSkyAlarms().get(aIn.getFrSkyFrameType());
 //					aIn.setThreshold(aIn.getThreshold());
 //					aIn.setGreaterThan(aIn.getGreaterThan());
 //					aIn.setAlarmLevel(aIn.getAlarmLevel());
@@ -2242,7 +2292,8 @@ public class FrSkyServer extends Service implements OnInitListener {
                 switch (msg.arg1) {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Logger.d(TAG,"BT connected");
-                	//Debug.startMethodTracing("frskydash");
+                	mDroppedFrames = 0;
+                	Debug.startMethodTracing("frskydash");
                 	setConnecting(false);
                 	statusBt = true;
                 	
@@ -2278,7 +2329,7 @@ public class FrSkyServer extends Service implements OnInitListener {
                 	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1
-                	//Debug.stopMethodTracing();
+                	Debug.stopMethodTracing();
                 	
                 	logger.stop();
                 }
@@ -2440,4 +2491,25 @@ public class FrSkyServer extends Service implements OnInitListener {
 		fileSim = fileSimThread;
 	}
 
+	class FrameParser implements Runnable 
+	{
+		private final BlockingQueue queue;
+		private static final String TAG="RawLogger";
+		
+		FrameParser(BlockingQueue q) { queue = q; }
+		public void run() 
+		{
+			try 
+			{
+				while (true) { consume((Frame) queue.take()); }
+			} 
+			catch (InterruptedException ex) 
+			{
+			}
+		}
+		   
+		void consume(Frame f) {
+			parseFrame(f,true);
+		}
+	}
 }

@@ -54,6 +54,8 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	// Used for GUI updates
 	private Handler tickHandler;
 	private Runnable runnableTick;
+	private static final int GUI_UPDATE_FREQUENCY=5;
+	private static final int GUI_UPDATE_SLEEP_MS=1000/GUI_UPDATE_FREQUENCY;
 
 	private boolean bluetoothEnabledAtStart;
 	private int _clickToDebug = 0;
@@ -186,7 +188,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
 		// Code to update GUI cyclic
 		tickHandler = new Handler();
-		tickHandler.postDelayed(runnableTick, 100);
+		tickHandler.postDelayed(runnableTick, GUI_UPDATE_SLEEP_MS);
 		runnableTick = new Runnable() {
 			@Override
 			public void run() {
@@ -245,7 +247,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
 				}
 
-				tickHandler.postDelayed(this, 100);
+				tickHandler.postDelayed(this, GUI_UPDATE_SLEEP_MS);
 			}
 		};
 
@@ -274,7 +276,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					+ FrSkyServer.getSourceChannel(
 							FrSkyServer.CHANNEL_ID_RSSIRX).toValueString());
 			tv_fps.setText("FPS: " + server.getFps());
-			tv_bad.setText("Bad: " + FrSkyServer.badFrames);
+			tv_bad.setText("Bad: " + FrSkyServer.badFrames+"/"+FrSkyServer.getDroppedFrames());
 
 			int len = server.getCurrentModel().getChannels().size();
 			// for(int i=0;i<len;i++)

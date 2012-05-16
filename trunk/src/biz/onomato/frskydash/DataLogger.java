@@ -98,13 +98,21 @@ public class DataLogger {
 		channelCsvBuffer = new LinkedBlockingQueue <String>();
 
 		HumanLogger humanLogger = new HumanLogger(frameBufferAsc);
-		new Thread(humanLogger).start();
+		Thread threadHumanLogger = new Thread(humanLogger,"HumanLoggerTread");
+		threadHumanLogger.setDaemon(true);
+		threadHumanLogger.start();
+		
 		
 		RawLogger rawLogger = new RawLogger(frameBufferRaw);
-		new Thread(rawLogger).start();
+		Thread threadRawLogger = new Thread(rawLogger,"RawLoggerThread");
+		threadRawLogger.setDaemon(true);
+		threadRawLogger.start();
 		
 		CsvLogger csvLogger = new CsvLogger(channelCsvBuffer);
-		new Thread(csvLogger).start();
+		
+		Thread threadCsvLogger = new Thread(csvLogger,"CSVLoggerThread");
+		threadCsvLogger.setDaemon(true);
+		threadCsvLogger.start();
 	}
 	
 	public void setModel(Model model)
@@ -213,7 +221,7 @@ public class DataLogger {
 				}
 				sb.append(crlf);
 
-				channelCsvBuffer.add(sb.toString());
+				channelCsvBuffer.offer(sb.toString());
 			}
 		}
 	}
@@ -230,10 +238,10 @@ public class DataLogger {
 		{
 			// Add frame to buffers
 			if(_logRaw){ 
-				frameBufferRaw.add(f);
+				frameBufferRaw.offer(f);
 			}
 			if(_logHuman){
-				frameBufferAsc.add(f);
+				frameBufferAsc.offer(f);
 			}
 		}	
 	}
@@ -259,23 +267,39 @@ public class DataLogger {
 		_fileCsv = null;
 	}
 	
-	
+	/**
+	 * Enable or Disable logging of raw frames to file
+	 * @param logToRaw
+	 */
 	public void setLogToRaw(boolean logToRaw)
 	{
 		_logRaw = logToRaw;
 	}
 	
+	/**
+	 * Enable or Disable logging of ASCII representation of framedata to file.
+	 * This should only be used for debugging purposes due to performance impact
+	 * @param logToHuman
+	 */
 	public void setLogToHuman(boolean logToHuman)
 	{
 		_logHuman = logToHuman;
 	}
 	
+	/**
+	 * Enable or Disable logging of the current model's channels to CSV file
+	 * @param logToCsv
+	 */
 	public void setLogToCsv(boolean logToCsv)
 	{
 		_logCsv = logToCsv;
 	}
 
-	
+	/**
+	 * Class to allow threaded logging of ASCII presentation of raw frames
+	 * @author eso
+	 *
+	 */
 	class HumanLogger implements Runnable 
 	{
 		private final BlockingQueue queue;

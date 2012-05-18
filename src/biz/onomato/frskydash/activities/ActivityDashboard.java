@@ -264,9 +264,11 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 
 	}
 
-	// TODO: Refactor to listen for broadcasts, insert into array, then
 	// cyclically read from array
 	private void updateChannelValues() {
+		//TODO: Reduce concatenation to boost performance
+		//TODO: stop doing findViewById (suggestion to build view list with channel id's as keys when changing model/resume)
+		//TODO: stop containing viewId in Channel
 		if (server != null) {
 			// "Hard Channels"
 			tv_rssitx.setText("RSSItx: "

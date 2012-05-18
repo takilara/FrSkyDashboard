@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.BlockingQueue;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 import biz.onomato.frskydash.util.Logger;
@@ -46,6 +48,8 @@ public class Channel implements Comparator<Channel> {
 	public static final int CHANNELTYPE_AD1 = 0;
 	public static final int CHANNELTYPE_AD2 = 1;
 	public static final int CHANNELTYPE_RSSI = 2;
+	
+	
 
 	/**
 	 * Broadcast message used for capturing and sending value updates
@@ -409,16 +413,16 @@ public class Channel implements Comparator<Channel> {
 	 * Update all registered listeners
 	 * @deprecated Broadcasts should not be used for channel updating
 	 */
-	private void broadcastUpdate()
-	{
-		String bCastAction = MESSAGE_CHANNEL_UPDATED + _channelId;
-		// Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
-
-		Intent i = new Intent();
-		i.setAction(bCastAction);
-		i.putExtra("channelValue", _val);
-		FrSkyServer.getContext().sendBroadcast(i);
-	}
+//	private void broadcastUpdate()
+//	{
+//		String bCastAction = MESSAGE_CHANNEL_UPDATED + _channelId;
+//		// Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
+//
+//		Intent i = new Intent();
+//		i.setAction(bCastAction);
+//		i.putExtra("channelValue", _val);
+//		FrSkyServer.getContext().sendBroadcast(i);
+//	}
 	
 	/**
 	 * Retrieve the last calculated value (not an average).
@@ -564,7 +568,6 @@ public class Channel implements Comparator<Channel> {
 	
 	/**
 	 * Update all the derived Channels
-	 * TODO: Should probably be made into AsyncTask or worker thread
 	 */
 	private void updateDerivedChannels()
 	{
@@ -573,6 +576,11 @@ public class Channel implements Comparator<Channel> {
 			c.setRaw(_val);
 		}
 	}
+	
+	
+	
+
+	
 	
 
 	public void setSourceChannel(Channel channel) {

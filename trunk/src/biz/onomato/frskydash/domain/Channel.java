@@ -265,15 +265,6 @@ public class Channel implements Comparator<Channel> {
 		setDirtyFlag(true);
 	}
 
-	// public String getName()
-	// {
-	// return _name;
-	// }
-	// public void setName(String n)
-	// {
-	// _name = n;
-	// setDirtyFlag(true);
-	// }
 
 	public String getLongUnit() {
 		if (_longUnit == null) {
@@ -359,17 +350,6 @@ public class Channel implements Comparator<Channel> {
 		setDirtyFlag(true);
 	}
 
-	// /**
-	// * @deprecated use {@link FrSkyServer#getContext()} instead. This is only
-	// a
-	// * wrapper method. Can be removed.
-	// *
-	// * @return the context this channel is in
-	// */
-	// public Context getContext() {
-	// // redirect only
-	// return FrSkyServer.getContext();
-	// }
 
 	// ==========================================================================================
 	// ==== CHANNEL METHODS =====
@@ -409,20 +389,6 @@ public class Channel implements Comparator<Channel> {
 		return _val;
 	}
 
-	/**
-	 * Update all registered listeners
-	 * @deprecated Broadcasts should not be used for channel updating
-	 */
-//	private void broadcastUpdate()
-//	{
-//		String bCastAction = MESSAGE_CHANNEL_UPDATED + _channelId;
-//		// Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
-//
-//		Intent i = new Intent();
-//		i.setAction(bCastAction);
-//		i.putExtra("channelValue", _val);
-//		FrSkyServer.getContext().sendBroadcast(i);
-//	}
 	
 	/**
 	 * Retrieve the last calculated value (not an average).
@@ -583,6 +549,10 @@ public class Channel implements Comparator<Channel> {
 	
 	
 
+	/**
+	 * Set the channel this channel listens to
+	 * @param channel source channel
+	 */
 	public void setSourceChannel(Channel channel) {
 		if(_sourceChannelId!=-1)
 		{
@@ -601,7 +571,7 @@ public class Channel implements Comparator<Channel> {
 	}
 
 	/**
-	 * @deprecated use {@link #setSourceChannel(Channel)} instead
+	 * @deprecated {@link #setSourceChannel(Channel)} preferred
 	 * @param channelId
 	 */
 	public void setSourceChannel(int channelId) {
@@ -649,6 +619,9 @@ public class Channel implements Comparator<Channel> {
 	}
 
 
+	/**
+	 * Used to unregister self from updates from the source channel
+	 */
 	public void unregisterListenerForChannelUpdates() {
 		if(_sourceChannelId!=-1)
 		{
@@ -683,18 +656,6 @@ public class Channel implements Comparator<Channel> {
 		_closed = true;
 	}
 
-	private BroadcastReceiver mChannelUpdateReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (!_closed) {
-				double val = intent.getDoubleExtra("channelValue", -1);
-				setRaw(val);
-			} else {
-				// kill self somehow
-				Logger.e(TAG, "Channel "+this.toString()+" still receiving commands while it should be unregistered. Channel Object ID: "+this.hashCode());
-			}
-		}
-	};
 
 	private BroadcastReceiver mCommandReceiver = new BroadcastReceiver() {
 		@Override
@@ -706,13 +667,6 @@ public class Channel implements Comparator<Channel> {
 		}
 	};
 
-	// TODO: Deprecate
-	// public void onSourceUpdate(double sourceValue)
-	// {
-	//
-	// double v = setRaw(sourceValue);
-	// Log.d(TAG,_name+" updated by parent to "+sourceValue+" -> "+v+" "+_shortUnit);
-	// }
 
 	// ==========================================================================================
 	// ==== UTILITY METHODS =====

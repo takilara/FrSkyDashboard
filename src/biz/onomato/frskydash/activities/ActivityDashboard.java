@@ -265,6 +265,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	}
 
 	// cyclically read from array
+	
+	/**
+	 * Updates all the values on the Dashboard activity
+	 */
 	private void updateChannelValues() {
 		//TODO: Reduce concatenation to boost performance
 		//TODO: stop doing findViewById (suggestion to build view list with channel id's as keys when changing model/resume)

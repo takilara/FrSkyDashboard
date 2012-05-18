@@ -2,6 +2,7 @@ package biz.onomato.frskydash.domain;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
@@ -87,7 +88,7 @@ public class Channel implements Comparator<Channel> {
 
 	public double rounder;
 	private String _description;
-	private long _sourceChannelId;
+	private int _sourceChannelId;
 	private float _offset;
 	private float _factor;
 	private int _precision;
@@ -95,7 +96,7 @@ public class Channel implements Comparator<Channel> {
 	// private Context _context;
 	private int _textViewId = -1;
 
-	private IntentFilter mIntentFilter;
+	//private IntentFilter mIntentFilter;
 	private IntentFilter mIntentFilterCommands;
 
 	private String _shortUnit;
@@ -234,7 +235,7 @@ public class Channel implements Comparator<Channel> {
 		return _modelId;
 	}
 
-	public long getSourceChannelId() {
+	public int getSourceChannelId() {
 		return _sourceChannelId;
 	}
 
@@ -395,17 +396,30 @@ public class Channel implements Comparator<Channel> {
 		// engAvg = _val;
 
 		if (_channelId != -1) {
-			String bCastAction = MESSAGE_CHANNEL_UPDATED + _channelId;
-			// Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
-
-			Intent i = new Intent();
-			i.setAction(bCastAction);
-			i.putExtra("channelValue", _val);
-			FrSkyServer.getContext().sendBroadcast(i);
+			// Interface based communication
+			updateDerivedChannels();
+			
+			// Broadcast based communication
+			//broadcastUpdate();
 		}
 		return _val;
 	}
 
+	/**
+	 * Update all registered listeners
+	 * @deprecated Broadcasts should not be used for channel updating
+	 */
+	private void broadcastUpdate()
+	{
+		String bCastAction = MESSAGE_CHANNEL_UPDATED + _channelId;
+		// Log.d(TAG,"Send broadcast of value to ANY listener on context "+_context+", using message: "+bCastAction);
+
+		Intent i = new Intent();
+		i.setAction(bCastAction);
+		i.putExtra("channelValue", _val);
+		FrSkyServer.getContext().sendBroadcast(i);
+	}
+	
 	/**
 	 * Retrieve the last calculated value (not an average).
 	 * 
@@ -495,65 +509,143 @@ public class Channel implements Comparator<Channel> {
 	// ==== INTER CHANNEL COMMUNICATION =====
 	// ==========================================================================================
 
+	/**
+	 * Tell this channel to get its updates from another channel
+	 * @param channel the channel to receive updates from
+	 */
+//	public void listenTo(Channel channel)
+//	{
+//		if(_sourceChannelId!=-1) 	// Used to listen to a channel
+//		{
+//			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+//		}
+//		
+//		if(channel!=null) // only listen to new channel if not null
+//		{
+//			// channel already listening on a channel
+//			channel.addDerivedChannel(this);
+//		}
+//	}
+	
+	/**
+	 * Array to hold derived Channels,
+	 * Note, this was made an Array instead of arrayList, as iterating needs high performance
+	 */
+	private Channel[] mDerivedChannelsA = new Channel[0];
+	private ArrayList<Channel> mDerivedChannelsL = new ArrayList<Channel>();
+	private boolean mUseList=true;
+	
+	/**
+	 * Add a channel that wants to get updates from this channel
+	 * 
+	 * @param channel
+	 */
+	public void addDerivedChannel(Channel channel)
+	{
+		if(!mDerivedChannelsL.contains(channel))
+		{
+			mDerivedChannelsL.add(channel);
+		}
+		mDerivedChannelsA = mDerivedChannelsL.toArray(new Channel[mDerivedChannelsL.size()]);
+	}
+	
+	/**
+	 * Drop a channel from the update list
+	 * 
+	 * @param channel
+	 */
+	public void dropDerivedChannel(Channel channel)
+	{
+		
+		mDerivedChannelsL.remove(channel);
+		mDerivedChannelsA = mDerivedChannelsL.toArray(new Channel[mDerivedChannelsL.size()]);
+		
+	}
+	
+	/**
+	 * Update all the derived Channels
+	 * TODO: Should probably be made into AsyncTask or worker thread
+	 */
+	private void updateDerivedChannels()
+	{
+		for(Channel c : mDerivedChannelsA)
+		{
+			c.setRaw(_val);
+		}
+	}
+	
+
 	public void setSourceChannel(Channel channel) {
-		_sourceChannelId = channel.getId();
+		if(_sourceChannelId!=-1)
+		{
+			Logger.w(TAG,_description+": Try to drop me from channel with id: "+_sourceChannelId);
+			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+		}
+		if(channel!=null)
+		{
+			_sourceChannelId = channel.getId();
+			channel.addDerivedChannel(this);
+		}
+		else
+		{
+			_sourceChannelId = -1;
+		}
 	}
 
-	public void setSourceChannel(long channelId) {
-		_sourceChannelId = channelId;
+	/**
+	 * @deprecated use {@link #setSourceChannel(Channel)} instead
+	 * @param channelId
+	 */
+	public void setSourceChannel(int channelId) {
+		setSourceChannel(FrSkyServer.getChannel(channelId));
 	}
 
+	// broadcast based communication
+	/**
+	 * Used to receive commands from Server
+	 */
 	public void registerListenerForServerCommands() {
 		FrSkyServer.getContext().registerReceiver(mCommandReceiver,
 				mIntentFilterCommands); // Used to receive messages from Server
 		Logger.d(TAG, "Channel "+this.toString()+" registered for commands. Channel Object ID: "+this.hashCode());
 	}
+	
+	/**
+	 * Used to enable reception of updates from source channel
+	 */
 	public void registerListenerForChannelUpdates() {
-		if (_sourceChannelId != -1) {
+		if(_sourceChannelId!=-1) 	// Used to listen to a channel
+		{
 			Logger.d(TAG, _description + " Registering listener");
-			if (listening) // already listening to something
+			if(listening)
 			{
-				// remove existing listener before allowing to add new one
-				try {
-					FrSkyServer.getContext().unregisterReceiver(
-							mChannelUpdateReceiver);
-				} catch (Exception e) {
-					Logger.e(TAG, e.getMessage());
-
-				}
-
+				//FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
 			}
-
-			mIntentFilter = new IntentFilter();
-			String bCastAction = MESSAGE_CHANNEL_UPDATED + _sourceChannelId;
-
-			Logger.d(TAG, _description + ": Added broadcast listener");
-
-			mIntentFilter.addAction(bCastAction);
-
-			// TODO: try to use "this" as receiver instead of
-			// mChannelUpdateReceiver
-			FrSkyServer.getContext().registerReceiver(mChannelUpdateReceiver,
-					mIntentFilter); // Used to receive messages from Server
-
-			// hcpl: moved this after registerReceiver in case of error state is
-			// then still fine
-			listening = true;
-		} else {
-			// Log.e(TAG,"SourceChannel was -1!");
+		
+			try
+			{
+				FrSkyServer.getChannel(_sourceChannelId).addDerivedChannel(this);
+				listening = true;
+			}
+			catch (Exception e)
+			{
+				
+			}
+			
+		}
+		else
+		{
 			unregisterListenerForChannelUpdates();
 		}
 		setDirtyFlag(true);
 	}
 
+
 	public void unregisterListenerForChannelUpdates() {
-		Logger.d(TAG, _description + ": Removing Channel update broadcast listener");
-		try {
-			FrSkyServer.getContext().unregisterReceiver(mChannelUpdateReceiver);
-			Logger.d(TAG, _description + ": Removed Listener Success");
-			listening = false;
-		} catch (Exception e) {
-			Logger.e(TAG, e.getMessage());
+		if(_sourceChannelId!=-1)
+		{
+			Logger.d(TAG, "Stopped listening");
+			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
 		}
 	}
 
@@ -574,6 +666,10 @@ public class Channel implements Comparator<Channel> {
 	public void close() {
 		// remove the channel update messages
 		Logger.i(TAG, "Try to close Channel "+this.toString());
+		if(_sourceChannelId!=-1)
+		{
+			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+		}
 		unregisterListenerForChannelUpdates();
 		unregisterListenerForServerCommands();
 		_closed = true;

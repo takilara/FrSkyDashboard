@@ -131,7 +131,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     private BluetoothDevice _device = null;
     public boolean reconnectBt = true;
     private boolean _manualBtDisconnect = false; 
-    private boolean _hubEnabled = false;
+    private static boolean _hubEnabled = false;
     private boolean _filePlaybackEnabled = false;
     
     private boolean _compareAfterRecord =false;
@@ -622,6 +622,43 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static Channel getSourceChannel(int id)
 	{
 		return _sourceChannelMap.get(id);
+	}
+	
+	/**
+	 * Fetch channel from channellists
+	 * @param channelId
+	 * @return
+	 */
+	public static Channel getChannel(int channelId)
+	{
+		// server source channels
+		Channel ch;
+		try
+		{
+			ch = _sourceChannelMap.get(channelId);
+		}
+		catch(Exception e)
+		{
+			ch = null; 
+			
+		}
+		
+		if((ch==null) && (_hubEnabled==true))
+		{
+			try
+			{
+				ch = FrSkyHub.getInstance().getChannel(channelId);
+				
+			}
+			catch(Exception e)
+			{
+				ch = null;
+			}
+		}
+		
+		return ch;
+		
+		//hub source channels
 	}
 	
 	/**

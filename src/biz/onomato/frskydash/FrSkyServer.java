@@ -2330,7 +2330,7 @@ public class FrSkyServer extends Service implements OnInitListener {
                 case BluetoothSerialService.STATE_CONNECTED:
                 	Logger.d(TAG,"BT connected");
                 	mDroppedFrames = 0;
-                	Debug.startMethodTracing("frskydash");
+                	//Debug.startMethodTracing("frskydash");
                 	setConnecting(false);
                 	statusBt = true;
                 	
@@ -2366,7 +2366,7 @@ public class FrSkyServer extends Service implements OnInitListener {
                 	if((statusBt==true) && (!_dying) && (!_manualBtDisconnect)) wasDisconnected("Bt");	// Only do disconnect message if previously connected
                 	statusBt = false;
                 	// set all the channels to -1
-                	Debug.stopMethodTracing();
+                	//Debug.stopMethodTracing();
                 	
                 	logger.stop();
                 }

@@ -1166,10 +1166,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 			if(getAutoSendAlarms())
 			{
 				sendAlarms(_currentModel);
-//				for(Alarm a : _currentModel.getFrSkyAlarms().values())
-//				{
-//					send(a.toFrame());
-//				}
+			}
+			else // request alarms from module same as connect
+			{
+				recordAlarmsFromModule();
 			}
 		}
 		_currentModel.registerListeners();

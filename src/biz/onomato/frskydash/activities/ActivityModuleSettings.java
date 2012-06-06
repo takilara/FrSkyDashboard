@@ -282,14 +282,24 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     	switch (v.getId()) {
     		case R.id.FrSkySettings_send:
     			// Send all alarms
-    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_RSSI).toFrame());
-    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_RSSI).toFrame());
-    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_AD1).toFrame());
-    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_AD1).toFrame());
-    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_AD2).toFrame());
-    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_AD2).toFrame());
+//    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_RSSI).toFrame());
+//    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_RSSI).toFrame());
+//    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_AD1).toFrame());
+//    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_AD1).toFrame());
+//    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_AD2).toFrame());
+//    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_AD2).toFrame());
+    			
+    			_model.setFrSkyAlarms(_alarmMap);
+    			FrSkyServer.saveModel(_model);
+    			server.sendAlarms(_model);
+    			//FrSkyServer.database.saveModel(_model);
+    			
+
+    			//this.setResult(RESULT_OK);
+				//this.finish();
+    			
     			break;
-    		case R.id.FrSkySettings_save:
+    		case R.id.FrSkySettings_save:	//no longer used unless users requires it back
     			_model.setFrSkyAlarms(_alarmMap);
     			//FrSkyServer.database.saveModel(_model);
     			FrSkyServer.saveModel(_model);
@@ -537,7 +547,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			
 			ll.addView(descTv);
 			
-			
+			sendABtn.setVisibility(View.GONE);
 			ll.addView(sendABtn);
 			
 			

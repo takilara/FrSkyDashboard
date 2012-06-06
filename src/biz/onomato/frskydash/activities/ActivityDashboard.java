@@ -361,7 +361,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			}
 
 			final Model ttm = tm;
-			Model cm = server.getCurrentModel();
+			//Model cm = server.getCurrentModel();
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Model Mismatch");
 			String msg = "The module configuration seem to be different from the current model '"
@@ -390,7 +390,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 							}
 						});
 			}
-			builder.setNegativeButton("Update '" + cm.getName() + "'",
+			builder.setNegativeButton("Update '" + server.getCurrentModel().getName() + "'",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							Logger.e(TAG, "Update alarms from module");

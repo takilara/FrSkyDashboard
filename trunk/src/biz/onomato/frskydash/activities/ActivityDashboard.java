@@ -614,13 +614,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		Logger.d(TAG, "Populate list of channels");
 		// tlChannelsTable.removeAllViews();
 		llDashboardChannels.removeAllViews();
-		final Model currentModel = server.getCurrentModel();
+		//final Model currentModel = server.getCurrentModel();
 
-		tv_modelName.setText(currentModel.getName());
+		tv_modelName.setText(server.getCurrentModel().getName());
 		int n = 0;
 		Logger.d(TAG, "Should add this amount of channels: "
-					+ currentModel.getChannels().size());
-		for (Channel c : currentModel.getChannels().values()) {
+					+ server.getCurrentModel().getChannels().size());
+		for (Channel c : server.getCurrentModel().getChannels().values()) {
 			Logger.i(TAG, "Id: "+c.getId());
 			Logger.i(TAG, c.getDescription());
 			Logger.i(TAG, "SourceChannelId: "+c.getSourceChannelId());
@@ -667,7 +667,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					// if(DEBUG)
 					// Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
 					Logger.d(TAG, "Edit channel "
-							+ currentModel.getChannels().get(v.getId() - 1000)
+							+ server.getCurrentModel().getChannels().get(v.getId() - 1000)
 									.getDescription());
 					// Launch editchannel with channel attached..
 					Intent i = new Intent(getApplicationContext(),
@@ -737,7 +737,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					ImageView iv = (ImageView) v;
 					int channelId = v.getId() - ID_CHANNEL_BUTTON_SILENT;
 					Logger.w(TAG, "Change silent on channel with id: " + channelId);
-					Channel c = currentModel.getChannels().get(channelId);
+					Channel c = server.getCurrentModel().getChannels().get(channelId);
 					// if(DEBUG)
 					// Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
 					Logger.d(TAG, "Toggle silent on " + c.getDescription());

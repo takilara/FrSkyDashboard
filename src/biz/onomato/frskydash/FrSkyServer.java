@@ -1796,12 +1796,18 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_recordingAlarms = true;
 		_recordingModelId = modelId;
 		_alarmMap.clear();
+		Logger.w(TAG,"Requesting alarms");
 		
 		// Only send request for RSSI alarms if Rx communication is up since we do automatic requests for alarms otherwise
-		if((statusRx==true) && (statusBt==true))
+		//if((statusRx==true) && (statusBt==true))
+		if(statusBt==true)
 		{
 			//send(Frame.InputRequestRSSIAlarms());
 			send(Frame.InputRequestADAlarms());
+		}
+		else
+		{
+			Logger.w(TAG,"Request for alarms not sent as StatusRx="+statusRx+" and statusBt="+statusBt);
 		}
 		//send(Frame.InputRequestADAlarms());
 	}

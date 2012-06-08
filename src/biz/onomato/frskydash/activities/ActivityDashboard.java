@@ -546,83 +546,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		}
 	};
 
-//	void doBindService() {
-//		// bindService(new Intent(this, FrSkyServer.class), mConnection,
-//		// Context.BIND_AUTO_CREATE);
-//		Logger.i(TAG, "Start the server service if it is not already started");
-//		startService(new Intent(this, FrSkyServer.class));
-//		Logger.i(TAG, "Try to bind to the service");
-//		getApplicationContext().bindService(
-//				new Intent(this, FrSkyServer.class), mConnection, 0);
-//		// bindService(new Intent(this, FrSkyServer.class), mConnection,
-//		// Context.BIND_AUTO_CREATE);
-//	}
-
-//	void doUnbindService() {
-//		if (server != null) {
-//			// Detach our existing connection.
-//			unbindService(mConnection);
-//		}
-//	}
-
-//	private ServiceConnection mConnection = new ServiceConnection() {
-//		public void onServiceConnected(ComponentName className, IBinder binder) {
-//			Logger.i(TAG, "Bound to Service");
-//			server = ((FrSkyServer.MyBinder) binder).getService();
-//			// server.setSettings(settings); // Make sure server has settings
-//			// available
-//
-//			if (createSpeakerLater) // server was not ready when TTS check
-//									// finished
-//			{
-//				server.createSpeaker();
-//			}
-//			Logger.i(TAG, "Setting up dashboard");
-//
-//			Logger.d(TAG,
-//						"Cyclic speaker should be set to "
-//								+ server.getCyclicSpeechEnabledAtStartup()
-//								+ " at startup");
-//			btnTglSpeak.setChecked(server.getCyclicSpeechEnabledAtStartup());
-//
-//			// server.setCyclicSpeechEnabled(server.getCyclicSpeechEnabledAtStartup());
-//
-//			// Check volume
-//			AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-//
-//			// audioManager.startBluetoothSco();
-//
-//			int currentVolume = audioManager
-//					.getStreamVolume(AudioManager.STREAM_MUSIC);
-//			int maxVolume = audioManager
-//					.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-//			double volPrc = currentVolume * 100 / maxVolume;
-//			Logger.d(TAG, String.format("Volume is [%s/%s] (%.2f %%)",
-//						currentVolume, maxVolume, volPrc));
-//			if (server.getAutoSetVolume()) {
-//				if (volPrc < server.getMinimumVolume()) {
-//					audioManager.setStreamVolume(
-//							AudioManager.STREAM_MUSIC,
-//							(int) Math.floor(server.getMinimumVolume()
-//									* maxVolume / 100),
-//							AudioManager.FLAG_SHOW_UI);
-//				}
-//			}
-//
-//			// check for bt
-//			checkForBt();
-//
-//			populateChannelList();
-//
-//			onResume();
-//
-//		}
-//
-//		public void onServiceDisconnected(ComponentName className) {
-//			server = null;
-//		}
-//	};
-
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -672,7 +595,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		int n = 0;
 		Logger.d(TAG, "Should add this amount of channels: "
 					+ server.getCurrentModel().getChannels().size());
-		for (Channel c : server.getCurrentModel().getChannels().values()) {
+		for (final Channel c : server.getCurrentModel().getChannels().values()) {
 			Logger.i(TAG, "Id: "+c.getId());
 			Logger.i(TAG, c.getDescription());
 			Logger.i(TAG, "SourceChannelId: "+c.getSourceChannelId());
@@ -724,15 +647,9 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 					// Launch editchannel with channel attached..
 					Intent i = new Intent(getApplicationContext(),
 							ActivityChannelConfig.class);
-					// i.putExtra("channelId", 1);
-//					i.putExtra(
-//							"channel",
-//							currentModel.getChannels().get(
-//									v.getId() - ID_CHANNEL_BUTTON_EDIT));
-					i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_REF,
+					i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_ID,
 							v.getId() - ID_CHANNEL_BUTTON_EDIT);
-					// i.putExtra("idInModel",
-					// v.getId()-ID_CHANNEL_BUTTON_EDIT);
+					i.putExtra(ActivityChannelConfig.EXTRA_MODEL_ID,c.getModelId());
 					startActivityForResult(i, CHANNEL_CONFIG_RETURN);
 				}
 			});

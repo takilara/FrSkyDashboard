@@ -274,13 +274,11 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					Logger.d(TAG,"Edit channel "+_model.getChannels().get(v.getId()-1000).getDescription());
-					// Launch editchannel with channel attached.. 
+					// Launch edit channel with channel id attached.. 
 					Intent i = new Intent(getApplicationContext(), ActivityChannelConfig.class);
-		    		//i.putExtra("channelId", 1);
-					//i.putExtra("channel", _model.getChannels().get(v.getId()-1000));
-					i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_REF, v.getId()-1000);
-					//i.putExtra("modelId", (int) _model.getId());	// Should edit existing model
-					//i.putExtra("idInModel", v.getId()-1000);
+					i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_ID, v.getId()-1000);
+					//also need to pass model reference
+					i.putExtra(ActivityChannelConfig.EXTRA_MODEL_ID, _model.getId());
 		    		startActivityForResult(i,CHANNEL_CONFIG_RETURN);
 				}
 			});
@@ -311,7 +309,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 								.getCurrentModel()
 								.getChannels()
 								.get(data.getExtras().getInt(
-										ActivityChannelConfig.EXTRA_CHANNEL_REF, -1));
+										ActivityChannelConfig.EXTRA_CHANNEL_ID, -1));
 	            		Logger.d(TAG,"   This channel has id: "+returnChannel.getId());
 	            		//int idInModel = data.getIntExtra("idInModel",-1);
 	            		//if(idInModel>-1)

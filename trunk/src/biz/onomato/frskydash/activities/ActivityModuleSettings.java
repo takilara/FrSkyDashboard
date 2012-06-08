@@ -221,7 +221,8 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			Logger.d(TAG,"This model has this many alarms: "+_alarmMap.size());
 			if(_alarmMap.size()==0)
 			{
-				_alarmMap = server.initializeFrSkyAlarms();
+				//get alarms from current model instead
+				_alarmMap = server.getCurrentModel().getFrSkyAlarms();
 			}
 			
 			

@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -308,6 +309,33 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	}
 
 	// Dialogs
+	
+// Espen: As the dialog contains a mix of buttons and texts, it is complex to refresh it properly
+// It can just as well be recreated fully 
+//	protected void onPrepareDialog(int id, Dialog dialog)
+//	{
+//		switch(id){
+//			case DIALOG_ALARMS_MISMATCH:
+//				Logger.w(TAG, "Update the alarm mismatch dialog");
+//				AlertDialog dlg = (AlertDialog) dialog;
+//				
+//				Model tm = null;
+//				if (_targetModel != -1) {
+//
+//					tm = FrSkyServer.modelMap.get(_targetModel);
+//					Logger.e(TAG, "Allow switch to model " + tm);
+//				}
+//				
+//				String msg = "The module configuration seem to be different from the current model '"
+//						+ server.getCurrentModel().getName() + "'.";
+//				if (_targetModel != -1) {
+//					msg += "\n\nThe model looks like '" + tm.getName() + "'";
+//				}
+//				dlg.setMessage(msg);
+//				break;
+//		}
+//	}
+	
 	/**
 	 * Put all dialogs here
 	 */
@@ -401,6 +429,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 					});
 
 			AlertDialog alert = builder.create();
+			//alert.setOnDismissListener(this);
 
 			dialog = alert;
 
@@ -410,7 +439,16 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		}
 		return dialog;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see android.content.DialogInterface.OnDismissListener#onDismiss(android.content.DialogInterface)
+	 */
+//	@Override
+//	public void onDismiss(DialogInterface dialog) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+	
 	/**
 	 * enable logging by updating flag on {@link Logger} class
 	 */
@@ -583,7 +621,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		super.onResume();
 
 		// enable updates
-		Logger.i(TAG, "onResume");
+		Logger.w(TAG, "onResume");
 		// _enableDebugActivity=false;
 		if (server != null) {
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
@@ -596,6 +634,13 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 															// Server
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive
 																// BT events
+		
+		//dismiss the alarm mismatch dialog to force it to update when requested
+		try{removeDialog(DIALOG_ALARMS_MISMATCH);}
+		catch (IllegalArgumentException e) {
+			// was not previously shown
+		}
+		
 
 	}
 
@@ -1082,5 +1127,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 				"Bluetooth not enabled, only simulations are available",
 				Toast.LENGTH_LONG).show();
 	}
+
+	
 
 }

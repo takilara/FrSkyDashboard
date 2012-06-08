@@ -72,6 +72,8 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 				mList.add(m);
 				//cursor.moveToNext();
 			} while(cursor.moveToNext());
+        } else {
+        	Logger.d(TAG,"No models found in database");
         }
 		//close cursor & DB connection
 		cursor.deactivate();
@@ -154,7 +156,9 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     }
 
     /**
-     * helper to get model from a cursor
+     * helper to get model from a cursor. For this no query is executed, everything is fetched from the cursor
+     * 
+     * FIXME make sure to use complete sql statement so we don't have to fetch channels and alarms separately
      * 
      * @param cu
      * @return
@@ -172,10 +176,12 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		m.setName(cu.getString(cu.getColumnIndexOrThrow(KEY_NAME)));
 		m.setType(cu.getString(cu.getColumnIndexOrThrow(KEY_MODELTYPE)));
 		// Add Channels to the model
+		//FIXME update query and get this info from the cursor instead
 		ArrayList<Channel> channelList = getChannelsForModel(m.getId());
 		Logger.i(TAG,"Found "+channelList.size()+" channels for model with id "+m.getId());
 		m.setChannels(channelList);
 		// Add Alarms to the model
+		//FIXME update query and get this info form the cursor instead
 		TreeMap<Integer,Alarm> alarmMap = getAlarmsForModel(m.getId());
 		m.setFrSkyAlarms(alarmMap);
 		// return this information
@@ -208,11 +214,12 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     		return;
     	}
     	// at this point Insert/update did not fail
-    		// first, make sure the channels have the correct modelId
-        	//Make sure all the models channels modelid is correct
-        	int mId = model.getId();
-        	//if(mId!=-1)
-        	//{
+		// first, make sure the channels have the correct modelId
+		// Make sure all the models channels modelid is correct. These have to
+		// be updated because they could be added while the model wasn't saved
+		// yet and therefor didn't have a proper ID from database yet
+		int mId = model.getId();
+        // iterate all channels and set the model id
         		for(Channel c : model.getChannels().values())
         		{
         			c.setModelId(mId);
@@ -237,7 +244,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     				deleteChannel(c);
     			}
     		}
-    		
+    		// FIXME is it needed to save them here? Is setAlarmsForModel not already saving these??
     		// update or add channels based on the channels on the model in memory
     		for(Channel ch:model.getChannels().values())
     		{
@@ -292,6 +299,11 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         Logger.d(TAG," The id for '"+model.getName()+"' is "+newId);
         // update model object
         model.setId(newId);
+        //FIXME is there a better way to get the last id first from db? Done this in PL/SQL but don't now for 
+        model.setName("Model "+newId);
+        ContentValues cv = new ContentValues();
+        cv.put(KEY_NAME, model.getName());
+        db.update(DATABASE_TABLE_MODELS, cv, KEY_ROWID + "=?", new String[]{String.valueOf(model.getId())});
         // close connection
         close();
         // return the new id

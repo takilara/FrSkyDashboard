@@ -56,11 +56,11 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		doBindService();
 	
-		///TODO: Use intent to get initial Model object?
+		// When using this activity to create a new model the id will be -1,
+		// only when editing an existing model the id will be given
 		Intent launcherIntent = getIntent();
 		_modelId = launcherIntent.getIntExtra("modelId", -1);
 		Logger.d(TAG,"Editing the model with id:"+_modelId);
-//		Log.d(TAG, "Channel Id is: "+_channelId);
 		
 		// Show the form
 		setContentView(R.layout.activity_modelconfig);
@@ -101,7 +101,10 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	        		unbindService(mConnection);
 	        	}
 	        	catch (Exception e)
-	        	{}
+	        	{
+	        		//always log exceptions
+	        		Logger.e(TAG,"error binding to service",e);
+	        	}
         }
     }
     
@@ -111,32 +114,20 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Logger.i(TAG,"Bound to Service");
 			
+			// when model id not set new model to configure
 			if(_modelId==-1)
 			{
 				Logger.d(TAG,"Configure new Model object");
-				//int len = FrSkyServer.database.getModels().size();
-				int len = FrSkyServer.modelMap.size();
-				_model = new Model("Model "+(len+1));
-				// save, to get id
-				//FrSkyServer.modelMap.put(_model.getId(), _model);
-				//FrSkyServer.saveModel(_model);
-				
+				_model = new Model("New Model");
 				_model.initializeDefaultChannels();
-				// save again to persist
-				//FrSkyServer.database.saveModel(_model);
+				// persist
 				FrSkyServer.addModel(_model);
 			}
-			else
-			{
+			// otherwise this was an existing model that we want to get from
+			// server only for now
+			else {
 				Logger.d(TAG,"Configure existing Model object (id:"+_modelId+")");
-				//_model = new Model(getApplicationContext());
-				//_model.loadFromDatabase(_modelId);
-				//_model = FrSkyServer.database.getModel(_modelId);
 				_model = FrSkyServer.modelMap.get(_modelId);
-				
-//				_model = new Model(getApplicationContext());
-//				_model.loadFromSettings(_modelId);
-				//_model = Model.createFromSettings(getApplicationContext(), _modelId);
 			}
 			
 			edName.setText(_model.getName());
@@ -154,7 +145,6 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			String[] modelTypes = getApplicationContext().getResources().getStringArray(R.array.model_types);
 			
 			spType.setAdapter(modelTypeAdapter);
-			int n=0;
 			for(int i=0;i<modelTypes.length;i++)
 			{
 				Logger.i(TAG,"Comparing "+modelTypes[i]+" to "+_model.getType());
@@ -166,7 +156,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				
 			}
 			//spType.setSelection(modelTypes);
-			
+			// refresh channels
 			populateChannelList();
 		}
 
@@ -246,7 +236,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	{
 		Logger.d(TAG,"Populate list of channels");
 		llChannelsLayout.removeAllViews();
-		
+		// iterate all channels for the current model
 		for(Channel c:_model.getChannels().values())
 		{
 			Logger.i(TAG,"Id: "+ c.getId());
@@ -255,16 +245,18 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 			
 			LinearLayout ll = new LinearLayout(getApplicationContext());
 			
+			//description of channel
 			TextView tvDesc = new TextView(getApplicationContext());
 			tvDesc.setText(c.getDescription());
 			tvDesc.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
 			
+			// delete option for channel
 			ImageButton btnDelete = new ImageButton(getApplicationContext());
 			btnDelete.setImageResource(R.drawable.ic_menu_delete);
 			btnDelete.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
 			btnDelete.setLayoutParams(new LinearLayout.LayoutParams(height,height));
-			//btnDelete.setText("Delete");
+			//delete id is 10.000 + channelId
 			btnDelete.setId(10000+c.getId());
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
@@ -273,14 +265,12 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 				}
 			});
 			
+			//edit button
 			ImageButton btnEdit = new ImageButton(getApplicationContext());
-			//btnEdit.setText("...");
 			btnEdit.setImageResource(R.drawable.ic_menu_edit);
 			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,height));
-
 			btnEdit.setId(1000+c.getId());// ID for delete should be 100+channelId
-			//btnEdit.setOnClickListener(this);
 			btnEdit.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					Logger.d(TAG,"Edit channel "+_model.getChannels().get(v.getId()-1000).getDescription());
@@ -353,6 +343,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	    	}
 	    }
 	
+	 //FIXME use dialogs managed by activity instead
 	 private void showDeleteChannelDialog(final Channel channel)
 		{
 			///TODO: Modify for deletion of models

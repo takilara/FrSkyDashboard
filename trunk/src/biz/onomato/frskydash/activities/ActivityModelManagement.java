@@ -26,6 +26,10 @@ import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.util.Logger;
 
+/**
+ * Activity with overview of all configured models
+ *
+ */
 public class ActivityModelManagement extends Activity implements OnClickListener {
 	private static final String TAG = "Model Management";
 	private FrSkyServer server;
@@ -35,6 +39,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	private ArrayList<RadioButton> rbList;
 	private RadioButton rbCurrentModel;
 	//private boolean DEBUG=true;
+	@SuppressWarnings("unused")
 	private int _deleteId=-1;
 	
 	@Override
@@ -135,124 +140,92 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		}
 	}
 	
-	private void populateModelList()
-	{
-		// populate with models
-
-		//llModelsLayout
+	/**
+	 * load all available models. The list is populated with controls that are
+	 * referred to with 100+id, 1000+id or 10.000+id.
+	 */
+	private void populateModelList() {
+		// llModelsLayout holds dynamically loaded views, according to the
+		// amount of models that are available
 		llModelsLayout.removeAllViews();
 		rbList.clear();
-		long currentModelId = -1;
-		if(server==null)
-		{
-			currentModelId=-1;
-		}
-		else
-		{
-			currentModelId=server.getCurrentModel().getId();
-		}
-		
-		//
-		//DBAdapterModel db = new DBAdapterModel(getApplicationContext());
-		//db.open();
-		//Cursor c = db.getAllModels();
-		
-		int n = 0;
-		//while(n < c.getCount())
-		
+		// init the current model id, if server is not available we need to init
+		// as -1. Otherwise we can get the id form the server
+		long currentModelId = server == null ? -1 : server.getCurrentModel()
+				.getId();
+
+		// get modelcount so we can check how many models are available when iterating
 		int modelCount = FrSkyServer.modelMap.size();
+		// iterate all models
 		for(Model m : FrSkyServer.modelMap.values())
 		{
-			Logger.d(TAG,"Add Model (id,name): "+m.getId()+", "+m.getName());
+			Logger.d(TAG,"Set Model (id,name): "+m.getId()+", "+m.getName());
 			LinearLayout ll = new LinearLayout(getApplicationContext());
-			
-			
+			//id of the model in this iteration (not the current selected model!)
 			int id = m.getId();
 			
+			//textview for the name of the model
 			TextView tvName = new TextView(getApplicationContext());
 			tvName.setText(m.getName());
 			tvName.setLayoutParams(new LinearLayout.LayoutParams(0,LayoutParams.WRAP_CONTENT,1));
 			
+			//radio button for selection of model
 			RadioButton rdThisModel = new RadioButton(getApplicationContext());
+			// dynamic Ids of radiobuttons are 10.000+id form the model they refer to
 			rdThisModel.setId(10000+id);
 			rbList.add(rdThisModel);
 			rdThisModel.setOnClickListener(this);
-			if(id==currentModelId)
-			{
-				rdThisModel.setChecked(true);
-			}
-			else
-			{
-				rdThisModel.setChecked(false);
-			}
-
+			// only set them selected if this id matches the current model id
+			rdThisModel.setChecked(id==currentModelId);
+			
+			//calculate height
 			int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());			
 			
 			// only allow deletion if there is more than one model
 			ImageButton btnDelete = new ImageButton(getApplicationContext());
-			//btnDelete.setText("Delete");
 			btnDelete.setImageResource(R.drawable.ic_menu_delete);
 			btnDelete.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
 			btnDelete.setLayoutParams(new LinearLayout.LayoutParams(height,height));
 			btnDelete.setId(100+id); // ID for delete should be 100+channelId
-			//btnDelete.setOnClickListener(this);
 			btnDelete.setOnClickListener(new OnClickListener(){
 				public void onClick(View v){
 					Logger.d(TAG,"Delete model with id:"+(v.getId()-100));
 					showDeleteDialog(v.getId()-100);
 				}
 			});
-
-			if(modelCount>1) 
-			{
-				btnDelete.setEnabled(true);
-			}
-			else
-			{
-				btnDelete.setEnabled(false);
-			}
+			//delete model button can only be enabled if there are more than one models
+			btnDelete.setEnabled(modelCount>1);
 			
-			
+			//edit model button
 			ImageButton btnEdit = new ImageButton(getApplicationContext());
-			//btnEdit.setText("...");
 			btnEdit.setImageResource(R.drawable.ic_menu_edit);
 			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,height));
-			btnEdit.setId(1000+id);// ID for delete should be 100+channelId
+			btnEdit.setId(1000+id);// ID for edit should be 1000+channelId
 			btnEdit.setOnClickListener(this);
 			
-//			ImageView iv = new ImageView(getApplicationContext());
-//			iv.setImageResource(R.drawable.ic_modeltype_helicopter);
-//			//iv.setBackgroundColor(0xffff0000);
-//			iv.setColorFilter(0xffaaaaaa);
-			
-			//iv.setLayoutParams(new LinearLayout.LayoutParams(20,20));
-			
-			//ll.addView(iv);
+			//add all the widgets to the list
 			ll.addView(rdThisModel);
 			ll.addView(tvName);
-			
 			ll.addView(btnEdit);
-			ll.addView(btnDelete);
-			
+			ll.addView(btnDelete);			
 			
 			ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 			//ll.setGravity();
-
 			
 			llModelsLayout.addView(ll);
 			
 //			LayoutParams params = ll.getLayoutParams();
 //			params.width = LayoutParams.MATCH_PARENT;
 //			//params.height = LayoutParams.WRAP_CONTENT;
-			n++;
 		}
-//		c.deactivate();
-//		db.close();
 	}
 	
-	
+	/**
+	 * helper to show delete dialog when the user wants to delete a model
+	 * 
+	 * @param id
+	 */
 	private void showDeleteDialog(int id)
 	{
 		///TODO: Modify for deletion of models
@@ -274,28 +247,16 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             	//TODO: Remove, make global to class?
             	
             	//Channel.deleteChannelsForModel(getApplicationContext(),m);
-            	int delModelId = m.getId();
-            	
-            	
-//            	FrSkyServer.database.deleteAllChannelsForModel(m);
-//            	FrSkyServer.database.deleteAlarmsForModel(m);
-//            	FrSkyServer.database.deleteModel(_deleteId);
-            	
-            	
+            	int delModelId = m.getId();            	
             	FrSkyServer.deleteModel(m);
             	
             	if(delModelId==server.getCurrentModel().getId())
             	{
             		// we deleted the current model
             		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
-            		
             	}
             	
-//            	DBAdapterModel db = new DBAdapterModel(getApplicationContext());
-//            	db.open();
-//            	db.deleteModel(_deleteId);
-//            	db.close();
-//            	
+            	// refresh list of models
             	populateModelList();
                 //Stop the activity
                 //server.deleteAllLogFiles();
@@ -313,6 +274,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
             }
 
         });
+        // FIXME see if we can use managed dialogs instead (test screen orientation etc)
         dialog.show();
 	}
 	
@@ -333,10 +295,6 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	        	{}
         }
     }
-    
-    
-    
-
     
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -374,7 +332,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
     			break;
     		
     	}
-    	///TODO: update model list
+    	// update model list
     	populateModelList();
     }
 }

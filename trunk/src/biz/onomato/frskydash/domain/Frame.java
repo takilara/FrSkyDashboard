@@ -387,7 +387,16 @@ public class Frame {
 	}
 
 	
-	
+	/**
+	 * create a new Frame for this alarm. This will give you a new object in
+	 * return.
+	 * 
+	 * @param AlarmType
+	 * @param AlarmLevel
+	 * @param AlarmThreshold
+	 * @param AlarmGreaterThan
+	 * @return
+	 */
 	public static Frame AlarmFrame(int AlarmType,int AlarmLevel,int AlarmThreshold, int AlarmGreaterThan)
 	{
 		int[] buf = new int[11];

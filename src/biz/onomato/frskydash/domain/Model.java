@@ -238,6 +238,7 @@ public class Model {
 	{
 		if(channel.getId()==-1)
 		{
+			//FIXME don't perform saves to db in the domain object!
 			FrSkyServer.saveChannel(channel);
 		}
 		channelMap.put(channel.getId(), channel);
@@ -302,7 +303,12 @@ public class Model {
 	}
 	
 	/**
-	 * I need to be able to add alarms to this model
+	 * I need to be able to add alarms to this model. This will check the
+	 * alarmtype and store in the correct collection reference. For the moment
+	 * we only support frsky alarms but eventually this system could be expanded
+	 * to support other types of alarms defined by the user. Thing of sensor
+	 * values and so on.
+	 * 
 	 * @param alarm
 	 */
 	public void addAlarm(Alarm alarm)
@@ -333,25 +339,27 @@ public class Model {
 	}
 	
 	/**
-	 * update the {@link Alarm}s for this model
+	 * update the {@link Alarm}s for this model. By doing so all modelId
+	 * references on the alarms will be set to this model and the alarms
+	 * collection will be attached to this model instance
 	 * 
 	 * @param alarmMap
 	 */
 	public void setFrSkyAlarms(TreeMap<Integer,Alarm> alarmMap)
 	{
-		if(alarmMap.size()>0)
-		{
-			for(Alarm a:alarmMap.values())
-			{
+		// this check isn't really needed
+	//	if(alarmMap.size()>0)
+	//	{
+			for(Alarm a:alarmMap.values()){
 				a.setModelId(_id);
 				addAlarm(a);
 			//	alarmCount += 1;
 			}
-		}
-		else
-		{
+		//}
+		//else
+		//{
 			//initiateFrSkyAlarms();
-		}
+		//}
 	}
 	
 	
@@ -422,6 +430,83 @@ public class Model {
 			
 		}
 		return sourceChannels;
+	}
+	
+	/**
+	 * Used to create initial alarms for a model.<br>
+	 * This consists of the following alarms:<br>
+	 * <ul>
+	 * <li>AD1 Alarm 1 and 2
+	 * <li>AD2 Alarm 1 and 2
+	 * <li>RSSI Alarm 1 and 2 <i>(Note, RSSI alarms are undocumented)</i>
+	 * </ul>
+	 * 
+	 * FIXME: Get the proper default values => hcpl: I believe the default values are 72<br>
+	 * FIXED: consider if this should be moved to Model
+	 */
+	public void initializeFrSkyAlarms()
+	{
+		// no need to keep an intermediate map here. I will be using all new
+		// object references so we don't work on the same objects
+		Frame alarm1RSSIFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_RSSI, 
+				Alarm.ALARMLEVEL_LOW, 
+				45, 
+				Alarm.LESSERTHAN);
+		Alarm alarm1RSSI = new Alarm(alarm1RSSIFrame);
+		alarm1RSSI.setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX));
+		alarm1RSSI.setModelId(this._id);
+		addAlarm(alarm1RSSI);
+		
+		Frame alarm2RSSIFrame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_RSSI, 
+				Alarm.ALARMLEVEL_MID, 
+				42, 
+				Alarm.LESSERTHAN);
+		Alarm alarm2RSSI = new Alarm(alarm2RSSIFrame);
+		alarm2RSSI.setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX));
+		alarm2RSSI.setModelId(this._id);
+		addAlarm(alarm2RSSI);
+		
+		Frame alarm1AD1Frame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD1, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
+		Alarm alarm1AD1 = new Alarm(alarm1AD1Frame);
+		alarm1AD1.setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_AD1));
+		alarm1AD1.setModelId(this._id);
+		addAlarm(alarm1AD1);
+		
+		Frame alarm2AD1Frame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD1, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
+		Alarm alarm2AD1 = new Alarm(alarm2AD1Frame );
+		alarm2AD1.setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_AD1));
+		alarm2AD1.setModelId(this._id);
+		addAlarm(alarm2AD1);
+		
+		Frame alarm1AD2Frame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM1_AD2, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
+		Alarm alarm1AD2 = new Alarm(alarm1AD2Frame);
+		alarm1AD2.setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_AD2));
+		alarm1AD2.setModelId(this._id);
+		addAlarm(alarm1AD2);
+		
+		Frame alarm2AD2Frame = Frame.AlarmFrame(
+				Frame.FRAMETYPE_ALARM2_AD2, 
+				Alarm.ALARMLEVEL_OFF, 
+				200, 
+				Alarm.LESSERTHAN);
+		Alarm alarm2AD2 = new Alarm(alarm2AD2Frame);
+		alarm2AD2.setUnitChannel(FrSkyServer.getSourceChannel(FrSkyServer.CHANNEL_ID_AD2));
+		alarm2AD2.setModelId(this._id);
+		addAlarm(alarm2AD2);
 	}
 
 	/**

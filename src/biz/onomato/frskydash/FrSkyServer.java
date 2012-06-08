@@ -1,7 +1,6 @@
 package biz.onomato.frskydash;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -10,8 +9,6 @@ import java.util.Locale;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -25,7 +22,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Binder;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -36,7 +32,6 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
-import biz.onomato.frskydash.DataLogger.RawLogger;
 import biz.onomato.frskydash.activities.ActivityDashboard;
 import biz.onomato.frskydash.activities.ActivityHubData;
 import biz.onomato.frskydash.db.FrSkyDatabase;
@@ -248,9 +243,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private int _framecount=0;
 	private int _framecountRx=0;
 	private int _framecountTx=0;
-	private boolean _btAutoEnable;
-	private boolean _btAutoConnect;
-	private int _minimumVolumeLevel;
 	private boolean _autoSetVolume;
 
 	/**
@@ -296,36 +288,28 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	private List<Integer> frSkyFrame = new ArrayList<Integer>(Frame.SIZE_TELEMETRY_FRAME);
 //	private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
-//
-//	/**
-//	 * index of the current user frame. If set to -1 no user frame is under
-//	 * construction.
-//	 */
-//	private static int currentFrSkyFrameIndex = -1;
-//
-//	/**
-//	 * if on previous byte the XOR byte was found or not
-//	 */
-//	private static boolean frSkyXOR = false;
-	
+
 	@Override
 	public void onCreate()
 	{
-		Logger.i(TAG,"onCreate");
+		//always call super as first statement
 		super.onCreate();
+		//log info for debugging
+		Logger.i(TAG,"onCreate");
+		//get a reference to the application context we are starting in
 		context = getApplicationContext();
+		//get a broadcastmanager for this context
 		broadcastManager = LocalBroadcastManager.getInstance(context);
-		//_serverChannels = new HashMap<String,Channel>();
 		
 		//TODO: setting max buffer size to 100 frames for now. Might need to tune this
 		mFrameBuffer = new LinkedBlockingQueue <Frame>(100);
 		FrameParser frameParser = new FrameParser(mFrameBuffer);
-		
+		// thread for parsing frames
 		Thread frameParserThread = new Thread(frameParser,"FrameParserThread");
 		frameParserThread.setDaemon(true);
 		frameParserThread.start();
-		
-		
+
+		//init colections (for alarms and sourcechannels)
 		_alarmMap = new TreeMap<Integer,Alarm>();
 		_sourceChannelMap = new TreeMap<Integer,Channel>(Collections.reverseOrder());
 		
@@ -336,76 +320,76 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		Toast.makeText(this,"Service created at " + time.getTime(), Toast.LENGTH_LONG).show();
 		
+		// get earlier stored preferences 
 		Logger.i(TAG,"Try to load settings");
         _settings = context.getSharedPreferences("FrSkyDash",MODE_PRIVATE);
         _editor = _settings.edit();
-        
+
+		// init notification on top to let the user get back to the application
+		// at any time
 		showNotification();		
 		
+		//init fixed channels
 		setupFixedChannels();
-		
-		//String _prevModel = "FunCub 1";
-		int _prevModelId;
-		try
-		{
-			_prevModelId= _settings.getInt("prevModelId", -1);
-		}
-		catch(Exception e)
-		{
-			_prevModelId = -1;
-		}
-		
-		Logger.i(TAG,"Previous ModelId was: "+_prevModelId);
-		//	_currentModel = new Model(context);
-		
 
-		
+		// init the previous model id from config, this is the id of the last
+		// model used before the application was shut down
+		int _prevModelId = -1;
+		try {
+			_prevModelId= _settings.getInt("prevModelId", -1);
+		} catch(Exception e) {
+			_prevModelId = -1;
+			Logger.e(TAG, "Issue fetching previous model from preferences", e);
+		}
+		Logger.i(TAG,"Previous ModelId was: "+_prevModelId);
+
+		// init backend and collection to store all models available to have
+		// them in memory. For easy access all models are stored in a treemap
+		// with their ID as key.
 		modelMap = new TreeMap<Integer,Model>();
 		database = new FrSkyDatabase(getApplicationContext());
-		
 		for(Model m: database.getModels())
 		{
 			modelMap.put(m.getId(), m);
 		}
-		
+		//retrieve the last used model from this map to start working on
 		Model cm = modelMap.get(_prevModelId);
-		
-		//_currentModel = database.getModel(_prevModelId);
-		
+		// if no previous model was selected we can create a first model to
+		// start with. 
 		if(cm==null)
 		{
-			Logger.e(TAG,"No model exists, make a new one");
+			Logger.d(TAG,"No model exists, make a new one");
+			// use some default model name
 			cm = new Model("Model 1");
-			// Saving to get id
-			database.saveModel(cm);
-			
-			cm.setFrSkyAlarms(initializeFrSkyAlarms());
+			// Saving to get id, this save is required since we don't get a
+			// proper model id otherwise to init the alarms and so on
+			// database.saveModel(cm);
 			// Create Default model channels.
 			cm.initializeDefaultChannels();
-			
-			//_model.addChannel(c);
-			
-			//_currentModel.setId(0);
+			//update so all alarms are saved
 			database.saveModel(cm);
+			//don't forget to store this created model in memory also
 			modelMap.put(cm.getId(),cm);
 		}
-		
+		// check if the model has alarms, if not we can init with defaults
 		if(cm.getFrSkyAlarms().size()==0)
 		{
-			Logger.e(TAG,"No alarms exists, setup with defaults");
-			cm.setFrSkyAlarms(initializeFrSkyAlarms());
-			
+			Logger.d(TAG,"No alarms exists, setup with defaults");
+			cm.initializeFrSkyAlarms();
+			//update so all alarms are saved
 			database.saveModel(cm);
 		}
-		
+		// store this last model id so we can get back to it on resume
 		_prevModelId = cm.getId();
 		_editor.putInt("prevModelId", _prevModelId);
 		_editor.commit();
 		
+		//actually set the model we prepared as current
 		Logger.d(TAG,"The current model is: "+cm.getName()+" and has id: "+cm.getId());
 		Logger.d(TAG,"Activating the model");
 		setCurrentModel(cm);
 		
+		//create a logger for the frsky information
 		logger = new DataLogger(getApplicationContext(),_currentModel,true,true,true);
 		//logger.setCsvHeader(_sourceChannels[CHANNEL_INDEX_AD1],_sourceChannels[CHANNEL_INDEX_AD2]);
 		logger.setCsvHeader();
@@ -413,30 +397,66 @@ public class FrSkyServer extends Service implements OnInitListener {
 		logger.setLogToCsv(getLogToCsv());
 		logger.setLogToHuman(getLogToHuman());
 		
+		// init bluetooth connection
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 		mIntentFilterBt.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
-		
 		//mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive BT events
 		
+		//inform via broadcast that server initialised is finished
 		Logger.i(TAG,"Broadcast that i've started");
 		Intent i = new Intent();
 		i.setAction(MESSAGE_STARTED);
 		sendBroadcast(i);
 		
+		// set a wake lock
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		 wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
-		 getWakeLock();
-		 
-		 mSerialService = new BluetoothSerialService(this, mHandlerBT);
-		 
-		 sim = new Simulator(this);
-		 
-		 _cyclicSpeechEnabled = false;
+		wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
+		getWakeLock();
+
+		mSerialService = new BluetoothSerialService(this, mHandlerBT);
+
+		sim = new Simulator(this);
+
+		// Cyclic job to "speak out" the channel values
+		initSpeakHandler();
+
+		// fps counters
+		initFPSCountersAndStartCounting();
+
+		// Cyclic job to send watchdog to the Tx module
+		initWatchdogHandler();
+
+		// register intent for listening to broadcasts
+		broadcastHubDataIntent = new Intent(BROADCAST_ACTION_HUB_DATA);
+
+	}
+
+	/**
+	 * Cyclic job to send watchdog to the Tx module
+	 */
+	private void initWatchdogHandler() {
+		watchdogHandler = new Handler();
+		runnableWatchdog = new Runnable () {
+			//@Override
+			public void run()
+			{
+				sendWatchdog();
+				
+				watchdogHandler.removeCallbacks(runnableWatchdog);
+				watchdogHandler.postDelayed(this,500);
+			}
+		};
+		watchdogHandler.postDelayed(runnableWatchdog, 500);
+	}
+
+	/**
+	 * init Cyclic job to "speak out" the channel values
+	 */
+	private void initSpeakHandler() {
+		_cyclicSpeechEnabled = false;
 		 _speakDelay = 30000;
-		
-		 // Cyclic job to "speak out" the channel values
 		 speakHandler = new Handler();
 		 runnableSpeaker = new Runnable() {
 			//@Override
@@ -455,13 +475,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 		    	speakHandler.postDelayed(this, _speakDelay);
 		 	}
 		 };
-		
-		 // Cyclic handler to calculate FPS, and set the various connection statuses
-		 
+	}
+
+	/**
+	 * initialise fps counters and start counting (delayed)
+	 */
+	private void initFPSCountersAndStartCounting() {
+		// Cyclic handler to calculate FPS, and set the various connection statuses
 		 fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
 		 fpsRxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
 		 fpsTxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-		
 		 fpsHandler = new Handler();
 		 runnableFps = new Runnable () {
 			//@Override
@@ -508,7 +531,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 					
 				}
 				
-				
 				_framecount = 0;
 				_framecountRx = 0;
 				_framecountTx = 0;
@@ -519,25 +541,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		};
 		// Start the FPS counters
 		fpsHandler.postDelayed(runnableFps,1000);
-		
-		
-		// Cyclic job to send watchdog to the Tx module
-		watchdogHandler = new Handler();
-		runnableWatchdog = new Runnable () {
-			//@Override
-			public void run()
-			{
-				sendWatchdog();
-				
-				watchdogHandler.removeCallbacks(runnableWatchdog);
-				watchdogHandler.postDelayed(this,500);
-			}
-		};
-		watchdogHandler.postDelayed(runnableWatchdog, 500);
-
-		// register intent for listening to broadcasts
-		broadcastHubDataIntent = new Intent(BROADCAST_ACTION_HUB_DATA);
-
 	}
 	
 	
@@ -691,6 +694,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * 
 	 * FIXME: Get the proper default values => hcpl: I believe the default values are 72<br>
 	 * FIXME: consider if this should be moved to Model
+	 * @deprecated use the initializeFrSkyAlarms method from Model instead
 	 */
 	public TreeMap<Integer,Alarm> initializeFrSkyAlarms()
 	{
@@ -970,7 +974,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setBtAutoEnable(boolean state)
 	{
-		_btAutoEnable = state;
+		//_btAutoEnable = state;
 		_editor.putBoolean("btAutoEnable", state);
 		_editor.commit();
 	}
@@ -990,7 +994,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setBtAutoConnect(boolean state)
 	{
-		_btAutoConnect = state;
+		// _btAutoConnect = state;
 		_editor.putBoolean("btAutoConnect", state);
 		_editor.commit();
 	}
@@ -1128,7 +1132,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setCurrentModel(Model currentModel)
 	{
-		
 		// reset old channels 
 		//FIXME destroy?
 		if(_currentModel!=null)
@@ -1156,7 +1159,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 		
 		if(_currentModel.getFrSkyAlarms().size()==0)
 		{
-			_currentModel.setFrSkyAlarms(initializeFrSkyAlarms());
+			// set default alarms if none were set yet
+			_currentModel.initializeFrSkyAlarms();
 			database.saveModel(_currentModel);
 		}
 		else
@@ -1839,7 +1843,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 					.show();
 			// Get instance of Vibrator from current Context
 			try {
-				Vibrator v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
+				Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 				// Start immediately
 				// Vibrate for 200 milliseconds
 				// Sleep for 500 milliseconds

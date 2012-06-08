@@ -42,7 +42,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	/**
 	 * use this to get the channel reference (from currentModel) 
 	 */
-	protected static final String EXTRA_CHANNEL_REF = "channelRef";
+	protected static final String EXTRA_CHANNEL_ID = "channelRef";
 
 	/**
 	 * use this to reference the current model we want to create a channel for
@@ -57,7 +57,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	/**
 	 * identifiers
 	 */
-	private long _channelId = -1;
+	private int _channelId = -1;
 	//private int _idInModel = -1;
 	private int _modelId=-1;
 	private Model _model;
@@ -152,18 +152,26 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			// hcpl: do not use parcelling or you'll get a new, different object
 			// instance. Instead pass a reference and with that reference
 			// collect the same object from the current model channels map
-			channel = server.getCurrentModel().getChannels()
-					.get(launcherIntent.getIntExtra(EXTRA_CHANNEL_REF, 0));
-			// in case this is a new channel creation rely on previous system
-			// (since I don't think it hurts there) 
-			Logger.i(TAG, "Channel config launched with attached channel id: "+launcherIntent.getIntExtra(EXTRA_CHANNEL_REF, 0));
-			if( channel == null ){
+			_modelId = launcherIntent.getIntExtra(EXTRA_MODEL_ID, -1);
+			_channelId = launcherIntent.getIntExtra(EXTRA_CHANNEL_ID, -1);
+			// if valid ids passed we can fetch these objects from server
+			if (_modelId != -1 && _channelId != -1) {
+				channel = FrSkyServer.modelMap.get(_modelId).getChannels()
+						.get(_channelId);
+				// in case this is a new channel creation rely on previous
+				// system
+				// (since I don't think it hurts there)
+				Logger.i(TAG, "Channel config launched with attached channel id: "
+								+ launcherIntent.getIntExtra(EXTRA_CHANNEL_ID, 0));
+			}
+			// otherwise we need to prepare for a new channel instead
+			else {
 				Logger.i(TAG, "New channel, creating a new one");
 				channel = prepareNewChannel(launcherIntent);
+				// update local references (needed for?)
+				_channelId = channel.getId();
+				_modelId = channel.getModelId();
 			}
-			// update local references (needed for?)
-			_channelId = channel.getId();
-			_modelId = channel.getModelId();
 			Logger.d(TAG, "The current channel is: "
 					+ channel.getDescription());
 			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
@@ -209,10 +217,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			settings = server.getSettings();
 	        editor = settings.edit();
 	        
+	        //if no model id was given we need to work on the current model
 	        if(_modelId==-1)
 			{
 	        	Logger.d(TAG,"Configure new Model object");
-				//_model = new Model(getApplicationContext());
 				_model = server.getCurrentModel();
 			}
 			else
@@ -344,7 +352,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 					//i.putExtra("channel", channel);
 					//i.putExtra("idInModel",_idInModel);
 					//pass channel and model id instead
-					i.putExtra(EXTRA_CHANNEL_REF, channel.getId());
+					i.putExtra(EXTRA_CHANNEL_ID, channel.getId());
 	
 					Logger.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
 					this.setResult(RESULT_OK,i);

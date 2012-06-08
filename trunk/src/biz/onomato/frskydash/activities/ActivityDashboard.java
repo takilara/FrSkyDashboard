@@ -43,7 +43,7 @@ import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.util.Logger;
 
-public class ActivityDashboard extends Activity implements OnClickListener {
+public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	private static final String TAG = "Dashboard";
 
 	private static final int DIALOG_ABOUT_ID = 0;
@@ -59,9 +59,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	private static final int GUI_UPDATE_SLEEP_MS=1000/GUI_UPDATE_FREQUENCY;
 
 	private boolean bluetoothEnabledAtStart;
-	private int _clickToDebug = 0;
+	//private int _clickToDebug = 0;
 
-	private int _targetModel = -1;
+	//private int _targetModel = -1;
 
 	// Used for Cyclic speak
 
@@ -94,7 +94,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 	private IntentFilter mIntentFilterBt;
 	private int _flashCounter = 0;
 	// service stuff
-	private FrSkyServer server = null;
+	//private FrSkyServer server = null;
 
 	private boolean createSpeakerLater = false;
 
@@ -133,7 +133,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		// bluetoothEnabledAtStart = false;
 
 		// Service stuff
-		doBindService();
+		//doBindService();
 
 		setContentView(R.layout.activity_dashboard);
 
@@ -255,9 +255,9 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		// Intentfilters for broadcast listeners
 		// Listen for server intents
 		mIntentFilter = new IntentFilter();
-		mIntentFilter.addAction(FrSkyServer.MESSAGE_STARTED);
+		//mIntentFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 		mIntentFilter.addAction(FrSkyServer.MESSAGE_SPEAKERCHANGE);
-		mIntentFilter.addAction(FrSkyServer.MESSAGE_ALARM_MISMATCH);
+		//mIntentFilter.addAction(FrSkyServer.MESSAGE_ALARM_MISMATCH);
 
 		// Listen for BT events (not used yet)
 		mIntentFilterBt = new IntentFilter();
@@ -336,108 +336,114 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 //		}
 //	}
 	
-	/**
-	 * Put all dialogs here
-	 */
-	protected Dialog onCreateDialog(int id) {
-		Dialog dialog;
-		Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
-
-		switch (id) {
-		case DIALOG_ABOUT_ID:
-			Logger.i(TAG, "About dialog");
-			dialog = new Dialog(this);
-			dialog.setContentView(R.layout.about_dialog);
-			dialog.setTitle("About " + getString(R.string.app_name));
-			TextView tvAboutVersion = (TextView) dialog
-					.findViewById(R.id.tvAboutVersion);
-			TextView tvAboutAuthor = (TextView) dialog
-					.findViewById(R.id.tvAboutAuthor);
-			tvAboutAuthor.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					// Log.d(TAG,"clicked author");
-					_clickToDebug++;
-					if (_clickToDebug > 5) {
-						Logger.d(TAG, "Enable debugging");
-						Toast.makeText(getApplicationContext(),
-								"Debugging enabled", Toast.LENGTH_LONG).show();
-						// MenuItem tDebug = (MenuItem)
-						// menu.findItem(R.id.menu_debug);
-						enableDebugging();
-						// tDebug.setVisible(false);
-					}
-				}
-
-			});
-
-			PackageManager pm = this.getPackageManager();
-			try {
-				PackageInfo pInfo = pm.getPackageInfo(this.getPackageName(),
-						PackageManager.GET_META_DATA);
-				tvAboutVersion.setText("Version: " + pInfo.versionName);
-				tvAboutAuthor.setText("Author: " + getString(R.string.author));
-			} catch (Exception e) {
-			}
-			break;
-		case DIALOG_ALARMS_MISMATCH:
-			Logger.e(TAG, "Show alarm mismatch dialog");
-			Model tm = null;
-			if (_targetModel != -1) {
-
-				tm = FrSkyServer.modelMap.get(_targetModel);
-				Logger.e(TAG, "Allow switch to model " + tm);
-			}
-
-			final Model ttm = tm;
-			//Model cm = server.getCurrentModel();
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Model Mismatch");
-			String msg = "The module configuration seem to be different from the current model '"
-					+ server.getCurrentModel().getName() + "'.";
-			if (_targetModel != -1) {
-				msg += "\n\nThe model looks like '" + tm.getName() + "'";
-			}
-			builder.setMessage(msg);
-			builder.setCancelable(true);
-			builder.setPositiveButton("Update FrSky",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Logger.e(TAG,
-									"Send the alarms for current model to module");
-							server.sendAlarms(server.getCurrentModel());
-						}
-					});
-			if (tm != null) {
-				builder.setNeutralButton("Switch to '" + tm.getName() + "'",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								Logger.e(TAG, "Change Currentmodel");
-								server.setCurrentModel(ttm);
-								populateChannelList();
-
-							}
-						});
-			}
-			builder.setNegativeButton("Update '" + server.getCurrentModel().getName() + "'",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Logger.e(TAG, "Update alarms from module");
-							server.getCurrentModel().setFrSkyAlarms(
-									server.getRecordedAlarmMap());
-							FrSkyServer.saveModel(server.getCurrentModel());
-						}
-					});
-
-			AlertDialog alert = builder.create();
-			//alert.setOnDismissListener(this);
-
-			dialog = alert;
-
-			break;
-		default:
-			dialog = null;
-		}
-		return dialog;
+//	/**
+//	 * Put all dialogs here
+//	 */
+//	protected Dialog onCreateDialog(int id) {
+//		Dialog dialog;
+//		Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
+//
+//		switch (id) {
+//		case DIALOG_ABOUT_ID:
+//			Logger.i(TAG, "About dialog");
+//			dialog = new Dialog(this);
+//			dialog.setContentView(R.layout.about_dialog);
+//			dialog.setTitle("About " + getString(R.string.app_name));
+//			TextView tvAboutVersion = (TextView) dialog
+//					.findViewById(R.id.tvAboutVersion);
+//			TextView tvAboutAuthor = (TextView) dialog
+//					.findViewById(R.id.tvAboutAuthor);
+//			tvAboutAuthor.setOnClickListener(new OnClickListener() {
+//				public void onClick(View v) {
+//					// Log.d(TAG,"clicked author");
+//					_clickToDebug++;
+//					if (_clickToDebug > 5) {
+//						Logger.d(TAG, "Enable debugging");
+//						Toast.makeText(getApplicationContext(),
+//								"Debugging enabled", Toast.LENGTH_LONG).show();
+//						// MenuItem tDebug = (MenuItem)
+//						// menu.findItem(R.id.menu_debug);
+//						enableDebugging();
+//						// tDebug.setVisible(false);
+//					}
+//				}
+//
+//			});
+//
+//			PackageManager pm = this.getPackageManager();
+//			try {
+//				PackageInfo pInfo = pm.getPackageInfo(this.getPackageName(),
+//						PackageManager.GET_META_DATA);
+//				tvAboutVersion.setText("Version: " + pInfo.versionName);
+//				tvAboutAuthor.setText("Author: " + getString(R.string.author));
+//			} catch (Exception e) {
+//			}
+//			break;
+//		case DIALOG_ALARMS_MISMATCH:
+//			Logger.e(TAG, "Show alarm mismatch dialog");
+//			Model tm = null;
+//			if (_targetModel != -1) {
+//
+//				tm = FrSkyServer.modelMap.get(_targetModel);
+//				Logger.e(TAG, "Allow switch to model " + tm);
+//			}
+//
+//			final Model ttm = tm;
+//			//Model cm = server.getCurrentModel();
+//			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//			builder.setTitle("Model Mismatch");
+//			String msg = "The module configuration seem to be different from the current model '"
+//					+ server.getCurrentModel().getName() + "'.";
+//			if (_targetModel != -1) {
+//				msg += "\n\nThe model looks like '" + tm.getName() + "'";
+//			}
+//			builder.setMessage(msg);
+//			builder.setCancelable(true);
+//			builder.setPositiveButton("Update FrSky",
+//					new DialogInterface.OnClickListener() {
+//						public void onClick(DialogInterface dialog, int id) {
+//							Logger.e(TAG,
+//									"Send the alarms for current model to module");
+//							server.sendAlarms(server.getCurrentModel());
+//						}
+//					});
+//			if (tm != null) {
+//				builder.setNeutralButton("Switch to '" + tm.getName() + "'",
+//						new DialogInterface.OnClickListener() {
+//							public void onClick(DialogInterface dialog, int id) {
+//								Logger.e(TAG, "Change Currentmodel");
+//								server.setCurrentModel(ttm);
+//								//populateChannelList();
+//
+//							}
+//						});
+//			}
+//			builder.setNegativeButton("Update '" + server.getCurrentModel().getName() + "'",
+//					new DialogInterface.OnClickListener() {
+//						public void onClick(DialogInterface dialog, int id) {
+//							Logger.e(TAG, "Update alarms from module");
+//							server.getCurrentModel().setFrSkyAlarms(
+//									server.getRecordedAlarmMap());
+//							FrSkyServer.saveModel(server.getCurrentModel());
+//						}
+//					});
+//
+//			AlertDialog alert = builder.create();
+//			//alert.setOnDismissListener(this);
+//
+//			dialog = alert;
+//
+//			break;
+//		default:
+//			dialog = null;
+//		}
+//		return dialog;
+//	}
+	
+	
+	public void onModelChanged()
+	{
+		populateChannelList();
 	}
 	
 	/* (non-Javadoc)
@@ -493,21 +499,22 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 			Logger.i(TAG, "Received Broadcast: '" + msg + "'");
 			Logger.i(TAG, "Comparing '" + msg + "' to '"
 						+ FrSkyServer.MESSAGE_SPEAKERCHANGE + "'");
-			if (msg.equals(FrSkyServer.MESSAGE_STARTED)) {
-				Logger.i(TAG,
-							"I have received BroadCast that the server has started");
-			}
+//			if (msg.equals(FrSkyServer.MESSAGE_STARTED)) {
+//				Logger.i(TAG,
+//							"I have received BroadCast that the server has started");
+//			}
 
-			else if (msg.equals(FrSkyServer.MESSAGE_SPEAKERCHANGE)) {
+			if (msg.equals(FrSkyServer.MESSAGE_SPEAKERCHANGE)) {
 				Logger.i(TAG,
 							"I have received BroadCast that cyclic speaker has toggled");
 				if (server != null)
 					btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
-			} else if (msg.equals(FrSkyServer.MESSAGE_ALARM_MISMATCH)) {
-				_targetModel = intent.getIntExtra("modelId", -1);
-				showDialog(DIALOG_ALARMS_MISMATCH);
-				// populateChannelList();
-			}
+			} 
+//			else if (msg.equals(FrSkyServer.MESSAGE_ALARM_MISMATCH)) {
+//				_targetModel = intent.getIntExtra("modelId", -1);
+//				showDialog(DIALOG_ALARMS_MISMATCH);
+//				// populateChannelList();
+//			}
 
 		}
 	};
@@ -539,82 +546,82 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		}
 	};
 
-	void doBindService() {
-		// bindService(new Intent(this, FrSkyServer.class), mConnection,
-		// Context.BIND_AUTO_CREATE);
-		Logger.i(TAG, "Start the server service if it is not already started");
-		startService(new Intent(this, FrSkyServer.class));
-		Logger.i(TAG, "Try to bind to the service");
-		getApplicationContext().bindService(
-				new Intent(this, FrSkyServer.class), mConnection, 0);
-		// bindService(new Intent(this, FrSkyServer.class), mConnection,
-		// Context.BIND_AUTO_CREATE);
-	}
+//	void doBindService() {
+//		// bindService(new Intent(this, FrSkyServer.class), mConnection,
+//		// Context.BIND_AUTO_CREATE);
+//		Logger.i(TAG, "Start the server service if it is not already started");
+//		startService(new Intent(this, FrSkyServer.class));
+//		Logger.i(TAG, "Try to bind to the service");
+//		getApplicationContext().bindService(
+//				new Intent(this, FrSkyServer.class), mConnection, 0);
+//		// bindService(new Intent(this, FrSkyServer.class), mConnection,
+//		// Context.BIND_AUTO_CREATE);
+//	}
 
-	void doUnbindService() {
-		if (server != null) {
-			// Detach our existing connection.
-			unbindService(mConnection);
-		}
-	}
+//	void doUnbindService() {
+//		if (server != null) {
+//			// Detach our existing connection.
+//			unbindService(mConnection);
+//		}
+//	}
 
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder binder) {
-			Logger.i(TAG, "Bound to Service");
-			server = ((FrSkyServer.MyBinder) binder).getService();
-			// server.setSettings(settings); // Make sure server has settings
-			// available
-
-			if (createSpeakerLater) // server was not ready when TTS check
-									// finished
-			{
-				server.createSpeaker();
-			}
-			Logger.i(TAG, "Setting up dashboard");
-
-			Logger.d(TAG,
-						"Cyclic speaker should be set to "
-								+ server.getCyclicSpeechEnabledAtStartup()
-								+ " at startup");
-			btnTglSpeak.setChecked(server.getCyclicSpeechEnabledAtStartup());
-
-			// server.setCyclicSpeechEnabled(server.getCyclicSpeechEnabledAtStartup());
-
-			// Check volume
-			AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-			// audioManager.startBluetoothSco();
-
-			int currentVolume = audioManager
-					.getStreamVolume(AudioManager.STREAM_MUSIC);
-			int maxVolume = audioManager
-					.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-			double volPrc = currentVolume * 100 / maxVolume;
-			Logger.d(TAG, String.format("Volume is [%s/%s] (%.2f %%)",
-						currentVolume, maxVolume, volPrc));
-			if (server.getAutoSetVolume()) {
-				if (volPrc < server.getMinimumVolume()) {
-					audioManager.setStreamVolume(
-							AudioManager.STREAM_MUSIC,
-							(int) Math.floor(server.getMinimumVolume()
-									* maxVolume / 100),
-							AudioManager.FLAG_SHOW_UI);
-				}
-			}
-
-			// check for bt
-			checkForBt();
-
-			populateChannelList();
-
-			onResume();
-
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			server = null;
-		}
-	};
+//	private ServiceConnection mConnection = new ServiceConnection() {
+//		public void onServiceConnected(ComponentName className, IBinder binder) {
+//			Logger.i(TAG, "Bound to Service");
+//			server = ((FrSkyServer.MyBinder) binder).getService();
+//			// server.setSettings(settings); // Make sure server has settings
+//			// available
+//
+//			if (createSpeakerLater) // server was not ready when TTS check
+//									// finished
+//			{
+//				server.createSpeaker();
+//			}
+//			Logger.i(TAG, "Setting up dashboard");
+//
+//			Logger.d(TAG,
+//						"Cyclic speaker should be set to "
+//								+ server.getCyclicSpeechEnabledAtStartup()
+//								+ " at startup");
+//			btnTglSpeak.setChecked(server.getCyclicSpeechEnabledAtStartup());
+//
+//			// server.setCyclicSpeechEnabled(server.getCyclicSpeechEnabledAtStartup());
+//
+//			// Check volume
+//			AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//
+//			// audioManager.startBluetoothSco();
+//
+//			int currentVolume = audioManager
+//					.getStreamVolume(AudioManager.STREAM_MUSIC);
+//			int maxVolume = audioManager
+//					.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+//			double volPrc = currentVolume * 100 / maxVolume;
+//			Logger.d(TAG, String.format("Volume is [%s/%s] (%.2f %%)",
+//						currentVolume, maxVolume, volPrc));
+//			if (server.getAutoSetVolume()) {
+//				if (volPrc < server.getMinimumVolume()) {
+//					audioManager.setStreamVolume(
+//							AudioManager.STREAM_MUSIC,
+//							(int) Math.floor(server.getMinimumVolume()
+//									* maxVolume / 100),
+//							AudioManager.FLAG_SHOW_UI);
+//				}
+//			}
+//
+//			// check for bt
+//			checkForBt();
+//
+//			populateChannelList();
+//
+//			onResume();
+//
+//		}
+//
+//		public void onServiceDisconnected(ComponentName className) {
+//			server = null;
+//		}
+//	};
 
 	@Override
 	public void onResume() {
@@ -636,10 +643,10 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 																// BT events
 		
 		//dismiss the alarm mismatch dialog to force it to update when requested
-		try{removeDialog(DIALOG_ALARMS_MISMATCH);}
-		catch (IllegalArgumentException e) {
-			// was not previously shown
-		}
+//		try{removeDialog(DIALOG_ALARMS_MISMATCH);}
+//		catch (IllegalArgumentException e) {
+//			// was not previously shown
+//		}
 		
 
 	}
@@ -996,7 +1003,7 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		// mTts.stop();
 		Logger.i(TAG, "onDestroy");
 		super.onDestroy();
-		doUnbindService();
+		//doUnbindService();
 
 	}
 
@@ -1126,6 +1133,66 @@ public class ActivityDashboard extends Activity implements OnClickListener {
 		Toast.makeText(this,
 				"Bluetooth not enabled, only simulations are available",
 				Toast.LENGTH_LONG).show();
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onServerConnected()
+	 */
+	@Override
+	void onServerConnected() {
+		// TODO Auto-generated method stub
+		if (createSpeakerLater) // server was not ready when TTS check finished
+		{
+			server.createSpeaker();
+		}
+		Logger.i(TAG, "Setting up dashboard");
+		
+		Logger.d(TAG,
+		"Cyclic speaker should be set to "
+				+ server.getCyclicSpeechEnabledAtStartup()
+				+ " at startup");
+		btnTglSpeak.setChecked(server.getCyclicSpeechEnabledAtStartup());
+		
+		// server.setCyclicSpeechEnabled(server.getCyclicSpeechEnabledAtStartup());
+		
+		// Check volume
+		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		
+		// audioManager.startBluetoothSco();
+		
+		int currentVolume = audioManager
+		.getStreamVolume(AudioManager.STREAM_MUSIC);
+		int maxVolume = audioManager
+		.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		double volPrc = currentVolume * 100 / maxVolume;
+		Logger.d(TAG, String.format("Volume is [%s/%s] (%.2f %%)",
+		currentVolume, maxVolume, volPrc));
+		if (server.getAutoSetVolume()) {
+		if (volPrc < server.getMinimumVolume()) {
+		audioManager.setStreamVolume(
+			AudioManager.STREAM_MUSIC,
+			(int) Math.floor(server.getMinimumVolume()
+					* maxVolume / 100),
+			AudioManager.FLAG_SHOW_UI);
+		}
+		}
+		
+		// check for bt
+		checkForBt();
+		
+		populateChannelList();
+		
+		onResume();
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onServerDisconnected()
+	 */
+	@Override
+	void onServerDisconnected() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

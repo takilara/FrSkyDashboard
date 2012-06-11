@@ -53,6 +53,7 @@ abstract class ActivityBase extends Activity {
 		//mIntentServerFilter = new IntentFilter();
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_ALARM_MISMATCH);
+		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_MODEL_CHANGED);
 		
 		doBindService();
 	}
@@ -87,9 +88,8 @@ abstract class ActivityBase extends Activity {
 	/**
 	 * Should be executed whenever there is a model change
 	 * 
-	 * FIXME: change so that it also listens for broadcast regarding modelchange from server, and not manually called
 	 */
-	abstract void onModelChanged();
+	abstract protected void onModelChanged();
 	
 	/**
 	 * Activityspecific code that needs to run after properly connected to the server goes here
@@ -208,8 +208,6 @@ abstract class ActivityBase extends Activity {
 								Logger.e(TAG, "Change Currentmodel");
 								server.setCurrentModel(ttm);
 								//populateChannelList();
-								onModelChanged();
-
 							}
 						});
 			}
@@ -260,6 +258,10 @@ abstract class ActivityBase extends Activity {
 				Logger.w(TAG, "Alarms are not matching");
 				showDialog(DIALOG_ALARMS_MISMATCH);
 				// populateChannelList();
+			}
+			
+			else if (msg.equals(FrSkyServer.MESSAGE_MODEL_CHANGED)) {
+				onModelChanged();
 			}
 
 		}

@@ -260,6 +260,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
 	public static final String MESSAGE_ALARM_MISMATCH = "biz.onomato.frskydash.intent.action.ALARM_MISMATCH";
 	
+	/**
+	 * Broadcast event to notify activities regarding a change of currentmodel
+	 */
+	public static final String MESSAGE_MODEL_CHANGED = "biz.onomato.frskydash.intent.action.MODEL_CHANGED";
+	
 	public LocalBroadcastManager broadcastManager;
 
 	/**
@@ -1100,6 +1105,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		//_currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		//logger.stop();		// SetModel will stop current Logger
 		Toast.makeText(this, _currentModel.getName() + " set as the active model", Toast.LENGTH_LONG).show();
+		
+		Intent i = new Intent();
+		i.setAction(MESSAGE_MODEL_CHANGED);
+		sendBroadcast(i);
 
 	}
 	

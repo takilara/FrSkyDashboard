@@ -823,6 +823,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 
 		case REQUEST_ENABLE_BT:
 			// When the request to enable Bluetooth returns
+			Logger.w(TAG, "Enable BT dialog returns");
 			if (resultCode == Activity.RESULT_OK) {
 				Logger.d(TAG, "BT now enabled");
 			} else {

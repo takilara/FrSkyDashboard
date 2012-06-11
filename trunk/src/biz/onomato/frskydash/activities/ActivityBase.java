@@ -77,6 +77,13 @@ abstract class ActivityBase extends Activity {
 		}
 	}
 	
+	@Override
+	public void onPause() {
+		super.onPause();
+		Logger.i(TAG, "onPause");
+		unregisterReceiver(mIntentServerReceiver);
+	}
+	
 	/**
 	 * Should be executed whenever there is a model change
 	 * 

@@ -443,7 +443,10 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	
 	public void onModelChanged()
 	{
-		populateChannelList();
+		if(server!=null) // broadcast from server might arrive before activity is properly attached to the service
+		{
+			populateChannelList();
+		}
 	}
 	
 	/* (non-Javadoc)

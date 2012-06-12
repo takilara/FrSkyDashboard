@@ -924,8 +924,8 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		// mTts.stop();
 		Logger.i(TAG, "onDestroy");
 		super.onDestroy();
-		//doUnbindService();
-
+		
+		doUnbindService();
 	}
 
 	public void onStop() {

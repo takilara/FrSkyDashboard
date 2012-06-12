@@ -30,9 +30,9 @@ import biz.onomato.frskydash.util.Logger;
  * Activity with overview of all configured models
  *
  */
-public class ActivityModelManagement extends Activity implements OnClickListener {
+public class ActivityModelManagement extends ActivityBase implements OnClickListener {
 	private static final String TAG = "Model Management";
-	private FrSkyServer server;
+	//private FrSkyServer server;
 	private static final int MODEL_CONFIG_RETURN=0;
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
@@ -45,7 +45,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+//		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		setContentView(R.layout.activity_modelmanagement);
 
 		rbList = new ArrayList<RadioButton>();
@@ -67,7 +67,7 @@ public class ActivityModelManagement extends Activity implements OnClickListener
 		});
 		
 		
-        doBindService();
+        //doBindService();
 	}
 	
 	@Override
@@ -278,42 +278,42 @@ public class ActivityModelManagement extends Activity implements OnClickListener
         dialog.show();
 	}
 	
-	void doBindService() {
-		Logger.i(TAG,"Start the server service if it is not already started");
-		startService(new Intent(this, FrSkyServer.class));
-		Logger.i(TAG,"Try to bind to the service");
-		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
-    }
+//	void doBindService() {
+//		Logger.i(TAG,"Start the server service if it is not already started");
+//		startService(new Intent(this, FrSkyServer.class));
+//		Logger.i(TAG,"Try to bind to the service");
+//		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
+//    }
     
-    void doUnbindService() {
-            if (server != null) {
-            // Detach our existing connection.
-	        	try {
-	        		unbindService(mConnection);
-	        	}
-	        	catch (Exception e)
-	        	{}
-        }
-    }
+//    void doUnbindService() {
+//            if (server != null) {
+//            // Detach our existing connection.
+//	        	try {
+//	        		unbindService(mConnection);
+//	        	}
+//	        	catch (Exception e)
+//	        	{}
+//        }
+//    }
     
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-		public void onServiceConnected(ComponentName className, IBinder binder) {
-			server = ((FrSkyServer.MyBinder) binder).getService();
-			Logger.i(TAG,"Bound to Service");
-			
-			populateModelList();
-			
-			rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
-			rbCurrentModel.setChecked(true);
-			
-	        
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			server = null;
-		}
-	};
+//    private ServiceConnection mConnection = new ServiceConnection() {
+//
+//		public void onServiceConnected(ComponentName className, IBinder binder) {
+//			server = ((FrSkyServer.MyBinder) binder).getService();
+//			Logger.i(TAG,"Bound to Service");
+//			
+//			populateModelList();
+//			
+//			rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
+//			rbCurrentModel.setChecked(true);
+//			
+//	        
+//		}
+//
+//		public void onServiceDisconnected(ComponentName className) {
+//			server = null;
+//		}
+//	};
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) 
     {
@@ -335,4 +335,45 @@ public class ActivityModelManagement extends Activity implements OnClickListener
     	// update model list
     	populateModelList();
     }
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onModelChanged()
+	 */
+	@Override
+	protected void onModelChanged() {
+		// TODO Auto-generated method stub
+		if(server!=null)
+		{
+			try
+			{
+				rbCurrentModel.setChecked(false); // Clear old radiobutton
+			}
+			catch (Exception e) 
+			{}
+			rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
+			rbCurrentModel.setChecked(true);
+		}
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onServerConnected()
+	 */
+	@Override
+	void onServerConnected() {
+		// TODO Auto-generated method stub
+		populateModelList();
+		
+		rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
+		rbCurrentModel.setChecked(true);
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onServerDisconnected()
+	 */
+	@Override
+	void onServerDisconnected() {
+		// TODO Auto-generated method stub
+		
+	}
 }

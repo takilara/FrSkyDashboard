@@ -312,7 +312,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
     		case R.id.FrSkySettings_btnGetFromModule:
     			Logger.d(TAG,"Try to fetch alarms from the module");
     			btnGetAlarmsFromModule.setEnabled(false);
-    			server.recordAlarmsFromModule(_model.getId());
+    			server.recordAlarmsFromModule(_model.getId(),false);
     			// register a listener for a full update
     			break;
     	}

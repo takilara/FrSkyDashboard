@@ -288,10 +288,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			int len = server.getCurrentModel().getChannels().size();
 			// for(int i=0;i<len;i++)
 			for (Channel c : server.getCurrentModel().getChannels().values()) {
-				// Channel c = server.getCurrentModel().getChannels().get(i);
-				// if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
-				// eso: adding try/catch, as switching model will break the id
-				// structure..
 				try {
 					TextView tv = (TextView) findViewById(c.getTextViewId());
 					tv.setText(c.toValueString());
@@ -299,148 +295,14 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 
 				}
 			}
-			// for(Channel c : server.getCurrentModel().getChannels())
-			// {
-			// //if(DEBUG)Log.d(TAG,"Update Channel '"+c.getDescription()+"', insert value '"+c.getValue()+"' into TextView with id '"+c.getTextViewId()+"'");
-			// TextView tv = (TextView) findViewById(c.getTextViewId());
-			// tv.setText(c.toValueString());
-			// }
 		}
 	}
 
-	// Dialogs
-	
-// Espen: As the dialog contains a mix of buttons and texts, it is complex to refresh it properly
-// It can just as well be recreated fully 
-//	protected void onPrepareDialog(int id, Dialog dialog)
-//	{
-//		switch(id){
-//			case DIALOG_ALARMS_MISMATCH:
-//				Logger.w(TAG, "Update the alarm mismatch dialog");
-//				AlertDialog dlg = (AlertDialog) dialog;
-//				
-//				Model tm = null;
-//				if (_targetModel != -1) {
-//
-//					tm = FrSkyServer.modelMap.get(_targetModel);
-//					Logger.e(TAG, "Allow switch to model " + tm);
-//				}
-//				
-//				String msg = "The module configuration seem to be different from the current model '"
-//						+ server.getCurrentModel().getName() + "'.";
-//				if (_targetModel != -1) {
-//					msg += "\n\nThe model looks like '" + tm.getName() + "'";
-//				}
-//				dlg.setMessage(msg);
-//				break;
-//		}
-//	}
-	
-//	/**
-//	 * Put all dialogs here
-//	 */
-//	protected Dialog onCreateDialog(int id) {
-//		Dialog dialog;
-//		Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
-//
-//		switch (id) {
-//		case DIALOG_ABOUT_ID:
-//			Logger.i(TAG, "About dialog");
-//			dialog = new Dialog(this);
-//			dialog.setContentView(R.layout.about_dialog);
-//			dialog.setTitle("About " + getString(R.string.app_name));
-//			TextView tvAboutVersion = (TextView) dialog
-//					.findViewById(R.id.tvAboutVersion);
-//			TextView tvAboutAuthor = (TextView) dialog
-//					.findViewById(R.id.tvAboutAuthor);
-//			tvAboutAuthor.setOnClickListener(new OnClickListener() {
-//				public void onClick(View v) {
-//					// Log.d(TAG,"clicked author");
-//					_clickToDebug++;
-//					if (_clickToDebug > 5) {
-//						Logger.d(TAG, "Enable debugging");
-//						Toast.makeText(getApplicationContext(),
-//								"Debugging enabled", Toast.LENGTH_LONG).show();
-//						// MenuItem tDebug = (MenuItem)
-//						// menu.findItem(R.id.menu_debug);
-//						enableDebugging();
-//						// tDebug.setVisible(false);
-//					}
-//				}
-//
-//			});
-//
-//			PackageManager pm = this.getPackageManager();
-//			try {
-//				PackageInfo pInfo = pm.getPackageInfo(this.getPackageName(),
-//						PackageManager.GET_META_DATA);
-//				tvAboutVersion.setText("Version: " + pInfo.versionName);
-//				tvAboutAuthor.setText("Author: " + getString(R.string.author));
-//			} catch (Exception e) {
-//			}
-//			break;
-//		case DIALOG_ALARMS_MISMATCH:
-//			Logger.e(TAG, "Show alarm mismatch dialog");
-//			Model tm = null;
-//			if (_targetModel != -1) {
-//
-//				tm = FrSkyServer.modelMap.get(_targetModel);
-//				Logger.e(TAG, "Allow switch to model " + tm);
-//			}
-//
-//			final Model ttm = tm;
-//			//Model cm = server.getCurrentModel();
-//			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//			builder.setTitle("Model Mismatch");
-//			String msg = "The module configuration seem to be different from the current model '"
-//					+ server.getCurrentModel().getName() + "'.";
-//			if (_targetModel != -1) {
-//				msg += "\n\nThe model looks like '" + tm.getName() + "'";
-//			}
-//			builder.setMessage(msg);
-//			builder.setCancelable(true);
-//			builder.setPositiveButton("Update FrSky",
-//					new DialogInterface.OnClickListener() {
-//						public void onClick(DialogInterface dialog, int id) {
-//							Logger.e(TAG,
-//									"Send the alarms for current model to module");
-//							server.sendAlarms(server.getCurrentModel());
-//						}
-//					});
-//			if (tm != null) {
-//				builder.setNeutralButton("Switch to '" + tm.getName() + "'",
-//						new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog, int id) {
-//								Logger.e(TAG, "Change Currentmodel");
-//								server.setCurrentModel(ttm);
-//								//populateChannelList();
-//
-//							}
-//						});
-//			}
-//			builder.setNegativeButton("Update '" + server.getCurrentModel().getName() + "'",
-//					new DialogInterface.OnClickListener() {
-//						public void onClick(DialogInterface dialog, int id) {
-//							Logger.e(TAG, "Update alarms from module");
-//							server.getCurrentModel().setFrSkyAlarms(
-//									server.getRecordedAlarmMap());
-//							FrSkyServer.saveModel(server.getCurrentModel());
-//						}
-//					});
-//
-//			AlertDialog alert = builder.create();
-//			//alert.setOnDismissListener(this);
-//
-//			dialog = alert;
-//
-//			break;
-//		default:
-//			dialog = null;
-//		}
-//		return dialog;
-//	}
 	
 	
+	/** 
+	 * Called whenever the current model gets changed
+	 */
 	public void onModelChanged()
 	{
 		if(server!=null) // broadcast from server might arrive before activity is properly attached to the service
@@ -449,14 +311,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see android.content.DialogInterface.OnDismissListener#onDismiss(android.content.DialogInterface)
-	 */
-//	@Override
-//	public void onDismiss(DialogInterface dialog) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 	
 	/**
 	 * enable logging by updating flag on {@link Logger} class
@@ -502,10 +356,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			Logger.i(TAG, "Received Broadcast: '" + msg + "'");
 			Logger.i(TAG, "Comparing '" + msg + "' to '"
 						+ FrSkyServer.MESSAGE_SPEAKERCHANGE + "'");
-//			if (msg.equals(FrSkyServer.MESSAGE_STARTED)) {
-//				Logger.i(TAG,
-//							"I have received BroadCast that the server has started");
-//			}
 
 			if (msg.equals(FrSkyServer.MESSAGE_SPEAKERCHANGE)) {
 				Logger.i(TAG,
@@ -513,12 +363,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 				if (server != null)
 					btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
 			} 
-//			else if (msg.equals(FrSkyServer.MESSAGE_ALARM_MISMATCH)) {
-//				_targetModel = intent.getIntExtra("modelId", -1);
-//				showDialog(DIALOG_ALARMS_MISMATCH);
-//				// populateChannelList();
-//			}
-
 		}
 	};
 
@@ -563,18 +407,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		tickHandler.post(runnableTick);
 
 		registerReceiver(mIntentReceiver, mIntentFilter); // Used to receive
-															// messages from
-															// Server
 		registerReceiver(mIntentReceiverBt, mIntentFilterBt); // Used to receive
-																// BT events
-		
-		//dismiss the alarm mismatch dialog to force it to update when requested
-//		try{removeDialog(DIALOG_ALARMS_MISMATCH);}
-//		catch (IllegalArgumentException e) {
-//			// was not previously shown
-//		}
-		
-
 	}
 
 	@Override

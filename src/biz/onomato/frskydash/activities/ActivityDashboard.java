@@ -46,9 +46,6 @@ import biz.onomato.frskydash.util.Logger;
 public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	private static final String TAG = "Dashboard";
 
-	private static final int DIALOG_ABOUT_ID = 0;
-	private static final int DIALOG_ALARMS_MISMATCH = 1;
-	private Dialog dlgAbout;
 	// private static final boolean DEBUG=true;
 	// private static boolean _enableDebugActivity=false;
 

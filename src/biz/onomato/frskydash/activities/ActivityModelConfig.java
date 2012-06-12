@@ -40,8 +40,6 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 	private static final int CHANNEL_CONFIG_RETURN = 1;
 	private static final int MODULE_CONFIG_RETURN = 2;
 	//private FrSkyServer server;
-	private static final String DELETE_CHANNEL_DESCRIPTION_KEY = "channelDescription";
-	private static final String DELETE_CHANNEL_ID_KEY = "channelId";
 	
 	private Model _model;
 	private int _modelId;
@@ -274,53 +272,54 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 		 Bundle args = new Bundle();
 	     args.putInt(DELETE_CHANNEL_ID_KEY, channel.getId());
 	     args.putString(DELETE_CHANNEL_DESCRIPTION_KEY, channel.getDescription());
+	     args.putInt(DELETE_CHANNEL_FROM_MODEL_ID_KEY, _model.getId());
 			
 	     removeDialog(DIALOG_DELETE_CHANNEL); 
 		 showDialog(DIALOG_DELETE_CHANNEL,args);
 	 }
 	 
-	 @Override
-		protected Dialog onCreateDialog(int id,Bundle args) {
-			super.onCreateDialog(id,args);
-			AlertDialog dialog;
-			Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
-
-			switch (id) {
-			case DIALOG_DELETE_CHANNEL:
-				String mDescription = args.getString(DELETE_CHANNEL_DESCRIPTION_KEY);
-				final int mId = args.getInt(DELETE_CHANNEL_ID_KEY);
-				dialog = new AlertDialog.Builder(this).create();
-				dialog.setTitle("Delete "+mDescription+"?");
-
-				dialog.setMessage("Do you really want to delete the channel '"+mDescription+"'?");
-				
-				dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
-
-		            @Override
-		            public void onClick(DialogInterface dialog, int which) {
-		            	
-		            	_model.removeChannel(mId);
-		            	populateChannelList();
-		            }
-
-		        });
-		        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
-
-		            @Override
-		            public void onClick(DialogInterface dialog, int which) {
-
-		                //Stop the activity
-		            	//_deleteId=-1;
-		            	Logger.i(TAG,"Cancel Deletion");
-		            }
-
-		        });
-				break;
-			default:
-				dialog = null;
-			}
-			return dialog;
-		} 
+//	 @Override
+//		protected Dialog onCreateDialog(int id,Bundle args) {
+//			super.onCreateDialog(id,args);
+//			AlertDialog dialog;
+//			Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
+//
+//			switch (id) {
+//			case DIALOG_DELETE_CHANNEL:
+//				String mDescription = args.getString(DELETE_CHANNEL_DESCRIPTION_KEY);
+//				final int mId = args.getInt(DELETE_CHANNEL_ID_KEY);
+//				dialog = new AlertDialog.Builder(this).create();
+//				dialog.setTitle("Delete "+mDescription+"?");
+//
+//				dialog.setMessage("Do you really want to delete the channel '"+mDescription+"'?");
+//				
+//				dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
+//
+//		            @Override
+//		            public void onClick(DialogInterface dialog, int which) {
+//		            	
+//		            	_model.removeChannel(mId);
+//		            	populateChannelList();
+//		            }
+//
+//		        });
+//		        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
+//
+//		            @Override
+//		            public void onClick(DialogInterface dialog, int which) {
+//
+//		                //Stop the activity
+//		            	//_deleteId=-1;
+//		            	Logger.i(TAG,"Cancel Deletion");
+//		            }
+//
+//		        });
+//				break;
+//			default:
+//				dialog = null;
+//			}
+//			return dialog;
+//		} 
 	 
 	 
 	 
@@ -328,7 +327,7 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 	 * @see biz.onomato.frskydash.activities.ActivityBase#onModelChanged()
 	 */
 	@Override
-	protected void onModelChanged() {
+	protected void onCurrentModelChanged() {
 		// do nothing
 		
 	}
@@ -390,6 +389,16 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 	@Override
 	void onServerDisconnected() {
 		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onModelMapChanged()
+	 */
+	@Override
+	protected void onModelMapChanged() {
+		// This gets called when models or channels are changed
+		populateChannelList();
 		
 	}
 }

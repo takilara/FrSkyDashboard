@@ -38,8 +38,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	private static final String TAG = "Model Management";
 	//private FrSkyServer server;
 	private static final int MODEL_CONFIG_RETURN=0;
-	private static final String DELETE_ID_KEY = "modelId";
-	private static final String DELETE_NAME_KEY = "modelName";
+
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
 	private ArrayList<RadioButton> rbList;
@@ -82,6 +81,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	public void onResume()
 	{
 		super.onResume();
+		//populateModelList(); 
 		
 		//test.setText(oAd1.toString());
 	}
@@ -234,77 +234,6 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 		}
 	}
 	
-//	@Override
-//	protected void onPrepareDialog(int id, Dialog dialog,Bundle args) {
-//	    super.onPrepareDialog(id, dialog);
-//
-//	    switch(id) {
-//	    case DIALOG_DELETE_MODEL:
-//	    	String mName = args.getString(DELETE_NAME_KEY);
-//			final int mId = args.getInt(DELETE_ID_KEY);
-//	    	AlertDialog dlg = (AlertDialog) dialog;
-//	    	dlg.setMessage("Do you really want to delete the model '"+mName+"'?");
-//	    	break;
-//	    }
-//	}
-	
-	@Override
-	protected Dialog onCreateDialog(int id,Bundle args) {
-		super.onCreateDialog(id,args);
-		AlertDialog dialog;
-		Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
-
-		switch (id) {
-		case DIALOG_DELETE_MODEL:
-			String mName = args.getString(DELETE_NAME_KEY);
-			final int mId = args.getInt(DELETE_ID_KEY);
-			dialog = new AlertDialog.Builder(this).create();
-			dialog.setTitle("Delete "+mName+"?");
-
-			dialog.setMessage("Do you really want to delete the model '"+mName+"'?");
-			
-			dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
-
-	            @Override
-	            public void onClick(DialogInterface dialog, int which) {
-	            	//TODO: Remove, make global to class?
-	            	
-	            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
-	            	            	
-	            	FrSkyServer.deleteModel(FrSkyServer.modelMap.get(mId));
-	            	
-	            	
-	            	//FIXME should be handled by deleteModel
-//	            	if(_deleteId==server.getCurrentModel().getId())
-//	            	{
-//	            		// we deleted the current model
-//	            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
-//	            	}
-	            	
-	            	// refresh list of models
-	            	populateModelList();
-	                //Stop the activity
-	                //server.deleteAllLogFiles();
-	            }
-
-	        });
-	        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
-
-	            @Override
-	            public void onClick(DialogInterface dialog, int which) {
-
-	                //Stop the activity
-	            	//_deleteId=-1;
-	            	Logger.i(TAG,"Cancel Deletion");
-	            }
-
-	        });
-			break;
-		default:
-			dialog = null;
-		}
-		return dialog;
-	}
 	
 	
 	private void showDeleteDialog(int id)
@@ -320,62 +249,6 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 		showDialog(DIALOG_DELETE_MODEL,args);
 	}
 	
-	/**
-	 * helper to show delete dialog when the user wants to delete a model
-	 * 
-	 * @param id
-	 */
-//	private void showDeleteDialog(int id)
-//	{
-//		///TODO: Modify for deletion of models
-//		//final Model m = new Model(getApplicationContext());
-//		//m.loadFromDatabase(id);
-//		//final Model m = server.database.getModel(id); 
-//		final Model m = FrSkyServer.modelMap.get(id);
-//		Logger.i(TAG,"Delete model with id:"+id);
-//		_deleteId = id;
-//		AlertDialog dialog = new AlertDialog.Builder(this).create();
-//		dialog.setTitle("Delete "+m.getName()+"?");
-//
-//		dialog.setMessage("Do you really want to delete the model '"+m.getName()+"'?");
-//		
-//		dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
-//
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//            	//TODO: Remove, make global to class?
-//            	
-//            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
-//            	int delModelId = m.getId();            	
-//            	FrSkyServer.deleteModel(m);
-//            	
-//            	if(delModelId==server.getCurrentModel().getId())
-//            	{
-//            		// we deleted the current model
-//            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
-//            	}
-//            	
-//            	// refresh list of models
-//            	populateModelList();
-//                //Stop the activity
-//                //server.deleteAllLogFiles();
-//            }
-//
-//        });
-//        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
-//
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//
-//                //Stop the activity
-//            	_deleteId=-1;
-//            	Logger.i(TAG,"Cancel Deletion");
-//            }
-//
-//        });
-//        // FIXME see if we can use managed dialogs instead (test screen orientation etc)
-//        dialog.show();
-//	}
 	
 
 
@@ -404,7 +277,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	 * @see biz.onomato.frskydash.activities.ActivityBase#onModelChanged()
 	 */
 	@Override
-	protected void onModelChanged() {
+	protected void onCurrentModelChanged() {
 		// TODO Auto-generated method stub
 		if(server!=null)
 		{
@@ -438,6 +311,18 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	@Override
 	void onServerDisconnected() {
 		// TODO Auto-generated method stub
+		
+	}
+
+	
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onModelMapChanged()
+	 */
+	@Override
+	protected void onModelMapChanged() {
+		// TODO Auto-generated method stub
+		populateModelList();
 		
 	}
 }

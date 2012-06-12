@@ -2,6 +2,7 @@ package biz.onomato.frskydash.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,12 +34,14 @@ import biz.onomato.frskydash.util.Logger;
  * @author Espen Solbu
  *
  */
-public class ActivityModelConfig extends Activity implements OnClickListener {
+public class ActivityModelConfig extends ActivityBase implements OnClickListener {
 	private static final String TAG = "ModelConfig";
 	//private static final boolean DEBUG=true;
 	private static final int CHANNEL_CONFIG_RETURN = 1;
 	private static final int MODULE_CONFIG_RETURN = 2;
-	private FrSkyServer server;
+	//private FrSkyServer server;
+	private static final String DELETE_CHANNEL_DESCRIPTION_KEY = "channelDescription";
+	private static final String DELETE_CHANNEL_ID_KEY = "channelId";
 	
 	private Model _model;
 	private int _modelId;
@@ -54,7 +57,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		doBindService();
+		//doBindService();
 	
 		// When using this activity to create a new model the id will be -1,
 		// only when editing an existing model the id will be given
@@ -86,84 +89,7 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 		super.onPause();
 		saveModel();
 	}
-	
-	void doBindService() {
-		Logger.i(TAG,"Start the server service if it is not already started");
-		startService(new Intent(this, FrSkyServer.class));
-		Logger.i(TAG,"Try to bind to the service");
-		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
-    }
-    
-    void doUnbindService() {
-            if (server != null) {
-            // Detach our existing connection.
-	        	try {
-	        		unbindService(mConnection);
-	        	}
-	        	catch (Exception e)
-	        	{
-	        		//always log exceptions
-	        		Logger.e(TAG,"error binding to service",e);
-	        	}
-        }
-    }
-    
-    private ServiceConnection mConnection = new ServiceConnection() {
 
-		public void onServiceConnected(ComponentName className, IBinder binder) {
-			server = ((FrSkyServer.MyBinder) binder).getService();
-			Logger.i(TAG,"Bound to Service");
-			
-			// when model id not set new model to configure
-			if(_modelId==-1)
-			{
-				Logger.d(TAG,"Configure new Model object");
-				_model = new Model("New Model");
-				_model.initializeDefaultChannels();
-				// persist
-				FrSkyServer.addModel(_model);
-			}
-			// otherwise this was an existing model that we want to get from
-			// server only for now
-			else {
-				Logger.d(TAG,"Configure existing Model object (id:"+_modelId+")");
-				_model = FrSkyServer.modelMap.get(_modelId);
-			}
-			
-			edName.setText(_model.getName());
-			
-			//ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
-			
-			ArrayAdapter<CharSequence> modelTypeAdapter  = ArrayAdapter.createFromResource(getApplicationContext(),R.array.model_types,android.R.layout.simple_spinner_item);
-        	
-//			for(Channel c : server.getCurrentModel().getChannels())
-//			{
-//				channelDescriptionAdapter.add(c);
-//			}
-			
-			modelTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			String[] modelTypes = getApplicationContext().getResources().getStringArray(R.array.model_types);
-			
-			spType.setAdapter(modelTypeAdapter);
-			for(int i=0;i<modelTypes.length;i++)
-			{
-				Logger.i(TAG,"Comparing "+modelTypes[i]+" to "+_model.getType());
-				if(modelTypes[i].equals(_model.getType()))
-				{
-					spType.setSelection(i);
-					break;
-				}
-				
-			}
-			//spType.setSelection(modelTypes);
-			// refresh channels
-			populateChannelList();
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			server = null;
-		}
-	};
 
 	@Override
 	public void onClick(View v) {
@@ -341,37 +267,129 @@ public class ActivityModelConfig extends Activity implements OnClickListener {
 	    	}
 	    }
 	
-	 //FIXME use dialogs managed by activity instead
+
+
 	 private void showDeleteChannelDialog(final Channel channel)
-		{
-			///TODO: Modify for deletion of models
-		 	Logger.i(TAG,"Delete channel "+channel.getDescription());
-			AlertDialog dialog = new AlertDialog.Builder(this).create();
-			dialog.setTitle("Delete "+channel.getDescription()+"?");
-
-			dialog.setMessage("Do you really want to delete the channel '"+channel.getDescription()+"'?");
+	 {
+		 Bundle args = new Bundle();
+	     args.putInt(DELETE_CHANNEL_ID_KEY, channel.getId());
+	     args.putString(DELETE_CHANNEL_DESCRIPTION_KEY, channel.getDescription());
 			
-			dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
+	     removeDialog(DIALOG_DELETE_CHANNEL); 
+		 showDialog(DIALOG_DELETE_CHANNEL,args);
+	 }
+	 
+	 @Override
+		protected Dialog onCreateDialog(int id,Bundle args) {
+			super.onCreateDialog(id,args);
+			AlertDialog dialog;
+			Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
 
-	            @Override
-	            public void onClick(DialogInterface dialog, int which) {
-	            	
-	            	_model.removeChannel(channel);
-	            	populateChannelList();
-	            }
+			switch (id) {
+			case DIALOG_DELETE_CHANNEL:
+				String mDescription = args.getString(DELETE_CHANNEL_DESCRIPTION_KEY);
+				final int mId = args.getInt(DELETE_CHANNEL_ID_KEY);
+				dialog = new AlertDialog.Builder(this).create();
+				dialog.setTitle("Delete "+mDescription+"?");
 
-	        });
-	        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
+				dialog.setMessage("Do you really want to delete the channel '"+mDescription+"'?");
+				
+				dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
 
-	            @Override
-	            public void onClick(DialogInterface dialog, int which) {
+		            @Override
+		            public void onClick(DialogInterface dialog, int which) {
+		            	
+		            	_model.removeChannel(mId);
+		            	populateChannelList();
+		            }
 
-	                //Stop the activity
-	            	//_deleteId=-1;
-	            	Logger.i(TAG,"Cancel Deletion");
-	            }
+		        });
+		        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
 
-	        });
-	        dialog.show();
+		            @Override
+		            public void onClick(DialogInterface dialog, int which) {
+
+		                //Stop the activity
+		            	//_deleteId=-1;
+		            	Logger.i(TAG,"Cancel Deletion");
+		            }
+
+		        });
+				break;
+			default:
+				dialog = null;
+			}
+			return dialog;
+		} 
+	 
+	 
+	 
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onModelChanged()
+	 */
+	@Override
+	protected void onModelChanged() {
+		// do nothing
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onServerConnected()
+	 */
+	@Override
+	void onServerConnected() {
+		// TODO Auto-generated method stub
+		if(_modelId==-1)
+		{
+			Logger.d(TAG,"Configure new Model object");
+			_model = new Model("New Model");
+			_model.initializeDefaultChannels();
+			// persist
+			FrSkyServer.addModel(_model);
 		}
+		// otherwise this was an existing model that we want to get from
+		// server only for now
+		else {
+			Logger.d(TAG,"Configure existing Model object (id:"+_modelId+")");
+			_model = FrSkyServer.modelMap.get(_modelId);
+		}
+		
+		edName.setText(_model.getName());
+		
+		//ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
+		
+		ArrayAdapter<CharSequence> modelTypeAdapter  = ArrayAdapter.createFromResource(getApplicationContext(),R.array.model_types,android.R.layout.simple_spinner_item);
+    	
+//		for(Channel c : server.getCurrentModel().getChannels())
+//		{
+//			channelDescriptionAdapter.add(c);
+//		}
+		
+		modelTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		String[] modelTypes = getApplicationContext().getResources().getStringArray(R.array.model_types);
+		
+		spType.setAdapter(modelTypeAdapter);
+		for(int i=0;i<modelTypes.length;i++)
+		{
+			Logger.i(TAG,"Comparing "+modelTypes[i]+" to "+_model.getType());
+			if(modelTypes[i].equals(_model.getType()))
+			{
+				spType.setSelection(i);
+				break;
+			}
+			
+		}
+		//spType.setSelection(modelTypes);
+		// refresh channels
+		populateChannelList();
+	}
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onServerDisconnected()
+	 */
+	@Override
+	void onServerDisconnected() {
+		// TODO Auto-generated method stub
+		
+	}
 }

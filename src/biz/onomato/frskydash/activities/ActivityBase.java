@@ -37,6 +37,8 @@ abstract class ActivityBase extends Activity {
 	protected static final int DIALOG_ABOUT_ID = 0;
 	protected static final int DIALOG_ALARMS_MISMATCH = 1;
 	protected static final int DIALOG_DELETE_MODEL = 2;
+	protected static final int DIALOG_DELETE_CHANNEL = 3;
+	
 	
 	protected int _clickToDebug = 0;
 	protected int _targetModel = -1;
@@ -101,7 +103,7 @@ abstract class ActivityBase extends Activity {
 	 */
 	abstract void onServerDisconnected();
 	
-	private final void doBindService() {
+	protected final void doBindService() {
 		Logger.i(TAG, "Start the server service if it is not already started");
 		startService(new Intent(this, FrSkyServer.class));
 		Logger.i(TAG, "Try to bind to the service");

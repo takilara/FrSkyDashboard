@@ -46,8 +46,8 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	private RadioButton rbCurrentModel;
 	//private boolean DEBUG=true;
 	@SuppressWarnings("unused")
-	private int _deleteId=-1;
-	private String _deleteName=null;
+	//private int _deleteId=-1;
+	//private String _deleteName=null;
 	//private int mModelToDelete = -1;
 	
 	@Override
@@ -129,11 +129,15 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 			int ii=id-100;
 			Logger.d(TAG,"Delete model with id:"+ii);
 			
-			_deleteId = ii;
-			_deleteName = FrSkyServer.modelMap.get(_deleteId).getName();
 			
 			//showDeleteDialog(ii);
-			showDialog(DIALOG_DELETE_MODEL);
+			
+			Bundle args = new Bundle();
+	        args.putInt(DELETE_ID_KEY, ii);
+	        args.putString(DELETE_NAME_KEY, FrSkyServer.modelMap.get(ii).getName());
+			
+	        removeDialog(DIALOG_DELETE_MODEL);
+			showDialog(DIALOG_DELETE_MODEL,args);
 		}
 		else
 		{
@@ -290,7 +294,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	            public void onClick(DialogInterface dialog, int which) {
 
 	                //Stop the activity
-	            	_deleteId=-1;
+	            	//_deleteId=-1;
 	            	Logger.i(TAG,"Cancel Deletion");
 	            }
 
@@ -305,12 +309,12 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	
 	private void showDeleteDialog(int id)
 	{
-		_deleteId = id;
-		_deleteName = FrSkyServer.modelMap.get(_deleteId).getName();
+		//_deleteId = id;
+		//_deleteName = FrSkyServer.modelMap.get(id).getName();
 
 		Bundle args = new Bundle();
-        args.putInt(DELETE_ID_KEY, _deleteId);
-        args.putString(DELETE_NAME_KEY, _deleteName);
+        args.putInt(DELETE_ID_KEY, id);
+        args.putString(DELETE_NAME_KEY, FrSkyServer.modelMap.get(id).getName());
 		
         removeDialog(DIALOG_DELETE_MODEL);
 		showDialog(DIALOG_DELETE_MODEL,args);

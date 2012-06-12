@@ -1057,7 +1057,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void setCurrentModel(Model currentModel)
 	{
-		// reset old channels 
+		
 		//FIXME destroy?
 		if(_currentModel!=null)
 		{
@@ -1098,7 +1098,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			}
 			else // request alarms from module same as connect
 			{
-				recordAlarmsFromModule();
+				recordAlarmsFromModule(true);
 			}
 		}
 		_currentModel.registerListeners();
@@ -1712,10 +1712,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 		send(f.toInts());
 	}
 	
-	public void recordAlarmsFromModule()
+//	public void recordAlarmsFromModule()
+//	{
+//		recordAlarmsFromModule(-1);
+//	}
+	public void recordAlarmsFromModule(boolean compare)
 	{
-		recordAlarmsFromModule(-1);
+		_compareAfterRecord=compare;
+		recordAlarmsFromModule(-1,compare);
 	}
+	
 	
 	/**
 	 * Used to start recording alarms from the FrSky Module,
@@ -1723,8 +1729,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * use <b>getRecordedAlarmMap()</b> to retrieve them. 	
 	 * @param modelId id of the model you want the recorded alarms to be stored on
 	 */
-	public void recordAlarmsFromModule(int modelId)
+	public void recordAlarmsFromModule(int modelId,boolean compare)
 	{
+		_compareAfterRecord=compare;
 		// empty the map, allowing others to monitor it for becoming full again
 		_recordingAlarms = true;
 		_recordingModelId = modelId;
@@ -2276,8 +2283,8 @@ public class FrSkyServer extends Service implements OnInitListener {
                 	_manualBtDisconnect = false;
                 	//send(Frame.InputRequestAll().toInts());
                 	
-                	_compareAfterRecord=true;
-                	recordAlarmsFromModule();
+                	//_compareAfterRecord=true;
+                	recordAlarmsFromModule(true);
                 	
                 	// Dont autosend when connecting, rather autosend when setting currentModel
 //                	if(getAutoSendAlarms())

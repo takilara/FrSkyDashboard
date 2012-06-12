@@ -19,6 +19,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -51,6 +52,9 @@ abstract class ActivityBase extends Activity {
 		Logger.i(TAG,"onCreate");
 		super.onCreate(savedInstanceState);
 		//mIntentServerFilter = new IntentFilter();
+		
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_ALARM_MISMATCH);
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_MODEL_CHANGED);
@@ -62,7 +66,7 @@ abstract class ActivityBase extends Activity {
 	public void onDestroy() {
 		Logger.i(TAG, "onDestroy");
 		super.onDestroy();
-		doUnbindService();
+		//doUnbindService();
 	}
 	
 	@Override
@@ -71,11 +75,7 @@ abstract class ActivityBase extends Activity {
 		registerReceiver(mIntentServerReceiver, mIntentServerFilter); // Used to capture server messages relevant for all activities
 		
 
-		//dismiss the alarm mismatch dialog to force it to update when requested
-		try{removeDialog(DIALOG_ALARMS_MISMATCH);}
-		catch (IllegalArgumentException e) {
-		// was not previously shown
-		}
+
 	}
 	
 	@Override
@@ -108,7 +108,7 @@ abstract class ActivityBase extends Activity {
 				new Intent(this, FrSkyServer.class), mConnection, 0);
 	}
 
-	private final void doUnbindService() {
+	protected final void doUnbindService() {
 		if (server != null) {
 			// Detach our existing connection.
 			unbindService(mConnection);
@@ -256,6 +256,13 @@ abstract class ActivityBase extends Activity {
 			else if (msg.equals(FrSkyServer.MESSAGE_ALARM_MISMATCH)) {
 				_targetModel = intent.getIntExtra("modelId", -1);
 				Logger.w(TAG, "Alarms are not matching");
+				
+				//dismiss the alarm mismatch dialog to force it to update when requested
+				try{removeDialog(DIALOG_ALARMS_MISMATCH);}
+				catch (IllegalArgumentException e) {
+				// was not previously shown
+				}
+				
 				showDialog(DIALOG_ALARMS_MISMATCH);
 				// populateChannelList();
 			}

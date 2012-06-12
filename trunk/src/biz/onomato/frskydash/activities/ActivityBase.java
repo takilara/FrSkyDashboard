@@ -34,8 +34,9 @@ import android.widget.Toast;
 abstract class ActivityBase extends Activity {
 	private static final String TAG = "Base Activity";
 	
-	private static final int DIALOG_ABOUT_ID = 0;
-	private static final int DIALOG_ALARMS_MISMATCH = 1;
+	protected static final int DIALOG_ABOUT_ID = 0;
+	protected static final int DIALOG_ALARMS_MISMATCH = 1;
+	protected static final int DIALOG_DELETE_MODEL = 2;
 	
 	protected int _clickToDebug = 0;
 	protected int _targetModel = -1;
@@ -133,7 +134,7 @@ abstract class ActivityBase extends Activity {
 	/**
 	 * Put all dialogs here
 	 */
-	protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(int id, Bundle args) {
 		Dialog dialog;
 		Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
 

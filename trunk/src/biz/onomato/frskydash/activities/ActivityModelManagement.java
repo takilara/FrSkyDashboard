@@ -4,10 +4,13 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -21,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Model;
@@ -34,6 +38,8 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	private static final String TAG = "Model Management";
 	//private FrSkyServer server;
 	private static final int MODEL_CONFIG_RETURN=0;
+	private static final String DELETE_ID_KEY = "modelId";
+	private static final String DELETE_NAME_KEY = "modelName";
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
 	private ArrayList<RadioButton> rbList;
@@ -41,6 +47,8 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	//private boolean DEBUG=true;
 	@SuppressWarnings("unused")
 	private int _deleteId=-1;
+	private String _deleteName=null;
+	//private int mModelToDelete = -1;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -120,8 +128,12 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 		{
 			int ii=id-100;
 			Logger.d(TAG,"Delete model with id:"+ii);
-			showDeleteDialog(ii);
 			
+			_deleteId = ii;
+			_deleteName = FrSkyServer.modelMap.get(_deleteId).getName();
+			
+			//showDeleteDialog(ii);
+			showDialog(DIALOG_DELETE_MODEL);
 		}
 		else
 		{
@@ -218,62 +230,148 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 		}
 	}
 	
+//	@Override
+//	protected void onPrepareDialog(int id, Dialog dialog,Bundle args) {
+//	    super.onPrepareDialog(id, dialog);
+//
+//	    switch(id) {
+//	    case DIALOG_DELETE_MODEL:
+//	    	String mName = args.getString(DELETE_NAME_KEY);
+//			final int mId = args.getInt(DELETE_ID_KEY);
+//	    	AlertDialog dlg = (AlertDialog) dialog;
+//	    	dlg.setMessage("Do you really want to delete the model '"+mName+"'?");
+//	    	break;
+//	    }
+//	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id,Bundle args) {
+		super.onCreateDialog(id,args);
+		AlertDialog dialog;
+		Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
+
+		switch (id) {
+		case DIALOG_DELETE_MODEL:
+			String mName = args.getString(DELETE_NAME_KEY);
+			final int mId = args.getInt(DELETE_ID_KEY);
+			dialog = new AlertDialog.Builder(this).create();
+			dialog.setTitle("Delete "+mName+"?");
+
+			dialog.setMessage("Do you really want to delete the model '"+mName+"'?");
+			
+			dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+	            	//TODO: Remove, make global to class?
+	            	
+	            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
+	            	            	
+	            	FrSkyServer.deleteModel(FrSkyServer.modelMap.get(mId));
+	            	
+	            	
+	            	//FIXME should be handled by deleteModel
+//	            	if(_deleteId==server.getCurrentModel().getId())
+//	            	{
+//	            		// we deleted the current model
+//	            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
+//	            	}
+	            	
+	            	// refresh list of models
+	            	populateModelList();
+	                //Stop the activity
+	                //server.deleteAllLogFiles();
+	            }
+
+	        });
+	        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+
+	                //Stop the activity
+	            	_deleteId=-1;
+	            	Logger.i(TAG,"Cancel Deletion");
+	            }
+
+	        });
+			break;
+		default:
+			dialog = null;
+		}
+		return dialog;
+	}
+	
+	
+	private void showDeleteDialog(int id)
+	{
+		_deleteId = id;
+		_deleteName = FrSkyServer.modelMap.get(_deleteId).getName();
+
+		Bundle args = new Bundle();
+        args.putInt(DELETE_ID_KEY, _deleteId);
+        args.putString(DELETE_NAME_KEY, _deleteName);
+		
+        removeDialog(DIALOG_DELETE_MODEL);
+		showDialog(DIALOG_DELETE_MODEL,args);
+	}
+	
 	/**
 	 * helper to show delete dialog when the user wants to delete a model
 	 * 
 	 * @param id
 	 */
-	private void showDeleteDialog(int id)
-	{
-		///TODO: Modify for deletion of models
-		//final Model m = new Model(getApplicationContext());
-		//m.loadFromDatabase(id);
-		//final Model m = server.database.getModel(id); 
-		final Model m = FrSkyServer.modelMap.get(id);
-		Logger.i(TAG,"Delete model with id:"+id);
-		_deleteId = id;
-		AlertDialog dialog = new AlertDialog.Builder(this).create();
-		dialog.setTitle("Delete "+m.getName()+"?");
-
-		dialog.setMessage("Do you really want to delete the model '"+m.getName()+"'?");
-		
-		dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            	//TODO: Remove, make global to class?
-            	
-            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
-            	int delModelId = m.getId();            	
-            	FrSkyServer.deleteModel(m);
-            	
-            	if(delModelId==server.getCurrentModel().getId())
-            	{
-            		// we deleted the current model
-            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
-            	}
-            	
-            	// refresh list of models
-            	populateModelList();
-                //Stop the activity
-                //server.deleteAllLogFiles();
-            }
-
-        });
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                //Stop the activity
-            	_deleteId=-1;
-            	Logger.i(TAG,"Cancel Deletion");
-            }
-
-        });
-        // FIXME see if we can use managed dialogs instead (test screen orientation etc)
-        dialog.show();
-	}
+//	private void showDeleteDialog(int id)
+//	{
+//		///TODO: Modify for deletion of models
+//		//final Model m = new Model(getApplicationContext());
+//		//m.loadFromDatabase(id);
+//		//final Model m = server.database.getModel(id); 
+//		final Model m = FrSkyServer.modelMap.get(id);
+//		Logger.i(TAG,"Delete model with id:"+id);
+//		_deleteId = id;
+//		AlertDialog dialog = new AlertDialog.Builder(this).create();
+//		dialog.setTitle("Delete "+m.getName()+"?");
+//
+//		dialog.setMessage("Do you really want to delete the model '"+m.getName()+"'?");
+//		
+//		dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
+//
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//            	//TODO: Remove, make global to class?
+//            	
+//            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
+//            	int delModelId = m.getId();            	
+//            	FrSkyServer.deleteModel(m);
+//            	
+//            	if(delModelId==server.getCurrentModel().getId())
+//            	{
+//            		// we deleted the current model
+//            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
+//            	}
+//            	
+//            	// refresh list of models
+//            	populateModelList();
+//                //Stop the activity
+//                //server.deleteAllLogFiles();
+//            }
+//
+//        });
+//        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
+//
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//
+//                //Stop the activity
+//            	_deleteId=-1;
+//            	Logger.i(TAG,"Cancel Deletion");
+//            }
+//
+//        });
+//        // FIXME see if we can use managed dialogs instead (test screen orientation etc)
+//        dialog.show();
+//	}
 	
 
 

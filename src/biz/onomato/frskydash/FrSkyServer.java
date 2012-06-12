@@ -154,7 +154,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * current {@link Model} selected by the user. This Model has
 	 * {@link Channel} instances that are registered to listen for updates
 	 */
-    private Model _currentModel=null;
+    private static Model _currentModel=null;
     
 	/**
 	 * A collection of {@link Model} instances available
@@ -1040,7 +1040,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public Model getCurrentModel()
 	{
-		return _currentModel;
+		if(_currentModel!=null)
+		{
+			return _currentModel;
+		}
+		else
+		{
+			setCurrentModel(modelMap.get(modelMap.firstKey()));
+			return _currentModel;
+		}
 	}
 	
 	/**
@@ -2379,6 +2387,13 @@ public class FrSkyServer extends Service implements OnInitListener {
      */
     public static void deleteModel(Model model)
     {
+    	if(_currentModel==model)
+    	{
+    		// should change currentmodel
+    		_currentModel=null;
+    	}
+
+    	
     	model.unregisterListeners();
     	model.frSkyAlarms.clear();
     	model.getChannels().clear();
@@ -2386,6 +2401,8 @@ public class FrSkyServer extends Service implements OnInitListener {
     	database.deleteAlarmsForModel(model);
     	database.deleteModel(model.getId());
     	modelMap.remove(model.getId());
+    	
+    	
     }
     
     /**

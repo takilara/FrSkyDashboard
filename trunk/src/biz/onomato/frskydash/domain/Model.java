@@ -252,8 +252,17 @@ public class Model {
 	public boolean removeChannel(Channel channel)
 	{
 		//channel.unregisterListener();
-		channel.close();
-		channelMap.remove(channel.getId());
+		
+		//channelMap.remove(channel.getId());
+		return removeChannel(channel.getId());
+		
+		//return _channels.remove(channel);
+	}
+	public boolean removeChannel(int channelId)
+	{
+		//channel.unregisterListener();
+		channelMap.get(channelId).close();
+		channelMap.remove(channelId);
 		return true;
 		//return _channels.remove(channel);
 	}

@@ -259,11 +259,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 	
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
 	public static final String MESSAGE_ALARM_MISMATCH = "biz.onomato.frskydash.intent.action.ALARM_MISMATCH";
+	/**
+	 * Broadcast event to notify activities regarding a change in the modelmap, e.g. added or deleted model
+	 */
+	public static final String MESSAGE_MODELMAP_CHANGED = "biz.onomato.frskydash.intent.action.MODELMAP_CHANGED";
 	
 	/**
 	 * Broadcast event to notify activities regarding a change of currentmodel
 	 */
-	public static final String MESSAGE_MODEL_CHANGED = "biz.onomato.frskydash.intent.action.MODEL_CHANGED";
+	public static final String MESSAGE_CURRENTMODEL_CHANGED = "biz.onomato.frskydash.intent.action.CURRENTMODEL_CHANGED";
 	
 	public LocalBroadcastManager broadcastManager;
 
@@ -1115,7 +1119,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Toast.makeText(this, _currentModel.getName() + " set as the active model", Toast.LENGTH_LONG).show();
 		
 		Intent i = new Intent();
-		i.setAction(MESSAGE_MODEL_CHANGED);
+		i.setAction(MESSAGE_CURRENTMODEL_CHANGED);
 		sendBroadcast(i);
 
 	}
@@ -2378,6 +2382,9 @@ public class FrSkyServer extends Service implements OnInitListener {
     		}
     	}
     	modelMap.put(model.getId(), model);
+    	Intent i = new Intent();
+		i.setAction(MESSAGE_MODELMAP_CHANGED);
+		context.sendBroadcast(i);
     	
     }
     
@@ -2401,6 +2408,10 @@ public class FrSkyServer extends Service implements OnInitListener {
     	database.deleteAlarmsForModel(model);
     	database.deleteModel(model.getId());
     	modelMap.remove(model.getId());
+    	
+    	Intent i = new Intent();
+		i.setAction(MESSAGE_MODELMAP_CHANGED);
+		context.sendBroadcast(i);
     	
     	
     }

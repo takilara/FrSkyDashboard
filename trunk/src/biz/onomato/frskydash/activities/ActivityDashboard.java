@@ -300,7 +300,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	/** 
 	 * Called whenever the current model gets changed
 	 */
-	public void onModelChanged()
+	public void onCurrentModelChanged()
 	{
 		if(server!=null) // broadcast from server might arrive before activity is properly attached to the service
 		{
@@ -943,6 +943,16 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	@Override
 	void onServerDisconnected() {
 		// TODO Auto-generated method stub
+		
+	}
+
+
+	/* (non-Javadoc)
+	 * @see biz.onomato.frskydash.activities.ActivityBase#onModelMapChanged()
+	 */
+	@Override
+	protected void onModelMapChanged() {
+		// No worries unless deleted every model
 		
 	}
 

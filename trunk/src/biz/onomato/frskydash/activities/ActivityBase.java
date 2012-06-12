@@ -38,6 +38,18 @@ abstract class ActivityBase extends Activity {
 	protected static final int DIALOG_ALARMS_MISMATCH = 1;
 	protected static final int DIALOG_DELETE_MODEL = 2;
 	protected static final int DIALOG_DELETE_CHANNEL = 3;
+
+	protected static final String CURRENT_MODEL_NAME_KEY = "CurrentModelName";
+	protected static final String CURRENT_MODEL_ID_KEY = "CurrentModelId";
+	protected static final String TARGET_MODEL_NAME_KEY = "TargetModelName";
+	protected static final String TARGET_MODEL_ID_KEY = "TargetModelId";
+	protected static final String DELETE_ID_KEY = "modelId";
+	protected static final String DELETE_NAME_KEY = "modelName";
+	protected static final String DELETE_CHANNEL_DESCRIPTION_KEY = "channelDescription";
+	protected static final String DELETE_CHANNEL_ID_KEY = "channelId";
+
+	protected static final String DELETE_CHANNEL_FROM_MODEL_ID_KEY = "modelId";
+
 	
 	
 	protected int _clickToDebug = 0;
@@ -60,7 +72,8 @@ abstract class ActivityBase extends Activity {
 		
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_STARTED);
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_ALARM_MISMATCH);
-		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_MODEL_CHANGED);
+		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_CURRENTMODEL_CHANGED);
+		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_MODELMAP_CHANGED);
 		
 		doBindService();
 	}
@@ -89,10 +102,15 @@ abstract class ActivityBase extends Activity {
 	}
 	
 	/**
-	 * Should be executed whenever there is a model change
+	 * Executed whenever there is a model change
 	 * 
 	 */
-	abstract protected void onModelChanged();
+	abstract protected void onCurrentModelChanged();
+	
+	/**
+	 * Executed whenever contents of modelmap is changed
+	 */
+	abstract protected void onModelMapChanged();
 	
 	/**
 	 * Activityspecific code that needs to run after properly connected to the server goes here
@@ -178,21 +196,25 @@ abstract class ActivityBase extends Activity {
 			break;
 		case DIALOG_ALARMS_MISMATCH:
 			Logger.e(TAG, "Show alarm mismatch dialog");
-			Model tm = null;
-			if (_targetModel != -1) {
+			String mCurrentModelName = args.getString(CURRENT_MODEL_NAME_KEY);
+			String mTargetModelName = args.getString(TARGET_MODEL_NAME_KEY);
+			final int mCurrentModelId = args.getInt(CURRENT_MODEL_ID_KEY);
+			final int mTargetModelId = args.getInt(TARGET_MODEL_ID_KEY);
+//			Model tm = null;
+			if (mTargetModelId != -1) {
 
-				tm = FrSkyServer.modelMap.get(_targetModel);
-				Logger.e(TAG, "Allow switch to model " + tm);
+				//tm = FrSkyServer.modelMap.get(mTargetModelId);
+				Logger.e(TAG, "Allow switch to model " + mTargetModelName);
 			}
 
-			final Model ttm = tm;
+			//final Model ttm = tm;
 			//Model cm = server.getCurrentModel();
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Model Mismatch");
 			String msg = "The module configuration seem to be different from the current model '"
-					+ server.getCurrentModel().getName() + "'.";
-			if (_targetModel != -1) {
-				msg += "\n\nThe model looks like '" + tm.getName() + "'";
+					+ mCurrentModelName + "'.";
+			if (mTargetModelId != -1) {
+				msg += "\n\nThe model looks like '" + mTargetModelName + "'";
 			}
 			builder.setMessage(msg);
 			builder.setCancelable(true);
@@ -201,35 +223,121 @@ abstract class ActivityBase extends Activity {
 						public void onClick(DialogInterface dialog, int id) {
 							Logger.e(TAG,
 									"Send the alarms for current model to module");
-							server.sendAlarms(server.getCurrentModel());
+							server.sendAlarms(FrSkyServer.modelMap.get(mCurrentModelId));
 						}
 					});
-			if (tm != null) {
-				builder.setNeutralButton("Switch to '" + tm.getName() + "'",
+			if (mTargetModelId != -1) {
+				builder.setNeutralButton("Switch to '" + mTargetModelName + "'",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								Logger.e(TAG, "Change Currentmodel");
-								server.setCurrentModel(ttm);
+								server.setCurrentModel(mTargetModelId);
 								//populateChannelList();
 							}
 						});
 			}
-			builder.setNegativeButton("Update '" + server.getCurrentModel().getName() + "'",
+			builder.setNegativeButton("Update '" + mCurrentModelName + "'",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							Logger.e(TAG, "Update alarms from module");
-							server.getCurrentModel().setFrSkyAlarms(
-									server.getRecordedAlarmMap());
+							//FrSkyServer.modelMap.get(mCurrentModelId).setFrSkyAlarms(server.getRecordedAlarmMap());
+							server.getCurrentModel().setFrSkyAlarms(server.getRecordedAlarmMap());
 							FrSkyServer.saveModel(server.getCurrentModel());
 						}
 					});
 
 			AlertDialog alert = builder.create();
+			//Logger.w(TAG, alert.toString());
 			//alert.setOnDismissListener(this);
 
 			dialog = alert;
 
 			break;
+		case DIALOG_DELETE_MODEL:
+			String mName = args.getString(DELETE_NAME_KEY);
+			final int mId = args.getInt(DELETE_ID_KEY);
+			AlertDialog dlg = new AlertDialog.Builder(this).create();
+			dlg.setTitle("Delete "+mName+"?");
+
+			dlg.setMessage("Do you really want to delete the model '"+mName+"'?");
+			
+			dlg.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+	            	//TODO: Remove, make global to class?
+	            	
+	            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
+	            	            	
+	            	FrSkyServer.deleteModel(FrSkyServer.modelMap.get(mId));
+	            	
+	            	
+	            	//FIXME should be handled by deleteModel
+//	            	if(_deleteId==server.getCurrentModel().getId())
+//	            	{
+//	            		// we deleted the current model
+//	            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
+//	            	}
+	            	
+	            	// refresh list of models
+	            	//populateModelList();
+	                //Stop the activity
+	                //server.deleteAllLogFiles();
+	            }
+
+	        });
+	        dlg.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+
+	                //Stop the activity
+	            	//_deleteId=-1;
+	            	Logger.i(TAG,"Cancel Deletion");
+	            }
+
+	        });
+	        dialog = dlg;
+			break;
+			
+		case DIALOG_DELETE_CHANNEL:
+			String mDescription = args.getString(DELETE_CHANNEL_DESCRIPTION_KEY);
+			final int mChannelId = args.getInt(DELETE_CHANNEL_ID_KEY);
+			final int mModelId = args.getInt(DELETE_CHANNEL_FROM_MODEL_ID_KEY);
+			AlertDialog dlg2 = new AlertDialog.Builder(this).create();
+			dlg2.setTitle("Delete "+mDescription+"?");
+
+			dlg2.setMessage("Do you really want to delete the channel '"+mDescription+"'?");
+			
+			dlg2.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+	            	
+	            	FrSkyServer.modelMap.get(mModelId).removeChannel(mChannelId);
+	            	
+	            	//FIXME: this broadcast should come from FrSkyServer
+	            	Intent i = new Intent();
+	            	i.setAction(FrSkyServer.MESSAGE_MODELMAP_CHANGED);
+	            	sendBroadcast(i);
+	            	//populateChannelList();
+	            }
+
+	        });
+	        dlg2.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
+
+	            @Override
+	            public void onClick(DialogInterface dialog, int which) {
+
+	                //Stop the activity
+	            	//_deleteId=-1;
+	            	Logger.i(TAG,"Cancel Deletion");
+	            }
+
+	        });
+	        dialog = dlg2;
+			break;
+
 		default:
 			dialog = null;
 		}
@@ -266,12 +374,21 @@ abstract class ActivityBase extends Activity {
 				// was not previously shown
 				}
 				
-				showDialog(DIALOG_ALARMS_MISMATCH);
+				Bundle args = new Bundle();
+				args.putString(CURRENT_MODEL_NAME_KEY, server.getCurrentModel().getName());
+				args.putInt(CURRENT_MODEL_ID_KEY, server.getCurrentModel().getId());
+				args.putString(TARGET_MODEL_NAME_KEY, FrSkyServer.modelMap.get(_targetModel).getName());
+				args.putInt(TARGET_MODEL_ID_KEY, _targetModel);
+				
+				showDialog(DIALOG_ALARMS_MISMATCH,args);
 				// populateChannelList();
 			}
 			
-			else if (msg.equals(FrSkyServer.MESSAGE_MODEL_CHANGED)) {
-				onModelChanged();
+			else if (msg.equals(FrSkyServer.MESSAGE_CURRENTMODEL_CHANGED)) {
+				onCurrentModelChanged();
+			}
+			else if (msg.equals(FrSkyServer.MESSAGE_MODELMAP_CHANGED)) {
+				onModelMapChanged();
 			}
 
 		}

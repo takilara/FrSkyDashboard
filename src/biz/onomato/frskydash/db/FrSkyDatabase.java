@@ -79,7 +79,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		cursor.deactivate();
 		close();
 		//debug
-		Logger.e(TAG,"Our Model list now contains: ");
+		Logger.d(TAG,"Our Model list now contains: ");
 		// log al collected models , already done on getting model
 //		for(Model m : mList) {
 //			Logger.e(TAG,"  "+m.getName());

@@ -34,22 +34,34 @@ import android.widget.Toast;
 abstract class ActivityBase extends Activity {
 	private static final String TAG = "Base Activity";
 	
+	// Dialogs
 	protected static final int DIALOG_ABOUT_ID = 0;
 	protected static final int DIALOG_ALARMS_MISMATCH = 1;
 	protected static final int DIALOG_DELETE_MODEL = 2;
 	protected static final int DIALOG_DELETE_CHANNEL = 3;
 
+	// Keys for bundles
 	protected static final String CURRENT_MODEL_NAME_KEY = "CurrentModelName";
 	protected static final String CURRENT_MODEL_ID_KEY = "CurrentModelId";
+	protected static final String MODEL_ID_KEY = "ModelId";
 	protected static final String TARGET_MODEL_NAME_KEY = "TargetModelName";
 	protected static final String TARGET_MODEL_ID_KEY = "TargetModelId";
 	protected static final String DELETE_ID_KEY = "modelId";
 	protected static final String DELETE_NAME_KEY = "modelName";
 	protected static final String DELETE_CHANNEL_DESCRIPTION_KEY = "channelDescription";
 	protected static final String DELETE_CHANNEL_ID_KEY = "channelId";
-
 	protected static final String DELETE_CHANNEL_FROM_MODEL_ID_KEY = "modelId";
 
+	// Return codes
+	protected static final int NEW_MODEL_RETURN = 0;
+	protected static final int MODEL_CONFIG_RETURN = 1;
+	protected static final int CHANNEL_CONFIG_RETURN = 2;
+	protected static final int MODULE_CONFIG_RETURN = 3;
+	protected static final int REQUEST_CONNECT_DEVICE_RETURN = 4;
+	protected static final int REQUEST_ENABLE_BT_RETURN = 5;
+	protected static final int CHECK_TTS_DATA_RETURN = 6;
+	
+	
 	
 	
 	protected int _clickToDebug = 0;
@@ -234,9 +246,25 @@ abstract class ActivityBase extends Activity {
 							public void onClick(DialogInterface dialog, int id) {
 								Logger.d(TAG, "Change Currentmodel");
 								server.setCurrentModel(mTargetModelId);
-								//populateChannelList();
 							}
 						});
+			}
+			else
+			{
+				// Provide button to add new model
+				// FIXME: Broken, so taken out
+//				builder.setNeutralButton("Add new model",
+//						new DialogInterface.OnClickListener() {
+//							public void onClick(DialogInterface dialog, int id) {
+//								Logger.i(TAG, "Add new model");
+//								Intent i = new Intent(getApplicationContext(), ActivityModelConfig.class);
+//					    		i.putExtra("modelId", (int) -1);	// Should create new model
+//					    		startActivityForResult(i,NEW_MODEL_RETURN);
+//					    		
+//								
+//							}
+//						});
+				
 			}
 			builder.setNegativeButton("Update '" + mCurrentModelName + "'",
 					new DialogInterface.OnClickListener() {

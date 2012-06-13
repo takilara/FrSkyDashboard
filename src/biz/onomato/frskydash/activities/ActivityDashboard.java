@@ -306,13 +306,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	}
 	
 	
-	/**
-	 * enable logging by updating flag on {@link Logger} class
-	 */
-	public void enableDebugging() {
-		// _enableDebugActivity=true;
-		Logger.D = true;
-	}
+
 
 	// Check for bluetooth capabilities, request if no capabilities
 	public void checkForBt() {

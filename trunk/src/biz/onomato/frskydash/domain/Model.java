@@ -93,10 +93,11 @@ public class Model {
 		// FRSKY channels only for now
 		//alarms = new Alarm[6];
 		frSkyAlarms = new TreeMap<Integer, Alarm>();
+		
 		channelMap = new TreeMap<Integer,Channel>();
 		
 		// populate FrSky Alarms with defaults
-		//initiateFrSkyAlarms();
+		initializeFrSkyAlarms();
 		
 		_id = -1; 
 		setName(modelName);

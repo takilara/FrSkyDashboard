@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="biz.onomato.frskydash" 
-      android:versionCode="19"
-      android:versionName="2.0B05"
+      android:versionCode="21"
+      android:versionName="2.0B06"
       android:installLocation="preferExternal">
     
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -14,7 +14,7 @@
     
     <uses-sdk android:minSdkVersion="8" />
     
-    <application android:icon="@drawable/ic_status" android:label="@string/app_name" android:debuggable="false">
+    <application android:icon="@drawable/ic_status" android:label="@string/app_name" android:debuggable="true">
          <!-- 
          <activity android:name=".FrSkyDash"
                   android:label="@string/app_name"

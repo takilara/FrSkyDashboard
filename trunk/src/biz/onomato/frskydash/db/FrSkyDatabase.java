@@ -196,6 +196,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 	 */
     public void saveModel(Model model)
     {
+    	Logger.w(TAG, "Saving model: "+model);
     	// if the model is -1 then this is a non saved object that needs to be inserted in the backend
     	if(model.getId()==-1)
     	{

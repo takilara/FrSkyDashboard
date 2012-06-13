@@ -356,6 +356,7 @@ public class Model {
 	 */
 	public void setFrSkyAlarms(TreeMap<Integer,Alarm> alarmMap)
 	{
+		Logger.w(TAG,"Adding Alarms to me ["+_name+"]");
 		// this check isn't really needed
 	//	if(alarmMap.size()>0)
 	//	{

@@ -2424,7 +2424,7 @@ public class FrSkyServer extends Service implements OnInitListener {
     {
     	//FIXME: What happens if saving a model with -1 id, but with channels?
     	
-
+    	Logger.w(TAG,"Saving model ["+model.getName()+"]");
     	database.saveModel(model);
     }
     
@@ -2434,6 +2434,7 @@ public class FrSkyServer extends Service implements OnInitListener {
      */
     public static void saveModel(int modelId)
     {
+    	Logger.w(TAG,"Saving model id ["+modelId+"]");
     	saveModel(modelMap.get(modelId));
     }
     

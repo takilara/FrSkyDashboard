@@ -167,11 +167,12 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		    registerReceiver(mIntentReceiver, mIntentFilter);
 		    
 		    Logger.i(TAG,"Bound to Service");
+		    Logger.w(TAG, "We are working with model Id: "+_modelId);
 			
 			
 			if(_modelId==-1)
 			{
-				Logger.d(TAG,"Configure new Model object");
+				Logger.w(TAG,"Configure new Model object");
 				//_model = new Model(getApplicationContext());
 				_model = server.getCurrentModel();
 			}
@@ -184,6 +185,16 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 				_model = FrSkyServer.modelMap.get(_modelId);
 			}
         	
+			Logger.w(TAG, "We are working with model "+_model);
+			
+			if(_model==server.getCurrentModel())
+			{
+				btnSend.setText("Save & Send");
+			}
+			else
+			{
+				btnSend.setText("Save");
+			}
 			
 			//_alarmMap = _model.getFrSkyAlarms();
 			_alarmMap = new TreeMap<Integer,Alarm>(Collections.reverseOrder());
@@ -222,7 +233,10 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			if(_alarmMap.size()==0)
 			{
 				//get alarms from current model instead
-				_alarmMap = server.getCurrentModel().getFrSkyAlarms();
+				// FIXME: this means the object will be the same, see about copying the alarms instead
+				_model.initializeFrSkyAlarms();
+				//_alarmMap = server.getCurrentModel().getFrSkyAlarms();
+				_alarmMap = _model.getFrSkyAlarms();
 			}
 			
 			
@@ -290,9 +304,16 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 //    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM1_AD2).toFrame());
 //    			server.send(_alarmMap.get(Frame.FRAMETYPE_ALARM2_AD2).toFrame());
     			
+    			Logger.w(TAG, "starting to save model "+_model);
+    			
     			_model.setFrSkyAlarms(_alarmMap);
     			FrSkyServer.saveModel(_model);
-    			server.sendAlarms(_model);
+    			if(_model==server.getCurrentModel())	// only send if we are working on currentmodel
+    			{
+    				server.sendAlarms(_model);
+    			}
+    			this.setResult(RESULT_OK);
+				this.finish();
     			//FrSkyServer.database.saveModel(_model);
     			
 

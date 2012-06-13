@@ -37,7 +37,7 @@ import biz.onomato.frskydash.util.Logger;
 public class ActivityModelManagement extends ActivityBase implements OnClickListener {
 	private static final String TAG = "Model Management";
 	//private FrSkyServer server;
-	private static final int MODEL_CONFIG_RETURN=0;
+	//private static final int MODEL_CONFIG_RETURN=0;
 
 	private LinearLayout llModelsLayout;
 	private Button btnAddModel;
@@ -89,7 +89,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	public void onClick(View v)
 	{
 		int id = v.getId();
-		if(id>10000)		// Select current Model
+		if(id>10000)		// Selecting an existing model
 		{
 			//remove check from all the radio buttons
 			for(RadioButton rb : rbList)
@@ -116,7 +116,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 				
 			}
 		}
-		else if(id>1000)	// EDIT
+		else if(id>1000)	// Edit existing model
 		{
 			int ii=id-1000;
 			Intent i = new Intent(this, ActivityModelConfig.class);
@@ -124,7 +124,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
     		
     		startActivityForResult(i,MODEL_CONFIG_RETURN);
 		}
-		else if(id>100) // DELETE
+		else if(id>100) // Delete existing model
 		{
 			int ii=id-100;
 			Logger.d(TAG,"Delete model with id:"+ii);

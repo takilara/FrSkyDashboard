@@ -37,8 +37,7 @@ import biz.onomato.frskydash.util.Logger;
 public class ActivityModelConfig extends ActivityBase implements OnClickListener {
 	private static final String TAG = "ModelConfig";
 	//private static final boolean DEBUG=true;
-	private static final int CHANNEL_CONFIG_RETURN = 1;
-	private static final int MODULE_CONFIG_RETURN = 2;
+
 	//private FrSkyServer server;
 	
 	private Model _model;
@@ -86,6 +85,10 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 	{
 		super.onPause();
 		saveModel();
+		Intent i = new Intent();
+		i.putExtra(MODEL_ID_KEY,_model.getId());
+		this.setResult(RESULT_OK,i);
+		this.finish();
 	}
 
 
@@ -278,48 +281,7 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 		 showDialog(DIALOG_DELETE_CHANNEL,args);
 	 }
 	 
-//	 @Override
-//		protected Dialog onCreateDialog(int id,Bundle args) {
-//			super.onCreateDialog(id,args);
-//			AlertDialog dialog;
-//			Logger.i(TAG, "Make a dialog on context: " + this.getPackageName());
-//
-//			switch (id) {
-//			case DIALOG_DELETE_CHANNEL:
-//				String mDescription = args.getString(DELETE_CHANNEL_DESCRIPTION_KEY);
-//				final int mId = args.getInt(DELETE_CHANNEL_ID_KEY);
-//				dialog = new AlertDialog.Builder(this).create();
-//				dialog.setTitle("Delete "+mDescription+"?");
-//
-//				dialog.setMessage("Do you really want to delete the channel '"+mDescription+"'?");
-//				
-//				dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Yes", new DialogInterface.OnClickListener() {
-//
-//		            @Override
-//		            public void onClick(DialogInterface dialog, int which) {
-//		            	
-//		            	_model.removeChannel(mId);
-//		            	populateChannelList();
-//		            }
-//
-//		        });
-//		        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"No", new DialogInterface.OnClickListener() {
-//
-//		            @Override
-//		            public void onClick(DialogInterface dialog, int which) {
-//
-//		                //Stop the activity
-//		            	//_deleteId=-1;
-//		            	Logger.i(TAG,"Cancel Deletion");
-//		            }
-//
-//		        });
-//				break;
-//			default:
-//				dialog = null;
-//			}
-//			return dialog;
-//		} 
+
 	 
 	 
 	 

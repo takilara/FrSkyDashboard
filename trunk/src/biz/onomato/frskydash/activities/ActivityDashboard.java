@@ -62,10 +62,8 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 
 	// Used for Cyclic speak
 
-	private static final int MY_DATA_CHECK_CODE = 7;
-	private static final int CHANNEL_CONFIG_RETURN = 1;
-	private static final int MODEL_CONFIG_RETURN = 8;
-	private static final int MODULE_CONFIG_RETURN = 9;
+	
+	
 
 	// Used for unique id's
 	private static final int ID_CHANNEL_BUTTON_EDIT = 1000;
@@ -110,8 +108,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	public static final String TOAST = "toast";
 	// private static BluetoothSerialService mSerialService = null;
 
-	private static final int REQUEST_CONNECT_DEVICE = 6;
-	private static final int REQUEST_ENABLE_BT = 2;
+
 
 	// graphical stuff:
 	private float scale;
@@ -142,7 +139,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		Logger.i(TAG, "Checking for TTS");
 		Intent checkSpeakIntent = new Intent();
 		checkSpeakIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-		startActivityForResult(checkSpeakIntent, MY_DATA_CHECK_CODE);
+		startActivityForResult(checkSpeakIntent, CHECK_TTS_DATA_RETURN);
 
 		// Setup the form items
 		tv_ad1_val = (TextView) findViewById(R.id.ad1Value);
@@ -337,7 +334,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 							"Request BT enabling as BT not enabled and autoenable not set");
 				Intent enableBtIntent = new Intent(
 						BluetoothAdapter.ACTION_REQUEST_ENABLE);
-				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT_RETURN);
 			}
 		}
 	}
@@ -636,7 +633,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		Channel returnChannel = null;
 		switch (requestCode) {
-		case REQUEST_CONNECT_DEVICE:
+		case REQUEST_CONNECT_DEVICE_RETURN:
 
 			// When DeviceListActivity returns with a device to connect
 			if (resultCode == Activity.RESULT_OK) {
@@ -654,7 +651,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			}
 			break;
 
-		case REQUEST_ENABLE_BT:
+		case REQUEST_ENABLE_BT_RETURN:
 			// When the request to enable Bluetooth returns
 			Logger.d(TAG, "Enable BT dialog returns");
 			if (resultCode == Activity.RESULT_OK) {
@@ -666,7 +663,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 				notifyBtNotEnabled();
 			}
 			break;
-		case MY_DATA_CHECK_CODE:
+		case CHECK_TTS_DATA_RETURN:
 			Logger.i(TAG, "Check for TTS complete");
 			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				Logger.i(TAG, "speech capabilities ok");
@@ -695,6 +692,12 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			}
 
 			populateChannelList();
+			break;
+		case NEW_MODEL_RETURN: // broken
+			Logger.w(TAG, "User added a new model, switch to it");
+			int mNewModelId = data.getIntExtra(MODEL_ID_KEY, -1);
+			Logger.w(TAG, "The new id was: "+mNewModelId);
+			
 			break;
 		case MODEL_CONFIG_RETURN: // User edited a model, or swapped current
 									// model
@@ -867,7 +870,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			if (server.getConnectionState() == BluetoothSerialService.STATE_NONE) {
 				// Launch the DeviceListActivity to see devices and do scan
 				Intent serverIntent = new Intent(this, ActivityDeviceList.class);
-				startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+				startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_RETURN);
 			} else if (server.getConnectionState() == BluetoothSerialService.STATE_CONNECTED) {
 				// Connected, reconnect
 				server.reconnectBt();

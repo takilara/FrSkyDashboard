@@ -577,7 +577,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	        				{
 		        				try
 		        				{
-		        					Logger.w(TAG,"Got recorded alarm: "+a.getFrSkyFrameType()+": "+
+		        					Logger.d(TAG,"Got recorded alarm: "+a.getFrSkyFrameType()+": "+
 		        				server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
 	//		        				a.setThreshold(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getThreshold());
 	//		        				a.setAlarmLevel(server.getRecordedAlarmMap().get(a.getFrSkyFrameType()).getAlarmLevel());
@@ -587,7 +587,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		        				}
 		        				catch(Exception e)
 		        				{
-		        					Logger.e(TAG,"Failed to get alarms from the server..");
+		        					Logger.w(TAG,"Failed to get alarms from the server..");
 		        					//Logger.e(TAG,e.getMessage());
 		        				}
 	        				}

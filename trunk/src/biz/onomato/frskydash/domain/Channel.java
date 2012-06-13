@@ -556,7 +556,7 @@ public class Channel implements Comparator<Channel> {
 	public void setSourceChannel(Channel channel) {
 		if(_sourceChannelId!=-1)
 		{
-			Logger.w(TAG,_description+": Try to drop me from channel with id: "+_sourceChannelId);
+			Logger.d(TAG,_description+": Try to drop me from channel with id: "+_sourceChannelId);
 			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
 		}
 		if(channel!=null)

@@ -1511,11 +1511,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 			equal = alarmsSameAsModel(_currentModel);
 			if(equal)
 			{
-				Logger.e(TAG,"Alarm sets are equal");
+				Logger.i(TAG,"Alarm sets are equal");
 			}
 			else
 			{
-				Logger.e(TAG,"Alarm sets are not equal, see if i can find a model that is equal");
+				Logger.i(TAG,"Alarm sets are not equal, see if i can find a model that is equal");
 				boolean found = false;
 				for(Model m: modelMap.values())
 				{
@@ -1524,16 +1524,16 @@ public class FrSkyServer extends Service implements OnInitListener {
 						if(alarmsSameAsModel(m))
 						{
 							found = true;
-							Logger.w(TAG,"Alarms match model "+m.getName());
+							Logger.d(TAG,"Alarms match model "+m.getName());
 							// _autoSwitch should come from settings
 							if(_autoSwitch)
 							{
 								//setCurrentModel(m);
-								Logger.e(TAG,"Auto Switch model");
+								Logger.i(TAG,"Auto Switch model");
 							}
 							else
 							{
-								Logger.e(TAG,"Show popup allow switch of model");
+								Logger.d(TAG,"Show popup allow switch of model");
 								Intent i = new Intent(MESSAGE_ALARM_MISMATCH);
 								i.putExtra("modelId", m.getId());
 								sendBroadcast(i);
@@ -1549,7 +1549,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				}
 				if(!found)
 				{
-					Logger.e(TAG,"Show popup no switch option");
+					Logger.i(TAG,"Show popup no switch option");
 					Intent i = new Intent(MESSAGE_ALARM_MISMATCH);
 					i.putExtra("modelId", -1);
 					sendBroadcast(i);
@@ -1748,7 +1748,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_recordingAlarms = true;
 		_recordingModelId = modelId;
 		_alarmMap.clear();
-		Logger.w(TAG,"Requesting alarms");
+		Logger.d(TAG,"Requesting alarms");
 		
 		// Only send request for RSSI alarms if Rx communication is up since we do automatic requests for alarms otherwise
 		//if((statusRx==true) && (statusBt==true))
@@ -1759,7 +1759,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		else
 		{
-			Logger.w(TAG,"Request for alarms not sent as StatusRx="+statusRx+" and statusBt="+statusBt);
+			Logger.d(TAG,"Request for alarms not sent as StatusRx="+statusRx+" and statusBt="+statusBt);
 		}
 		//send(Frame.InputRequestADAlarms());
 	}

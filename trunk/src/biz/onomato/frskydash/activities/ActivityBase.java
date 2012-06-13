@@ -195,7 +195,7 @@ abstract class ActivityBase extends Activity {
 			}
 			break;
 		case DIALOG_ALARMS_MISMATCH:
-			Logger.e(TAG, "Show alarm mismatch dialog");
+			Logger.i(TAG, "Show alarm mismatch dialog");
 			String mCurrentModelName = args.getString(CURRENT_MODEL_NAME_KEY);
 			String mTargetModelName = args.getString(TARGET_MODEL_NAME_KEY);
 			final int mCurrentModelId = args.getInt(CURRENT_MODEL_ID_KEY);
@@ -204,7 +204,7 @@ abstract class ActivityBase extends Activity {
 			if (mTargetModelId != -1) {
 
 				//tm = FrSkyServer.modelMap.get(mTargetModelId);
-				Logger.e(TAG, "Allow switch to model " + mTargetModelName);
+				Logger.d(TAG, "Allow switch to model " + mTargetModelName);
 			}
 
 			//final Model ttm = tm;
@@ -223,7 +223,7 @@ abstract class ActivityBase extends Activity {
 			builder.setPositiveButton("Update FrSky",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							Logger.e(TAG,
+							Logger.d(TAG,
 									"Send the alarms for current model to module");
 							server.sendAlarms(FrSkyServer.modelMap.get(mCurrentModelId));
 						}
@@ -232,7 +232,7 @@ abstract class ActivityBase extends Activity {
 				builder.setNeutralButton("Switch to '" + mTargetModelName + "'",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								Logger.e(TAG, "Change Currentmodel");
+								Logger.d(TAG, "Change Currentmodel");
 								server.setCurrentModel(mTargetModelId);
 								//populateChannelList();
 							}
@@ -241,7 +241,7 @@ abstract class ActivityBase extends Activity {
 			builder.setNegativeButton("Update '" + mCurrentModelName + "'",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							Logger.e(TAG, "Update alarms from module");
+							Logger.d(TAG, "Update alarms from module");
 							//FrSkyServer.modelMap.get(mCurrentModelId).setFrSkyAlarms(server.getRecordedAlarmMap());
 							server.getCurrentModel().setFrSkyAlarms(server.getRecordedAlarmMap());
 							FrSkyServer.saveModel(server.getCurrentModel());
@@ -357,7 +357,7 @@ abstract class ActivityBase extends Activity {
 					mTargetModelName = FrSkyServer.modelMap.get(_targetModel).getName();
 				}
 					
-				Logger.w(TAG, "Alarms are not matching");
+				Logger.i(TAG, "Alarms are not matching");
 				
 				//dismiss the alarm mismatch dialog to force it to update when requested
 				try{removeDialog(DIALOG_ALARMS_MISMATCH);}

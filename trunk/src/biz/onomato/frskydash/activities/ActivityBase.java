@@ -366,6 +366,15 @@ abstract class ActivityBase extends Activity {
 
 			else if (msg.equals(FrSkyServer.MESSAGE_ALARM_MISMATCH)) {
 				_targetModel = intent.getIntExtra("modelId", -1);
+				String mTargetModelName;
+				if(_targetModel==-1){
+					mTargetModelName = "";
+				}
+				else
+				{
+					mTargetModelName = FrSkyServer.modelMap.get(_targetModel).getName();
+				}
+					
 				Logger.w(TAG, "Alarms are not matching");
 				
 				//dismiss the alarm mismatch dialog to force it to update when requested
@@ -377,7 +386,7 @@ abstract class ActivityBase extends Activity {
 				Bundle args = new Bundle();
 				args.putString(CURRENT_MODEL_NAME_KEY, server.getCurrentModel().getName());
 				args.putInt(CURRENT_MODEL_ID_KEY, server.getCurrentModel().getId());
-				args.putString(TARGET_MODEL_NAME_KEY, FrSkyServer.modelMap.get(_targetModel).getName());
+				args.putString(TARGET_MODEL_NAME_KEY, mTargetModelName);
 				args.putInt(TARGET_MODEL_ID_KEY, _targetModel);
 				
 				showDialog(DIALOG_ALARMS_MISMATCH,args);

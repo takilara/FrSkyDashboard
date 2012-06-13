@@ -273,6 +273,8 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 	        //chkAutoSetVolume.setChecked(settings.getBoolean("autoSetVolume", false));
 	        
 	        chkAutoSetVolume.setChecked(server.getAutoSetVolume());
+	        chkBtAutoSendAlarms.setChecked(server.getAutoSendAlarms());
+
 	        sbInitialMinimumVolume.setEnabled(chkAutoSetVolume.isChecked());
 	        sbInitialMinimumVolume.setProgress(server.getMinimumVolume());
 	        

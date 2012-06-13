@@ -215,7 +215,9 @@ abstract class ActivityBase extends Activity {
 					+ mCurrentModelName + "'.";
 			if (mTargetModelId != -1) {
 				msg += "\n\nThe model looks like '" + mTargetModelName + "'";
+				
 			}
+			msg += "\n\nUse the 'Back' button to cancel.";
 			builder.setMessage(msg);
 			builder.setCancelable(true);
 			builder.setPositiveButton("Update FrSky",
@@ -265,24 +267,7 @@ abstract class ActivityBase extends Activity {
 
 	            @Override
 	            public void onClick(DialogInterface dialog, int which) {
-	            	//TODO: Remove, make global to class?
-	            	
-	            	//Channel.deleteChannelsForModel(getApplicationContext(),m);
-	            	            	
 	            	FrSkyServer.deleteModel(FrSkyServer.modelMap.get(mId));
-	            	
-	            	
-	            	//FIXME should be handled by deleteModel
-//	            	if(_deleteId==server.getCurrentModel().getId())
-//	            	{
-//	            		// we deleted the current model
-//	            		server.setCurrentModel(FrSkyServer.modelMap.firstKey());
-//	            	}
-	            	
-	            	// refresh list of models
-	            	//populateModelList();
-	                //Stop the activity
-	                //server.deleteAllLogFiles();
 	            }
 
 	        });
@@ -290,9 +275,6 @@ abstract class ActivityBase extends Activity {
 
 	            @Override
 	            public void onClick(DialogInterface dialog, int which) {
-
-	                //Stop the activity
-	            	//_deleteId=-1;
 	            	Logger.i(TAG,"Cancel Deletion");
 	            }
 

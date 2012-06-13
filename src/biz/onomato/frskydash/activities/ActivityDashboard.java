@@ -395,7 +395,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		super.onResume();
 
 		// enable updates
-		Logger.w(TAG, "onResume");
+		Logger.d(TAG, "onResume");
 		// _enableDebugActivity=false;
 		if (server != null) {
 			btnTglSpeak.setChecked(server.getCyclicSpeechEnabled());
@@ -538,7 +538,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 				public void onClick(View v) {
 					ImageView iv = (ImageView) v;
 					int channelId = v.getId() - ID_CHANNEL_BUTTON_SILENT;
-					Logger.w(TAG, "Change silent on channel with id: " + channelId);
+					Logger.d(TAG, "Change silent on channel with id: " + channelId);
 					Channel c = server.getCurrentModel().getChannels().get(channelId);
 					// if(DEBUG)
 					// Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
@@ -656,7 +656,7 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 
 		case REQUEST_ENABLE_BT:
 			// When the request to enable Bluetooth returns
-			Logger.w(TAG, "Enable BT dialog returns");
+			Logger.d(TAG, "Enable BT dialog returns");
 			if (resultCode == Activity.RESULT_OK) {
 				Logger.d(TAG, "BT now enabled");
 			} else {

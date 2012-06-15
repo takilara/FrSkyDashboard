@@ -5,14 +5,14 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Locale;
-import java.util.concurrent.BlockingQueue;
+//import java.util.Locale;
+//import java.util.concurrent.BlockingQueue;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
+//import android.content.BroadcastReceiver;
+//import android.content.Context;
+//import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
+//import android.os.AsyncTask;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 import biz.onomato.frskydash.util.Logger;
@@ -170,30 +170,12 @@ public class Channel implements Comparator<Channel> {
 		_factor = factor;
 		_shortUnit = unit;
 		_longUnit = longUnit;
-		// _mc = new MathContext(2);
-		// _context = context;
-		// _context = FrSkyServer.getContext();
+
 		setMovingAverage(0);
 
 		setDirtyFlag(true);
 
-		// _movingAverage = 10;
-		// _raw=-1;
-		// _val=-1;
-		// _avg=0;
-		// _stack = new MyStack(10);
-		//
 		reset();
-
-		// FRSKY channels only for now
-		// alarms = new Alarm[2];
-
-		// db = new DBAdapterChannel(context);
-
-		// TODO: listen for FrSkyServer.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS
-		mIntentFilterCommands = new IntentFilter();
-		mIntentFilterCommands
-				.addAction(FrSkyServer.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
 	}
 
 	// ==========================================================================================
@@ -479,23 +461,7 @@ public class Channel implements Comparator<Channel> {
 	// ==== INTER CHANNEL COMMUNICATION =====
 	// ==========================================================================================
 
-	/**
-	 * Tell this channel to get its updates from another channel
-	 * @param channel the channel to receive updates from
-	 */
-//	public void listenTo(Channel channel)
-//	{
-//		if(_sourceChannelId!=-1) 	// Used to listen to a channel
-//		{
-//			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
-//		}
-//		
-//		if(channel!=null) // only listen to new channel if not null
-//		{
-//			// channel already listening on a channel
-//			channel.addDerivedChannel(this);
-//		}
-//	}
+
 	
 	/**
 	 * Array to hold derived Channels,
@@ -578,15 +544,7 @@ public class Channel implements Comparator<Channel> {
 		setSourceChannel(FrSkyServer.getChannel(channelId));
 	}
 
-	// broadcast based communication
-	/**
-	 * Used to receive commands from Server
-	 */
-	public void registerListenerForServerCommands() {
-		FrSkyServer.getContext().registerReceiver(mCommandReceiver,
-				mIntentFilterCommands); // Used to receive messages from Server
-		Logger.d(TAG, "Channel "+this.toString()+" registered for commands. Channel Object ID: "+this.hashCode());
-	}
+
 	
 	/**
 	 * Used to enable reception of updates from source channel
@@ -630,15 +588,6 @@ public class Channel implements Comparator<Channel> {
 		}
 	}
 
-	public void unregisterListenerForServerCommands() {
-		Logger.d(TAG, _description + ": Removing Server Commands broadcast listener");
-		try {
-			FrSkyServer.getContext().unregisterReceiver(mCommandReceiver);
-			Logger.d(TAG, "Channel "+this.toString()+" unregistered for commands. Channel Object ID: "+this.hashCode());
-		} catch (Exception e) {
-			Logger.e(TAG, "Channel "+this.toString()+" unregistered for commands FAILED. Channel Object ID: "+this.hashCode());
-		}
-	}
 
 
 	/**
@@ -652,20 +601,11 @@ public class Channel implements Comparator<Channel> {
 			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
 		}
 		unregisterListenerForChannelUpdates();
-		unregisterListenerForServerCommands();
+//		unregisterListenerForServerCommands();
 		_closed = true;
 	}
 
 
-	private BroadcastReceiver mCommandReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// TODO: Currently only supports reset command
-			Logger.i(TAG, getDescription() + " (id: " + _channelId
-					+ ", ModelId: " + _modelId + "): Received RESET broadcast");
-			reset();
-		}
-	};
 
 
 	// ==========================================================================================
@@ -734,25 +674,7 @@ public class Channel implements Comparator<Channel> {
 		return Math.round(o * rounder) / rounder;
 	}
 
-	// TODO: Deprecate
-	// public void addListener(OnChannelListener channel)
-	// {
-	// _listeners.add(channel);
-	// setDirtyFlag(true);
-	// }
 
-	// public String toCsv()
-	// {
-	// ///TODO: stop using String.format, should not be neccessary as already
-	// uses convert
-	//
-	// StringBuilder sb = new StringBuilder();
-	//
-	//
-	// sb.append(String.format("%."+_precision+"f",convert(_raw))+delim);
-	// sb.append(String.format("%."+_precision+"f",convert(_avg))+delim);
-	// return sb.toString();
-	// }
 	public String toCsvHeader() {
 		StringBuilder sb = new StringBuilder();
 		// TODO decimalFormat probably faster

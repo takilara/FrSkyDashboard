@@ -584,7 +584,7 @@ public class FrSkyHub extends Hub{
 		// all double values, need at least precision 2
 		channel.setPrecision(2);
 		channel.setSilent(true);
-		channel.registerListenerForServerCommands();
+		//channel.registerListenerForServerCommands();
 		//_sourceChannelMap.put(channelID, channel);
 		addChannel(channel);
 	}

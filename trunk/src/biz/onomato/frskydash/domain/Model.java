@@ -528,7 +528,7 @@ public class Model {
 		for(Channel c: getChannels().values())
 		{
 			c.unregisterListenerForChannelUpdates();
-			c.unregisterListenerForServerCommands();
+			//c.unregisterListenerForServerCommands();
 		}
 	}
 	
@@ -541,7 +541,7 @@ public class Model {
 		for(Channel c: getChannels().values())
 		{
 			c.registerListenerForChannelUpdates();
-			c.registerListenerForServerCommands();
+			//c.registerListenerForServerCommands();
 		}
 	}
 	

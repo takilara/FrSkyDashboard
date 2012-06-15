@@ -286,7 +286,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	/**
 	 * Broadcast event to trigger a channel reset
 	 */
-	public static final String BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS = "biz.onomato.frskydash.intent.action.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS";
+	//public static final String BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS = "biz.onomato.frskydash.intent.action.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS";
 	// hcpl: these are class members now since we have to collect the data over
 	// several method executions since the bytes could be spread over several
 	// telemetry 11 bytes frames
@@ -1402,7 +1402,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		ad1.setId(CHANNEL_ID_AD1);
 		ad1.setPrecision(0);
 		ad1.setSilent(true);
-		ad1.registerListenerForServerCommands();
+		//ad1.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_AD1, ad1);
 		
 		
@@ -1410,7 +1410,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		ad2.setId(CHANNEL_ID_AD2);
 		ad2.setPrecision(0);
 		ad2.setSilent(true);
-		ad2.registerListenerForServerCommands();
+		//ad2.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_AD2, ad2);
 
 		Channel rssirx =  new Channel("RSSIrx", 0, 1, "", "");
@@ -1420,7 +1420,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssirx.setLongUnit("dBm");
 		rssirx.setShortUnit("dBm");
 		rssirx.setSilent(true);
-		rssirx.registerListenerForServerCommands();
+		//rssirx.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_RSSIRX, rssirx);
 		
 		Channel rssitx =  new Channel("RSSItx", 0, 1, "", "");
@@ -1430,7 +1430,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssitx.setLongUnit("dBm");
 		rssitx.setShortUnit("dBm");
 		rssitx.setSilent(true);
-		rssitx.registerListenerForServerCommands();
+		//rssitx.registerListenerForServerCommands();
 		_sourceChannelMap.put(CHANNEL_ID_RSSITX, rssitx);
 	}
 	
@@ -1776,12 +1776,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 //			c.reset();
 //		}
 		
-		Intent i = new Intent();
-		i.setAction(BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
-		Logger.i(TAG, "Sending Reset Broadcast");
-		sendBroadcast(i);
-		
-		
+//		Intent i = new Intent();
+//		i.setAction(BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS);
+//		Logger.i(TAG, "Sending Reset Broadcast");
+//		sendBroadcast(i);
+//		
+		Logger.i(TAG, "Sending Reset Command to channels");
+		for(Model m : modelMap.values())
+		{
+			for(Channel c : m.getChannels().values())
+			{
+				c.reset();
+			}
+		}
 
 		// speak warning, only when not manually disconnected
 		if (!_manualBtDisconnect) {

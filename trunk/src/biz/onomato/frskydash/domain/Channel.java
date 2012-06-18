@@ -5,14 +5,8 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-//import java.util.Locale;
-//import java.util.concurrent.BlockingQueue;
 
-//import android.content.BroadcastReceiver;
-//import android.content.Context;
-//import android.content.Intent;
 import android.content.IntentFilter;
-//import android.os.AsyncTask;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 import biz.onomato.frskydash.util.Logger;
@@ -49,8 +43,12 @@ public class Channel implements Comparator<Channel> {
 	public static final int CHANNELTYPE_AD2 = 1;
 	public static final int CHANNELTYPE_RSSI = 2;
 	
+	/**
+	 * a default value for the channel description. If this value is set on
+	 * insert at db we know we are not dealing with user data
+	 */
+	public static final String DEFAULT_CHANNEL_DESCRIPTION = "New Channel";
 	
-
 	/**
 	 * Broadcast message used for capturing and sending value updates
 	 */

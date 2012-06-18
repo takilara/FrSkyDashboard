@@ -33,11 +33,22 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 
 	//private FrSkyServer server;
 	
+	// TODO see if this reference is needed, probably local working copy for
+	// edits, but if save automatically this isn't really needed since we can
+	// work directly on the server collection then?
 	private Model _model;
+	
+	/**
+	 * reference to the model we are working on with this activity
+	 */
+	// TODO compare with targetModel in ActivityBase
 	private int _modelId;
 	
 	private Button btnAddChannel,btnFrSkyAlarms;
+	
+	// TODO remove from layout instead? No longer in user
 	private Button btnSave;
+	
 	private LinearLayout llChannelsLayout;
 	private EditText edName;
 	private Spinner spType;
@@ -74,9 +85,10 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 	}
 	
 	@Override
-	public void onPause()
-	{
+	public void onPause() {
 		super.onPause();
+		// make sure we persist the updates to the model object on pause of this
+		// activity
 		saveModel();
 		Intent i = new Intent();
 		i.putExtra(MODEL_ID_KEY,_model.getId());
@@ -113,9 +125,10 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 				editChannelIntent.putExtra(ActivityChannelConfig.EXTRA_MODEL_ID,
 					(int) _model.getId()); // Should edit existing model
 				// also add the nr of channels
-				editChannelIntent.putExtra(
-					ActivityChannelConfig.EXTRA_MODEL_NR_CHANNELS, _model
-							.getChannels().size()); 
+				// hcpl: channel activity will get this information elsewhere
+//				editChannelIntent.putExtra(
+//					ActivityChannelConfig.EXTRA_MODEL_NR_CHANNELS, _model
+//							.getChannels().size());
 				Logger.d(TAG, "Launch channel edit with modelId: " + _model.getId());
 				//editChannelIntent.putExtra("idInModel", v.getId()-1000);
 	    		startActivityForResult(editChannelIntent,CHANNEL_CONFIG_RETURN);
@@ -129,8 +142,12 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 				break;
 		}
 	}
-	
-	public void saveModel()
+
+	/**
+	 * helper for saving the model. This will redirect to the actual save model
+	 * method on the server side.
+	 */
+	private void saveModel()
 	{
 		Logger.d(TAG,"Save this model");
 
@@ -295,11 +312,14 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 	 */
 	@Override
 	void onServerConnected() {
-		// TODO Auto-generated method stub
+		// check if a model id is present. Id == -1 is no model ID present so
+		// time to create a new model instead
 		if(_modelId==-1)
 		{
 			Logger.d(TAG,"Configure new Model object");
-			_model = new Model("New Model");
+			// create new object with the default name so it will be overwritten
+			// on save
+			_model = new Model(Model.DEFAULT_MODEL_NAME);
 			_model.initializeDefaultChannels();
 			// persist
 			FrSkyServer.addModel(_model);
@@ -314,7 +334,7 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 		edName.setText(_model.getName());
 		
 		//ArrayAdapter<CharSequence> alarmLevelAdapter = ArrayAdapter.createFromResource(this, R.array.alarm_level, android.R.layout.simple_spinner_item );
-		
+		// init all model types
 		ArrayAdapter<CharSequence> modelTypeAdapter  = ArrayAdapter.createFromResource(getApplicationContext(),R.array.model_types,android.R.layout.simple_spinner_item);
     	
 //		for(Channel c : server.getCurrentModel().getChannels())

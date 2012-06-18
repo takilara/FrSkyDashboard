@@ -275,10 +275,18 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         close();
         return result;
     }
-    
+
 	/**
-	 * insert a model into database. By doing so an id is generated and set to
-	 * the model reference.
+	 * <p>
+	 * insert a model into database.
+	 * </p>
+	 * 
+	 * <p>
+	 * If the object still had the default name/description in place it will be
+	 * overwritten by a generic description/name holding a reference to the item
+	 * id.
+	 * </p>
+	 * 
 	 * 
 	 * @param model
 	 * @return
@@ -300,11 +308,15 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         Logger.d(TAG," The id for '"+model.getName()+"' is "+newId);
         // update model object
         model.setId(newId);
-        //FIXME is there a better way to get the last id first from db? Done this in PL/SQL but don't now for 
-        model.setName("Model "+newId);
-        ContentValues cv = new ContentValues();
-        cv.put(KEY_NAME, model.getName());
-        db.update(DATABASE_TABLE_MODELS, cv, KEY_ROWID + "=?", new String[]{String.valueOf(model.getId())});
+        //FIXME is there a better way to get the last id first from db? Done this in PL/SQL but don't now for
+		// at this point we can check for default model name to overwrite
+		if (Model.DEFAULT_MODEL_NAME.equals(model.getName())) {
+			model.setName("Model " + newId);
+			ContentValues cv = new ContentValues();
+			cv.put(KEY_NAME, model.getName());
+			db.update(DATABASE_TABLE_MODELS, cv, KEY_ROWID + "=?",
+					new String[] { String.valueOf(model.getId()) });
+		}
         // close connection
         close();
         // return the new id
@@ -477,36 +489,59 @@ public class FrSkyDatabase extends AbstractDBAdapter {
     			Logger.e(TAG,"Channel Update failed");
     		}
     }
-    
-    /**
-     * insert of a channel object
-     * 
-     * @param channel
-     * @return
-     */
-    private int insertChannel(Channel channel)
-    {
-    	Logger.d(TAG,"Insert Channel into the database");
-    	open();
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_DESCRIPTION, channel.getDescription());
-        initialValues.put(KEY_LONGUNIT, channel.getLongUnit());
-        initialValues.put(KEY_SHORTUNIT, channel.getShortUnit());
-        initialValues.put(KEY_OFFSET, channel.getOffset());
-        initialValues.put(KEY_FACTOR, channel.getFactor());
-        initialValues.put(KEY_PRECISION, channel.getPrecision());
-        initialValues.put(KEY_MOVINGAVERAGE, channel.getMovingAverage());
-        initialValues.put(KEY_MODELID, channel.getModelId());
-        initialValues.put(KEY_SOURCECHANNELID, channel.getSourceChannelId());
-        initialValues.put(KEY_SILENT, channel.getSilent());
-        
-        int id = (int) db.insert(DATABASE_TABLE_CHANNELS, null, initialValues);
-        // update channel id
-        channel.setId(id);
-        
-        close();
-        return id;
-    }
+
+	/**
+	 * <p>
+	 * insert of a channel object
+	 * </p>
+	 * 
+	 * <p>
+	 * If the object still had the default name/description in place it will be
+	 * overwritten by a generic description/name holding a reference to the item
+	 * id.
+	 * </p>
+	 * 
+	 * @param channel
+	 * @return
+	 */
+	private int insertChannel(Channel channel) {
+		// debug information
+		Logger.d(TAG, "Insert Channel into the database");
+		// open connection
+		open();
+		// create default content
+		ContentValues initialValues = new ContentValues();
+		initialValues.put(KEY_DESCRIPTION, channel.getDescription());
+		initialValues.put(KEY_LONGUNIT, channel.getLongUnit());
+		initialValues.put(KEY_SHORTUNIT, channel.getShortUnit());
+		initialValues.put(KEY_OFFSET, channel.getOffset());
+		initialValues.put(KEY_FACTOR, channel.getFactor());
+		initialValues.put(KEY_PRECISION, channel.getPrecision());
+		initialValues.put(KEY_MOVINGAVERAGE, channel.getMovingAverage());
+		initialValues.put(KEY_MODELID, channel.getModelId());
+		initialValues.put(KEY_SOURCECHANNELID, channel.getSourceChannelId());
+		initialValues.put(KEY_SILENT, channel.getSilent());
+		// insert and retrieve the generated id
+		int generatedId = (int) db.insert(DATABASE_TABLE_CHANNELS, null,
+				initialValues);
+		// update channel id
+		channel.setId(generatedId);
+		// FIXME is there a better way to get the last id first from db? Done
+		// this in PL/SQL but don't now for
+		// at this point we can check the channel name if this is default we can
+		// overwrite with a generated one
+		if( Channel.DEFAULT_CHANNEL_DESCRIPTION.equals(channel.getDescription())){
+			channel.setDescription("Channel " + generatedId);
+			ContentValues cv = new ContentValues();
+			cv.put(KEY_DESCRIPTION, channel.getDescription());
+			db.update(DATABASE_TABLE_CHANNELS, cv, KEY_ROWID + "=?",
+				new String[] { String.valueOf(channel.getId()) });
+		}
+		// close connection
+		close();
+		// return the new id
+		return generatedId;
+	}
     
     /**
      * update channel object in database

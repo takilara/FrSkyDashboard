@@ -32,7 +32,12 @@ public class Model {
 	public static final int MODEL_TYPE_MULTIROTOR=4;
 	public static final int MODEL_TYPE_UNKNOWN=-1;
 	
-	//private ArrayList<Channel> _channels;
+	/**
+	 * a default value for the model name. If this value is set on
+	 * insert at db we know we are not dealing with user data
+	 */
+	public static final String DEFAULT_MODEL_NAME= "New Model";
+	
 	/**
 	 * collection of channels for this model
 	 */
@@ -205,11 +210,13 @@ public class Model {
 	 */
 	public void initializeDefaultChannels() {
 		// AD 1
-		addChannel(createChannel("AD1 raw", _id, FrSkyServer.CHANNEL_ID_AD1));
+		addChannel(createChannel("AD1 raw", _id,
+				FrSkyServer.getChannel(FrSkyServer.CHANNEL_ID_AD1)));
 		// AD 2
-		addChannel(createChannel("AD2 raw", _id, FrSkyServer.CHANNEL_ID_AD2));
+		addChannel(createChannel("AD2 raw", _id,
+				FrSkyServer.getChannel(FrSkyServer.CHANNEL_ID_AD2)));
 		// indicate model is dirty, needs saving
-		dirty=true;
+		dirty = true;
 	}
 	
 	/**
@@ -217,7 +224,7 @@ public class Model {
 	 * 
 	 * @return
 	 */
-	private Channel createChannel(String description, int id, int sourceChannel){
+	private Channel createChannel(String description, int id, Channel sourceChannel){
 		Channel channel = new Channel();
 		channel.setDescription(description);
 		channel.setModelId(id);

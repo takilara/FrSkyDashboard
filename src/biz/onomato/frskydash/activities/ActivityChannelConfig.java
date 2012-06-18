@@ -50,30 +50,46 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	protected static final String EXTRA_MODEL_ID = "modelId";
 
 	/**
-	 * use this to pass the number of channels on an existing model
-	 */
-	protected static final String EXTRA_MODEL_NR_CHANNELS = "modelNrChannels";
-	
-	/**
-	 * identifiers
+	 * identifier for the current channel we are working on
 	 */
 	private int _channelId = -1;
-	//private int _idInModel = -1;
+	// TODO is the channel object needed?
+	private Channel channel;
+
+	/**
+	 * identifier for the current model we are working on. Channel is always
+	 * linked to a model!
+	 */
 	private int _modelId=-1;
+	// TODO is the model object needed?
 	private Model _model;
+	
+	/**
+	 * server reference
+	 */
 	private FrSkyServer server;
+	
+	/**
+	 * preferences
+	 */
 	SharedPreferences settings;
 	SharedPreferences.Editor editor;
 	
-	private Channel channel;
+	/**
+	 * widgets
+	 */
 	//private TextView tvName;
 	private EditText edDesc,edUnit,edShortUnit,edOffset,edFactor,edPrecision,edMovingAverage;
 	private CheckBox chkSpeechEnabled;
 	private Spinner spSourceChannel;
-	private Button btnSave;
-	private boolean first=true;
 	
-	ArrayList<Channel> sourceChannels;
+	// TODO remove from layout completely
+	private Button btnSave;
+	
+	/**
+	 * a collection of sourcechannels
+	 */
+	private ArrayList<Channel> sourceChannels;
 	
 	//chConf_edVoice
     
@@ -87,11 +103,6 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		
 		// hcpl: moved selection of channel to onBind method since server
 		// instance is then known
-		
-		//_modelId = launcherIntent.getIntExtra("modelId", -1);
-		//Logger.d(TAG, "working model has id: "+_modelId);
-		
-		Logger.d(TAG, "Channel Id is: "+_channelId);
 		
 		// Show the form
 		setContentView(R.layout.activity_channelconfig);
@@ -107,14 +118,18 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		edMovingAverage 	= (EditText) findViewById(R.id.chConf_edMovingAverage);
 		chkSpeechEnabled 	= (CheckBox) findViewById(R.id.chConf_chkSpeechEnabled);
 
+		//FIXME better to remove from layout completely
 		btnSave				= (Button) findViewById(R.id.chConf_btnSave);
-		
+		btnSave.setVisibility(View.GONE);
 		// register listener
 		btnSave.setOnClickListener(this);
 	}
-	
+
 	/**
-	 * Helper to connect with {@link FrSkyServer} instance
+	 * Helper to connect with {@link FrSkyServer} instance. Check {
+	 * {@link #mConnection} for logic when connection with server is
+	 * established. We need to wait for that connection since we need
+	 * information like current model.
 	 */
 	private void doBindService() {
 		Logger.i(TAG,"Start the server service if it is not already started");
@@ -123,28 +138,31 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		getApplicationContext().bindService(new Intent(this, FrSkyServer.class), mConnection,0);
     }
 
-	/**
-	 * Helper to disconnect from {@link FrSkyServer} instance
-	 */
-    private void doUnbindService() {
-    	// FIXME no longer in use? Why not on destroy?
-    	// always check if server available 
-		if (server != null) {
-			// Detach our existing connection.
-			try {
-				unbindService(mConnection);
-			} catch (Exception e) {
-				// hcpl: try to avoid empty catch blocks. Better to log the
-				// error and if desired disable that error logging in the Logger
-				// class. Otherwise it can be hard to find these kind of errors
-				Logger.e(TAG, "Error on unbinding "
-						+ this.getClass().toString(), e);
-			}
-		}
-    }
+	// hcpl: commented since no longer referenced, if needed call this in mConnection 
+//	/**
+//	 * Helper to disconnect from {@link FrSkyServer} instance
+//	 */
+//    private void doUnbindService() {
+//    	// FIXME no longer in use? Why not on destroy?
+//    	// always check if server available 
+//		if (server != null) {
+//			// Detach our existing connection.
+//			try {
+//				unbindService(mConnection);
+//			} catch (Exception e) {
+//				// hcpl: try to avoid empty catch blocks. Better to log the
+//				// error and if desired disable that error logging in the Logger
+//				// class. Otherwise it can be hard to find these kind of errors
+//				Logger.e(TAG, "Error on unbinding "
+//						+ this.getClass().toString(), e);
+//			}
+//		}
+//    }
     
 	/**
-	 * helper to retrieve selected channel that came with intent
+	 * helper to retrieve selected channel that came with intent. This can only
+	 * be executed once you have a proper server connection since Model map from
+	 * server will be referenced.
 	 */
 	private void getSelectedChannel() {
 		Intent launcherIntent = getIntent();
@@ -154,24 +172,23 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			// collect the same object from the current model channels map
 			_modelId = launcherIntent.getIntExtra(EXTRA_MODEL_ID, -1);
 			_channelId = launcherIntent.getIntExtra(EXTRA_CHANNEL_ID, -1);
-			// if valid ids passed we can fetch these objects from server
+			// hcpl: I moved the logging to here also
+			Logger.d(TAG, "Channel config launched with attached Model ID: "+_modelId);
+			Logger.d(TAG, "Channel config launched with attached Channel ID: "+_channelId);
+			// if valid IDs passed we can fetch these objects from server
 			if (_modelId != -1 && _channelId != -1) {
+				// TODO local object not really needed...
 				channel = FrSkyServer.modelMap.get(_modelId).getChannels()
 						.get(_channelId);
-				// in case this is a new channel creation rely on previous
-				// system
-				// (since I don't think it hurts there)
-				Logger.i(TAG, "Channel config launched with attached channel id: "
-								+ launcherIntent.getIntExtra(EXTRA_CHANNEL_ID, 0));
 			}
 			// otherwise we need to prepare for a new channel instead
 			else {
 				Logger.i(TAG, "New channel, creating a new one");
-				channel = prepareNewChannel(launcherIntent);
-				// update local references (needed for?)
-				_channelId = channel.getId();
-				_modelId = channel.getModelId();
+				// in this case local object is required unless we save right away 
+				// TODO consider saving channel at this point
+				prepareNewChannel(launcherIntent);
 			}
+			// end with some logging about channel details
 			Logger.d(TAG, "The current channel is: "
 					+ channel.getDescription());
 			Logger.d(TAG, "channel context is: " + FrSkyServer.getContext());
@@ -180,10 +197,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		} catch (Exception e) {
 			Logger.d(TAG, "Channel config launched without attached channel");
 			//channel = null;
-			channel = new Channel();
-			_channelId = launcherIntent.getIntExtra("channelId", -1);
-			_modelId = -1;
-
+			// hcpl: avoid code duplication
+			prepareNewChannel(launcherIntent);
 		}
 	}
 	
@@ -193,27 +208,36 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	 * @param intent
 	 * @return
 	 */
-	private Channel prepareNewChannel(Intent intent){
-		// FIXME this will register for commands right away, not needed
-		Channel c = new Channel();
+	private void prepareNewChannel(Intent intent){
+		// this will register for commands right away
+		channel = new Channel();
 //		c.setName(_model.getName()+"_"+(_model.getChannels().length+1));
 //		c.setDescription("Description"+(_model.getChannels().length+1));
 		//c.setName(_model.getName()+"_"+(_model.getChannels().size()+1));
-		c.setDescription("Description"+(intent.getIntExtra(EXTRA_MODEL_NR_CHANNELS, 0)+1));
-		c.setModelId(intent.getIntExtra(EXTRA_MODEL_ID,0));
-		c.setId(-1);
-		return c;
+		// use default channel description so it will be overwritten on save
+		channel.setDescription(Channel.DEFAULT_CHANNEL_DESCRIPTION);
+		channel.setModelId(intent.getIntExtra(EXTRA_MODEL_ID,0));
+		channel.setId(-1);
+		// perform insert
+		FrSkyServer.saveChannel(channel);
+		// update local references
+		_channelId = channel.getId();
+		_modelId = channel.getModelId();
 	}
     
     private ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
+			// get server reference
 			server = ((FrSkyServer.MyBinder) binder).getService();
 			Logger.i(TAG,"Bound to Service");
 			//Logger.i(TAG,"Fetch channel "+_channelId+" from Server");
 			
+			// get the selected channel now that we have references to models at
+			// server
 			getSelectedChannel();			
 			
+			// init preferences
 			settings = server.getSettings();
 	        editor = settings.edit();
 	        
@@ -279,12 +303,21 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 				}
 				
 				spSourceChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
-				    @Override
+					
+							/**
+							 * keep track of first selection since first
+							 * selection will be on initialisation of view only
+							 * and doesn't have to be counted as an update of
+							 * the sourcechannel
+							 */
+							private boolean firstSelection = true;
+
+					@Override
 				    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 				        // your code here
-				    	if(first)
+				    	if(firstSelection)
 				    	{
-				    		first = false;
+				    		firstSelection = false;
 				    	}
 				    	else
 				    	{
@@ -337,7 +370,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		switch(v.getId()){
 			case R.id.chConf_btnSave:
 				Logger.i(TAG,"Apply settings to channel: "+_channelId);
-				applyChannel();
+				saveChannel();
 				
 				// Enable the listener:
 				//channel.registerListener();
@@ -354,7 +387,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 					//pass channel and model id instead
 					i.putExtra(EXTRA_CHANNEL_ID, channel.getId());
 	
-					Logger.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
+//					Logger.d(TAG,"Sending Parcelled channel back: Description:"+channel.getDescription()+", silent: "+channel.getSilent());
 					this.setResult(RESULT_OK,i);
 				}
 				else
@@ -367,7 +400,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		}
 	}
 	
-	private void applyChannel()
+	/**
+	 * Save all changes to this channel.
+	 */
+	private void saveChannel()
 	{
 		Logger.i(TAG,"Apply the settings");
 		
@@ -392,9 +428,12 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		channel.setMovingAverage(ma);
 		
 		// get reference to user selection
-		Channel c = (Channel) spSourceChannel.getSelectedItem();
-		Logger.d(TAG,"Try to set source channel to:"+c.toString()+" (ID: "+c.getId()+")");
-		channel.setSourceChannel(c);
+		Channel sourceChannel = (Channel) spSourceChannel.getSelectedItem();
+		// could be that user didn't make any selection
+		if( sourceChannel != null ){
+			Logger.d(TAG,"Try to set source channel to:"+sourceChannel.toString()+" (ID: "+sourceChannel.getId()+")");
+			channel.setSourceChannel(sourceChannel);
+		}
 		
 		//channel.setDirtyFlag(true);
 		
@@ -420,25 +459,30 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		}
 		else
 		{
+			// FIXME check this
 			Logger.d(TAG,"This is a new model, delay saving");
 		}
 	}
 	
+	@Override
 	public void onPause() {
-
 		super.onPause();
+		// log information here
 		Logger.i(TAG, "onPause");
-		// remove all source channels to prevent holding reference 
+		// make sure to persist the channel updates we did in this activity.
+		// THIS HAS TO BE DONE BEFORE SOURCECHANNELS ARE CLEARED!!
+		saveChannel();
+		// remove all source channels to prevent holding reference. This is clean up!
 		if( sourceChannels != null )
 			sourceChannels.clear();
-		
-		finish();
-		
+		// inform with result ok
+		Intent i = new Intent();
+		i.putExtra(EXTRA_CHANNEL_ID, channel.getId());
+		this.setResult(RESULT_OK,i);
+		this.finish();
 		// hcpl: is this no longer needed?
 		// mTts.stop();
 		// doUnbindService();
-		
-
 	}
 
 }

@@ -1502,7 +1502,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	{
 		// hcpl: isn't it better to start from not being equal? Otherwise on
 		// error you might end up with equal while check hasn't passed = false
-		// positive
+		// positive => fixed by initialising models always with alarms
 		boolean equal = true;
 		// we can only check if the current model is set
 		if(_currentModel!=null){
@@ -1514,6 +1514,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Logger.i(TAG,"Alarm sets are equal");
 			}
 			else
+				
 			{
 				Logger.i(TAG,"Alarm sets are not equal, see if i can find a model that is equal");
 				boolean found = false;

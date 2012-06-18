@@ -2,18 +2,8 @@ package biz.onomato.frskydash.activities;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Model;
@@ -44,7 +33,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	private ArrayList<RadioButton> rbList;
 	private RadioButton rbCurrentModel;
 	//private boolean DEBUG=true;
-	@SuppressWarnings("unused")
+//	@SuppressWarnings("unused")
 	//private int _deleteId=-1;
 	//private String _deleteName=null;
 	//private int mModelToDelete = -1;
@@ -73,7 +62,6 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 			}
 		});
 		
-		
         //doBindService();
 	}
 	
@@ -82,7 +70,6 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	{
 		super.onResume();
 		//populateModelList(); 
-		
 		//test.setText(oAd1.toString());
 	}
 	

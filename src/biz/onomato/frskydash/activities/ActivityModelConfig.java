@@ -1,15 +1,8 @@
 package biz.onomato.frskydash.activities;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -243,7 +236,10 @@ public class ActivityModelConfig extends ActivityBase implements OnClickListener
 	            		//{
 	            			//_model.setChannel(idInModel,returnChannel);
 	            			//returnChannel.setContext(getApplicationContext());
-	            			returnChannel.setSourceChannel(returnChannel.getSourceChannelId());
+				// FIXED get reference to source channel itself first before
+				// setting
+				returnChannel.setSourceChannel(FrSkyServer
+						.getChannel(returnChannel.getSourceChannelId()));
 	            			//returnChannel.registerListenerForServerCommands();
 	            			
 	            			//_model.setChannel(returnChannel);

@@ -101,7 +101,7 @@ public class Model {
 		
 		channelMap = new TreeMap<Integer,Channel>();
 		
-		// populate FrSky Alarms with defaults
+		// populate FrSky Alarms with defaults, this closes ticket #415
 		initializeFrSkyAlarms();
 		
 		_id = -1; 
@@ -125,7 +125,7 @@ public class Model {
 	 * ctor
 	 */
 	public Model() {
-		this("Model 1", "");
+		this(Model.DEFAULT_MODEL_NAME, "");
 	}
 
 	/**

@@ -558,4 +558,27 @@ public class Model {
 				+ "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + _id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		// 2 models are the same if they have the same ID
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Model other = (Model) obj;
+		if (_id != other._id)
+			return false;
+		return true;
+	}
+
 }

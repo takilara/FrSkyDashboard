@@ -175,6 +175,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		m.setId(cu.getInt(cu.getColumnIndexOrThrow(KEY_ROWID)));
 		m.setName(cu.getString(cu.getColumnIndexOrThrow(KEY_NAME)));
 		m.setType(cu.getString(cu.getColumnIndexOrThrow(KEY_MODELTYPE)));
+		m.setHubClassName(cu.getString(cu.getColumnIndexOrThrow(KEY_HUB_CLASS)));
 		// Add Channels to the model
 		//FIXME update query and get this info from the cursor instead
 		ArrayList<Channel> channelList = getChannelsForModel(m.getId());
@@ -270,6 +271,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, model.getName());
         args.put(KEY_MODELTYPE, model.getType());
+        args.put(KEY_HUB_CLASS, model.getHubClassName());
         boolean result = db.update(DATABASE_TABLE_MODELS, args, 
                 KEY_ROWID + "=" + model.getId(), null) > 0;
         close();
@@ -301,6 +303,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_NAME, model.getName());
         initialValues.put(KEY_MODELTYPE, model.getType());
+        initialValues.put(KEY_HUB_CLASS, model.getHubClassName());
         //initialValues.put(KEY_TITLE, title);
         // insert and retrieve the generated id
         int newId = (int) db.insert(DATABASE_TABLE_MODELS, null, initialValues);

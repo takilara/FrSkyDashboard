@@ -111,6 +111,7 @@
     <string name="modelConf_Channels">Channels</string>
     <string name="modelConf_addChannel">Add Channel</string>
     <string name="modelConf_frSkyAlarms">FrSky Alarms</string>
+    <string name="modelConf_HubType">Hub Type</string>
     
     <string-array name="model_types">	<!-- Translators, note that the order is important -->
 		<item>Other</item>
@@ -119,9 +120,8 @@
 		<item>Car</item>
 		<item>Boat</item>
 		<item>Multirotor</item>
-		
 	</string-array>
-	
+   	
     <string-array name="rpm_blade_values">
         <item>1</item>
         <item>2</item>

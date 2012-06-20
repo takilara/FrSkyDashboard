@@ -3,9 +3,9 @@ package biz.onomato.frskydash.domain;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import android.util.Log;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.hub.Hub;
 import biz.onomato.frskydash.util.Logger;
 
@@ -499,14 +499,17 @@ public class Model {
 	}
 
 	/**
-	 * retrieve hub for this model
+	 * retrieve hub for this model. Returns null if the user hasn't selected hub
+	 * support.
 	 * 
 	 * @return
 	 */
 	public Hub getHub() {
-		if (hub == null)
-			//FIXME for now just create a default frskyhub, we can make this configurable later on
-			hub = new FrSkyHub();
+		// if (hub == null)
+		// // FIXED for now just create a default frskyhub, we can make this
+		// // configurable later on
+		// hub = new FrSkyHub();
+		// user could have selected no hub support, then this will return null
 		return hub;
 	}
 
@@ -537,6 +540,36 @@ public class Model {
 		if (_id != other._id)
 			return false;
 		return true;
+	}
+
+	/**
+	 * set the hub via class name. If this fails none will be used instead and
+	 * error will be logged in the background
+	 * 
+	 * TODO might be better to throw an exception instead so we can catch in
+	 * somewhere we have the proper context to display an error message to the
+	 * user
+	 * 
+	 * @param className
+	 */
+	public void setHubClassName(String className) {
+		try {
+			this.hub = (Hub) Class.forName(className).newInstance();
+		} catch (Exception e) {
+			//reset to null
+			this.hub = null;
+			// and log this info
+			Log.e(TAG, "Create hub from class " + className + " failed", e);
+		}
+	}
+
+	/**
+	 * retrieve class name for current hub
+	 * 
+	 * @return
+	 */
+	public String getHubClassName() {
+		return (this.hub == null ? null : hub.getClass().getName());
 	}
 
 }

@@ -268,7 +268,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	 * 
 	        	 * Add channel list from Hub to source list
 	        	 */
-	        	if(server.getHubEnabled())
+	        	if(server.getHubEnabled() && _model.getHub() != null)
 	        	{
 	        		//FIXME shouldn't need a FrSkyHub instance
 		        	for(Channel ch : new FrSkyHub().getChannels().values())

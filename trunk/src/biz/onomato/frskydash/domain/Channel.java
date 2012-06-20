@@ -32,6 +32,8 @@ import biz.onomato.frskydash.util.Logger;
  */
 public class Channel implements Comparator<Channel> {
 
+	private static final int DEFAULT_DIRTY_ID = -1;
+
 	/**
 	 * tag for debug messages
 	 */
@@ -96,7 +98,7 @@ public class Channel implements Comparator<Channel> {
 	private int _precision;
 	private NumberFormat decFormat;
 	// private Context _context;
-	private int _textViewId = -1;
+	private int _textViewId = DEFAULT_DIRTY_ID;
 
 	//private IntentFilter mIntentFilter;
 	private IntentFilter mIntentFilterCommands;
@@ -109,11 +111,16 @@ public class Channel implements Comparator<Channel> {
 
 	// public Alarm[] alarms;
 	// public int alarmCount = 0;
+	
 	/**
-	 * identifiers
+	 * identifier for the model this channel belongs to 
 	 */
-	private int _modelId = -1;
-	private int _channelId = -1;
+	private int _modelId = DEFAULT_DIRTY_ID;
+	
+	/**
+	 * Identifier for this channel
+	 */
+	private int _channelId = DEFAULT_DIRTY_ID;
 
 	/**
 	 * if this object is dirty or not
@@ -134,14 +141,13 @@ public class Channel implements Comparator<Channel> {
 	 */
 	private MyStack _stack;
 
-	// SharedPreferences _settings;
-	// SharedPreferences.Editor editor;
-
 	/**
-	 * Def ctor
+	 * Def ctor, this will create a channel with some default description and
+	 * values. Note that the default channel description wil be updated on
+	 * saving
 	 */
 	public Channel() {
-		this("description", (float) 0, (float) 1, "Symbol", "UnitName");
+		this(DEFAULT_CHANNEL_DESCRIPTION, (float) 0, (float) 1, "Symbol", "UnitName");
 	}
 
 	/**
@@ -157,7 +163,7 @@ public class Channel implements Comparator<Channel> {
 			String longUnit) {
 		// instanciate listeners list
 		// _listeners = new ArrayList<OnChannelListener> ();
-		_sourceChannelId = -1;
+		_sourceChannelId = DEFAULT_DIRTY_ID;
 		rounder = 1;
 		_silent = false;
 		_precision = 2;
@@ -359,7 +365,7 @@ public class Channel implements Comparator<Channel> {
 		// eng = convert(_raw);
 		// engAvg = _val;
 
-		if (_channelId != -1) {
+		if (_channelId != DEFAULT_DIRTY_ID) {
 			// Interface based communication
 			updateDerivedChannels();
 			
@@ -421,6 +427,7 @@ public class Channel implements Comparator<Channel> {
 	@Override
 	public String toString() {
 		return getDescription();
+		// FIXED don't update this as long as there is no adapter since this will be used to display in lists
 		// return "Channel [_raw=" + _raw + ", _val=" + _val + ", _avg=" + _avg
 		// + ", _description=" + _description + ", _movingAverage="
 		// + _movingAverage + ", _modelId=" + _modelId + ", _channelId="
@@ -436,7 +443,7 @@ public class Channel implements Comparator<Channel> {
 	 * @return the formatted string
 	 */
 	public String toValueString() {
-		// TODO DecimalFormat is probably faster
+		// DONE DecimalFormat is faster
 		//return String.format("%." + _precision + "f", _val);
 		return decFormat.format(_val);
 	}
@@ -449,7 +456,7 @@ public class Channel implements Comparator<Channel> {
 	 * @return the formatted string
 	 */
 	public String toValueString(int inputValue) {
-		// TODO DecimalFormat is probably faster
+		// DONE DecimalFormat is faster
 		//return String.format("%." + _precision + "f", convert(inputValue));
 		return decFormat.format(convert(inputValue));
 		
@@ -467,7 +474,7 @@ public class Channel implements Comparator<Channel> {
 	 */
 	private Channel[] mDerivedChannelsA = new Channel[0];
 	private ArrayList<Channel> mDerivedChannelsL = new ArrayList<Channel>();
-	private boolean mUseList=true;
+	//private boolean mUseList=true;
 	
 	/**
 	 * Add a channel that wants to get updates from this channel
@@ -507,18 +514,13 @@ public class Channel implements Comparator<Channel> {
 		}
 	}
 	
-	
-	
-
-	
-	
 
 	/**
 	 * Set the channel this channel listens to
 	 * @param channel source channel
 	 */
 	public void setSourceChannel(Channel channel) {
-		if(_sourceChannelId!=-1)
+		if(_sourceChannelId!=DEFAULT_DIRTY_ID)
 		{
 			Logger.d(TAG,_description+": Try to drop me from channel with id: "+_sourceChannelId);
 			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
@@ -530,7 +532,7 @@ public class Channel implements Comparator<Channel> {
 		}
 		else
 		{
-			_sourceChannelId = -1;
+			_sourceChannelId = DEFAULT_DIRTY_ID;
 		}
 	}
 
@@ -542,13 +544,12 @@ public class Channel implements Comparator<Channel> {
 		setSourceChannel(FrSkyServer.getChannel(channelId));
 	}
 
-
 	
 	/**
 	 * Used to enable reception of updates from source channel
 	 */
 	public void registerListenerForChannelUpdates() {
-		if(_sourceChannelId!=-1) 	// Used to listen to a channel
+		if(_sourceChannelId!=DEFAULT_DIRTY_ID) 	// Used to listen to a channel
 		{
 			Logger.d(TAG, _description + " Registering listener");
 			if(listening)
@@ -579,7 +580,7 @@ public class Channel implements Comparator<Channel> {
 	 * Used to unregister self from updates from the source channel
 	 */
 	public void unregisterListenerForChannelUpdates() {
-		if(_sourceChannelId!=-1)
+		if(_sourceChannelId!=DEFAULT_DIRTY_ID)
 		{
 			Logger.d(TAG, "Stopped listening");
 			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
@@ -594,7 +595,7 @@ public class Channel implements Comparator<Channel> {
 	public void close() {
 		// remove the channel update messages
 		Logger.i(TAG, "Try to close Channel "+this.toString());
-		if(_sourceChannelId!=-1)
+		if(_sourceChannelId!=DEFAULT_DIRTY_ID)
 		{
 			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
 		}
@@ -629,7 +630,7 @@ public class Channel implements Comparator<Channel> {
 		// if(FrSkyServer.D)Log.d(TAG,"Local decimal symbol: '"+decDefault+"', US decimal symbol: '"+decUS+"'");
 		// toValueString should perform replace of Locale's decimal point with
 		// Locale.US decimal point
-		// TODO DecimalFormat probably faster
+		// DONE DecimalFormat is faster
 		return getDescription() + ": "
 				+ decFormat.format(_val)
 				//+ String.format(Locale.US, "%." + _precision + "f", _val)
@@ -647,8 +648,8 @@ public class Channel implements Comparator<Channel> {
 		// on the screen
 		// setRaw(-1);
 		// next manually ensure all values are reset for later use
-		_raw = -1;
-		_val = -1;
+		_raw = DEFAULT_DIRTY_ID;
+		_val = DEFAULT_DIRTY_ID;
 		_avg = 0;
 		// raw = _raw;
 		// rawAvg = _avg;
@@ -688,12 +689,10 @@ public class Channel implements Comparator<Channel> {
 
 	@Override
 	public int compare(Channel lhs, Channel rhs) {
-		// TODO Auto-generated method stub
-
 		if (lhs.getId() == rhs.getId())
 			return 0;
 		if (lhs.getId() < rhs.getId())
-			return -1;
+			return DEFAULT_DIRTY_ID;
 		else
 			return 1;
 	}

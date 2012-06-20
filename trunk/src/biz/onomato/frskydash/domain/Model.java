@@ -20,6 +20,8 @@ import biz.onomato.frskydash.util.Logger;
  */
 public class Model {
 	
+	private static final int DEFAULT_DIRTY_ID = -1;
+
 	private static final String TAG="ModelClass";
 	
 	// TODO create enum for this instead
@@ -30,7 +32,7 @@ public class Model {
 	public static final int MODEL_TYPE_CAR=2;
 	public static final int MODEL_TYPE_BOAT=3;
 	public static final int MODEL_TYPE_MULTIROTOR=4;
-	public static final int MODEL_TYPE_UNKNOWN=-1;
+	public static final int MODEL_TYPE_UNKNOWN=DEFAULT_DIRTY_ID;
 	
 	/**
 	 * a default value for the model name. If this value is set on
@@ -76,8 +78,6 @@ public class Model {
 	 */
 	public boolean dirty = false;
 
-	//private static DBAdapterModel db;
-
 	/**
 	 * Default Constructor
 	 * 
@@ -88,28 +88,25 @@ public class Model {
 	 */
 	public Model(String modelName,String modelType)
 	{
-		//_context = context;
 		// let user select from a fixed set of modeltypes
-		// TODO make an Enum for this instead
 		_modelTypes = FrSkyServer.getContext().getResources().getStringArray(R.array.model_types);
-		// create if neccessary
-		//db = new DBAdapterModel(context);
 		
 		// FRSKY channels only for now
 		//alarms = new Alarm[6];
-		frSkyAlarms = new TreeMap<Integer, Alarm>();
 		
+		// init channel and alarms map
+		frSkyAlarms = new TreeMap<Integer, Alarm>();
 		channelMap = new TreeMap<Integer,Channel>();
 		
 		// populate FrSky Alarms with defaults, this closes ticket #415
 		initializeFrSkyAlarms();
 		
-		_id = -1; 
+		// init ID as -1 so we know it's not saved yet.
+		setId(DEFAULT_DIRTY_ID);
+		// set the name for this model
 		setName(modelName);
 		//set some default modeltype if none was set by the user
 		setType(modelType.equals("") ? _modelTypes[0] : modelType);
-		//_channels = new ArrayList<Channel>();
-		//setId(-1);
 	}
 
 	/**
@@ -128,19 +125,20 @@ public class Model {
 	public Model() {
 		this(Model.DEFAULT_MODEL_NAME, "");
 	}
-
+	
 	/**
-	 * Should be called when you want to "release" a model
+	 * Should be called when you want to "release" a model.
 	 * 
-	 * Stops any channel listeners
-	 * Removes channel references
-	 * Removes alarm references 
+	 * Stops any channel listeners Removes channel references Removes alarm
+	 * references
 	 */
 	public void close()
 	{
 		Logger.d(TAG,_name+": Resetting myself and all my components");
-		for(Channel c: getChannels().values())
+		// iterate channels of this model
+		for(Channel c: this.getChannels().values())
 		{
+			// reset the channel
 			c.reset();
 			c = null;
 		}
@@ -230,7 +228,7 @@ public class Model {
 		channel.setDescription(description);
 		channel.setModelId(id);
 		channel.setSourceChannel(sourceChannel);
-		channel.setId(-1);
+		channel.setId(DEFAULT_DIRTY_ID);
 		channel.setSilent(true);
 		channel.setLongUnit("");
 		channel.setShortUnit("");
@@ -240,54 +238,42 @@ public class Model {
 	}
 
 	/**
-	 * I need to be able to add channels to this model
+	 * I need to be able to add channels to this model. Channels that aren't
+	 * saved yet will be saved by setting them to a Model. This adding can be
+	 * done with the complete Channel object since nothing is available in the
+	 * collection of channels for this model yet
+	 * 
 	 * @param channel
 	 */
 	public void addChannel(Channel channel)
 	{
-		if(channel.getId()==-1)
+		// check if this channel is saved already. If not we need to save it first
+		if(channel.getId()==DEFAULT_DIRTY_ID)
 		{
 			//FIXME don't perform saves to db in the domain object!
 			FrSkyServer.saveChannel(channel);
 		}
 		channelMap.put(channel.getId(), channel);
 	}
-	
+
 	/**
-	 * I need to be able to delete channels from this model
-	 * @param channel
-	 * @return
+	 * delete channel with given ID from this model. At this point only accept
+	 * IDs for channels since we should have the channel in the collection
+	 * already.
+	 * 
+	 * @param channelId
+	 * @return the channel object that was removed 
 	 */
-	public boolean removeChannel(Channel channel)
+	public Channel removeChannel(int channelId)
 	{
-		//channel.unregisterListener();
-		
-		//channelMap.remove(channel.getId());
-		return removeChannel(channel.getId());
-		
-		//return _channels.remove(channel);
-	}
-	public boolean removeChannel(int channelId)
-	{
-		//channel.unregisterListener();
+		//the close method on the channel will unregister it properly
 		channelMap.get(channelId).close();
-		channelMap.remove(channelId);
-		return true;
-		//return _channels.remove(channel);
+		return channelMap.remove(channelId);
 	}
 	
 	/**
-	 * I need to be able to set a given channel for this model
-	 * @param channel
-	 */
-	//public void setChannel(int id, Channel channel)
-	public void setChannel(Channel channel)
-	{
-		addChannel(channel);
-	}
-	
-	/**
-	 * Update collection of channels for this model 
+	 * Update collection of channels for this model . This could be useful to
+	 * give a complete set of channels that should be added to this model
 	 * 
 	 * @param channels
 	 */
@@ -300,24 +286,12 @@ public class Model {
 	}
 	
 	/**
-	 * Update collection of channels for this model 
-	 * 
-	 * @param channels
-	 */
-	public void setChannels(TreeMap<Integer,Channel> channels)
-	{
-		channelMap = channels;
-	}
-	
-	/**
 	 *  I need to be able to return list of channels from this model
 	 * @return
 	 */
-	//public ArrayList<Channel> getChannels()
 	public TreeMap<Integer,Channel> getChannels()
 	{
 		return channelMap;
-		//return _channels;
 	}
 	
 	/**
@@ -365,20 +339,13 @@ public class Model {
 	 */
 	public void setFrSkyAlarms(TreeMap<Integer,Alarm> alarmMap)
 	{
-		Logger.w(TAG,"Adding Alarms to me ["+_name+"]");
+		Logger.w(TAG, "Adding Alarms to me [" + _name + "]");
 		// this check isn't really needed
-	//	if(alarmMap.size()>0)
-	//	{
-			for(Alarm a:alarmMap.values()){
-				a.setModelId(_id);
-				addAlarm(a);
-			//	alarmCount += 1;
-			}
-		//}
-		//else
-		//{
-			//initiateFrSkyAlarms();
-		//}
+		for (Alarm a : alarmMap.values()) {
+			a.setModelId(_id);
+			addAlarm(a);
+			// alarmCount += 1;
+		}
 	}
 	
 	

@@ -118,7 +118,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		edMovingAverage 	= (EditText) findViewById(R.id.chConf_edMovingAverage);
 		chkSpeechEnabled 	= (CheckBox) findViewById(R.id.chConf_chkSpeechEnabled);
 
-		//FIXME better to remove from layout completely
+		//TODO better to remove from layout completely
 		btnSave				= (Button) findViewById(R.id.chConf_btnSave);
 		btnSave.setVisibility(View.GONE);
 		// register listener

@@ -25,12 +25,19 @@ public abstract class AbstractDBAdapter {
     private static final String TAG = "AbstractDBAdapter";
     
     private static final String DATABASE_NAME = "frsky";
-    private static final int DATABASE_VERSION = 4;
+    
+    // db v5 added hub to model
+    private static final int DATABASE_VERSION = 5;
     
     protected static final String DATABASE_TABLE_MODELS = "models";
     protected static final String KEY_ROWID = "_id";
     protected static final String KEY_NAME = "name";
     protected static final String KEY_MODELTYPE = "type";
+    
+    /**
+     * class for hub type (could be enum also...)
+     */
+    protected static final String KEY_HUB_CLASS = "hubclass";
     
     protected static final String DATABASE_TABLE_FRSKYALARMS = "alarmsfrsky";
     //protected static final String KEY_ROWID = "_id";
@@ -62,14 +69,15 @@ public abstract class AbstractDBAdapter {
     		+ DATABASE_TABLE_MODELS+ "("
     		+ KEY_ROWID+			" integer primary key autoincrement, "
             + KEY_NAME+ 			" text not null, "
-            + KEY_MODELTYPE+		" text"
-            
+            + KEY_MODELTYPE+		" text, "
+            + KEY_HUB_CLASS + 		" text"
             + ");";
     
 	protected String[] MODEL_COLUMNS = {
 			KEY_ROWID,
     		KEY_NAME,
-    		KEY_MODELTYPE};
+    		KEY_MODELTYPE, 
+    		KEY_HUB_CLASS};
 	
 	private static final String DATABASE_CREATE_FRSKYALARMS =
             "create table "

@@ -1,8 +1,6 @@
 package biz.onomato.frskydash.hub;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.TreeMap;
 
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.domain.Channel;
@@ -17,7 +15,6 @@ public class FrSkyHub extends Hub{
 
 	public final String TAG="FrSkyHub";
 	
-	// hcpl sensor hub data frame parameters
 	/**
 	 * size for user data frames
 	 */
@@ -38,11 +35,6 @@ public class FrSkyHub extends Hub{
 	 */
 	public static final int XOR_HUB_FRAME = 0x60;
 	
-	/**
-	 * singleton instance
-	 */
-	private static FrSkyHub instance = null;
-
 	/**
 	 * the current user frame we are working on. This is used to pass data
 	 * between incompletes frames.
@@ -66,18 +58,11 @@ public class FrSkyHub extends Hub{
 	private static FrSkyServer server;
 
 	/**
-	 * def ctor, singleton use {@link #getInstance()} instead
+	 * def ctor
 	 */
-	private FrSkyHub() {
+	public FrSkyHub() {
 		// eso: Prototype Channel code
 		initializeChannels();
-	}
-
-	public static FrSkyHub getInstance() {
-		if (instance == null) {
-			instance = new FrSkyHub();
-		}
-		return instance;
 	}
 
 	

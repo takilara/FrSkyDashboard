@@ -668,8 +668,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		if ((ch == null) && (_hubEnabled == true)) {
 			try {
-				ch = FrSkyHub.getInstance().getChannel(channelId);
-
+				//ch = FrSkyHub.getInstance().getChannel(channelId);
+				ch = getCurrentModel().getHub().getChannel(channelId);
 			} catch (Exception e) {
 				ch = null;
 			}
@@ -2035,9 +2035,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Logger.d(TAG, "Frametype User Data");
 				// Use menu item Debug to enable hub support
 				if (_hubEnabled) {
-					// FIXME: below should be changed to something like
-					// currentModel.getHub().addUserBytes(frame.getUserBytes)
-					FrSkyHub.getInstance().extractUserDataBytes(this, f);
+					// FIXED: below should be changed to something like
+					((FrSkyHub)getCurrentModel().getHub()).extractUserDataBytes(this, f);
+					//.addUserBytes(frame.getUserBytes)
+					//FrSkyHub.getInstance().extractUserDataBytes(this, f);
 
 					// FIXME: Temporary to add userbytes on hub
 					// FrSkyHub.getInstance().addUserBytes(f.getUserBytes());

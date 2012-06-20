@@ -1,25 +1,17 @@
 package biz.onomato.frskydash.activities;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -40,7 +32,6 @@ import biz.onomato.frskydash.BluetoothSerialService;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Channel;
-import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.util.Logger;
 
 public class ActivityDashboard extends ActivityBase implements OnClickListener {
@@ -190,6 +181,9 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 				// Log.i(TAG,"Update GUI");
 				if (server != null) {
 
+					// this will iterate all channels from current model at
+					// server at update their value. This includes the Hub
+					// Channels
 					updateChannelValues();
 
 					// set status lights
@@ -279,14 +273,14 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			tv_fps.setText("FPS: " + server.getFps());
 			tv_bad.setText("Bad: " + FrSkyServer.badFrames+"/"+FrSkyServer.getDroppedFrames());
 
-			int len = server.getCurrentModel().getChannels().size();
-			// for(int i=0;i<len;i++)
-			for (Channel c : server.getCurrentModel().getChannels().values()) {
+			// iterate all channels for the current model, get their value and
+			// update the gui
+			for (Channel c : FrSkyServer.getCurrentModel().getChannels().values()) {
 				try {
 					TextView tv = (TextView) findViewById(c.getTextViewId());
 					tv.setText(c.toValueString());
 				} catch (Exception e) {
-
+					Log.e(TAG, "Failure on updating channel value", e);
 				}
 			}
 		}

@@ -2,17 +2,19 @@ package biz.onomato.frskydash.hub;
 
 import java.util.Arrays;
 
-import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.domain.Channel;
-import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.util.Logger;
 
 /**
- * responsible for parsing FrSky Hub Sensor Data
+ * responsible for parsing FrSky Hub Sensor Data. By using channels and their
+ * setRaw method we ensure the gui thread gets all the updated values
  * 
  */
 public class FrSkyHub extends Hub{
 
+	/**
+	 * tag for logging
+	 */
 	public final String TAG="FrSkyHub";
 	
 	/**
@@ -52,10 +54,10 @@ public class FrSkyHub extends Hub{
 	 */
 	private static boolean hubXOR = false;
 
-	/**
-	 * is bound to a single server instance
-	 */
-	private static FrSkyServer server;
+//	/**
+//	 * is bound to a single server instance
+//	 */
+//	private static FrSkyServer server;
 
 	/**
 	 * def ctor
@@ -269,7 +271,7 @@ public class FrSkyHub extends Hub{
 		}
 
 		// let server update this information
-		server.broadcastChannelData(sensorType, value);
+		//server.broadcastChannelData(sensorType, value);
 	}
 
 	/**
@@ -381,17 +383,17 @@ public class FrSkyHub extends Hub{
 	}
 
 	@Override
-	public void addUserBytes(FrSkyServer server, int[] ints) {
+	public void addUserBytes(int[] ints) {
 		// shall take user bytes
 		// decode (destuff) them, and add to internal queue
 		// then identify hub frames within this queue
 		// and pass them to handleHubDataFrame
-		// FIXME can't this be implemented in another way so we don't have to
+		// FIXED can't this be implemented in another way so we don't have to
 		// pass the server instance?
 		// eso: server is currently used for broadcasts from the hub, this shall
 		// be removed as the hub shall not broadcast
 		// => server param to be removed
-		this.server = server;
+		//this.server = server;
 		// don't handle all the bytes, skip header (0), prim(1), size(2),
 		// unused(3) and end but(10)
 		// the byte at index 2 indicated how many bytes are valid in this frame.

@@ -341,13 +341,20 @@ public class Channel implements Comparator<Channel> {
 	// ==== CHANNEL METHODS =====
 	// ==========================================================================================
 
+	/**
+	 * wrapper to set int values (will just forward after casting to double
+	 * 
+	 * @param value
+	 * @return
+	 */
 	public double setRaw(int value) {
 		return setRaw((double) value);
 	}
 
 	/**
 	 * set new raw value for this channel. This will update stack for average
-	 * and other calculations and also send a broadcast.
+	 * and other calculations and also update all of the derived channels so
+	 * that on next gui update these new values are fetched instead.
 	 * 
 	 * @param value
 	 * @return
@@ -369,7 +376,7 @@ public class Channel implements Comparator<Channel> {
 			// Interface based communication
 			updateDerivedChannels();
 			
-			// Broadcast based communication
+			// Broadcast based communication NO MORE IN USE
 			//broadcastUpdate();
 		}
 		return _val;
@@ -497,7 +504,6 @@ public class Channel implements Comparator<Channel> {
 	 */
 	public void dropDerivedChannel(Channel channel)
 	{
-		
 		mDerivedChannelsL.remove(channel);
 		mDerivedChannelsA = mDerivedChannelsL.toArray(new Channel[mDerivedChannelsL.size()]);
 		

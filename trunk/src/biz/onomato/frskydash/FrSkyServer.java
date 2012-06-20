@@ -39,7 +39,6 @@ import biz.onomato.frskydash.domain.Alarm;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.domain.Model;
-import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.hub.SensorTypes;
 import biz.onomato.frskydash.sim.FileSimulatorThread;
 import biz.onomato.frskydash.sim.Simulator;
@@ -305,23 +304,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public static final String BROADCAST_ACTION_HUB_DATA = "biz.onomato.frskydash.intent.action.BROADCAST_HUB_DATA";
 
-	// /**
-	// * Broadcast event to trigger a channel reset
-	// */
-	// public static final String BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS =
-	// "biz.onomato.frskydash.intent.action.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS";
-	// hcpl: these are class members now since we have to collect the data over
-	// several method executions since the bytes could be spread over several
-	// telemetry 11 bytes frames
-
 	/**
 	 * the current user frame we are working on. This is used to pass data
 	 * between incomplete frames.
 	 */
 	private List<Integer> frSkyFrame = new ArrayList<Integer>(
 			Frame.SIZE_TELEMETRY_FRAME);
-
-	// private static int[] frSkyFrame = new int[Frame.SIZE_TELEMETRY_FRAME];
 
 	@Override
 	public void onCreate() {
@@ -2036,7 +2024,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				// Use menu item Debug to enable hub support
 				if (_hubEnabled) {
 					// FIXED: below should be changed to something like
-					((FrSkyHub)getCurrentModel().getHub()).addUserBytes(this, f.getUserBytes());
+					getCurrentModel().getHub().addUserBytes(f.getUserBytes());
 					//FrSkyHub.getInstance().extractUserDataBytes(this, f);
 
 					// FIXME: Temporary to add userbytes on hub

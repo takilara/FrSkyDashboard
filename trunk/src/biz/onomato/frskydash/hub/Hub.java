@@ -15,6 +15,7 @@ import biz.onomato.frskydash.domain.Channel;
  *
  */
 public abstract class Hub {
+	
 	/**
 	 * Treemap to hold the Hubs channels
 	 */
@@ -22,8 +23,6 @@ public abstract class Hub {
 
 	public final String TAG="Hub";
 
-	
-	
 	private void initializeMap()
 	{
 		mChannelMap = new TreeMap<Integer, Channel>(Collections.reverseOrder());
@@ -60,6 +59,7 @@ public abstract class Hub {
 	 * @param ints
 	 */
 	public abstract void addUserBytes(int[] ints);
+	
 	/**
 	 * Method that should take the userbyte part of a frame and "handle" it
 	 * @param ints

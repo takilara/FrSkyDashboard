@@ -270,7 +270,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	 */
 	        	if(server.getHubEnabled())
 	        	{
-		        	for(Channel ch : FrSkyHub.getInstance().getChannels().values())
+	        		//FIXME shouldn't need a FrSkyHub instance
+		        	for(Channel ch : new FrSkyHub().getChannels().values())
 	        		//for(Channel ch : FrSkyHub.getSourceChannels().values())
 		        	{
 		        		sourceChannels.add(ch);

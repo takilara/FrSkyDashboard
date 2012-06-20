@@ -69,6 +69,10 @@ import biz.onomato.frskydash.util.Logger;
  */
 public class FrSkyServer extends Service implements OnInitListener {
 
+	/**
+	 * use this constant to retrieve the previous model id from preferences
+	 * TODO move to some collection of preferences related constants?
+	 */
 	private static final String PREFKEY_PREV_MODEL_ID = "prevModelId";
 
 	/**
@@ -262,8 +266,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 	/**
 	 * map of alarms as found on the module. These can be different from the
 	 * alarms set on the Model {@link Model#frSkyAlarms}.
+	 * TODO move this set to the Model instead. Each model can have a different set of alarms
 	 */
 	private static TreeMap<Integer, Alarm> _alarmMap;
+	
 	private static boolean _recordingAlarms = false;
 	private static int _recordingModelId = -1;
 
@@ -299,9 +305,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public static final String BROADCAST_ACTION_HUB_DATA = "biz.onomato.frskydash.intent.action.BROADCAST_HUB_DATA";
 
-//	/**
-//	 * Broadcast event to trigger a channel reset
-//	 */
+	// /**
+	// * Broadcast event to trigger a channel reset
+	// */
 	// public static final String BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS =
 	// "biz.onomato.frskydash.intent.action.BROADCAST_CHANNEL_COMMAND_RESET_CHANNELS";
 	// hcpl: these are class members now since we have to collect the data over
@@ -373,22 +379,24 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		Logger.i(TAG, "Previous ModelId was: " + _prevModelId);
 
-		// init backend and collection to store all models available to have
-		// them in memory. For easy access all models are stored in a treemap
-		// with their ID as key.
+		// init collection of models. This is where all models are stored in
+		// memory and should be referenced from! For easy access all models are
+		// stored in a treemap with their ID as key.
 		modelMap = new TreeMap<Integer, Model>();
-		database = new FrSkyDatabase(getApplicationContext());
+		// get backend up and running using the context we received
+		database = new FrSkyDatabase(context);
+		// retrieve all models from backend and iterate
 		for (Model m : database.getModels()) {
 			modelMap.put(m.getId(), m);
 		}
 		// retrieve the last used model from this map to start working on
 		Model cm = modelMap.get(_prevModelId);
 		// if no previous model was selected we can create a first model to
-		// start with.
+		// start with. DON'T BREAK THIS PART, ALWAYS AT LEAST 1 MODEL REQUIRED
 		if (cm == null) {
 			Logger.d(TAG, "No model exists, make a new one");
 			// use some default model name
-			cm = new Model("Model 1");
+			cm = new Model();
 			// Saving to get id, this save is required since we don't get a
 			// proper model id otherwise to init the alarms and so on
 			// database.saveModel(cm);
@@ -400,7 +408,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			modelMap.put(cm.getId(), cm);
 		}
 		// check if the model has alarms, if not we can init with defaults
-		if (cm.getFrSkyAlarms().size() == 0) {
+		if (!cm.hasAlarms()) {
 			Logger.d(TAG, "No alarms exists, setup with defaults");
 			cm.initializeFrSkyAlarms();
 			// update so all alarms are saved
@@ -411,12 +419,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		_editor.putInt(PREFKEY_PREV_MODEL_ID, _prevModelId);
 		_editor.commit();
 
-		// actually set the model we prepared as current
+		// actually set the model we prepared as current model
 		Logger.d(TAG, "The current model is: " + cm.getName() + " and has id: "
 				+ cm.getId());
 		Logger.d(TAG, "Activating the model");
 		// set this model as current
-		setCurrentModel(cm);
+		setCurrentModel(cm.getId());
 
 		// create a logger for the frsky information
 		logger = new DataLogger(getApplicationContext(),
@@ -433,7 +441,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		mIntentFilterBt.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
 		// mIntentFilterBt.addAction("android.bluetooth.headset.action.STATE_CHANGED");
 		// Used to receive BT events
-		registerReceiver(mIntentReceiverBt, mIntentFilterBt); 
+		registerReceiver(mIntentReceiverBt, mIntentFilterBt);
 
 		// inform via broadcast that server initialised is finished
 		Logger.i(TAG, "Broadcast that i've started");
@@ -1001,7 +1009,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * @param state
 	 *            set true to have application send a models alarms on model
 	 *            change
-	 * @see #setCurrentModel(Model)
+	 * @see #setCurrentModel(int)
 	 */
 	public void setAutoSendAlarms(boolean state) {
 		_editor.putBoolean("autoSendAlarms", state);
@@ -1028,10 +1036,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * @return the current Model
 	 */
 	public static Model getCurrentModel() {
-		// if for some reason current model is -1 (unknown) we need to return the first entry of the collection instead
-		if( !validCurrentModel() ){
-			Logger.w(TAG, "Invalid current model on server side, send first one instead. CurrentModelId="+currentModelId);
-			setCurrentModel(modelMap.get(modelMap.firstKey()));
+		// if for some reason current model is -1 (unknown) we need to return
+		// the first entry of the collection instead
+		if (!validCurrentModel()) {
+			Logger.w(TAG,
+					"Invalid current model on server side, send first one instead. CurrentModelId="
+							+ currentModelId);
+			setCurrentModel(modelMap.firstKey());
 			// FIXME at this point we could have a situation where no models are
 			// available so that no first key is available so this will stil
 			// fail. But the app is designed so that always at least a first
@@ -1042,71 +1053,76 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 
 	/**
-	 * mapper for setting current model on this server 
+	 * update server to given model
 	 * 
 	 * @param modelId
 	 *            the id of the model the application should be monitoring
 	 */
 	public static void setCurrentModel(int modelId) {
-		setCurrentModel(modelMap.get(modelId));
-	}
-
-	/**
-	 * update server to given model
-	 * 
-	 * @param updateModel
-	 *            the model the application should be monitoring
-	 */
-	public static void setCurrentModel(Model updateModel) {
+		
+		// check that the given modelId is valid
+		if(!modelMap.containsKey(modelId)){
+			// perform logging
+			Logger.w(TAG, "Attempt to change to unkown Model");
+			// also let the user know this action failed
+			Toast.makeText(context, "Attempt to change to Unknown Model", Toast.LENGTH_SHORT).show();
+			// and break code here since we can 't switch to an unkown model 
+			return;
+		}
+		// at this point it's safe to have a local model object reference from
+		// the collection
+		Model newModel = modelMap.get(modelId);
+		
 		// check if we currently have a model set and perform some logging
 		if (validCurrentModel()) {
 			Logger.i(TAG, "Changing Models from " + getCurrentModel().getName()
-					+ " to " + updateModel.getName());
+					+ " to " + modelMap.get(modelId).getName());
 			// need to unregister that model here!
 			getCurrentModel().unregisterListeners();
-		} 
+		}
 		// otherwise no valid model was available so we can only log this
 		// information, no big deal
 		else {
 			Logger.i(TAG,
-					"Changing Models from NULL to " + updateModel.getName());
+					"Changing Models from NULL to " + newModel.getName());
 		}
-		// update current model 
-		currentModelId = updateModel.getId();
-		// save this new model Id in the settings so we can recover on resume of activity
+		// update current model
+		currentModelId = newModel.getId();
+		// save this new model Id in the settings so we can recover on resume of
+		// activity
 		_editor.putInt(PREFKEY_PREV_MODEL_ID, currentModelId);
 		_editor.commit();
 		// reset counter for bad frames
 		badFrames = 0;
 		// update logger for this model
 		if (logger != null) {
-			logger.setModel(updateModel);
+			logger.setModel(newModel);
 		}
 		// check if alarms are available
-		if (updateModel.getFrSkyAlarms().size() == 0) {
+		if (!newModel.hasAlarms()) {
 			// set default alarms if none were set yet
-			updateModel.initializeFrSkyAlarms();
+			newModel.initializeFrSkyAlarms();
 			// we updated the model so we need to save it now
-			database.saveModel(updateModel);
+			database.saveModel(newModel);
 		}
 		// otherwise we have already alarms set to this model so we can send
 		// them to module
 		// we already have alarms
 		// send them if user wants
 		else if (getAutoSendAlarms()) {
-			sendAlarms(updateModel);
+			sendAlarms(newModel);
 		}
 		// request alarms from module same as connect
 		else {
 			recordAlarmsFromModule(true);
 		}
 		// now register listeners on this activated model
-		updateModel.registerListeners();
+		newModel.registerListeners();
 		// _currentModel.setFrSkyAlarms(database.getAlarmsForModel(_currentModel));
 		// logger.stop(); // SetModel will stop current Logger
 		// inform user about this change
 		Toast.makeText(context,
-				updateModel.getName() + " set as the active model",
+				newModel.getName() + " set as the active model",
 				Toast.LENGTH_LONG).show();
 		// and broadcast a message that the current model has changed
 		Intent i = new Intent();
@@ -1457,12 +1473,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// hcpl: again why is default set to true?
 		return true;
 	}
-	
+
 	/**
 	 * helper to check if we have a valid current model set or not
+	 * 
 	 * @return
 	 */
-	private static boolean validCurrentModel(){
+	private static boolean validCurrentModel() {
 		return modelMap.containsKey(currentModelId);
 	}
 
@@ -1474,21 +1491,22 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// hcpl: isn't it better to start from not being equal? Otherwise on
 		// error you might end up with equal while check hasn't passed = false
 		// positive => fixed by initialising models always with alarms
-//		boolean equal = true;
+		// boolean equal = true;
 		// we can only check if the current model is set
 		if (validCurrentModel()) {
 			// at this point the model available so we can compare the alarms
-			// hcpl this local param is no longer used? 
-//			equal = ;
+			// hcpl this local param is no longer used?
+			// equal = ;
 			if (alarmsSameAsModel(modelMap.get(currentModelId))) {
 				// infor models are equals
 				Logger.i(TAG, "Alarm sets are equal");
-			} 
+			}
 			// otherwise models aren't equals so we can inform the user
 			else {
 				Logger.i(TAG,
 						"Alarm sets are not equal, see if i can find a model that is equal");
-				// start with the assumption that we didn't find the matching model
+				// start with the assumption that we didn't find the matching
+				// model
 				boolean found = false;
 				// iterate all available models
 				for (Model m : modelMap.values()) {
@@ -1500,7 +1518,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 					// in depth for that). Best way in Java is to override the
 					// equals method. In this case we have the model ID to check
 					// on.
-					if( m.getId() == currentModelId)
+					if (m.getId() == currentModelId)
 						continue; // this will skip to next iteration
 					if (alarmsSameAsModel(m)) {
 						// indicate that we found a model with the same alarms
@@ -1512,13 +1530,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 							// FIXME sure we want this disabled?
 							Logger.i(TAG, "Auto Switch model");
 						} else {
-							Logger.d(TAG,
-									"Show popup allow switch of model");
+							Logger.d(TAG, "Show popup allow switch of model");
 							Intent i = new Intent(MESSAGE_ALARM_MISMATCH);
 							i.putExtra("modelId", m.getId());
 							sendBroadcast(i);
 						}
-						// stop iteration at this point, 
+						// stop iteration at this point,
 						break;
 					}
 				}
@@ -1531,7 +1548,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 				}
 			}
 		}
-		//?
+		// ?
 		_compareAfterRecord = false;
 	}
 
@@ -1902,7 +1919,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// frame
 		if (mFrameBuffer.remainingCapacity() == 0) {
 			try {
-				/*Frame of = */mFrameBuffer.take();
+				/* Frame of = */mFrameBuffer.take();
 				mDroppedFrames++;
 				Logger.w(TAG, "Dropped oldest Frame");
 			} catch (Exception e) {
@@ -2347,12 +2364,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// FIXME by using an object instead of an id we introduce the
 		// possibility that we are working on the wrong object here!!
 		// check if model as param requested to delete isn't the current model.
-		if( validCurrentModel() && getCurrentModel().equals(model)){
+		if (validCurrentModel() && getCurrentModel().equals(model)) {
 			// if so we need to change the current model first
 			setCurrentModel(modelMap.firstKey());
 		}
 		// no continue unregistering everything for this model
-//		model.unregisterListeners();// already done in setCurrentModel
+		// model.unregisterListeners();// already done in setCurrentModel
 		model.frSkyAlarms.clear();
 		model.getChannels().clear();
 		database.deleteAllChannelsForModel(model);
@@ -2364,7 +2381,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		i.setAction(MESSAGE_MODELMAP_CHANGED);
 		context.sendBroadcast(i);
 	}
-	
+
 	/**
 	 * 
 	 * @param model
@@ -2456,7 +2473,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	class FrameParser implements Runnable {
 		private final BlockingQueue<Frame> queue;
-//		private static final String TAG = "RawLogger";
+
+		// private static final String TAG = "RawLogger";
 
 		FrameParser(BlockingQueue<Frame> q) {
 			queue = q;

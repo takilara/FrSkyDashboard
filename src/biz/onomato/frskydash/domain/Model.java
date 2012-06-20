@@ -122,7 +122,8 @@ public class Model {
 	}
 
 	/**
-	 * ctor
+	 * ctor without name so the default model name will be used that will be
+	 * replaced later with a generic name on storing this model
 	 */
 	public Model() {
 		this(Model.DEFAULT_MODEL_NAME, "");
@@ -550,6 +551,15 @@ public class Model {
 			c.registerListenerForChannelUpdates();
 			//c.registerListenerForServerCommands();
 		}
+	}
+	
+	/**
+	 * helper to check if this model has alarms
+	 * 
+	 * @return
+	 */
+	public boolean hasAlarms() {
+		return !this.getFrSkyAlarms().isEmpty();
 	}
 	
 	@Override

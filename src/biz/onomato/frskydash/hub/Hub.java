@@ -6,6 +6,7 @@ package biz.onomato.frskydash.hub;
 import java.util.Collections;
 import java.util.TreeMap;
 
+import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.domain.Channel;
 
 /**
@@ -58,7 +59,7 @@ public abstract class Hub {
 	 * Method that should take the userbyte part of a frame and "handle" it
 	 * @param ints
 	 */
-	public abstract void addUserBytes(int[] ints);
+	public abstract void addUserBytes(FrSkyServer server, int[] ints);
 	
 	/**
 	 * Method that should take the userbyte part of a frame and "handle" it

@@ -245,7 +245,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        if(_modelId==-1)
 			{
 	        	Logger.d(TAG,"Configure new Model object");
-				_model = server.getCurrentModel();
+				_model = FrSkyServer.getCurrentModel();
 			}
 			else
 			{
@@ -453,7 +453,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 			//channel.saveToDatabase();
 			//FrSkyServer.database.saveChannel(channel);
 			channel.registerListenerForChannelUpdates();
-			FrSkyServer.modelMap.get(channel.getModelId()).setChannel(channel);
+			FrSkyServer.modelMap.get(channel.getModelId()).addChannel(channel);
 			FrSkyServer.saveChannel(channel);
 			//or SAVE_MODEL, modelId
 		}

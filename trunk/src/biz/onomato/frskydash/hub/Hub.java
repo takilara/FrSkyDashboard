@@ -8,8 +8,6 @@ import java.util.TreeMap;
 
 import biz.onomato.frskydash.domain.Channel;
 
-import com.google.gson.annotations.Expose;
-
 /**
  * Used to provide (and enforce) basic hub functionality, All hub's must inherit
  * this class
@@ -22,12 +20,16 @@ public abstract class Hub {
 	/**
 	 * Treemap to hold the Hubs channels
 	 */
-	// @Expose does this has to be exposed?
 	private TreeMap<Integer, Channel> mChannelMap;
 
-	@Expose
-	private String name;
+	/**
+	 * a human readable name for this hub class
+	 */
+	protected String name;
 
+	/**
+	 * init channels map
+	 */
 	private void initializeMap() {
 		mChannelMap = new TreeMap<Integer, Channel>(Collections.reverseOrder());
 	}
@@ -75,9 +77,12 @@ public abstract class Hub {
 	public abstract void addUserBytes(byte[] bytes);
 
 	/**
-	 * A hub must initialize its channels
+	 * A hub must initialize its channels, what channels need to be initialised
+	 * depend on the actual implementation fo the hub.
+	 * 
+	 * @return this method will return itself so that we can chain this process
 	 */
-	protected abstract void initializeChannels();
+	public abstract Hub initializeChannels();
 
 	/**
 	 * Method for the hub to add channels to its channellist

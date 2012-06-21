@@ -19,6 +19,7 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.hub.HubFactory;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -29,11 +30,7 @@ import biz.onomato.frskydash.util.Logger;
  */
 public class ActivityModelConfig extends ActivityBase implements
 		OnClickListener {
-	
-	public static final String HUBTYPE_FRSKYHUB = "FrSkyHub";
-	
-	public static final String HUBTYPE_NONE = "None";
-	
+
 	private static final String TAG = "ModelConfig";
 	// private static final boolean DEBUG=true;
 
@@ -58,7 +55,7 @@ public class ActivityModelConfig extends ActivityBase implements
 	private LinearLayout llChannelsLayout;
 	private EditText edName;
 	private Spinner spType;
-	
+
 	private Spinner spnrHubTypes;
 
 	@Override
@@ -94,11 +91,10 @@ public class ActivityModelConfig extends ActivityBase implements
 		spnrHubTypes = ((Spinner) findViewById(R.id.modConf_spHubType));
 		// populate with options for now
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				getApplicationContext(),
-				android.R.layout.simple_spinner_item, new String[] {
-				HUBTYPE_NONE, HUBTYPE_FRSKYHUB });
-	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-	    spnrHubTypes.setAdapter(adapter);
+				getApplicationContext(), android.R.layout.simple_spinner_item,
+				HubFactory.getInstance().getHubNames());
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spnrHubTypes.setAdapter(adapter);
 	}
 
 	@Override
@@ -175,9 +171,10 @@ public class ActivityModelConfig extends ActivityBase implements
 		_model.setType((String) spType.getSelectedItem());
 		// _model.saveToDatabase();
 		// FrSkyServer.database.saveModel(_model);
-		
-		//retrieve hubtype from spinner
-		_model.setHubClassName(getSelectedHubType());
+
+		// retrieve hubtype from spinner
+		_model.setHubClassName(HubFactory.getInstance().getHubClassFromName(
+				spnrHubTypes.getSelectedItem().toString()));
 
 		FrSkyServer.saveModel(_model);
 		// if(_model.getId()==server.getCurrentModel().getId())
@@ -189,20 +186,6 @@ public class ActivityModelConfig extends ActivityBase implements
 		// {
 		// if(FrSkyServer.D)Log.d(TAG,"This is not the current model");
 		// }
-	}
-
-	/**
-	 * get selected hub form spinner
-	 * @return
-	 */
-	private String getSelectedHubType() {
-		if (spnrHubTypes.getSelectedItem() == null
-				|| HUBTYPE_NONE.equals(spnrHubTypes.getSelectedItem().toString()))
-			return null;
-		else
-			// FIXME make it truely adaptable using intents for instance
-			return "biz.onomato.frskydash.hub."
-					+ spnrHubTypes.getSelectedItem().toString();
 	}
 
 	private void populateChannelList() {
@@ -412,19 +395,24 @@ public class ActivityModelConfig extends ActivityBase implements
 			}
 
 		}
-		
-		//select the correct hub type
-		for(int i=0 ; i<spnrHubTypes.getCount();i++){
-			//FIXME this code is $^£%£
-			//if not set
-			if((_model.getHubClassName()== null && spnrHubTypes.getItemAtPosition(i).toString().equals("None"))
-					// or set and equals without package 
-					|| _model.getHubClassName().endsWith(spnrHubTypes.getItemAtPosition(i).toString()) ){
+
+		// select the correct hub type
+		// by iterating all its available hub types
+		for (int i = 0; i < spnrHubTypes.getCount(); i++) {
+			// check the name in the spinner and compare with the name based on
+			// the hub class form model
+			if (spnrHubTypes.getItemAtPosition(i) != null
+					&& spnrHubTypes
+							.getItemAtPosition(i)
+							.toString()
+							.equals(HubFactory.getInstance()
+									.getHubNameFromClass(
+											_model.getHubClassName()))) {
 				spnrHubTypes.setSelection(i);
-			break;
+				break;
+			}
 		}
-		}
-		
+
 		// spType.setSelection(modelTypes);
 		// refresh channels
 		populateChannelList();

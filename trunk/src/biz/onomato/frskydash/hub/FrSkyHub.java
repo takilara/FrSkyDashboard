@@ -54,17 +54,15 @@ public class FrSkyHub extends Hub{
 	 */
 	private static boolean hubXOR = false;
 
-//	/**
-//	 * is bound to a single server instance
-//	 */
-//	private static FrSkyServer server;
-
 	/**
-	 * def ctor
+	 * def ctor. This will not initialize the channels, you need to call the
+	 * initializeChannels() method!
 	 */
 	public FrSkyHub() {
 		// eso: Prototype Channel code
-		initializeChannels();
+		// don't call this in ctor so we can still import/export properly
+		//initializeChannels();
+		this.name = TAG;
 	}
 
 	/**
@@ -319,10 +317,8 @@ public class FrSkyHub extends Hub{
 	 */
 	public static double alt_after = 0;
 
-	/**
-	 * Create the _sourceChannelMap Populate it with our channels
-	 */
-	protected void initializeChannels() {
+	@Override
+	public Hub initializeChannels() {
 		// Sets up the hardcoded channels (Altitude,RPM)
 		// TODO: Figure out how to deal with race conditions on "split numbers"
 		// TODO create enums with descruption etc or proper factory instead
@@ -346,6 +342,8 @@ public class FrSkyHub extends Hub{
 		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_4, "Hub: Lipo Cell 4");
 		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_5, "Hub: Lipo Cell 5");
 		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_6, "Hub: Lipo Cell 6");
+		// return yourself for chaining
+		return this;
 	}
 
 	/**

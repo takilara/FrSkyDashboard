@@ -3,10 +3,10 @@ package biz.onomato.frskydash.domain;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import android.util.Log;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.hub.Hub;
+import biz.onomato.frskydash.hub.HubFactory;
 import biz.onomato.frskydash.util.Logger;
 
 import com.google.gson.annotations.Expose;
@@ -79,9 +79,11 @@ public class Model {
 	/**
 	 * hub configured by user
 	 */
-	@Expose
-	//FIXME hub is not export yet!!
+	// FIXME hub is not exported yet!! Related to abstract class
 	public Hub hub;
+
+ 	@Expose
+	public String hubClassName;
 
 	/**
 	 * ? number of alarms counted for this Model ?
@@ -518,6 +520,8 @@ public class Model {
 		// // configurable later on
 		// hub = new FrSkyHub();
 		// user could have selected no hub support, then this will return null
+		if( hub == null && hubClassName != null)
+			this.hub = HubFactory.getInstance().initHubFromClassName(hubClassName);
 		return hub;
 	}
 
@@ -561,14 +565,9 @@ public class Model {
 	 * @param className
 	 */
 	public void setHubClassName(String className) {
-		try {
-			this.hub = (Hub) Class.forName(className).newInstance();
-		} catch (Exception e) {
-			//reset to null
-			this.hub = null;
-			// and log this info
-			Log.e(TAG, "Create hub from class " + className + " failed", e);
-		}
+		this.hubClassName = className;
+		// also update the hub instance here
+		this.hub = HubFactory.getInstance().initHubFromClassName(className);
 	}
 
 	/**
@@ -577,7 +576,8 @@ public class Model {
 	 * @return
 	 */
 	public String getHubClassName() {
-		return (this.hub == null ? null : hub.getClass().getName());
+		//return (this.hub == null ? null : hub.getClass().getName());
+		return hubClassName;
 	}
 
 }

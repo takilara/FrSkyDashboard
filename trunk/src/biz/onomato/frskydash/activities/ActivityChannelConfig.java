@@ -23,7 +23,6 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
-import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -271,8 +270,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	        	if(server.getHubEnabled() && _model.getHub() != null)
 	        	{
 	        		//FIXME shouldn't need a FrSkyHub instance
-		        	for(Channel ch : new FrSkyHub().getChannels().values())
-	        		//for(Channel ch : FrSkyHub.getSourceChannels().values())
+		        	for(Channel ch : _model.getHub().initializeChannels().getChannels().values())
 		        	{
 		        		sourceChannels.add(ch);
 		        	}

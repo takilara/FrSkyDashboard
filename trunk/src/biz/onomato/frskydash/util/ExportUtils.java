@@ -80,6 +80,8 @@ public class ExportUtils {
 			Model model = gson.fromJson(line, Model.class);
 			// actually do something with this model (insert in DB?)
 			FrSkyServer.saveModel(model);
+			//we need to add them to db also
+			FrSkyServer.addModel(model);
 		}
 		// clean up FIXME this should be done in final
 		reader.close();

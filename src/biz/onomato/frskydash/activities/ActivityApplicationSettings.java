@@ -1,5 +1,7 @@
 package biz.onomato.frskydash.activities;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -10,6 +12,7 @@ import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,6 +28,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
+import biz.onomato.frskydash.util.ExportUtils;
 import biz.onomato.frskydash.util.Logger;
 
 public class ActivityApplicationSettings extends Activity implements OnClickListener, OnEditorActionListener, OnFocusChangeListener {
@@ -91,7 +95,65 @@ public class ActivityApplicationSettings extends Activity implements OnClickList
 		// Load settings
         //settings = getPreferences(MODE_PRIVATE);
 
-        
+		// export models option
+		((Button) findViewById(R.id.btnExportModels))
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						try {
+							// TODO work with some fixed location for now
+							// (outside
+							// the app directory since it would be deleted upon
+							// uninstall otherwise)
+							ExportUtils.exportModelsToFile(FrSkyServer.modelMap
+									.values(), new File(
+									"/sdcard/frskydash/export-models.json"));
+							Toast.makeText(getApplicationContext(),
+									"Export completed", Toast.LENGTH_SHORT)
+									.show();
+							// TODO check if this doesn't take too much time,
+							// otherwise in background thread
+						} catch (Exception e) {
+							Log.e(TAG, "Error on exporting models, message: "
+									+ e.getMessage(), e);
+							Toast.makeText(
+									getApplicationContext(),
+									"Error on exporting models, message: "
+											+ e.getMessage(),
+									Toast.LENGTH_SHORT).show();
+						}
+					}
+				});
+		
+		// import models option
+		((Button) findViewById(R.id.btnImportModels))
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						try {
+							// TODO work with some fixed location for now
+							// (outside
+							// the app directory since it would be deleted upon
+							// uninstall otherwise)
+							ExportUtils.importModelsFromFile(new File(
+									"/sdcard/frskydash/export-models.json"));
+							Toast.makeText(getApplicationContext(),
+									"Import finished", Toast.LENGTH_SHORT)
+									.show();
+						} catch (Exception e) {
+							Log.e(TAG, "Error on importing models, message: "
+									+ e.getMessage(), e);
+							Toast.makeText(
+									getApplicationContext(),
+									"Error on importing models, message: "
+											+ e.getMessage(),
+									Toast.LENGTH_SHORT).show();
+						}
+					}
+				});
+
         doBindService();
 	}
 	

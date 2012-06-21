@@ -37,7 +37,30 @@
             <!-- <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/button1" android:text="@string/defaults"></Button> -->
             
             <Button android:layout_width="match_parent" android:text="@string/btnDeleteLogs" android:layout_height="wrap_content" android:id="@+id/btnDeleteLogs"></Button>
-        </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/btnExportModels"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btnExportModels" 
+                    android:layout_weight="1">
+                </Button>
+
+                <Button
+                    android:id="@+id/btnImportModels"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/btnImportModels" >
+                </Button>
+            </LinearLayout>
+
+            </LinearLayout>
     </LinearLayout> 
     </ScrollView>
 </LinearLayout>

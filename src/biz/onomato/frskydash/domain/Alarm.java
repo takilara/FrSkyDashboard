@@ -3,10 +3,14 @@ package biz.onomato.frskydash.domain;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.util.Logger;
 
+import com.google.gson.annotations.Expose;
+
 public class Alarm {
 
 	private static final String TAG = "Alarm";
+	
 	public static final int ALARMTYPE_UNDEFINED=-1;
+	
 	public static final int ALARMTYPE_FRSKY=1;
 	
 	public static final int ALARMLEVEL_OFF=0;
@@ -16,25 +20,48 @@ public class Alarm {
 	public static final int GREATERTHAN=1;
 	public static final int LESSERTHAN=0;
 	
+	@Expose
 	private int _threshold;
-	private int _type;
-	private int _frSkyFrameType;
-	private int _level;
-	private int _modelId=-1;
-	private int _greaterthan;
-	private String _name="";
-	//private Channel _sourceChannel;
-
 	
+	@Expose
+	private int _type;
+	
+	@Expose
+	private int _frSkyFrameType;
+	
+	@Expose
+	private int _level;
+	
+	private int _modelId=-1;
+	
+	@Expose
+	private int _greaterthan;
+	
+	@Expose
+	private String _name="";
+
+	@Expose
 	private int _minThreshold=-1;
+	
+	@Expose
 	private int _maxThreshold=-1;
 	
+	@Expose
 	private int _unitChannelId=-1;
+	
+	@Expose
 	private int _sourceChannelId = -1;
+	
+	@Expose
 	private String _unitChannelUnit="";
+	
+	@Expose
 	private float _unitChannelOffset=0;
+	
+	@Expose
 	private float _unitChannelFactor=1;
-//	private String _unitChannelDescription="";
+	
+	@Expose
 	private int _unitChannelPrecision=0;
 	
 	private static final int MINIMUM_THRESHOLD_RSSI=20;

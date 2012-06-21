@@ -8,40 +8,45 @@ import java.util.TreeMap;
 
 import biz.onomato.frskydash.domain.Channel;
 
+import com.google.gson.annotations.Expose;
+
 /**
- * Used to provide (and enforce) basic hub functionality,
- * All hub's must inherit this class
+ * Used to provide (and enforce) basic hub functionality, All hub's must inherit
+ * this class
+ * 
  * @author eso
- *
+ * 
  */
 public abstract class Hub {
-	
+
 	/**
 	 * Treemap to hold the Hubs channels
 	 */
+	// @Expose does this has to be exposed?
 	private TreeMap<Integer, Channel> mChannelMap;
 
-	public final String TAG="Hub";
+	@Expose
+	private String name;
 
-	private void initializeMap()
-	{
+	private void initializeMap() {
 		mChannelMap = new TreeMap<Integer, Channel>(Collections.reverseOrder());
 	}
-	
+
 	/**
 	 * Get all sourceChannels from the hub
+	 * 
 	 * @return a TreeMap containing all the hub's channels
 	 */
 	public TreeMap<Integer, Channel> getChannels() {
-		if(mChannelMap==null)
-		{
+		if (mChannelMap == null) {
 			initializeMap();
 		}
 		return mChannelMap;
 	}
-	
+
 	/**
 	 * Get a channels from the hub
+	 * 
 	 * @return a channel with the given id
 	 */
 	public Channel getChannel(int id) {
@@ -50,38 +55,48 @@ public abstract class Hub {
 
 	/**
 	 * Method to get the ID of the hub, must be unique
+	 * 
 	 * @return
 	 */
 	public abstract int getId();
-	
+
 	/**
 	 * Method that should take the userbyte part of a frame and "handle" it
+	 * 
 	 * @param ints
 	 */
 	public abstract void addUserBytes(int[] ints);
-	
+
 	/**
 	 * Method that should take the userbyte part of a frame and "handle" it
+	 * 
 	 * @param ints
 	 */
 	public abstract void addUserBytes(byte[] bytes);
-	
+
 	/**
 	 * A hub must initialize its channels
 	 */
 	protected abstract void initializeChannels();
-	
+
 	/**
 	 * Method for the hub to add channels to its channellist
+	 * 
 	 * @param channel
 	 */
-	protected void addChannel(Channel channel)
-	{
-		if(mChannelMap==null)
-		{
+	protected void addChannel(Channel channel) {
+		if (mChannelMap == null) {
 			initializeMap();
 		}
 		mChannelMap.put(channel.getId(), channel);
 	}
-	
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 }

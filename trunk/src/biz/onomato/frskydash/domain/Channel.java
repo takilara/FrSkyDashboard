@@ -11,6 +11,8 @@ import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 import biz.onomato.frskydash.util.Logger;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * A Channel is a value that can be updated through the Telemetry protocol. The
  * intention is to use this in a generic way for both Analog values (AD1 and
@@ -91,22 +93,40 @@ public class Channel implements Comparator<Channel> {
 	private double _val;
 
 	public double rounder;
+	
+	@Expose
 	private String _description;
+	
+	@Expose
 	private int _sourceChannelId;
+	
+	@Expose
 	private float _offset;
+	
+	@Expose
 	private float _factor;
+	
+	@Expose
 	private int _precision;
+	
 	private NumberFormat decFormat;
-	// private Context _context;
+
 	private int _textViewId = DEFAULT_DIRTY_ID;
 
 	//private IntentFilter mIntentFilter;
 	private IntentFilter mIntentFilterCommands;
 
+	@Expose
 	private String _shortUnit;
+	
+	@Expose
 	private String _longUnit;
+	
+	@Expose
 	private int _movingAverage;
+	
 	public boolean _silent;
+	
 	public Date timestamp;
 
 	// public Alarm[] alarms;

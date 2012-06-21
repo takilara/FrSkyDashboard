@@ -9,6 +9,8 @@ import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.hub.Hub;
 import biz.onomato.frskydash.util.Logger;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * A Model as it is configured by the user. A Model should be of a certain type
  * (car, airplane, helicopter, quad, ...) and have a certain name so the user
@@ -45,16 +47,19 @@ public class Model {
 	/**
 	 * collection of channels for this model
 	 */
+	@Expose
 	private TreeMap<Integer, Channel> channelMap;
 
 	/**
 	 * type of a model
 	 */
+	@Expose
 	private String _type;
 
 	/**
 	 * name of a model
 	 */
+	@Expose
 	private String _name;
 
 	/**
@@ -68,11 +73,14 @@ public class Model {
 	/**
 	 * collection of alarms for this model
 	 */
+	@Expose
 	public TreeMap<Integer, Alarm> frSkyAlarms;
 
 	/**
 	 * hub configured by user
 	 */
+	@Expose
+	//FIXME hub is not export yet!!
 	public Hub hub;
 
 	/**

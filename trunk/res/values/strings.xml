@@ -135,5 +135,7 @@
         <item>4 blades</item>
     </string-array>
     
+    <string name="btnExportModels">Export Models</string>
+    <string name="btnImportModels">Import Models</string>
         
 </resources>

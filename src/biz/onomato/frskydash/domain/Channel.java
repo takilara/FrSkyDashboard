@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Locale;
 
 import android.content.IntentFilter;
 import biz.onomato.frskydash.FrSkyServer;
@@ -657,9 +658,11 @@ public class Channel implements Comparator<Channel> {
 		// toValueString should perform replace of Locale's decimal point with
 		// Locale.US decimal point
 		// DONE DecimalFormat is faster
+		// 20120702 eso: decFormat uses "." regardless of Localization, this seem to cause problems with localized phones, reverting to 
+		// use String.format as performance requirement is not high regarding this method
 		return getDescription() + ": "
-				+ decFormat.format(_val)
-				//+ String.format(Locale.US, "%." + _precision + "f", _val)
+				//+ decFormat.format(_val)
+				+ String.format(Locale.US, "%." + _precision + "f", _val)
 				+ getLongUnit();
 		// return getDescription()+": "+toValueString()+" "+getLongUnit();
 	}

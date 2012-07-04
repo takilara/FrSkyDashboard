@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="biz.onomato.frskydash" 
-      android:versionCode="23"
-      android:versionName="2.0B08"
+      android:versionCode="24"
+      android:versionName="2.0B09"
       android:installLocation="preferExternal">
     
     <uses-permission android:name="android.permission.WAKE_LOCK" />

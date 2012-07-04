@@ -17,7 +17,7 @@ public class Logger {
 	/**
 	 * property to indicate if logging is active or not
 	 */
-	public static boolean D = false;
+	public static boolean D = true;
 
 	public static void i(String tag, String msg) {
 		if (Logger.D)

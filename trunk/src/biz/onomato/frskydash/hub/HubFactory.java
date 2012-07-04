@@ -74,8 +74,7 @@ public class HubFactory {
 					.initializeChannels();
 		} catch (Exception e) {
 			// and log this info
-			Log.e(getClass().getName(), "Create hub from class " + className
-					+ " failed", e);
+			Log.e(getClass().getName(), "Create hub from class " + className + " failed"); //, e);
 			// reset to null
 			return null;
 		}

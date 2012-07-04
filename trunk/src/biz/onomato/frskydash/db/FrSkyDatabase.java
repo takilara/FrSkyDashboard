@@ -431,7 +431,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		ch.setMovingAverage(c.getInt(c.getColumnIndexOrThrow(KEY_MOVINGAVERAGE)));
 		ch.setSilent(c.getInt(c.getColumnIndexOrThrow(KEY_SILENT))>0);
 		ch.setModelId(c.getInt(c.getColumnIndexOrThrow(KEY_MODELID)));
-		ch.setSourceChannel(c.getInt(c.getColumnIndexOrThrow(KEY_SOURCECHANNELID)));
+		ch.setSourceChannelId(c.getInt(c.getColumnIndexOrThrow(KEY_SOURCECHANNELID)));
 		ch.setDirtyFlag(false);
 		
 		Logger.d(TAG,"Loaded '"+ch.getDescription()+"' from database");

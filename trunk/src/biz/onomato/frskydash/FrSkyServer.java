@@ -2024,7 +2024,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 				// Use menu item Debug to enable hub support
 				if (_hubEnabled) {
 					// FIXED: below should be changed to something like
-					getCurrentModel().getHub().addUserBytes(f.getUserBytes());
+					if(getCurrentModel().getHub()!=null)
+					{
+						getCurrentModel().getHub().addUserBytes(f.getUserBytes());
+					}
 					//FrSkyHub.getInstance().extractUserDataBytes(this, f);
 
 					// FIXME: Temporary to add userbytes on hub

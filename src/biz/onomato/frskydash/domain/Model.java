@@ -565,6 +565,11 @@ public class Model {
 	 * @param className
 	 */
 	public void setHubClassName(String className) {
+//		if(className==null)
+//		{
+//			className="FrSkyHub";
+//		}
+			
 		this.hubClassName = className;
 		// also update the hub instance here
 		this.hub = HubFactory.getInstance().initHubFromClassName(className);

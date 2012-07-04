@@ -101,6 +101,8 @@ public class Channel implements Comparator<Channel> {
 	@Expose
 	private int _sourceChannelId;
 	
+	//private Channel _sourceChannel = null;
+	
 	@Expose
 	private float _offset;
 	
@@ -549,13 +551,19 @@ public class Channel implements Comparator<Channel> {
 	public void setSourceChannel(Channel channel) {
 		if(_sourceChannelId!=DEFAULT_DIRTY_ID)
 		{
-			Logger.d(TAG,_description+": Try to drop me from channel with id: "+_sourceChannelId);
-			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+			//Logger.d(TAG,_description+": Try to drop me from channel with id: "+_sourceChannelId);
+			if(getSourceChannel()!=null) {	
+				getSourceChannel().dropDerivedChannel(this);
+			}
+			//FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
 		}
-		if(channel!=null)
+		if(channel!=null)	// Null if not found
 		{
 			_sourceChannelId = channel.getId();
-			channel.addDerivedChannel(this);
+			if(channel.getId()!=-1)	// -1 if source set to "None" 
+			{
+				channel.addDerivedChannel(this);
+			}
 		}
 		else
 		{
@@ -567,8 +575,77 @@ public class Channel implements Comparator<Channel> {
 	 * @deprecated {@link #setSourceChannel(Channel)} preferred
 	 * @param channelId
 	 */
-	public void setSourceChannel(int channelId) {
-		setSourceChannel(FrSkyServer.getChannel(channelId));
+	public void setSourceChannelId(int channelId) {
+		_sourceChannelId = channelId;
+//		if(FrSkyServer.modelMap.get(_modelId).getChannels().containsKey(channelId))
+//		{
+//			// Check if sourcechannel exist in our own models channels
+//			Logger.w(TAG, "Channel is in model");
+//			setSourceChannel(FrSkyServer.modelMap.get(_modelId).getChannels().get(channelId));
+//		}
+//		else if(FrSkyServer.modelMap.get(_modelId).getHub()!=null)
+//		{
+//			if(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().containsKey(channelId))
+//			{
+//			// If not, check currentmodel's hub channels
+//			Logger.w(TAG, "Channel is in model's hub");
+//			setSourceChannel(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().get(channelId));
+//			}
+//		}
+//		else if(FrSkyServer.getSourceChannels().containsKey(channelId))
+//		{
+//			// Last resort, check server channels
+//			Logger.w(TAG, "Channel is in server");
+//			setSourceChannel(FrSkyServer.getChannel(channelId));
+//		}
+//		else
+//		{
+//			listening = false;
+//			Logger.e(TAG, "Unable to find channel with id: "+channelId);
+//			Logger.e(TAG, "The requesting channel is: "+toString());
+//			Logger.e(TAG, "Tested towards channels in model: "+_modelId);
+//		}
+	}
+	
+	public Channel getSourceChannel()
+	{
+		if(_sourceChannelId!=DEFAULT_DIRTY_ID)
+		{
+			if(FrSkyServer.modelMap.get(_modelId).getChannels().containsKey(_sourceChannelId))
+			{
+				// Check if sourcechannel exist in our own models channels
+				Logger.w(TAG, "Channel is in model");
+				return FrSkyServer.modelMap.get(_modelId).getChannels().get(_sourceChannelId);
+			}
+			
+			if(FrSkyServer.modelMap.get(_modelId).getHub()!=null)
+			{
+				if(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().containsKey(_sourceChannelId))
+				{
+					// If not, check currentmodel's hub channels
+					Logger.w(TAG, "Channel is in model's hub");
+					return FrSkyServer.modelMap.get(_modelId).getHub().getChannels().get(_sourceChannelId);
+				}
+			}
+			if(FrSkyServer.getSourceChannels().containsKey(_sourceChannelId))
+			{
+				// Last resort, check server channels
+				Logger.w(TAG, "Channel is in server");
+				return FrSkyServer.getChannel(_sourceChannelId);
+			}
+			
+			
+			Logger.e(TAG, "Unable to find channel with id: "+_sourceChannelId);
+			Logger.e(TAG, "The requesting channel is: "+toString());
+			Logger.e(TAG, "Tested towards channels in model: "+_modelId);
+			return null;
+			
+			
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	
@@ -578,21 +655,57 @@ public class Channel implements Comparator<Channel> {
 	public void registerListenerForChannelUpdates() {
 		if(_sourceChannelId!=DEFAULT_DIRTY_ID) 	// Used to listen to a channel
 		{
-			Logger.d(TAG, _description + " Registering listener");
+			Logger.d(TAG, _description + " Registering listener, sourceId: "+_sourceChannelId);
 			if(listening)
 			{
 				//FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
 			}
+			
+			if(getSourceChannel()!=null)	// just in case the system is unable to find the channel
+			{
+				getSourceChannel().addDerivedChannel(this);
+			}
 		
-			try
-			{
-				FrSkyServer.getChannel(_sourceChannelId).addDerivedChannel(this);
-				listening = true;
-			}
-			catch (Exception e)
-			{
-				
-			}
+////			try
+////			{
+//				
+//				listening = true;
+//				if(FrSkyServer.modelMap.get(_modelId).getChannels().containsKey(_sourceChannelId))
+//				{
+//					// Check if sourcechannel exist in our own models channels
+//					Logger.w(TAG, "Channel is in model");
+//					FrSkyServer.modelMap.get(_modelId).getChannels().get(_sourceChannelId).addDerivedChannel(this);
+//				}
+//				else if(FrSkyServer.modelMap.get(_modelId).getHub()!=null)
+//				{
+//					if(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().containsKey(_sourceChannelId))
+//					{
+//					// If not, check currentmodel's hub channels
+//					Logger.w(TAG, "Channel is in model's hub");
+//					FrSkyServer.modelMap.get(_modelId).getHub().getChannels().get(_sourceChannelId).addDerivedChannel(this);
+//					}
+//				}
+//				else if(FrSkyServer.getSourceChannels().containsKey(_sourceChannelId))
+//				{
+//					// Last resort, check server channels
+//					Logger.w(TAG, "Channel is in server");
+//					FrSkyServer.getChannel(_sourceChannelId).addDerivedChannel(this);
+//				}
+//				else
+//				{
+//					listening = false;
+//					Logger.e(TAG, "Unable to find source channel with id: "+_sourceChannelId);
+//					Logger.e(TAG, "The requesting channel is: "+toString());
+//					Logger.e(TAG, "Tested towards channels in model: "+_modelId);
+//				}
+//				
+////			}
+////			catch (Exception e)
+////			{
+////				Logger.e(TAG,e.toString());
+////			}
+			
+			
 			
 		}
 		else
@@ -603,6 +716,10 @@ public class Channel implements Comparator<Channel> {
 	}
 
 
+
+
+
+
 	/**
 	 * Used to unregister self from updates from the source channel
 	 */
@@ -610,7 +727,8 @@ public class Channel implements Comparator<Channel> {
 		if(_sourceChannelId!=DEFAULT_DIRTY_ID)
 		{
 			Logger.d(TAG, "Stopped listening");
-			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+			//FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+			getSourceChannel().dropDerivedChannel(this);
 		}
 	}
 
@@ -624,7 +742,8 @@ public class Channel implements Comparator<Channel> {
 		Logger.i(TAG, "Try to close Channel "+this.toString());
 		if(_sourceChannelId!=DEFAULT_DIRTY_ID)
 		{
-			FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+			//FrSkyServer.getChannel(_sourceChannelId).dropDerivedChannel(this);
+			getSourceChannel().dropDerivedChannel(this);
 		}
 		unregisterListenerForChannelUpdates();
 //		unregisterListenerForServerCommands();

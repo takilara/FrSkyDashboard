@@ -2023,9 +2023,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 				Logger.d(TAG, "Frametype User Data");
 				// Use menu item Debug to enable hub support
 				if (_hubEnabled) {
-					// FIXED: below should be changed to something like
+					// FIXME: Following check is probably too slow, should have a boolean variable to check instead
 					if(getCurrentModel().getHub()!=null)
 					{
+						// can only run this if the model has a hub, otherwise will throw exception
 						getCurrentModel().getHub().addUserBytes(f.getUserBytes());
 					}
 					//FrSkyHub.getInstance().extractUserDataBytes(this, f);

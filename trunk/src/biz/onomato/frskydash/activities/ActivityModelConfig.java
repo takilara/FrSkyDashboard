@@ -177,6 +177,15 @@ public class ActivityModelConfig extends ActivityBase implements
 				spnrHubTypes.getSelectedItem().toString()));
 
 		FrSkyServer.saveModel(_model);
+		// re-register channels
+		
+		// FIXME: change this so that applies after every save of currentmodel? or so that it is not needed
+		// e.g. Channel could understand that it should listen to something, and that it is part of currentmodel, and register itself?
+		if(_model==FrSkyServer.getCurrentModel())
+		{
+			Logger.w(TAG, "Re-register listeners as we saved the model");
+			_model.registerListeners();
+		}
 		// if(_model.getId()==server.getCurrentModel().getId())
 		// {
 		// if(FrSkyServer.D)Log.d(TAG,"Should update the servers.currentmodel");

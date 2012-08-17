@@ -53,9 +53,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 
 	// Used for Cyclic speak
 
-	
-	
-
 	// Used for unique id's
 	private static final int ID_CHANNEL_BUTTON_EDIT = 1000;
 	private static final int ID_CHANNEL_TEXTVIEW_VALUE = 2000;
@@ -98,8 +95,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 	// private String mConnectedDeviceName = null;
 	public static final String TOAST = "toast";
 	// private static BluetoothSerialService mSerialService = null;
-
-
 
 	// graphical stuff:
 	private float scale;
@@ -286,8 +281,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		}
 	}
 
-	
-	
 	/** 
 	 * Called whenever the current model gets changed
 	 */
@@ -298,9 +291,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			populateChannelList();
 		}
 	}
-	
-	
-
 
 	// Check for bluetooth capabilities, request if no capabilities
 	public void checkForBt() {
@@ -403,23 +393,33 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		// speakHandler.removeCallbacks(runnableSpeaker);
 	}
 
+	/**
+	 * Update the dashboard view by removing all current content and building
+	 * the structure again with information (channels etc) from the current
+	 * selected model instead.
+	 */
 	private void populateChannelList() {
 		Logger.d(TAG, "Populate list of channels");
 		// tlChannelsTable.removeAllViews();
 		llDashboardChannels.removeAllViews();
+		// set name of current model
 		//final Model currentModel = server.getCurrentModel();
-
-		tv_modelName.setText(server.getCurrentModel().getName());
-		int n = 0;
+		tv_modelName.setText(FrSkyServer.getCurrentModel().getName());
+		// get the amount of channels for this model
 		Logger.d(TAG, "Should add this amount of channels: "
-					+ server.getCurrentModel().getChannels().size());
-		for (final Channel c : server.getCurrentModel().getChannels().values()) {
+					+ FrSkyServer.getCurrentModel().getChannels().size());
+		// keep track of index
+		int n = 0;
+		// now iterate all the channels from this model
+		for (final Channel c : FrSkyServer.getCurrentModel().getChannels().values()) {
+			// some more logging
 			Logger.i(TAG, "Id: "+c.getId());
 			Logger.i(TAG, c.getDescription());
 			Logger.i(TAG, "SourceChannelId: "+c.getSourceChannelId());
 			Logger.i(TAG, "Precicion: " + c.getPrecision());
 			Logger.i(TAG, "Moving Average: " + c.getMovingAverage());
-
+			
+			// create layout objects
 			LinearLayout llLine = new LinearLayout(getApplicationContext());
 			llLine.setLayoutParams(new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
@@ -430,129 +430,11 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 					LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 			llVals.setGravity(Gravity.CENTER_HORIZONTAL);
 
-			// Add Description
-			TextView tvDesc = new TextView(getApplicationContext());
-			tvDesc.setText(c.getDescription());
-			tvDesc.setLayoutParams(new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
+			TextView tvDesc = createChannelDescriptionView(c);
 
 			llDashboardChannels.addView(tvDesc);
 
-			// btn
-			ImageButton btnEdit = new ImageButton(getApplicationContext());
-			// btnEdit.setText("...");
-			btnEdit.setImageResource(R.drawable.ic_menu_edit);
-
-			int height = (int) TypedValue.applyDimension(
-					TypedValue.COMPLEX_UNIT_DIP, 40, getResources()
-							.getDisplayMetrics());
-			btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,
-					height));
-
-			btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
-			btnEdit.setId(ID_CHANNEL_BUTTON_EDIT + c.getId());// ID for delete
-																// should be
-																// 100+channelId
-
-			btnEdit.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					// if(DEBUG)
-					// Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
-					Logger.d(TAG, "Edit channel "
-							+ server.getCurrentModel().getChannels().get(v.getId() - 1000)
-									.getDescription());
-					// Launch editchannel with channel attached..
-					Intent i = new Intent(getApplicationContext(),
-							ActivityChannelConfig.class);
-					i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_ID,
-							v.getId() - ID_CHANNEL_BUTTON_EDIT);
-					i.putExtra(ActivityChannelConfig.EXTRA_MODEL_ID,c.getModelId());
-					startActivityForResult(i, CHANNEL_CONFIG_RETURN);
-				}
-			});
-
-			llLine.addView(btnEdit);
-
-			// Value
-			Logger.d(TAG, "Add TextView for Value: " + c.getValue(true));
-			TextView tvValue = new TextView(getApplicationContext());
-			tvValue.setText("" + c.getValue());
-			tvValue.setGravity(Gravity.RIGHT);
-
-			tvValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
-			tvValue.setLayoutParams(new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
-			tvValue.setId(ID_CHANNEL_TEXTVIEW_VALUE + n);
-			c.setTextViewId(ID_CHANNEL_TEXTVIEW_VALUE + n);
-			llVals.addView(tvValue);
-			// llLine.addView(tvValue);
-
-			// Unit
-			Logger.d(TAG, "Add TextView for Unit: " + c.getShortUnit());
-			TextView tvUnit = new TextView(getApplicationContext());
-			tvUnit.setText("" + c.getShortUnit());
-			tvUnit.setGravity(Gravity.LEFT);
-			LinearLayout.LayoutParams llpUnits = new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			llpUnits.setMargins(10, 0, 0, 0);
-			tvUnit.setLayoutParams(llpUnits);
-			tvUnit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-			llVals.addView(tvUnit);
-			// llVals.setBackgroundColor(0xffff0000);
-
-			llLine.addView(llVals);
-
-			ImageView speakerV = new ImageView(getApplicationContext());
-			// speakerV.setBackgroundResource(android.R.drawable.ic_lock_silent_mode);
-			if (c.getSilent()) {
-				// speakerV.setImageResource(android.R.drawable.ic_lock_silent_mode);
-				speakerV.setImageResource(R.drawable.ic_lock_silent_mode);
-			} else {
-				speakerV.setImageResource(R.drawable.ic_lock_silent_mode_off);
-				speakerV.setColorFilter(0xff00ff00);
-			}
-			speakerV.setClickable(true);
-			speakerV.setLayoutParams(new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT, 0));
-			speakerV.setId(ID_CHANNEL_BUTTON_SILENT + c.getId());
-			speakerV.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					ImageView iv = (ImageView) v;
-					int channelId = v.getId() - ID_CHANNEL_BUTTON_SILENT;
-					Logger.d(TAG, "Change silent on channel with id: " + channelId);
-					Channel c = server.getCurrentModel().getChannels().get(channelId);
-					// if(DEBUG)
-					// Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
-					Logger.d(TAG, "Toggle silent on " + c.getDescription());
-					boolean s = !c.getSilent();
-					c.setSilent(s);
-					// c.saveToDatabase();
-					// FrSkyServer.database.saveChannel(c);
-					FrSkyServer.saveChannel(c);
-					// or SAVE_MODEL
-					if (s) {
-						iv.setImageResource(R.drawable.ic_lock_silent_mode);
-						// iv.setColorFilter(0xff00ff00);
-						iv.clearColorFilter();
-					} else {
-						iv.setImageResource(R.drawable.ic_lock_silent_mode_off);
-						iv.setColorFilter(0xff00ff00);
-					}
-
-					// Launch editchannel with channel attached..
-				}
-			});
-
-			llLine.addView(speakerV);
-
-			// View for separator
-			View v = new View(getApplicationContext());
-			v.setBackgroundColor(0xFF909090);
-			v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 2));
+			View v = createChannelValueView(n, c, llLine, llVals);
 
 			// Add line to channel List
 			llDashboardChannels.addView(llLine);
@@ -565,6 +447,133 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		// ScrollViewDashboard
 		// if(DEBUG)Log.d(TAG,"Request new layout of scrollView");
 		// llDashboardMain.requestLayout();
+	}
+
+	private TextView createChannelDescriptionView(final Channel c) {
+		// Add Description
+		TextView tvDesc = new TextView(getApplicationContext());
+		tvDesc.setText(c.getDescription());
+		tvDesc.setLayoutParams(new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
+		return tvDesc;
+	}
+
+	private View createChannelValueView(int n, final Channel c, LinearLayout llLine,
+			LinearLayout llVals) {
+		// btn
+		ImageButton btnEdit = new ImageButton(getApplicationContext());
+		// btnEdit.setText("...");
+		btnEdit.setImageResource(R.drawable.ic_menu_edit);
+
+		int height = (int) TypedValue.applyDimension(
+				TypedValue.COMPLEX_UNIT_DIP, 40, getResources()
+						.getDisplayMetrics());
+		btnEdit.setLayoutParams(new LinearLayout.LayoutParams(height,
+				height));
+
+		btnEdit.setScaleType(ImageView.ScaleType.CENTER_CROP);
+		// ID for delete should be 100+channelId
+		btnEdit.setId(ID_CHANNEL_BUTTON_EDIT + c.getId());
+
+		btnEdit.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				//debug info on delete
+				Logger.d(TAG, "Edit channel "
+						+ FrSkyServer.getCurrentModel().getChannels().get(v.getId() - 1000)
+								.getDescription());
+				// Launch editchannel with channel attached..
+				Intent i = new Intent(getApplicationContext(),
+						ActivityChannelConfig.class);
+				i.putExtra(ActivityChannelConfig.EXTRA_CHANNEL_ID,
+						v.getId() - ID_CHANNEL_BUTTON_EDIT);
+				i.putExtra(ActivityChannelConfig.EXTRA_MODEL_ID,c.getModelId());
+				startActivityForResult(i, CHANNEL_CONFIG_RETURN);
+			}
+		});
+
+		llLine.addView(btnEdit);
+
+		// Value
+		Logger.d(TAG, "Add TextView for Value: " + c.getValue(true));
+		TextView tvValue = new TextView(getApplicationContext());
+		tvValue.setText("" + c.getValue());
+		tvValue.setGravity(Gravity.RIGHT);
+
+		tvValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
+		tvValue.setLayoutParams(new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
+		tvValue.setId(ID_CHANNEL_TEXTVIEW_VALUE + n);
+		c.setTextViewId(ID_CHANNEL_TEXTVIEW_VALUE + n);
+		llVals.addView(tvValue);
+		// llLine.addView(tvValue);
+
+		// Unit
+		Logger.d(TAG, "Add TextView for Unit: " + c.getShortUnit());
+		TextView tvUnit = new TextView(getApplicationContext());
+		tvUnit.setText("" + c.getShortUnit());
+		tvUnit.setGravity(Gravity.LEFT);
+		LinearLayout.LayoutParams llpUnits = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		llpUnits.setMargins(10, 0, 0, 0);
+		tvUnit.setLayoutParams(llpUnits);
+		tvUnit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+		llVals.addView(tvUnit);
+		// llVals.setBackgroundColor(0xffff0000);
+
+		llLine.addView(llVals);
+
+		ImageView speakerV = new ImageView(getApplicationContext());
+		// speakerV.setBackgroundResource(android.R.drawable.ic_lock_silent_mode);
+		if (c.getSilent()) {
+			// speakerV.setImageResource(android.R.drawable.ic_lock_silent_mode);
+			speakerV.setImageResource(R.drawable.ic_lock_silent_mode);
+		} else {
+			speakerV.setImageResource(R.drawable.ic_lock_silent_mode_off);
+			speakerV.setColorFilter(0xff00ff00);
+		}
+		speakerV.setClickable(true);
+		speakerV.setLayoutParams(new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT, 0));
+		speakerV.setId(ID_CHANNEL_BUTTON_SILENT + c.getId());
+		speakerV.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				ImageView iv = (ImageView) v;
+				int channelId = v.getId() - ID_CHANNEL_BUTTON_SILENT;
+				Logger.d(TAG, "Change silent on channel with id: " + channelId);
+				Channel c = FrSkyServer.getCurrentModel().getChannels().get(channelId);
+				// if(DEBUG)
+				// Log.d(TAG,"Edit channel "+currentModel.getChannels()[v.getId()-1000].getDescription());
+				Logger.d(TAG, "Toggle silent on " + c.getDescription());
+				boolean s = !c.getSilent();
+				c.setSilent(s);
+				// c.saveToDatabase();
+				// FrSkyServer.database.saveChannel(c);
+				FrSkyServer.saveChannel(c);
+				// or SAVE_MODEL
+				if (s) {
+					iv.setImageResource(R.drawable.ic_lock_silent_mode);
+					// iv.setColorFilter(0xff00ff00);
+					iv.clearColorFilter();
+				} else {
+					iv.setImageResource(R.drawable.ic_lock_silent_mode_off);
+					iv.setColorFilter(0xff00ff00);
+				}
+
+				// Launch editchannel with channel attached..
+			}
+		});
+
+		llLine.addView(speakerV);
+
+		// View for separator
+		View v = new View(getApplicationContext());
+		v.setBackgroundColor(0xFF909090);
+		v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 2));
+		return v;
 	}
 
 	public void onClick(View v) {

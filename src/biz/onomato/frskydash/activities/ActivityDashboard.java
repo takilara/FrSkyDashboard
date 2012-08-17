@@ -418,37 +418,65 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			Logger.i(TAG, "SourceChannelId: "+c.getSourceChannelId());
 			Logger.i(TAG, "Precicion: " + c.getPrecision());
 			Logger.i(TAG, "Moving Average: " + c.getMovingAverage());
-			
-			// create layout objects
-			LinearLayout llLine = new LinearLayout(getApplicationContext());
-			llLine.setLayoutParams(new LinearLayout.LayoutParams(
+
+			// combine all in a single view so we can move that code to
+			// channel presentation builder
+			LinearLayout singleChannelView = new LinearLayout(getApplicationContext());
+			singleChannelView.setLayoutParams(new LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT));
+			singleChannelView.setOrientation(LinearLayout.VERTICAL);
+			buildChannelView(singleChannelView, c, n);
+			llDashboardChannels.addView(singleChannelView);
 
-			LinearLayout llVals = new LinearLayout(getApplicationContext());
-			llVals.setLayoutParams(new LinearLayout.LayoutParams(0,
-					LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-			llVals.setGravity(Gravity.CENTER_HORIZONTAL);
-
-			TextView tvDesc = createChannelDescriptionView(c);
-
-			llDashboardChannels.addView(tvDesc);
-
-			View v = createChannelValueView(n, c, llLine, llVals);
-
-			// Add line to channel List
-			llDashboardChannels.addView(llLine);
 			// Add separator view to channel List
-			llDashboardChannels.addView(v);
-
+			View separatorView = new View(getApplicationContext());
+			separatorView.setBackgroundColor(0xFF909090);
+			separatorView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 2));
+			llDashboardChannels.addView(separatorView);
+			
+			// increment counter here
 			n++;
-
 		}
 		// ScrollViewDashboard
 		// if(DEBUG)Log.d(TAG,"Request new layout of scrollView");
 		// llDashboardMain.requestLayout();
 	}
+	
+	/**
+	 * Channel presentation related code for a complete channel view
+	 * 
+	 * @param singleChannelView
+	 * @param c
+	 * @param n
+	 */
+	private void buildChannelView(LinearLayout singleChannelView, final Channel c, int n){
+		// create layout objects
+		LinearLayout llLine = new LinearLayout(getApplicationContext());
+		llLine.setLayoutParams(new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT));
 
+		LinearLayout llVals = new LinearLayout(getApplicationContext());
+		llVals.setLayoutParams(new LinearLayout.LayoutParams(0,
+				LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+		llVals.setGravity(Gravity.CENTER_HORIZONTAL);
+
+		//create description view
+		TextView tvDesc = createChannelDescriptionView(c);
+		singleChannelView.addView(tvDesc);
+
+		// create channel value view
+		createChannelValueView(n, c, llLine, llVals);
+		singleChannelView.addView(llLine);
+	}
+
+	/**
+	 * Channel presentation related code for channel description
+	 * 
+	 * @param c
+	 * @return
+	 */
 	private TextView createChannelDescriptionView(final Channel c) {
 		// Add Description
 		TextView tvDesc = new TextView(getApplicationContext());
@@ -459,7 +487,16 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		return tvDesc;
 	}
 
-	private View createChannelValueView(int n, final Channel c, LinearLayout llLine,
+	/**
+	 * channel presentation related code for channel value
+	 * 
+	 * @param n
+	 * @param c
+	 * @param llLine
+	 * @param llVals
+	 * @return
+	 */
+	private void createChannelValueView(int n, final Channel c, LinearLayout llLine,
 			LinearLayout llVals) {
 		// btn
 		ImageButton btnEdit = new ImageButton(getApplicationContext());
@@ -568,12 +605,6 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		});
 
 		llLine.addView(speakerV);
-
-		// View for separator
-		View v = new View(getApplicationContext());
-		v.setBackgroundColor(0xFF909090);
-		v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 2));
-		return v;
 	}
 
 	public void onClick(View v) {

@@ -29,7 +29,8 @@ import biz.onomato.frskydash.BluetoothSerialService;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
 import biz.onomato.frskydash.domain.Channel;
-import biz.onomato.frskydash.presentation.ChannelViewBuilder;
+import biz.onomato.frskydash.presentation.ChannelViewFactory;
+import biz.onomato.frskydash.presentation.DefaultChannelViewBuilder;
 import biz.onomato.frskydash.util.Logger;
 
 public class ActivityDashboard extends ActivityBase implements OnClickListener {
@@ -419,7 +420,8 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 			Logger.i(TAG, "Moving Average: " + c.getMovingAverage());
 
 			// add view for channel
-			View singleChannelView = ChannelViewBuilder.getInstance().buildChannelView(this, n, c);
+			View singleChannelView = ChannelViewFactory.getInstance()
+					.getBuilderForChannel(c).buildChannelView(this, n, c);
 			llDashboardChannels.addView(singleChannelView);
 
 			// Add separator view to channel List

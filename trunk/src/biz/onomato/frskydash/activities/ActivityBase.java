@@ -55,7 +55,7 @@ abstract class ActivityBase extends Activity {
 	// Return codes
 	protected static final int NEW_MODEL_RETURN = 0;
 	protected static final int MODEL_CONFIG_RETURN = 1;
-	protected static final int CHANNEL_CONFIG_RETURN = 2;
+	public static final int CHANNEL_CONFIG_RETURN = 2;
 	protected static final int MODULE_CONFIG_RETURN = 3;
 	protected static final int REQUEST_CONNECT_DEVICE_RETURN = 4;
 	protected static final int REQUEST_ENABLE_BT_RETURN = 5;

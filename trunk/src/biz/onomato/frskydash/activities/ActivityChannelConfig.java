@@ -41,12 +41,12 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	/**
 	 * use this to get the channel reference (from currentModel) 
 	 */
-	protected static final String EXTRA_CHANNEL_ID = "channelRef";
+	public static final String EXTRA_CHANNEL_ID = "channelRef";
 
 	/**
 	 * use this to reference the current model we want to create a channel for
 	 */
-	protected static final String EXTRA_MODEL_ID = "modelId";
+	public static final String EXTRA_MODEL_ID = "modelId";
 
 	/**
 	 * identifier for the current channel we are working on

@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -250,7 +251,9 @@ public class ActivityDashboard extends ActivityBase implements OnClickListener {
 		// Listen for BT events (not used yet)
 		mIntentFilterBt = new IntentFilter();
 		mIntentFilterBt.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-
+		
+		// Allow screen to stay on
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 	}
 
 	// cyclically read from array

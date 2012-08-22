@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout android:id="@+id/linearLayout1" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:scrollbars="vertical">
+        <ScrollView android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/scrollView1">
+            <LinearLayout android:orientation="vertical" android:id="@+id/linearLayout2" android:layout_width="match_parent" android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/modConf_tvDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/modelConf_Description" >
+
+				</TextView>
+
+                <EditText
+                    android:id="@+id/modConf_edName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    
+                </EditText>
+
+                <TextView
+                    android:id="@+id/modConf_tvModelType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/modelConf_ModelType" />
+
+                <Spinner
+                    android:id="@+id/modConf_spType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                
+            <TextView
+                android:id="@+id/modConf_tvHubType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/modelConf_HubType" />
+
+            <Spinner
+                android:id="@+id/modConf_spHubType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+
+			<TextView android:background="#333333" android:id="@+id/modConf_tvChannels" android:layout_height="wrap_content" android:text="@string/modelConf_Channels" android:layout_width="match_parent" android:gravity="center"></TextView>
+                <!--  Start with channels here -->
+                
+                <LinearLayout
+                	android:id="@+id/llChannelsLayout"
+                	android:layout_width="match_parent"
+               		android:layout_height="wrap_content"
+                	android:orientation="vertical" >
+
+		        	<!--  Populate with channels here.. -->
+                
+    			</LinearLayout>
+                <Button
+            		android:id="@+id/modConf_btnAddChannel"
+            		android:layout_width="match_parent"
+            		android:layout_height="wrap_content"
+            		android:text="@string/modelConf_addChannel" />
+                
+                <Button
+            		android:id="@+id/modConf_btnFrSkyAlarms"
+            		android:layout_width="match_parent"
+            		android:layout_height="wrap_content"
+            		android:text="@string/modelConf_frSkyAlarms" />
+                
+                <Button 
+                    android:id="@+id/modConf_btnSave"
+                    android:text="@string/save"                     android:layout_width="match_parent" 
+                    android:layout_height="wrap_content" />
+                <!-- android:drawableRight="@drawable/ic_menu_save" -->
+                
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>

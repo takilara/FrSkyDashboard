@@ -108,12 +108,13 @@ public class Frame {
 			// eso: temporary fix to allow frames "that are still longer than 11" (from simulator) to get destuffed			
 			if(frame.length>11)
 			{
-				Logger.d(TAG,"Frame needs to be decoded: ");
+				
+				Logger.i(TAG,"Frame needs to be decoded: ");
 				//Logger.d(TAG,"\tBefore: "+Frame.frameToHuman(frame,false));
-				Logger.d(TAG,"\tBefore: "+toHuman());
+				Logger.i(TAG,"\tBefore: "+toHuman());
 				_frame = frameDecode(frame);
 				//Logger.d(TAG,"\tAfter: "+Frame.frameToHuman(frame,false));
-				Logger.d(TAG,"\tAfter: "+toHuman(false));
+				Logger.i(TAG,"\tAfter: "+toHuman(false));
 				
 				
 			}

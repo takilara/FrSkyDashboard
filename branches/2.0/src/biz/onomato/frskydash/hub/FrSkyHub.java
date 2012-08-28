@@ -87,9 +87,20 @@ public class FrSkyHub extends Hub{
 		SensorTypes sensorType = TranslatorFactory.getInstance().getSensorType(
 				frame);
 		// translate value
-		double value = TranslatorFactory.getInstance()
+		double value;
+		try
+		{
+		value = TranslatorFactory.getInstance()
 				.getTranslatorForFrame(sensorType)
 				.translateValue(sensorType, frame);
+		}
+		catch (Exception e)
+		{
+			Logger.e(TAG, "Unable to get value for frame: "+Arrays.toString(frame));
+			Logger.e(TAG, "SensorType is: "+sensorType.toString());
+			value = -999.25; // need to be changed, just added for testng purposes
+			
+		}
 		// FIXME now there is one exception for volt sensor so far
 		if (sensorType == SensorTypes.volt) {
 			// get the right cell for specific update
@@ -266,6 +277,16 @@ public class FrSkyHub extends Hub{
 		case gps_longitude_before:
 			getChannel(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
 			break;
+		case fas100_current:
+			getChannel(CHANNEL_ID_FAS100_CURRENT).setRaw(value);
+			break;
+		case fas100_voltage_before:
+			getChannel(CHANNEL_ID_FAS100_VOLTAGE).setRaw(value);
+			break;
+		case fas100_voltage_after:
+			getChannel(CHANNEL_ID_FAS100_VOLTAGE).setRaw(value);
+			break;
+			
 		}
 
 		// let server update this information
@@ -310,6 +331,11 @@ public class FrSkyHub extends Hub{
 	public static final int CHANNEL_ID_GPS_SPEED = 23 + HUB_ID;
 	public static final int CHANNEL_ID_GPS_LATITUDE = 24 + HUB_ID;
 	public static final int CHANNEL_ID_GPS_LONGITUDE = 25 + HUB_ID;
+	
+	// current sensor
+	public static final int CHANNEL_ID_FAS100_CURRENT = 26 + HUB_ID;
+	public static final int CHANNEL_ID_FAS100_VOLTAGE = 27 + HUB_ID;
+	
 
 	/**
 	 * Poor solution for holding decimal part of altitude
@@ -321,6 +347,7 @@ public class FrSkyHub extends Hub{
 	public Hub initializeChannels() {
 		// Sets up the hardcoded channels (Altitude,RPM)
 		// TODO: Figure out how to deal with race conditions on "split numbers"
+		// Comment: eso: Always combine the number when the decimal part arrives
 		// TODO create enums with descruption etc or proper factory instead
 		configureChannelForSensor(CHANNEL_ID_ALTITUDE, "Hub: Altitude");
 		configureChannelForSensor(CHANNEL_ID_RPM, "Hub: RPM (pulses)");
@@ -342,6 +369,14 @@ public class FrSkyHub extends Hub{
 		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_4, "Hub: Lipo Cell 4");
 		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_5, "Hub: Lipo Cell 5");
 		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_6, "Hub: Lipo Cell 6");
+		
+		configureChannelForSensor(CHANNEL_ID_FAS100_CURRENT, "FrSky FAS-100 Current");
+		configureChannelForSensor(CHANNEL_ID_FAS100_VOLTAGE, "FrSky FAS-100 Voltage");
+		// incoming current must be divided by 10
+		getChannel(CHANNEL_ID_FAS100_CURRENT).setFactor((float) 0.1);
+		
+		//FIXME reconfigure current for factor = 1/10
+		
 		// return yourself for chaining
 		return this;
 	}
@@ -382,6 +417,11 @@ public class FrSkyHub extends Hub{
 
 	@Override
 	public void addUserBytes(int[] ints) {
+		// FIXME: I don't trust this implementation:
+		// I get too many start/stop bytes at wrong position
+		// 1. We need to consider the length of valid bytes in the frame, and discard bytes after. SIZE_HUB_FRAME should not be used
+		// 2. Hub destuffing should only apply to the actual payload, and not the length or the second NA byte
+		
 		// shall take user bytes
 		// decode (destuff) them, and add to internal queue
 		// then identify hub frames within this queue
@@ -408,6 +448,7 @@ public class FrSkyHub extends Hub{
 		for (int b : ints) {
 			// b = ints[i];
 			// handle byte stuffing first
+			// FIXME: This is not correct, hub stuffing only happens on payload (after size data), might not be relevant
 			if (b == STUFFING_HUB_FRAME) {
 				hubXOR = true;
 				// drop this byte

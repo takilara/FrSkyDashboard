@@ -29,6 +29,9 @@ public enum SensorTypes {
 	CELL_0, CELL_1, CELL_2, CELL_3, CELL_4, CELL_5, // , volt_6;
 
 	// concatenated value for time & date values
-	gps_day_month, gps_hour_minute, gps_date
-
+	gps_day_month, gps_hour_minute, gps_date,
+	
+	// FAS-100
+	fas100_current,fas100_voltage_before,fas100_voltage_after,
+	
 }

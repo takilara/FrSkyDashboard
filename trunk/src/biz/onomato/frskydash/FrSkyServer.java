@@ -348,6 +348,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Logger.i(TAG, "Try to load settings");
 		_settings = context.getSharedPreferences("FrSkyDash", MODE_PRIVATE);
 		_editor = _settings.edit();
+		
+		// update hub support enabled
+		getHubEnabled();
+		
 
 		// init notification on top to let the user get back to the application
 		// at any time
@@ -2020,7 +2024,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			if (inBound) {
 				_framecountRx++;
 				// hcpl add handling user data frames!!
-				Logger.d(TAG, "Frametype User Data");
+				//Logger.d(TAG, "Frametype User Data");
 				// Use menu item Debug to enable hub support
 				if (_hubEnabled) {
 					// FIXME: Following check is probably too slow, should have a boolean variable to check instead

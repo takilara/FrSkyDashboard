@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import biz.onomato.frskydash.hub.sensors.AcceleratorTranslator;
 import biz.onomato.frskydash.hub.sensors.AltitudeTranslator;
+import biz.onomato.frskydash.hub.sensors.FAS100CurrentTranslator;
+import biz.onomato.frskydash.hub.sensors.FAS100VoltageTranslator;
 import biz.onomato.frskydash.hub.sensors.FuelTranslator;
 import biz.onomato.frskydash.hub.sensors.GPSTranslator;
 import biz.onomato.frskydash.hub.sensors.RPMTranslator;
@@ -89,6 +91,13 @@ public class TranslatorFactory {
 		dataTranslators.put(SensorTypes.acc_x, accTranslator);
 		dataTranslators.put(SensorTypes.acc_y, accTranslator);
 		dataTranslators.put(SensorTypes.acc_z, accTranslator);
+		
+		//FAS_100
+		FAS100VoltageTranslator fas100VoltageTranslator = new FAS100VoltageTranslator();
+		dataTranslators.put(SensorTypes.fas100_voltage_before, fas100VoltageTranslator);
+		dataTranslators.put(SensorTypes.fas100_voltage_after, fas100VoltageTranslator);
+		dataTranslators.put(SensorTypes.fas100_current, new FAS100CurrentTranslator());
+		
 	}
 
 	/**
@@ -96,6 +105,7 @@ public class TranslatorFactory {
 	 */
 	private void initDataIDs() {
 		// put data
+		dataIDs.put(0x00, SensorTypes.undefined);
 		dataIDs.put(0x01, SensorTypes.gps_altitude_before);
 		dataIDs.put(0x01 + 8, SensorTypes.gps_altitude_after);
 		dataIDs.put(0x02, SensorTypes.temp1);
@@ -122,6 +132,13 @@ public class TranslatorFactory {
 		dataIDs.put(0x24, SensorTypes.acc_x);
 		dataIDs.put(0x25, SensorTypes.acc_y);
 		dataIDs.put(0x26, SensorTypes.acc_z);
+		
+		//FAS-100
+		dataIDs.put(0x28, SensorTypes.fas100_current);
+		dataIDs.put(0x3a, SensorTypes.fas100_voltage_before);
+		dataIDs.put(0x3b, SensorTypes.fas100_voltage_after);
+		
+		
 	}
 
 	/**

@@ -63,7 +63,6 @@ public class TranslatorFactory {
 	 */
 	private void initTranslators() {
 		GPSTranslator gpsTranslator = new GPSTranslator();
-				
 		dataTranslators.put(SensorTypes.gps_altitude_before, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_altitude_after, gpsTranslator);
 		dataTranslators.put(SensorTypes.temp1, new TempTranslator());
@@ -162,7 +161,10 @@ public class TranslatorFactory {
 	 * @return
 	 */
 	public SensorTypes getSensorType(int[] frame) {
-		return dataIDs.get(frame[1]);
+		if(dataIDs.get(frame[1])!=null)
+			return dataIDs.get(frame[1]);
+		else
+			return dataIDs.get(0x00); // return undefined if key is unknown
 	}
 
 }

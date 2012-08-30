@@ -161,7 +161,10 @@ public class TranslatorFactory {
 	 * @return
 	 */
 	public SensorTypes getSensorType(int[] frame) {
-		return dataIDs.get(frame[1]);
+		if(dataIDs.get(frame[1])!=null)
+			return dataIDs.get(frame[1]);
+		else
+			return dataIDs.get(0x00); // return undefined if key is unknown
 	}
 
 }

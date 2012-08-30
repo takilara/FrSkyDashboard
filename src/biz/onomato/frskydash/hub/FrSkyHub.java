@@ -281,7 +281,7 @@ public class FrSkyHub extends Hub{
 			getChannel(CHANNEL_ID_FAS100_CURRENT).setRaw(value);
 			break;
 		case fas100_voltage_before:
-			getChannel(CHANNEL_ID_FAS100_VOLTAGE).setRaw(value);
+			//getChannel(CHANNEL_ID_FAS100_VOLTAGE).setRaw(value);
 			break;
 		case fas100_voltage_after:
 			getChannel(CHANNEL_ID_FAS100_VOLTAGE).setRaw(value);
@@ -374,7 +374,8 @@ public class FrSkyHub extends Hub{
 		configureChannelForSensor(CHANNEL_ID_FAS100_VOLTAGE, "FrSky FAS-100 Voltage");
 		// incoming current must be divided by 10
 		getChannel(CHANNEL_ID_FAS100_CURRENT).setFactor((float) 0.1);
-		
+		// incoming voltage must be multiplied by (21/11) to get voltage in Volts
+		getChannel(CHANNEL_ID_FAS100_VOLTAGE).setFactor((float) (21.0/11.0));
 
 		
 		// return yourself for chaining

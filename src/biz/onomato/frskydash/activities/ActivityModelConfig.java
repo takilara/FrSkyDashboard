@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.activities;
 
 import android.content.Intent;
@@ -5,6 +24,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
@@ -62,6 +82,7 @@ public class ActivityModelConfig extends ActivityBase implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		// doBindService();
 
 		// When using this activity to create a new model the id will be -1,

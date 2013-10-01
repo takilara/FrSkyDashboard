@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.domain;
 
 import java.text.DecimalFormat;
@@ -8,6 +27,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.content.IntentFilter;
+import android.graphics.Color;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.MyStack;
 import biz.onomato.frskydash.util.Logger;
@@ -70,6 +90,8 @@ public class Channel implements Comparator<Channel> {
 	private boolean listening = false;
 
 	private boolean _closed = false;
+	
+	private int mTextColor = Color.WHITE;
 
 	// /**
 	// * the actual values
@@ -131,6 +153,8 @@ public class Channel implements Comparator<Channel> {
 	public boolean _silent;
 	
 	public Date timestamp;
+	
+	private Alarm mAlarm; //FIXME: Replace with alarmlist
 
 	// public Alarm[] alarms;
 	// public int alarmCount = 0;
@@ -384,10 +408,12 @@ public class Channel implements Comparator<Channel> {
 	 */
 	public double setRaw(double value) {
 		timestamp = new Date();
+		
 		_avg = _stack.push(value);
 
 		_raw = value;
 		_val = convert(_avg);
+		
 
 		// // Update public properties
 		// raw = _raw;
@@ -401,6 +427,12 @@ public class Channel implements Comparator<Channel> {
 			
 			// Broadcast based communication NO MORE IN USE
 			//broadcastUpdate();
+		}
+		
+		// Update alarms
+		if(mAlarm!=null)
+		{
+			testAlarms();
 		}
 		return _val;
 	}
@@ -419,7 +451,7 @@ public class Channel implements Comparator<Channel> {
 	 * Retrieve the calculated value for this channel
 	 * 
 	 * @param average
-	 *            pass true if you want to retrieve the average raw value
+	 *            pass true if you want to retrieve the average calculated value
 	 * @return
 	 */
 	public double getValue(boolean average) {
@@ -577,34 +609,6 @@ public class Channel implements Comparator<Channel> {
 	 */
 	public void setSourceChannelId(int channelId) {
 		_sourceChannelId = channelId;
-//		if(FrSkyServer.modelMap.get(_modelId).getChannels().containsKey(channelId))
-//		{
-//			// Check if sourcechannel exist in our own models channels
-//			Logger.w(TAG, "Channel is in model");
-//			setSourceChannel(FrSkyServer.modelMap.get(_modelId).getChannels().get(channelId));
-//		}
-//		else if(FrSkyServer.modelMap.get(_modelId).getHub()!=null)
-//		{
-//			if(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().containsKey(channelId))
-//			{
-//			// If not, check currentmodel's hub channels
-//			Logger.w(TAG, "Channel is in model's hub");
-//			setSourceChannel(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().get(channelId));
-//			}
-//		}
-//		else if(FrSkyServer.getSourceChannels().containsKey(channelId))
-//		{
-//			// Last resort, check server channels
-//			Logger.w(TAG, "Channel is in server");
-//			setSourceChannel(FrSkyServer.getChannel(channelId));
-//		}
-//		else
-//		{
-//			listening = false;
-//			Logger.e(TAG, "Unable to find channel with id: "+channelId);
-//			Logger.e(TAG, "The requesting channel is: "+toString());
-//			Logger.e(TAG, "Tested towards channels in model: "+_modelId);
-//		}
 	}
 	
 	public Channel getSourceChannel()
@@ -614,7 +618,7 @@ public class Channel implements Comparator<Channel> {
 			if(FrSkyServer.modelMap.get(_modelId).getChannels().containsKey(_sourceChannelId))
 			{
 				// Check if sourcechannel exist in our own models channels
-				Logger.w(TAG, "Channel is in model");
+				Logger.d(TAG, "Channel is in model");
 				return FrSkyServer.modelMap.get(_modelId).getChannels().get(_sourceChannelId);
 			}
 			
@@ -623,14 +627,14 @@ public class Channel implements Comparator<Channel> {
 				if(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().containsKey(_sourceChannelId))
 				{
 					// If not, check currentmodel's hub channels
-					Logger.w(TAG, "Channel is in model's hub");
+					Logger.d(TAG, "Channel is in model's hub");
 					return FrSkyServer.modelMap.get(_modelId).getHub().getChannels().get(_sourceChannelId);
 				}
 			}
 			if(FrSkyServer.getSourceChannels().containsKey(_sourceChannelId))
 			{
 				// Last resort, check server channels
-				Logger.w(TAG, "Channel is in server");
+				Logger.d(TAG, "Channel is in server");
 				return FrSkyServer.getChannel(_sourceChannelId);
 			}
 			
@@ -665,48 +669,6 @@ public class Channel implements Comparator<Channel> {
 			{
 				getSourceChannel().addDerivedChannel(this);
 			}
-		
-////			try
-////			{
-//				
-//				listening = true;
-//				if(FrSkyServer.modelMap.get(_modelId).getChannels().containsKey(_sourceChannelId))
-//				{
-//					// Check if sourcechannel exist in our own models channels
-//					Logger.w(TAG, "Channel is in model");
-//					FrSkyServer.modelMap.get(_modelId).getChannels().get(_sourceChannelId).addDerivedChannel(this);
-//				}
-//				else if(FrSkyServer.modelMap.get(_modelId).getHub()!=null)
-//				{
-//					if(FrSkyServer.modelMap.get(_modelId).getHub().getChannels().containsKey(_sourceChannelId))
-//					{
-//					// If not, check currentmodel's hub channels
-//					Logger.w(TAG, "Channel is in model's hub");
-//					FrSkyServer.modelMap.get(_modelId).getHub().getChannels().get(_sourceChannelId).addDerivedChannel(this);
-//					}
-//				}
-//				else if(FrSkyServer.getSourceChannels().containsKey(_sourceChannelId))
-//				{
-//					// Last resort, check server channels
-//					Logger.w(TAG, "Channel is in server");
-//					FrSkyServer.getChannel(_sourceChannelId).addDerivedChannel(this);
-//				}
-//				else
-//				{
-//					listening = false;
-//					Logger.e(TAG, "Unable to find source channel with id: "+_sourceChannelId);
-//					Logger.e(TAG, "The requesting channel is: "+toString());
-//					Logger.e(TAG, "Tested towards channels in model: "+_modelId);
-//				}
-//				
-////			}
-////			catch (Exception e)
-////			{
-////				Logger.e(TAG,e.toString());
-////			}
-			
-			
-			
 		}
 		else
 		{
@@ -864,5 +826,35 @@ public class Channel implements Comparator<Channel> {
 			return false;
 		}
 
+	}
+	
+	public boolean addAlarm(Alarm alarm)
+	{
+		mAlarm = alarm;
+		return true;
+	}
+	
+	public void testAlarms()
+	{
+		//Logger.w(TAG, "Testing the alarms for channel "+_description);
+		//Logger.w(TAG, "Alarm Level = "+mAlarm.analyze());
+		switch (mAlarm.analyze())
+		{
+			case Alarm.ALARM_LEVEL_CRITICAL:
+				mTextColor = Color.rgb(255, 0, 0);
+				break;
+			case Alarm.ALARM_LEVEL_MEDIUM:
+				mTextColor = Color.rgb(255, 113, 0);
+				break;
+			case Alarm.ALARM_LEVEL_NORMAL:
+			default:
+				mTextColor = Color.GREEN;
+				break;
+		}
+	}
+	
+	public int getColor()
+	{
+		return mTextColor;
 	}
 }

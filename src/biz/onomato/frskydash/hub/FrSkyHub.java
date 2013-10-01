@@ -1,8 +1,28 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.hub;
 
 import java.util.Arrays;
 
 import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.util.Logger;
 
 /**
@@ -13,9 +33,64 @@ import biz.onomato.frskydash.util.Logger;
 public class FrSkyHub extends Hub{
 
 	/**
+	 * Unique ID for the HUB
+	 */
+	public static final int HUB_ID =-1000;
+
+	/**
+	 * Unique ID's for the Hubs channels
+	 * FIXME: Id for hubs and channels should be changed. Preferrably so that hub can
+	 * be oblivious to channel id's
+	 */
+	
+	public static final int CHANNEL_ID_ALTITUDE = 0 + HUB_ID;
+	public static final int CHANNEL_ID_RPM = 1 + HUB_ID;
+	public static final int CHANNEL_ID_TEMP1 = 2 + HUB_ID;
+	public static final int CHANNEL_ID_TEMP2 = 3 + HUB_ID;
+	// acc sensor
+	public static final int CHANNEL_ID_ACCELEROMETER_X = 4 + HUB_ID;
+	public static final int CHANNEL_ID_ACCELEROMETER_Y = 5 + HUB_ID;
+	public static final int CHANNEL_ID_ACCELEROMETER_Z = 6 + HUB_ID;
+	public static final int CHANNEL_ID_FUEL = 7 + HUB_ID;
+	// lipo sensor, to be registered per cell (required for cannonical values,
+	// unless we implement compositive values support)
+	public static final int CHANNEL_ID_LIPO_CELL_1 = 10 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_2 = 11 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_3 = 12 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_4 = 13 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_5 = 14 + HUB_ID;
+	public static final int CHANNEL_ID_LIPO_CELL_6 = 15 + HUB_ID;
+	// gps sensor values
+	public static final int CHANNEL_ID_GPS_COURSE = 21 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_ALTITUDE = 22 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_SPEED = 23 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_LATITUDE = 24 + HUB_ID;
+	public static final int CHANNEL_ID_GPS_LONGITUDE = 25 + HUB_ID;
+	
+	
+	// current sensor
+	public static final int CHANNEL_ID_FAS_CURRENT = 26 + HUB_ID;
+	public static final int CHANNEL_ID_FAS_VOLTAGE = 27 + HUB_ID;
+	
+
+	public static final int CHANNEL_ID_VERT_SPEED = 28 + HUB_ID;
+	
+	// OpenXVario
+	public static final int CHANNEL_ID_OPENXVARIO_VFAS_VOLTAGE = 29 + HUB_ID;
+	public static final int CHANNEL_ID_OPENXVARIO_GPS_DISTANCE = 30 + HUB_ID;
+	
+	public static final int CHANNEL_ID_GPS_TIMESTAMP = 31 + HUB_ID;
+	
+	// Calculated channels
+	public static final int CHANNEL_ID_CALC_TIMESTAMP = 32 + HUB_ID;
+	public static final int CHANNEL_ID_CALC_GPS_LOCK = 33 + HUB_ID;
+	public static final int CHANNEL_ID_CALC_VERT_SPEED = 34 + HUB_ID;
+
+	
+	/**
 	 * tag for logging
 	 */
-	public final String TAG="FrSkyHub";
+	public final static String TAG="FrSkyHub";
 	
 	/**
 	 * size for user data frames
@@ -54,6 +129,9 @@ public class FrSkyHub extends Hub{
 	 */
 	private static boolean hubXOR = false;
 
+	
+
+	
 	/**
 	 * def ctor. This will not initialize the channels, you need to call the
 	 * initializeChannels() method!
@@ -79,47 +157,57 @@ public class FrSkyHub extends Hub{
 				|| frame[0] != START_STOP_HUB_FRAME
 				|| frame[SIZE_HUB_FRAME - 1] != START_STOP_HUB_FRAME) {
 			// log exception here
-			Logger.d(TAG,
+			Logger.e(TAG,
 					"Wrong hub frame format: " + Arrays.toString(frame));
 			return;
 		}
 		// retrieve sensor type
 		SensorTypes sensorType = TranslatorFactory.getInstance().getSensorType(
 				frame);
-		// translate value
-		double value;
-		try
-		{
-		value = TranslatorFactory.getInstance()
-				.getTranslatorForFrame(sensorType)
-				.translateValue(sensorType, frame);
-		}
-		catch (Exception e)
-		{
-			Logger.e(TAG, "Unable to get value for frame: "+Arrays.toString(frame));
-			Logger.e(TAG, "SensorType is: "+sensorType.toString());
-			value = -999.25; // need to be changed, just added for testng purposes
+		
+		
+//		
 			
-		}
-		// FIXME now there is one exception for volt sensor so far
-		if (sensorType == SensorTypes.volt) {
-			// get the right cell for specific update
-			// first 4 bit is battery cell number
-			int cell = FrSkyHub.getBatteryCell(frame);
-			// if (cell < 1 || cell > 6) { CHECK RANGE OF CELL
-			if (cell < 0 || cell > 5) {
-				Logger.d(this.getClass().toString(),
-						"failed to handle cell nr out of range: " + cell);
-				return;
+			// due to need to maintain state (store "before" until "after" is ready, the following approach is deprecated
+			// translate value
+			double value;
+			try
+			{
+			value = TranslatorFactory.getInstance()
+					.getTranslatorForFrame(sensorType)
+					.translateValue(sensorType, frame);
 			}
-			// now we can update a specific cell
-			String type = "CELL_" + cell;
-			// and update
-			updateChannel(SensorTypes.valueOf(type), value);
-		}
-		// and update channel
-		else
-			updateChannel(sensorType, value);
+			catch (Exception e)
+			{
+				Logger.e(TAG, "Unable to get value for frame: "+Arrays.toString(frame));
+				Logger.e(TAG, "SensorType is: "+sensorType.toString());
+				value = UNDEFINED_VALUE; // need to be changed, just added for testng purposes
+				
+			}
+			// FIXME now there is one exception for volt sensor so far
+			if (sensorType == SensorTypes.volt) {
+				// get the right cell for specific update
+				// first 4 bit is battery cell number
+				int cell = FrSkyHub.getBatteryCell(frame);
+				// if (cell < 1 || cell > 6) { CHECK RANGE OF CELL
+				if (cell < 0 || cell > 5) {
+					Logger.d(this.getClass().toString(),
+							"failed to handle cell nr out of range: " + cell);
+					return;
+				}
+				// now we can update a specific cell
+				String type = "CELL_" + cell;
+				// and update
+				updateChannel(SensorTypes.valueOf(type), value);
+			}
+			// and update channel
+			else{
+				if(value!=UNDEFINED_VALUE)	// only update if we have a value
+				{
+					updateChannel(sensorType, value);
+				}
+			}
+		
 	}
 
 	/**
@@ -131,6 +219,8 @@ public class FrSkyHub extends Hub{
 	public static int getSignedLE16BitValue(int[] frame) {
 		// return 0xFFFF - ( (frame[2] & 0xFF) + ( (frame[3] & 0xFF) * 0x100) );
 		// return 0xFFFF - getUnsigned16BitValue(frame);
+		
+		// Debug
 		return (short) getUnsignedLE16BitValue(frame);
 	}
 
@@ -191,14 +281,10 @@ public class FrSkyHub extends Hub{
 	 * @param value
 	 */
 	private void updateChannel(SensorTypes sensorType, double value) {
-		// TODO create a channel here for the correct type of information and
-		// broadcast channel so GUI can update this value
-		Logger.d(TAG, "Data received for channel: " + sensorType
-				+ ", value: " + value);
 
 		/*
 		 * eso, prototype Channel support Update a proper channel rather than
-		 * broadcast. Allow broadcasts until Channels are fully implemented
+		 * broadcast. 
 		 */
 		switch (sensorType) {
 		case rpm:
@@ -210,21 +296,20 @@ public class FrSkyHub extends Hub{
 		case temp2:
 			getChannel(CHANNEL_ID_TEMP2).setRaw(value);
 			break;
-		case altitude_before:
-			// /TODO: Proper construction of resulting altitude double needs to
-			// be done in handleHubDataFrame or extractUserDataBytes
-			getChannel(CHANNEL_ID_ALTITUDE).setRaw(value);
-			break;
 		case altitude_after:
 			getChannel(CHANNEL_ID_ALTITUDE).setRaw(value);
+			break;
+		case vertical_speed:
+			getChannel(CHANNEL_ID_VERT_SPEED).setRaw(value);
+			break;
 		case acc_x:
-			getChannel(CHANNEL_ID_ACCELERATOR_X).setRaw(value);
+			getChannel(CHANNEL_ID_ACCELEROMETER_X).setRaw(value);
 			break;
 		case acc_y:
-			getChannel(CHANNEL_ID_ACCELERATOR_Y).setRaw(value);
+			getChannel(CHANNEL_ID_ACCELEROMETER_Y).setRaw(value);
 			break;
 		case acc_z:
-			getChannel(CHANNEL_ID_ACCELERATOR_Z).setRaw(value);
+			getChannel(CHANNEL_ID_ACCELEROMETER_Z).setRaw(value);
 			break;
 		case fuel:
 			getChannel(CHANNEL_ID_FUEL).setRaw(value);
@@ -250,133 +335,86 @@ public class FrSkyHub extends Hub{
 		case gps_altitude_after:
 			getChannel(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
 			break;
-		case gps_altitude_before:
-			getChannel(CHANNEL_ID_GPS_ALTITUDE).setRaw(value);
-			break;
 		case gps_speed_after:
-			getChannel(CHANNEL_ID_GPS_SPEED).setRaw(value);
-			break;
-		case gps_speed_before:
 			getChannel(CHANNEL_ID_GPS_SPEED).setRaw(value);
 			break;
 		case gps_course_after:
 			getChannel(CHANNEL_ID_GPS_COURSE).setRaw(value);
 			break;
-		case gps_course_before:
-			getChannel(CHANNEL_ID_GPS_COURSE).setRaw(value);
-			break;
-		case gps_latitude_after:
+		case gps_latitude_ns:
 			getChannel(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
 			break;
-		case gps_latitude_before:
-			getChannel(CHANNEL_ID_GPS_LATITUDE).setRaw(value);
-			break;
-		case gps_longitude_after:
+		case gps_longitude_ew:
 			getChannel(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
 			break;
-		case gps_longitude_before:
-			getChannel(CHANNEL_ID_GPS_LONGITUDE).setRaw(value);
-			break;
-		case fas100_current:
-			getChannel(CHANNEL_ID_FAS100_CURRENT).setRaw(value);
-			break;
-		case fas100_voltage_before:
-			//getChannel(CHANNEL_ID_FAS100_VOLTAGE).setRaw(value);
-			break;
-		case fas100_voltage_after:
-			getChannel(CHANNEL_ID_FAS100_VOLTAGE).setRaw(value);
+		case gps_second:
+			getChannel(CHANNEL_ID_GPS_TIMESTAMP).setRaw(value);
 			break;
 			
+		case fas_current:
+			getChannel(CHANNEL_ID_FAS_CURRENT).setRaw(value);
+			break;
+		case fas_voltage_after:
+			getChannel(CHANNEL_ID_FAS_VOLTAGE).setRaw(value);
+			break;
+		case openxvario_vfas_voltage:
+			getChannel(CHANNEL_ID_OPENXVARIO_VFAS_VOLTAGE).setRaw(value);
+			break;
+		case openxvario_gps_distance:
+			getChannel(CHANNEL_ID_OPENXVARIO_GPS_DISTANCE).setRaw(value);
+			break;
+		
+		default:
+			// don't update these as they are not fully composed at this time         
+			break;
 		}
-
-		// let server update this information
-		//server.broadcastChannelData(sensorType, value);
 	}
 
-	/**
-	 * Prototype Channel support eso
-	 */
+		
 
-	/**
-	 * Unique ID for the HUB
-	 */
-	public static final int HUB_ID =-1000;
-
-	/**
-	 * Unique ID's for the Hubs channels
-	 * FIXME: Id for hubs and channels should be changed. Preferrably so that hub can
-	 * be oblivious to channel id's
-	 */
-	
-	public static final int CHANNEL_ID_ALTITUDE = 0 + HUB_ID;
-	public static final int CHANNEL_ID_RPM = 1 + HUB_ID;
-	public static final int CHANNEL_ID_TEMP1 = 2 + HUB_ID;
-	public static final int CHANNEL_ID_TEMP2 = 3 + HUB_ID;
-	// acc sensor
-	public static final int CHANNEL_ID_ACCELERATOR_X = 4 + HUB_ID;
-	public static final int CHANNEL_ID_ACCELERATOR_Y = 5 + HUB_ID;
-	public static final int CHANNEL_ID_ACCELERATOR_Z = 6 + HUB_ID;
-	public static final int CHANNEL_ID_FUEL = 7 + HUB_ID;
-	// lipo sensor, to be registered per cell (required for cannonical values,
-	// unless we implement compositive values support)
-	public static final int CHANNEL_ID_LIPO_CELL_1 = 10 + HUB_ID;
-	public static final int CHANNEL_ID_LIPO_CELL_2 = 11 + HUB_ID;
-	public static final int CHANNEL_ID_LIPO_CELL_3 = 12 + HUB_ID;
-	public static final int CHANNEL_ID_LIPO_CELL_4 = 13 + HUB_ID;
-	public static final int CHANNEL_ID_LIPO_CELL_5 = 14 + HUB_ID;
-	public static final int CHANNEL_ID_LIPO_CELL_6 = 15 + HUB_ID;
-	// gps sensor values
-	public static final int CHANNEL_ID_GPS_COURSE = 21 + HUB_ID;
-	public static final int CHANNEL_ID_GPS_ALTITUDE = 22 + HUB_ID;
-	public static final int CHANNEL_ID_GPS_SPEED = 23 + HUB_ID;
-	public static final int CHANNEL_ID_GPS_LATITUDE = 24 + HUB_ID;
-	public static final int CHANNEL_ID_GPS_LONGITUDE = 25 + HUB_ID;
-	
-	// current sensor
-	public static final int CHANNEL_ID_FAS100_CURRENT = 26 + HUB_ID;
-	public static final int CHANNEL_ID_FAS100_VOLTAGE = 27 + HUB_ID;
-	
-
-	/**
-	 * Poor solution for holding decimal part of altitude
-	 * 
-	 */
-	public static double alt_after = 0;
 
 	@Override
 	public Hub initializeChannels() {
 		// Sets up the hardcoded channels (Altitude,RPM)
-		// TODO: Figure out how to deal with race conditions on "split numbers"
-		// Comment: eso: Always combine the number when the decimal part arrives
-		// TODO create enums with descruption etc or proper factory instead
-		configureChannelForSensor(CHANNEL_ID_ALTITUDE, "Hub: Altitude");
-		configureChannelForSensor(CHANNEL_ID_RPM, "Hub: RPM (pulses)");
-		configureChannelForSensor(CHANNEL_ID_TEMP1, "Hub: Temp 1");
-		configureChannelForSensor(CHANNEL_ID_TEMP2, "Hub: Temp 2");
-		configureChannelForSensor(CHANNEL_ID_ACCELERATOR_X, "Hub: Acc. X");
-		configureChannelForSensor(CHANNEL_ID_ACCELERATOR_Y, "Hub: Acc. Y");
-		configureChannelForSensor(CHANNEL_ID_ACCELERATOR_Z, "Hub: Acc. Z");
-		configureChannelForSensor(CHANNEL_ID_FUEL, "Hub: Fuel");
-		configureChannelForSensor(CHANNEL_ID_GPS_ALTITUDE, "Hub: GPS Altitude");
-		configureChannelForSensor(CHANNEL_ID_GPS_COURSE, "Hub: GPS Course");
-		configureChannelForSensor(CHANNEL_ID_GPS_LATITUDE, "Hub: GPS Latitude");
-		configureChannelForSensor(CHANNEL_ID_GPS_LONGITUDE,
-				"Hub: GPS Longitude");
-		configureChannelForSensor(CHANNEL_ID_GPS_SPEED, "Hub: GPS Speed");
-		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_1, "Hub: Lipo Cell 1");
-		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_2, "Hub: Lipo Cell 2");
-		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_3, "Hub: Lipo Cell 3");
-		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_4, "Hub: Lipo Cell 4");
-		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_5, "Hub: Lipo Cell 5");
-		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_6, "Hub: Lipo Cell 6");
+		// TODO create enums with description etc or proper factory instead
+		configureChannelForSensor(CHANNEL_ID_ALTITUDE, 					"Hub: Altitude");
+		configureChannelForSensor(CHANNEL_ID_VERT_SPEED, 				"Hub: Vertical Speed");
+		configureChannelForSensor(CHANNEL_ID_RPM, 						"Hub: RPM (pulses)");
+		configureChannelForSensor(CHANNEL_ID_TEMP1, 					"Hub: Temp 1");
+		configureChannelForSensor(CHANNEL_ID_TEMP2, 					"Hub: Temp 2");
+		configureChannelForSensor(CHANNEL_ID_ACCELEROMETER_X, 			"Hub: Acc. X");
+		configureChannelForSensor(CHANNEL_ID_ACCELEROMETER_Y, 			"Hub: Acc. Y");
+		configureChannelForSensor(CHANNEL_ID_ACCELEROMETER_Z, 			"Hub: Acc. Z");
+		configureChannelForSensor(CHANNEL_ID_FUEL, 						"Hub: Fuel");
+		configureChannelForSensor(CHANNEL_ID_GPS_ALTITUDE, 				"Hub: GPS Altitude");
+		configureChannelForSensor(CHANNEL_ID_GPS_COURSE, 				"Hub: GPS Course");
+		configureChannelForSensor(CHANNEL_ID_GPS_LATITUDE, 				"Hub: GPS Latitude");
+		configureChannelForSensor(CHANNEL_ID_GPS_LONGITUDE,				"Hub: GPS Longitude");
+		configureChannelForSensor(CHANNEL_ID_GPS_SPEED, 				"Hub: GPS Speed");
+		configureChannelForSensor(CHANNEL_ID_GPS_TIMESTAMP, 			"Hub: GPS Timestamp");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_1, 				"Hub: Lipo Cell 1");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_2, 				"Hub: Lipo Cell 2");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_3, 				"Hub: Lipo Cell 3");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_4, 				"Hub: Lipo Cell 4");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_5, 				"Hub: Lipo Cell 5");
+		configureChannelForSensor(CHANNEL_ID_LIPO_CELL_6, 				"Hub: Lipo Cell 6");
+		configureChannelForSensor(CHANNEL_ID_FAS_CURRENT, 				"Hub: FAS-XX Current");
+		configureChannelForSensor(CHANNEL_ID_FAS_VOLTAGE, 				"Hub: FAS-XX Voltage");
 		
-		configureChannelForSensor(CHANNEL_ID_FAS100_CURRENT, "FrSky FAS-100 Current");
-		configureChannelForSensor(CHANNEL_ID_FAS100_VOLTAGE, "FrSky FAS-100 Voltage");
+		//OpenXVario
+		
+		configureChannelForSensor(CHANNEL_ID_OPENXVARIO_VFAS_VOLTAGE, 	"oXv: VFAS Voltage");
+		configureChannelForSensor(CHANNEL_ID_OPENXVARIO_GPS_DISTANCE, 	"oXv: GPS Distance");
+		
+		// custom setup
+		getChannel(CHANNEL_ID_GPS_LATITUDE).setPrecision(10);
+		getChannel(CHANNEL_ID_GPS_LONGITUDE).setPrecision(10);
 		// incoming current must be divided by 10
-		getChannel(CHANNEL_ID_FAS100_CURRENT).setFactor((float) 0.1);
+		//getChannel(CHANNEL_ID_FAS_CURRENT).setFactor((float) 0.1);
 		// incoming voltage must be multiplied by (21/11) to get voltage in Volts
-		getChannel(CHANNEL_ID_FAS100_VOLTAGE).setFactor((float) (21.0/11.0));
-
+		//getChannel(CHANNEL_ID_FAS_VOLTAGE).setFactor((float) (21.0/11.0));
+		getChannel(CHANNEL_ID_OPENXVARIO_VFAS_VOLTAGE).setPrecision(1);
+		getChannel(CHANNEL_ID_GPS_TIMESTAMP).setPrecision(0);
 		
 		// return yourself for chaining
 		return this;
@@ -396,17 +434,6 @@ public class FrSkyHub extends Hub{
 		addChannel(channel);
 	}
 
-	public static int getBefore(double value) {
-		return (int) Math.round(value);
-	}
-
-	public static int getAfter(double value) {
-		return (int) (value - Math.round(value));
-	}
-
-	public static double convertToAfter(int value) {
-		return Double.parseDouble("0." + value);
-	}
 
 	/* (non-Javadoc)
 	 * @see biz.onomato.frskydash.hub.Hub#getId()
@@ -416,8 +443,11 @@ public class FrSkyHub extends Hub{
 		return HUB_ID;
 	}
 
+	private int[] prevInts = null;
+	private Frame prevFrame = null;
+	
 	@Override
-	public void addUserBytes(int[] ints) {
+	public void addUserBytes(int[] ints,Frame frame) {
 		// FIXME: I don't trust this implementation:
 		// I get too many start/stop bytes at wrong position
 		// 1. We need to consider the length of valid bytes in the frame, and discard bytes after. SIZE_HUB_FRAME should not be used
@@ -498,10 +528,29 @@ public class FrSkyHub extends Hub{
 				// log a debug message and drop the frame to start over
 				// again.
 				else {
+					//if(hubFrame[1]!=0x00) // No need to log it if "ID" is 0x00..
+					//{
 					// log debug info here
-					Logger.d(TAG, "Start/stop byte at wrong position: 0x"
-							+ Integer.toHexString(b) + " frame so far: "
-							+ Arrays.toString(hubFrame));
+					if(currentHubFrameIndex==1
+							|| hubFrame[1]==0x00) // not an error to reset frame if sequential 5e like this
+					{
+						
+					}
+					else // unclear reason for dropping the frame
+					{
+						Logger.w(TAG, "Start/stop byte at wrong position: 0x"
+								+ Integer.toHexString(b) + " frame so far: "
+								+ Arrays.toString(hubFrame));
+						Logger.w(TAG, "The bad hubframe: "+toHuman(hubFrame));
+						Logger.w(TAG, "Incoming bytes: "+toHuman(ints));
+						Logger.w(TAG, "Previous bytes: "+toHuman(prevInts));
+						Logger.w(TAG, "Incoming Frame: "+frame.toHuman());
+						Logger.w(TAG, "Previous Frame: "+prevFrame.toHuman());
+						Logger.w(TAG, "Position in Hubframe: "+currentHubFrameIndex);
+						
+						Logger.w(TAG,"------");
+						//}
+					}
 					currentHubFrameIndex = 0;
 					hubFrame = new int[SIZE_HUB_FRAME];
 					hubFrame[currentHubFrameIndex++] = b;
@@ -518,12 +567,14 @@ public class FrSkyHub extends Hub{
 			// a frame, just discard them for now
 			else {
 				// log debug info here
-				Logger.d(TAG, "Received data outside frame, dropped byte: 0x"
+				Logger.w(TAG, "Received data outside frame, dropped byte: 0x"
 						+ Integer.toHexString(b));
 			}
 			// make sure to unset the xor flag at this point
 			hubXOR = false;
 		}
+		prevInts = ints;
+		prevFrame = frame;
 	}
 
 	/* (non-Javadoc)

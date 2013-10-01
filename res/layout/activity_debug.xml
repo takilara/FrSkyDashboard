@@ -1,36 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ 
+   This file is part of FrSky Dashboard.
+  
+    FrSky Dashboard is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+  
+    FrSky Dashboard is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+  
+    You should have received a copy of the GNU General Public License
+    along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+  -->
     <LinearLayout android:id="@+id/linearLayout0" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
     <ScrollView 
 	    android:id="@+id/DebugViewSimulator"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
-    <LinearLayout android:id="@+id/linearLayout1" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
+
+        <LinearLayout android:id="@+id/linearLayout1" 
+        	android:layout_width="match_parent" 
+        android:layout_height="match_parent" 
+        android:orientation="vertical">
         
-        <Button
-            android:id="@+id/debug_btnExportDb"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <Button 
+            android:id="@+id/debug_btnExportDb" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
             android:text="Export DB to sdcard" />
-
+        
         <ToggleButton
             android:id="@+id/debug_watchdogEnabled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textOn="Watchdog to Tx enabled" 
-        	android:textOff="Watchdog to Tx disabled" />
-        
-         <Button android:id="@+id/button_show_hub_data"
-		            android:layout_width="match_parent"
-		            android:layout_height="wrap_content"
-		            android:text="Sensor Hub Data"
-		        />
+        	android:textOff="Watchdog to Tx disabled" />        
 
-         <CheckBox
-             android:id="@+id/debug_chk_hubEnabled"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:text="Enable Alfa Hub support" />
-         
+        
          <CheckBox
              android:id="@+id/debug_chk_filePlaybackEnabled"
              android:layout_width="wrap_content"

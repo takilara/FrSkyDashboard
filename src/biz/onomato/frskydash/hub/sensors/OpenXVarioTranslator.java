@@ -19,14 +19,37 @@
 
 package biz.onomato.frskydash.hub.sensors;
 
+import java.util.Arrays;
+
 import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.hub.SensorTypes;
+import biz.onomato.frskydash.util.Logger;
 
-public class FuelTranslator implements UserDataTranslator {
+public class OpenXVarioTranslator implements UserDataTranslator {
+
+	private static final String TAG = "OpenXVarioTranslator";
+	private double PRECISION_FVAS_VOLTAGE = 10.0;
+	
+	/**
+	 * combined value
+	 */
+	private double voltage = 0.0;
+	private double gps_distance,gps_distance_tmp = 0.0;
 
 	@Override
 	public double translateValue(SensorTypes type, int[] frame) {
-		return FrSkyHub.getUnsignedLE16BitValue(frame);
+		//Logger.d(TAG,"Translate Frame: "+Arrays.toString(frame));
+		//Logger.d(TAG,"fas100voltage at this time: "+fas100voltage);
+		switch (type) {
+		case openxvario_vfas_voltage:
+			voltage = FrSkyHub.getSignedLE16BitValue(frame)/PRECISION_FVAS_VOLTAGE; // representing mV
+			return voltage;
+		case openxvario_gps_distance:
+			gps_distance = FrSkyHub.getSignedLE16BitValue(frame); // Precision is "unknown" as this changes depending on value....
+			return gps_distance;	
+			
+		}
+		return FrSkyHub.UNDEFINED_VALUE;
 	}
 
 }

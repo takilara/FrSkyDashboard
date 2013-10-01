@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.hub;
 
 /**
@@ -6,7 +25,7 @@ package biz.onomato.frskydash.hub;
  */
 public enum SensorTypes {
 
-	undefined, gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude_before, altitude_after, gps_speed_before, gps_speed_after, gps_longitude_before, gps_longitude_after, gps_ew, gps_latitude_before, gps_latitude_after, gps_ns, gps_course_before, gps_course_after,
+	undefined, gps_altitude_before, gps_altitude_after, temp1, rpm, fuel, temp2, volt, altitude_before, altitude_after, gps_speed_before, gps_speed_after, gps_longitude_before, gps_longitude_after, gps_longitude_ew, gps_latitude_before, gps_latitude_after, gps_latitude_ns, gps_course_before, gps_course_after,vertical_speed,
 
 	/**
 	 * @deprecated use day_month instead
@@ -32,6 +51,9 @@ public enum SensorTypes {
 	gps_day_month, gps_hour_minute, gps_date,
 	
 	// FAS-100
-	fas100_current,fas100_voltage_before,fas100_voltage_after,
+	fas_current,fas_voltage_before,fas_voltage_after,
+	
+	// OpenXVario
+	openxvario_vfas_voltage,openxvario_gps_distance,
 	
 }

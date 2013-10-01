@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.db;
 
 import java.util.ArrayList;
@@ -6,7 +25,7 @@ import java.util.TreeMap;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import biz.onomato.frskydash.domain.Alarm;
+import biz.onomato.frskydash.domain.ModuleAlarm;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Model;
 import biz.onomato.frskydash.util.Logger;
@@ -14,7 +33,7 @@ import biz.onomato.frskydash.util.Logger;
 /**
  * <p>
  * All database access should go through this class. This clas provides methods
- * for retrieving {@link Model}s with their {@link Channel}s and {@link Alarm}s
+ * for retrieving {@link Model}s with their {@link Channel}s and {@link ModuleAlarm}s
  * and all required CRUD operations on these objects.
  * </p>
  * 
@@ -183,7 +202,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		m.setChannels(channelList);
 		// Add Alarms to the model
 		//FIXME update query and get this info form the cursor instead
-		TreeMap<Integer,Alarm> alarmMap = getAlarmsForModel(m.getId());
+		TreeMap<Integer,ModuleAlarm> alarmMap = getAlarmsForModel(m.getId());
 		m.setFrSkyAlarms(alarmMap);
 		// return this information
 		return m;
@@ -639,7 +658,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
      * get all alarms for a given model
      * 
      */
-    public TreeMap<Integer,Alarm> getAlarmsForModel(Model model)
+    public TreeMap<Integer,ModuleAlarm> getAlarmsForModel(Model model)
     {
     	return getAlarmsForModel(model.getId());
     }
@@ -650,7 +669,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
      * @param modelId
      * @return
      */
-    public TreeMap<Integer, Alarm> getAlarmsForModel(int modelId)
+    public TreeMap<Integer, ModuleAlarm> getAlarmsForModel(int modelId)
     {
     	// Query for this modelid
     	open();
@@ -662,11 +681,11 @@ public class FrSkyDatabase extends AbstractDBAdapter {
 		Logger.d(TAG,"Loading alarms for modelid: "+modelId);
 		Logger.d(TAG,"  found: "+cu.getCount()+" alarms");
 		// init collection
-		TreeMap<Integer,Alarm> mAlarms = new TreeMap<Integer,Alarm>();
+		TreeMap<Integer,ModuleAlarm> mAlarms = new TreeMap<Integer,ModuleAlarm>();
 		// go to first element
 		if (cu.moveToFirst())
 			do {
-				Alarm a = getAlarm(cu);
+				ModuleAlarm a = getAlarm(cu);
 				a.setModelId(modelId);
 				mAlarms.put(a.getFrSkyFrameType(), a);
 			} while (cu.moveToNext());
@@ -683,9 +702,9 @@ public class FrSkyDatabase extends AbstractDBAdapter {
      * @param cursor
      * @return
      */
-    private Alarm getAlarm(Cursor cursor)
+    private ModuleAlarm getAlarm(Cursor cursor)
     {
-    	Alarm a = new Alarm(Alarm.ALARMTYPE_FRSKY);
+    	ModuleAlarm a = new ModuleAlarm(ModuleAlarm.ALARMTYPE_FRSKY);
     	a.setModelId(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_MODELID)));
     	a.setFrSkyFrameType(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_FRAMETYPE)));
     	a.setThreshold(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_THRESHOLD)));
@@ -715,12 +734,12 @@ public class FrSkyDatabase extends AbstractDBAdapter {
      * @param alarmMap
      * @return
      */
-    public boolean setAlarmsForModel(int modelId,TreeMap<Integer,Alarm> alarmMap)
+    public boolean setAlarmsForModel(int modelId,TreeMap<Integer,ModuleAlarm> alarmMap)
     {
     	// delete all the existing alarms
     	deleteAlarmsForModel(modelId);
  	
-    	for(Alarm a : alarmMap.values())
+    	for(ModuleAlarm a : alarmMap.values())
     	{
     		insertAlarm(a);
     	}
@@ -735,7 +754,7 @@ public class FrSkyDatabase extends AbstractDBAdapter {
      * @param alarm
      * @return
      */
-    private int insertAlarm(Alarm alarm)
+    private int insertAlarm(ModuleAlarm alarm)
     {
     	Logger.d(TAG,"Insert Alarm into the database: (ModelId,Frskyframe) ("+alarm.getModelId()+","+alarm.getFrSkyFrameType()+")");
     	open();

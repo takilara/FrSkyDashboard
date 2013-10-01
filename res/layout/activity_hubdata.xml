@@ -1,10 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ 
+   This file is part of FrSky Dashboard.
+  
+    FrSky Dashboard is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+  
+    FrSky Dashboard is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+  
+    You should have received a copy of the GNU General Public License
+    along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+  -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linearLayout0"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <LinearLayout 
+		    android:id="@+id/status_fragment_placeholder" 
+		    android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="vertical" />
+    
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="match_parent"
@@ -32,22 +56,30 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="right"
                     android:text="0.0"
                     android:textAppearance="@android:style/TextAppearance.Large" />
 
-                <Button
-                    android:id="@+id/buttonZeroAltitude"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0" />
-
-                <Button
-                    android:id="@+id/buttonRemoveAltOffset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="X" />
             </LinearLayout>
+            <LinearLayout
+                android:id="@+id/vert_speed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FVAS-02 Vertical Speed: "
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+
+                <TextView
+                    android:id="@+id/textViewVertSpeed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+            </LinearLayout>
+            
 
             <View
                 android:layout_width="match_parent"
@@ -149,18 +181,19 @@
                 android:layout_height="2dip"
                 android:background="#FF909090" />
 
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TAS-01 Accl. (X,Y,Z): "
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+            
             <LinearLayout
                 android:id="@+id/tas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TAS-01 Accl. (X,Y,Z): "
-                    android:textAppearance="@android:style/TextAppearance.Large" />
-
+                
                 <TextView
                     android:id="@+id/textViewAccX"
                     android:layout_width="wrap_content"
@@ -320,6 +353,55 @@
                 android:layout_height="2dip"
                 android:background="#FF909090" />
 
+            
+            <LinearLayout
+                android:id="@+id/fas_current"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FAS Current: "
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+
+                <TextView
+                    android:id="@+id/textViewFasCurrent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/fas_voltage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FAS Voltage: "
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+
+                <TextView
+                    android:id="@+id/textViewFasVoltage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+            </LinearLayout>
+            
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="#FF909090" />
+            
+            
+            
             <LinearLayout
                 android:id="@+id/gps"
                 android:layout_width="match_parent"
@@ -427,135 +509,72 @@
                         android:textAppearance="@android:style/TextAppearance.Large" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" >
-
+                
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="N/S: "
+                        android:text="Timestamp (yyyy-mm-dd HH:mm:ss): "
                         android:textAppearance="@android:style/TextAppearance.Large" />
 
                     <TextView
-                        android:id="@+id/textViewNS"
+                        android:id="@+id/textViewTimeStamp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="0"
+                        android:text="0000/00/00 - 00:00:00"
                         android:textAppearance="@android:style/TextAppearance.Large" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="E/W: "
-                        android:textAppearance="@android:style/TextAppearance.Large" />
+                
 
-                    <TextView
-                        android:id="@+id/textViewEW"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Date (dd/mm/yy): "
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewDay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="/"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewMonth"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="/"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewYear"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Time (hh:mm:ss): "
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewHour"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=":"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewMinute"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=":"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-
-                    <TextView
-                        android:id="@+id/textViewSecond"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textAppearance="@android:style/TextAppearance.Large" />
-                </LinearLayout>
-            </LinearLayout>
+                
+            
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dip"
                 android:background="#FF909090" />
+            
+                       
+            <LinearLayout
+                android:id="@+id/openXVario_voltage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="OpenXVario Voltage: "
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+
+                <TextView
+                    android:id="@+id/textViewOpenXVarioVoltage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+            </LinearLayout>            
+            
+            <LinearLayout
+                android:id="@+id/openXVario_dist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="OpenXVario Dist: "
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+
+                <TextView
+                    android:id="@+id/textViewOpenXVarioDist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textAppearance="@android:style/TextAppearance.Large" />
+            </LinearLayout>
+            
+        </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

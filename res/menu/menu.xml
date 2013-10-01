@@ -17,6 +17,9 @@
 	<item android:id="@+id/model_management"
 		android:title="@string/menu_choose_model_management_label" />
 	
+	<item android:id="@+id/hub_channels"
+		android:title="@string/menu_choose_hub_channel_activity" />
+	
 	<item android:id="@+id/menu_choose_simulator"
 		android:title="@string/menu_choose_simulator_label" />
 	
@@ -25,6 +28,9 @@
 	
 	<item android:id="@+id/menu_debug"
 		android:title="@string/activity_debug" />
+	
+	<item android:id="@+id/menu_maps"
+		android:title="@string/activity_maps" />
 	  
 </menu> 
     

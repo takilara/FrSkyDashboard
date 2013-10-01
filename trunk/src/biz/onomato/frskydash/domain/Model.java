@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.domain;
 
 import java.util.ArrayList;
@@ -18,7 +37,7 @@ import com.google.gson.annotations.Expose;
  * 
  * For the frsky telemetry part a Model also has a collection of {@link Channel}
  * objects that are listening for incoming values. And a collection of
- * {@link Alarm} configurations that can be set to the FrSky Module.
+ * {@link ModuleAlarm} configurations that can be set to the FrSky Module.
  * 
  * @author Espen Solbu
  */
@@ -74,7 +93,7 @@ public class Model {
 	 * collection of alarms for this model
 	 */
 	@Expose
-	public TreeMap<Integer, Alarm> frSkyAlarms;
+	public TreeMap<Integer, ModuleAlarm> frSkyAlarms;
 
 	/**
 	 * hub configured by user
@@ -112,7 +131,7 @@ public class Model {
 		// alarms = new Alarm[6];
 
 		// init channel and alarms map
-		frSkyAlarms = new TreeMap<Integer, Alarm>();
+		frSkyAlarms = new TreeMap<Integer, ModuleAlarm>();
 		channelMap = new TreeMap<Integer, Channel>();
 
 		// populate FrSky Alarms with defaults, this closes ticket #415
@@ -312,9 +331,9 @@ public class Model {
 	 * 
 	 * @param alarm
 	 */
-	public void addAlarm(Alarm alarm) {
+	public void addAlarm(ModuleAlarm alarm) {
 		// if(DEBUG)Log.i(TAG,"Adding alarm: "+alarm);
-		if (alarm.getAlarmType() == Alarm.ALARMTYPE_FRSKY) {
+		if (alarm.getAlarmType() == ModuleAlarm.ALARMTYPE_FRSKY) {
 			// --> add to frSkyAlarms
 			// if(DEBUG)Log.i(TAG,"FrSky alarm of type: "+alarm.getFrSkyFrameType());
 			frSkyAlarms.put(alarm.getFrSkyFrameType(), alarm);
@@ -326,25 +345,25 @@ public class Model {
 	}
 
 	/**
-	 * get the {@link Alarm}s set to this model
+	 * get the {@link ModuleAlarm}s set to this model
 	 * 
 	 * @return
 	 */
-	public TreeMap<Integer, Alarm> getFrSkyAlarms() {
+	public TreeMap<Integer, ModuleAlarm> getFrSkyAlarms() {
 		return frSkyAlarms;
 	}
 
 	/**
-	 * update the {@link Alarm}s for this model. By doing so all modelId
+	 * update the {@link ModuleAlarm}s for this model. By doing so all modelId
 	 * references on the alarms will be set to this model and the alarms
 	 * collection will be attached to this model instance
 	 * 
 	 * @param alarmMap
 	 */
-	public void setFrSkyAlarms(TreeMap<Integer, Alarm> alarmMap) {
+	public void setFrSkyAlarms(TreeMap<Integer, ModuleAlarm> alarmMap) {
 		Logger.w(TAG, "Adding Alarms to me [" + _name + "]");
 		// this check isn't really needed
-		for (Alarm a : alarmMap.values()) {
+		for (ModuleAlarm a : alarmMap.values()) {
 			a.setModelId(_id);
 			addAlarm(a);
 			// alarmCount += 1;
@@ -356,7 +375,7 @@ public class Model {
 	 * 
 	 * @param alarm
 	 */
-	public void deleteAlarm(Alarm alarm) {
+	public void deleteAlarm(ModuleAlarm alarm) {
 		// TODO
 	}
 
@@ -371,7 +390,7 @@ public class Model {
 		return getAllowedSourceChannels(null);
 	}
 
-	public ArrayList<Channel> getAllowedSourceChannels(Alarm alarm) {
+	public ArrayList<Channel> getAllowedSourceChannels(ModuleAlarm alarm) {
 		ArrayList<Channel> sourceChannels = new ArrayList<Channel>();
 		if (alarm == null) {
 
@@ -430,48 +449,48 @@ public class Model {
 		// no need to keep an intermediate map here. I will be using all new
 		// object references so we don't work on the same objects
 		Frame alarm1RSSIFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM1_RSSI,
-				Alarm.ALARMLEVEL_LOW, 45, Alarm.LESSERTHAN);
-		Alarm alarm1RSSI = new Alarm(alarm1RSSIFrame);
+				ModuleAlarm.ALARMLEVEL_LOW, 45, ModuleAlarm.LESSERTHAN);
+		ModuleAlarm alarm1RSSI = new ModuleAlarm(alarm1RSSIFrame);
 		alarm1RSSI.setUnitChannel(FrSkyServer
 				.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX));
 		alarm1RSSI.setModelId(this._id);
 		addAlarm(alarm1RSSI);
 
 		Frame alarm2RSSIFrame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM2_RSSI,
-				Alarm.ALARMLEVEL_MID, 42, Alarm.LESSERTHAN);
-		Alarm alarm2RSSI = new Alarm(alarm2RSSIFrame);
+				ModuleAlarm.ALARMLEVEL_MID, 42, ModuleAlarm.LESSERTHAN);
+		ModuleAlarm alarm2RSSI = new ModuleAlarm(alarm2RSSIFrame);
 		alarm2RSSI.setUnitChannel(FrSkyServer
 				.getSourceChannel(FrSkyServer.CHANNEL_ID_RSSIRX));
 		alarm2RSSI.setModelId(this._id);
 		addAlarm(alarm2RSSI);
 
 		Frame alarm1AD1Frame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM1_AD1,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
-		Alarm alarm1AD1 = new Alarm(alarm1AD1Frame);
+				ModuleAlarm.ALARMLEVEL_OFF, 200, ModuleAlarm.LESSERTHAN);
+		ModuleAlarm alarm1AD1 = new ModuleAlarm(alarm1AD1Frame);
 		alarm1AD1.setUnitChannel(FrSkyServer
 				.getSourceChannel(FrSkyServer.CHANNEL_ID_AD1));
 		alarm1AD1.setModelId(this._id);
 		addAlarm(alarm1AD1);
 
 		Frame alarm2AD1Frame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM2_AD1,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
-		Alarm alarm2AD1 = new Alarm(alarm2AD1Frame);
+				ModuleAlarm.ALARMLEVEL_OFF, 200, ModuleAlarm.LESSERTHAN);
+		ModuleAlarm alarm2AD1 = new ModuleAlarm(alarm2AD1Frame);
 		alarm2AD1.setUnitChannel(FrSkyServer
 				.getSourceChannel(FrSkyServer.CHANNEL_ID_AD1));
 		alarm2AD1.setModelId(this._id);
 		addAlarm(alarm2AD1);
 
 		Frame alarm1AD2Frame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM1_AD2,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
-		Alarm alarm1AD2 = new Alarm(alarm1AD2Frame);
+				ModuleAlarm.ALARMLEVEL_OFF, 200, ModuleAlarm.LESSERTHAN);
+		ModuleAlarm alarm1AD2 = new ModuleAlarm(alarm1AD2Frame);
 		alarm1AD2.setUnitChannel(FrSkyServer
 				.getSourceChannel(FrSkyServer.CHANNEL_ID_AD2));
 		alarm1AD2.setModelId(this._id);
 		addAlarm(alarm1AD2);
 
 		Frame alarm2AD2Frame = Frame.AlarmFrame(Frame.FRAMETYPE_ALARM2_AD2,
-				Alarm.ALARMLEVEL_OFF, 200, Alarm.LESSERTHAN);
-		Alarm alarm2AD2 = new Alarm(alarm2AD2Frame);
+				ModuleAlarm.ALARMLEVEL_OFF, 200, ModuleAlarm.LESSERTHAN);
+		ModuleAlarm alarm2AD2 = new ModuleAlarm(alarm2AD2Frame);
 		alarm2AD2.setUnitChannel(FrSkyServer
 				.getSourceChannel(FrSkyServer.CHANNEL_ID_AD2));
 		alarm2AD2.setModelId(this._id);

@@ -1,3 +1,21 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package biz.onomato.frskydash;
 
 import java.io.File;
@@ -10,6 +28,7 @@ import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -35,10 +54,12 @@ import android.widget.Toast;
 import biz.onomato.frskydash.activities.ActivityDashboard;
 import biz.onomato.frskydash.activities.ActivityHubData;
 import biz.onomato.frskydash.db.FrSkyDatabase;
-import biz.onomato.frskydash.domain.Alarm;
+import biz.onomato.frskydash.domain.ModuleAlarm;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.domain.Model;
+import biz.onomato.frskydash.domain.ThresholdAlarm;
+import biz.onomato.frskydash.hub.FrSkyHub;
 import biz.onomato.frskydash.hub.SensorTypes;
 import biz.onomato.frskydash.sim.FileSimulatorThread;
 import biz.onomato.frskydash.sim.Simulator;
@@ -49,7 +70,7 @@ import biz.onomato.frskydash.util.Logger;
  * launched. It will stay alive even if the application is "minimized". It will
  * only be closed by a press on the "Back" button while on the Dashboard. <br>
  * <br>
- * Serves as a store for {@link Model}s, {@link Channel}s and {@link Alarm}s <br>
+ * Serves as a store for {@link Model}s, {@link Channel}s and {@link ModuleAlarm}s <br>
  * <br>
  * Receives bytebuffer from {@link BluetoothSerialService}, and parses this into
  * individual {@link Frame}s that is then sent to the respective Channel, Alarm
@@ -91,7 +112,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	// private static final int REQUEST_ENABLE_BT = 2;
 	private IntentFilter mIntentFilterBt;
 	private boolean bluetoothEnabledAtStart;
-	private boolean _connecting = false;
+	private static boolean _connecting = false;
 	private BluetoothAdapter mBluetoothAdapter = null;
 
 	/**
@@ -132,7 +153,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private BluetoothDevice _device = null;
 	public boolean reconnectBt = true;
 	private boolean _manualBtDisconnect = false;
-	private static boolean _hubEnabled = false;
+	private static boolean _hubEnabled = true;
 	private boolean _filePlaybackEnabled = false;
 
 	private static boolean _compareAfterRecord = false;
@@ -145,13 +166,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private static int mDroppedFrames = 0;
 
 	/**
-	 * FPS
+	 * FPS counters, volatile as updated by fpsThread
 	 */
-	public int fps, fpsRx, fpsTx = 0;
+	public static volatile int fps, fpsRx, fpsTx = 0;
 	public static int badFrames = 0;
-	private MyStack fpsStack;
-	private MyStack fpsRxStack;
-	private MyStack fpsTxStack;
+	private volatile MyStack fpsStack;
+	private volatile MyStack fpsRxStack;
+	private volatile MyStack fpsTxStack;
 	private static final int FRAMES_FOR_FPS_CALC = 2;
 
 	private static DataLogger logger;
@@ -161,6 +182,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * {@link Channel} instances that are registered to listen for updates
 	 */
 	private static int currentModelId = -1;
+	
+	private static String currentModelName = "";
 
 	/**
 	 * A collection of {@link Model} instances available
@@ -174,8 +197,11 @@ public class FrSkyServer extends Service implements OnInitListener {
 	private TextToSpeech mTts;
 	private int _speakDelay;
 
-	private Handler fpsHandler, watchdogHandler, speakHandler;
+	//private Handler watchdogHandler;
+	// Moved to threads
+	//private Handler speakHandler, fpsHandler;		
 	private Runnable runnableFps, runnableSpeaker, runnableWatchdog;
+	private Thread speakerThread,fpsThread,watchdogThread;
 
 	// server Channels, add constants for all known source channels
 	// eso: refactor to ChannelMap
@@ -249,9 +275,19 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	private static FileSimulatorThread fileSim = null;
 
-	public static boolean statusBt = false;
-	public boolean statusTx = false;
-	public static boolean statusRx = false;
+	
+	/**
+	 * Status indicating if the BlueTooth connection is functioning
+	 */
+	public static volatile boolean statusBt = false;
+	/**
+	 * Status indicating if the connection to the Transmitter module is functioning
+	 */
+	public static volatile boolean statusTx = false;
+	/**
+	 * Status indicating if the connection to the Receiver is functioning
+	 */
+	public static volatile boolean statusRx = false;
 
 	// private HashMap<String,Channel> _serverChannels;
 
@@ -267,7 +303,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * alarms set on the Model {@link Model#frSkyAlarms}.
 	 * TODO move this set to the Model instead. Each model can have a different set of alarms
 	 */
-	private static TreeMap<Integer, Alarm> _alarmMap;
+	private static TreeMap<Integer, ModuleAlarm> _alarmMap;
 	
 	private static boolean _recordingAlarms = false;
 	private static int _recordingModelId = -1;
@@ -278,6 +314,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 	public static final String MESSAGE_ALARM_RECORDING_COMPLETE = "biz.onomato.frskydash.intent.action.ALARM_RECORDING_COMPLETE";
 	public static final String MESSAGE_ALARM_MISMATCH = "biz.onomato.frskydash.intent.action.ALARM_MISMATCH";
+	
 	/**
 	 * Broadcast event to notify activities regarding a change in the modelmap,
 	 * e.g. added or deleted model
@@ -297,12 +334,12 @@ public class FrSkyServer extends Service implements OnInitListener {
 	/**
 	 * hcpl: intent used to broadcast hub data info
 	 */
-	private Intent broadcastHubDataIntent;
+	//private Intent broadcastHubDataIntent;
 
 	/**
 	 * a unique identifier for broadcast intents
 	 */
-	public static final String BROADCAST_ACTION_HUB_DATA = "biz.onomato.frskydash.intent.action.BROADCAST_HUB_DATA";
+//	public static final String BROADCAST_ACTION_HUB_DATA = "biz.onomato.frskydash.intent.action.BROADCAST_HUB_DATA";
 
 	/**
 	 * the current user frame we are working on. This is used to pass data
@@ -332,7 +369,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		frameParserThread.start();
 
 		// init colections (for alarms and sourcechannels)
-		_alarmMap = new TreeMap<Integer, Alarm>();
+		_alarmMap = new TreeMap<Integer, ModuleAlarm>();
 		_sourceChannelMap = new TreeMap<Integer, Channel>(
 				Collections.reverseOrder());
 
@@ -458,9 +495,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		// Cyclic job to send watchdog to the Tx module
 		initWatchdogHandler();
-
+		
 		// register intent for listening to broadcasts
-		broadcastHubDataIntent = new Intent(BROADCAST_ACTION_HUB_DATA);
+		//broadcastHubDataIntent = new Intent(BROADCAST_ACTION_HUB_DATA);
 
 	}
 
@@ -468,44 +505,86 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * Cyclic job to send watchdog to the Tx module
 	 */
 	private void initWatchdogHandler() {
-		watchdogHandler = new Handler();
+		//watchdogHandler = new Handler();
 		runnableWatchdog = new Runnable() {
 			// @Override
 			public void run() {
-				sendWatchdog();
-
-				watchdogHandler.removeCallbacks(runnableWatchdog);
-				watchdogHandler.postDelayed(this, 500);
+				Boolean mAlive=true;
+				while(mAlive && !Thread.currentThread().isInterrupted())
+				{
+					sendWatchdog();
+	
+					//watchdogHandler.removeCallbacks(runnableWatchdog);
+					//watchdogHandler.postDelayed(this, 500);
+					try 
+					{
+						Thread.sleep(500);
+					} 
+					catch (InterruptedException e) 
+					{
+						// TODO Auto-generated catch block
+						mAlive=false;
+						break;
+						//return;
+					}
+				}
 			}
 		};
-		watchdogHandler.postDelayed(runnableWatchdog, 500);
+		//watchdogHandler.postDelayed(runnableWatchdog, 500);
+		if(watchdogThread!=null) 
+		{
+			watchdogThread.interrupt();
+		}
+				
+		watchdogThread = new Thread(runnableWatchdog);
+		watchdogThread.start();
 	}
-
+	
+	
 	/**
 	 * init Cyclic job to "speak out" the channel values
 	 */
 	private void initSpeakHandler() {
 		_cyclicSpeechEnabled = false;
 		_speakDelay = 30000;
-		speakHandler = new Handler();
+		//speakHandler = new Handler();
 		runnableSpeaker = new Runnable() {
 			// @Override
+			
 			public void run() {
-				Logger.i(TAG, "Cyclic Speak stuff");
-				if (statusRx) {
-					for (Channel c : getCurrentModel().getChannels().values()) {
-						if (!c.getSilent())
-							mTts.speak(c.toVoiceString(),
-									TextToSpeech.QUEUE_ADD, null);
+				Logger.i(TAG, "Speaker thread started");
+				while(_cyclicSpeechEnabled && !Thread.currentThread().isInterrupted())
+				{
+					Logger.i(TAG, "Cyclic Speak stuff");
+					if (statusRx) {
+						for (Channel c : getCurrentModel().getChannels().values()) {
+							if (!c.getSilent())
+								mTts.speak(c.toVoiceString(),
+										TextToSpeech.QUEUE_ADD, null);
+						}
+					}
+	
+	//				speakHandler.removeCallbacks(runnableSpeaker);
+	//				speakHandler.postDelayed(this, _speakDelay);
+					try
+					{ 
+						Thread.sleep(_speakDelay); 
+					}
+					catch(InterruptedException e)
+					{
+						Logger.i(TAG, this.toString()+ " Speaker thread force stopped");
+						break;
 					}
 				}
-
-				speakHandler.removeCallbacks(runnableSpeaker);
-				speakHandler.postDelayed(this, _speakDelay);
+				Logger.i(TAG, this.toString()+ " Speaker thread stopped");
 			}
 		};
+		
+		
 	}
 
+
+	
 	/**
 	 * initialise fps counters and start counting (delayed)
 	 */
@@ -515,58 +594,87 @@ public class FrSkyServer extends Service implements OnInitListener {
 		fpsStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
 		fpsRxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
 		fpsTxStack = new MyStack(FRAMES_FOR_FPS_CALC); // try with 2 seconds..
-		fpsHandler = new Handler();
+		//fpsHandler = new Handler();
 		runnableFps = new Runnable() {
 			// @Override
 			public void run() {
-				fpsStack.push(_framecount);
-				fpsRxStack.push(_framecountRx);
-				fpsTxStack.push(_framecountTx);
-
-				fps = (int) Math.floor(fpsStack.average());
-				fpsRx = (int) Math.floor(fpsRxStack.average());
-				fpsTx = (int) Math.floor(fpsTxStack.average());
-
-				// TODO this might be optimized, would need proper testing
-				// though
-				if (fpsRx > 0) // receiving frames from Rx, means Tx comms is up
-								// as well
+				Logger.i(TAG, "FPS Thread started");
+				Boolean mAlive=true;
+				while(mAlive && !Thread.currentThread().isInterrupted())
 				{
-					// check if we should restart the cyclic speaker
-					if ((statusRx == false) && (getCyclicSpeechEnabled())) {
-						// Restart speaker if running
-						startCyclicSpeaker();
-					}
-					statusRx = true;
-					statusTx = true;
-				} else // not receiving frames from Rx
-				{
-					// make sure user knows if state changed from ok to not ok
-					// only do this if Bt connection is up
-					if ((statusRx == true) && (statusBt == true)) {
-						wasDisconnected("Rx");
-					}
-					statusRx = false;
-
-					if (fpsTx > 0) // need to check if Tx comms is up
+					fpsStack.push(_framecount);
+					fpsRxStack.push(_framecountRx);
+					fpsTxStack.push(_framecountTx);
+	
+					fps = (int) Math.floor(fpsStack.average());
+					fpsRx = (int) Math.floor(fpsRxStack.average());
+					fpsTx = (int) Math.floor(fpsTxStack.average());
+	
+					// TODO this might be optimized, would need proper testing
+					// though
+					if (fpsRx > 0) // receiving frames from Rx, means Tx comms is up
+									// as well
 					{
+						// check if we should restart the cyclic speaker
+						if ((statusRx == false) && (getCyclicSpeechEnabled())) {
+							// Restart speaker if running
+							startCyclicSpeaker();
+						}
+						statusRx = true;
 						statusTx = true;
-					} else {
-						statusTx = false;
+					} 
+					else // not receiving frames from Rx
+					{
+						// make sure user knows if state changed from ok to not ok
+						// only do this if Bt connection is up
+						if ((statusRx == true) && (statusBt == true)) {
+							disconnectedReason = "Rx";
+							//wasDisconnected("Rx");
+							mHandler.post(wasDisconnectedOnUi);
+						}
+						statusRx = false;
+	
+						if (fpsTx > 0) // need to check if Tx comms is up
+						{
+							statusTx = true;
+						} 
+						else 
+						{
+							statusTx = false;
+						}
+	
 					}
 
+					_framecount = 0;
+					_framecountRx = 0;
+					_framecountTx = 0;
+					// Log.i(TAG,"FPS: "+fps);
+					//fpsHandler.removeCallbacks(runnableFps);
+					//fpsHandler.postDelayed(this, 1000);
+					try 
+					{
+						Thread.sleep(1000);
+					} 
+					catch (InterruptedException e) 
+					{
+						// TODO Auto-generated catch block
+						Logger.i(TAG, "FPS Thread stopped");
+						mAlive=false;
+						break;
+						//return;
+					}
 				}
-
-				_framecount = 0;
-				_framecountRx = 0;
-				_framecountTx = 0;
-				// Log.i(TAG,"FPS: "+fps);
-				fpsHandler.removeCallbacks(runnableFps);
-				fpsHandler.postDelayed(this, 1000);
 			}
 		};
 		// Start the FPS counters
-		fpsHandler.postDelayed(runnableFps, 1000);
+		//fpsHandler.postDelayed(runnableFps, 1000);
+		if(fpsThread!=null) 
+		{
+			fpsThread.interrupt();
+		}
+				
+		fpsThread = new Thread(runnableFps);
+		fpsThread.start();
 	}
 
 	/**
@@ -576,6 +684,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void sendWatchdog() {
 		// Send get all alarms frame to force frames from Tx
+		//Logger.d(TAG, "Send Watchdog if needed");
 
 		if (_watchdogEnabled) {
 			// check if we already sent one
@@ -730,7 +839,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * 
 	 * @return returns true if the application is trying to connect
 	 */
-	public boolean getConnecting() {
+	public static boolean getConnecting() {
 		return _connecting;
 	}
 
@@ -738,7 +847,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * 
 	 * @return TreeMap containing alarms recorded from the FrSky module
 	 */
-	public TreeMap<Integer, Alarm> getRecordedAlarmMap() {
+	public TreeMap<Integer, ModuleAlarm> getRecordedAlarmMap() {
 		return _alarmMap;
 	}
 
@@ -793,7 +902,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 *         NOTE: Will return FPS from rx if rx communication is up, and FPS
 	 *         from tx otherwise
 	 */
-	public String getFps() {
+	public static String getFps() {
 		// return Integer.toString(fpsRx);
 		if (statusRx) {
 			return Integer.toString(fpsRx);
@@ -923,7 +1032,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 * Get current hub enabled state
 	 */
 	public boolean getHubEnabled() {
-		_hubEnabled = _settings.getBoolean("hubEnabled", false);
+		//_hubEnabled = _settings.getBoolean("hubEnabled", false);
+		_hubEnabled = true; // should always be enabled
 		return _hubEnabled;
 	}
 
@@ -1043,6 +1153,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// return requested model from server collection
 		return modelMap.get(currentModelId);
 	}
+	
+	/**
+	 * Convenience function to get current modelname
+	 * @return the Name of the current model
+	 */
+	public static String getCurrentModelName()
+	{
+		return currentModelName;
+	}
 
 	/**
 	 * update server to given model
@@ -1080,6 +1199,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 		}
 		// update current model
 		currentModelId = newModel.getId();
+		currentModelName = newModel.getName();
 		// save this new model Id in the settings so we can recover on resume of
 		// activity
 		_editor.putInt(PREFKEY_PREV_MODEL_ID, currentModelId);
@@ -1117,6 +1237,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 				newModel.getName() + " set as the active model",
 				Toast.LENGTH_LONG).show();
 		// and broadcast a message that the current model has changed
+		
+		
 		Intent i = new Intent();
 		i.setAction(MESSAGE_CURRENTMODEL_CHANGED);
 		context.sendBroadcast(i);
@@ -1278,8 +1400,9 @@ public class FrSkyServer extends Service implements OnInitListener {
 		if (wl.isHeld()) {
 			wl.release();
 		}
-		stopCyclicSpeaker();
 		Logger.i(TAG, "Shutdown mTts");
+		stopCyclicSpeaker();
+		
 
 		try {
 			mTts.shutdown();
@@ -1296,8 +1419,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 		// Disable BT
 
+		
 		Logger.i(TAG, "Stop FPS counter");
-		fpsHandler.removeCallbacks(runnableFps);
+		//fpsHandler.removeCallbacks(runnableFps);
+		fpsThread.interrupt();
+		
+		Logger.i(TAG, "Stop Watchdog Thread");
+		watchdogThread.interrupt();
 
 		Logger.i(TAG, "Reset channels");
 		destroyChannels();
@@ -1338,27 +1466,58 @@ public class FrSkyServer extends Service implements OnInitListener {
 		Logger.i(TAG, "TTS initialized");
 		// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
 		if (status == TextToSpeech.SUCCESS) {
-			int result = mTts.setLanguage(Locale.US);
-			if (result == TextToSpeech.LANG_MISSING_DATA
-					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
-				// Lanuage data is missing or the language is not supported.
-				Logger.e(TAG, "Language is not available.");
-			} else {
-				// Check the documentation for other possible result codes.
-				// For example, the language may be available for the locale,
-				// but not for the specified country and variant.
-				// The TTS engine has been successfully initialized.
-				// Allow the user to press the button for the app to speak
-				// again.
-
-				// Greet the user.
+			int langAvailable = mTts.isLanguageAvailable(Locale.US);
+			if(langAvailable==TextToSpeech.LANG_MISSING_DATA)
+			{
+				Logger.e(TAG, "Language data is missing, request it?");
+				// does not work
+//				Intent installIntent = new Intent();
+//				installIntent
+//						.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+//				startActivity(installIntent);
+				Toast.makeText(getApplicationContext(), "Text to Speech not installed for Locale.US. Speech will not work",
+						Toast.LENGTH_LONG).show();
+			}
+			else if (langAvailable==TextToSpeech.LANG_NOT_SUPPORTED)
+			{
+				Logger.e(TAG, "Locale.US Language not supported. TTS will not work");
+				// not tested
+				Toast.makeText(getApplicationContext(), "Text to Speech not supported for Locale.US. Speech will not work",
+						Toast.LENGTH_LONG).show();
+				//TODO: Alternatively, fallback to other language?
+			}
+			else
+			{
+				Logger.i(TAG, "TTS Language is supported, set the language to Locale.US");
+				int result = mTts.setLanguage(Locale.US);
+				
 				String myGreeting = "Application has enabled Text to Speech";
 				mTts.speak(myGreeting, TextToSpeech.QUEUE_FLUSH, null);
 
 				setCyclicSpeechEnabled(getCyclicSpeechEnabledAtStartup());
+				
+//				// No idea if these tests are now needed
+//				if (result == TextToSpeech.LANG_MISSING_DATA
+//						|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
+//					// Lanuage data is missing or the language is not supported.
+//					Logger.e(TAG, "Language is not available.");
+//				} else {
+//					// Check the documentation for other possible result codes.
+//					// For example, the language may be available for the locale,
+//					// but not for the specified country and variant.
+//					// The TTS engine has been successfully initialized.
+//					// Allow the user to press the button for the app to speak
+//					// again.
+//
+//					// Greet the user.
+//					
+//
+//				}
 
-			}
-		} else {
+			}	
+			
+			
+					} else {
 			// Initialization failed.
 			Logger.i(TAG, "Something wrong with TTS");
 			Logger.e(TAG, "Could not initialize TextToSpeech.");
@@ -1399,6 +1558,14 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssirx.setShortUnit("dBm");
 		rssirx.setSilent(true);
 		// rssirx.registerListenerForServerCommands();
+		
+		// Alarm testing
+		ThresholdAlarm alarmRssiRx = new ThresholdAlarm("RSSIrx Low Level alarm");
+		alarmRssiRx.setRelation(ThresholdAlarm.LESSER_THAN);
+		alarmRssiRx.setMediumThreshold(45.0);
+		alarmRssiRx.setCriticalThreshold(42.0);
+		alarmRssiRx.setSourceChannel(rssirx);
+		
 		_sourceChannelMap.put(CHANNEL_ID_RSSIRX, rssirx);
 
 		Channel rssitx = new Channel("RSSItx", 0, 1, "", "");
@@ -1409,6 +1576,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 		rssitx.setShortUnit("dBm");
 		rssitx.setSilent(true);
 		// rssitx.registerListenerForServerCommands();
+		
+		ThresholdAlarm alarmRssiTx = new ThresholdAlarm("RSSItx Low Level alarm");
+		alarmRssiTx.setRelation(ThresholdAlarm.LESSER_THAN);
+		alarmRssiTx.setMediumThreshold(45.0);
+		alarmRssiTx.setCriticalThreshold(42.0);
+		alarmRssiTx.setSourceChannel(rssitx);
+		
 		_sourceChannelMap.put(CHANNEL_ID_RSSITX, rssitx);
 	}
 
@@ -1432,7 +1606,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 
 	/**
-	 * Compares the recorded {@link Alarm}s to the alarm set of a {@link Model}.
+	 * Compares the recorded {@link ModuleAlarm}s to the alarm set of a {@link Model}.
 	 * If no model is given this method will return false. If a model is given
 	 * this method will iterate all alarms on that model and return false on the
 	 * first mismatch.
@@ -1451,7 +1625,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 			return false;
 		// otherwise we can check the alarms set
 		// iterate all alarms on the current model
-		for (Alarm a : _alarmMap.values()) {
+		for (ModuleAlarm a : _alarmMap.values()) {
 			// Log.w(TAG,"Checking "+a.getFrSkyFrameType());
 			// as soon as we spot a difference
 			if (!model.getFrSkyAlarms().containsValue(a)) {
@@ -1582,7 +1756,8 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 *            the Bluetooth device we want to connect to
 	 */
 	public void connect(BluetoothDevice device) {
-
+		//reset all channels upon connection
+		resetChannels();
 		setConnecting(true);
 
 		logger.stop(); // stop the logger (will force creation of new files)
@@ -1606,11 +1781,34 @@ public class FrSkyServer extends Service implements OnInitListener {
 	}
 
 	/**
+	 * Iterate all channels and reset their internal states, automatically called by connection
+	 */
+	public void resetChannels()
+	{
+		Logger.i(TAG, "Sending Reset Command to channels");
+		for (Model m : modelMap.values()) {
+			for (Channel c : m.getChannels().values()) {
+				c.reset();
+			}
+		}
+		
+		// Reset hub channels
+		if(getCurrentModel().getHub()!=null)
+		{
+			for(Channel c : getCurrentModel().getHub().getChannels().values()) {
+				c.reset();
+			}
+		}
+	}
+	
+	/**
 	 * Disconnects from the Bluetooth device
 	 */
 	public void disconnect() {
 		_manualBtDisconnect = true;
 		mSerialService.stop();
+		
+		//resetChannels();
 	}
 
 	/**
@@ -1733,6 +1931,20 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// send(Frame.InputRequestADAlarms());
 	}
 
+	
+	// Need handler for callbacks to the UI thread
+    final Handler mHandler = new Handler();
+    volatile String disconnectedReason = "";
+
+    // Create runnable for posting
+    final Runnable wasDisconnectedOnUi = new Runnable() {
+        public void run() {
+        	
+            wasDisconnected(disconnectedReason);
+        }
+    };
+
+	
 	/**
 	 * Gets called whenever bluetooth connection is unintentionally dropped
 	 * 
@@ -1752,32 +1964,30 @@ public class FrSkyServer extends Service implements OnInitListener {
 		// Logger.i(TAG, "Sending Reset Broadcast");
 		// sendBroadcast(i);
 		//
-		Logger.i(TAG, "Sending Reset Command to channels");
-		for (Model m : modelMap.values()) {
-			for (Channel c : m.getChannels().values()) {
-				c.reset();
-			}
-		}
 
-		// speak warning, only when not manually disconnected
-		if (!_manualBtDisconnect) {
-			saySomething("Alarm! Alarm! Alarm! Connection Lost!");
-			Toast.makeText(getApplicationContext(),
-					"Lost connection with " + source, Toast.LENGTH_SHORT)
-					.show();
-			// Get instance of Vibrator from current Context
-			try {
-				Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-				// Start immediately
-				// Vibrate for 200 milliseconds
-				// Sleep for 500 milliseconds
-				long[] pattern = { 0, 200, 500, 200, 500, 200, 500 };
-				v.vibrate(pattern, -1);
-			} catch (Exception e) {
-				Logger.e(TAG,
-						"failure on vibrating for connection lost warning", e);
+			    
+			// speak warning, only when not manually disconnected
+			if (!_manualBtDisconnect) {
+				saySomething("Alarm! Alarm! Alarm! Connection Lost!");
+				Toast.makeText(getApplicationContext(),
+						"Lost connection with " + source, Toast.LENGTH_SHORT)
+						.show();
+				// Get instance of Vibrator from current Context
+				try {
+					Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+					// Start immediately
+					// Vibrate for 200 milliseconds
+					// Sleep for 500 milliseconds
+					long[] pattern = { 0, 200, 500, 200, 500, 200, 500 };
+					v.vibrate(pattern, -1);
+				} catch (Exception e) {
+					Logger.e(TAG,
+							"failure on vibrating for connection lost warning", e);
+				}
 			}
-		}
+		
+		
+
 	}
 
 	// **************************************************************************************************************
@@ -1994,13 +2204,13 @@ public class FrSkyServer extends Service implements OnInitListener {
 
 				if (_recordingAlarms) {
 					// store alarms for future use
-					Alarm aIn = new Alarm(f);
-					Logger.w(TAG,
+					ModuleAlarm aIn = new ModuleAlarm(f);
+					Logger.d(TAG,
 							"Adding alarm to the recording buffer, alarm id: "
 									+ aIn.getFrSkyFrameType());
 					_alarmMap.put(aIn.getFrSkyFrameType(), aIn);
 					if (_alarmMap.size() >= 4) {
-						Logger.w(TAG, "recording completed");
+						Logger.i(TAG, "recording completed");
 						_recordingAlarms = false;
 						// Update the alarms for the model
 						if (_recordingModelId != -1) {
@@ -2031,7 +2241,10 @@ public class FrSkyServer extends Service implements OnInitListener {
 					if(getCurrentModel().getHub()!=null)
 					{
 						// can only run this if the model has a hub, otherwise will throw exception
-						getCurrentModel().getHub().addUserBytes(f.getUserBytes());
+						if(f!=null)
+						{
+							getCurrentModel().getHub().addUserBytes(f.getUserBytes(),f);
+						}
 					}
 					//FrSkyHub.getInstance().extractUserDataBytes(this, f);
 
@@ -2103,9 +2316,38 @@ public class FrSkyServer extends Service implements OnInitListener {
 	public void startCyclicSpeaker() {
 		// Stop it before starting it
 		Logger.i(TAG, "Start Cyclic Speaker");
-		speakHandler.removeCallbacks(runnableSpeaker);
-		speakHandler.post(runnableSpeaker);
+		
+		// kill existing speakerthreads
+		if(speakerThread!=null) 
+		{
+			speakerThread.interrupt();
+		}
 		_cyclicSpeechEnabled = true;
+		
+		speakerThread = new Thread(runnableSpeaker);
+		speakerThread.start();
+		
+//		if(speakerThread==null) 
+//		{
+//			speakerThread = new Thread(runnableSpeaker);
+//		}
+//		else
+//		{
+//			if(speakerThread.getState()==Thread.State.NEW)
+//			{
+//				
+//				speakerThread.start();	
+//			}
+//			else
+//			{
+//				speakerThread = new Thread(runnableSpeaker);
+//			}
+//		}
+		
+		
+//		speakHandler.removeCallbacks(runnableSpeaker);
+//		speakHandler.post(runnableSpeaker);
+
 
 		Intent i = new Intent();
 		i.setAction(MESSAGE_SPEAKERCHANGE);
@@ -2117,12 +2359,15 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public void stopCyclicSpeaker() {
 		Logger.i(TAG, "Stop Cyclic Speaker");
+		_cyclicSpeechEnabled = false;
 		try {
-			speakHandler.removeCallbacks(runnableSpeaker);
+			//speakHandler.removeCallbacks(runnableSpeaker);
+//			speakerThread.stop();
+			speakerThread.interrupt();
 			mTts.speak("", TextToSpeech.QUEUE_FLUSH, null);
 		} catch (Exception e) {
 		}
-		_cyclicSpeechEnabled = false;
+		
 		Intent i = new Intent();
 		i.setAction(MESSAGE_SPEAKERCHANGE);
 		sendBroadcast(i);
@@ -2281,6 +2526,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 					setConnecting(false);
 					if ((statusBt == true) && (!_dying)
 							&& (!_manualBtDisconnect))
+						
 						wasDisconnected("Bt"); // Only do disconnect message if
 												// previously connected
 					statusBt = false;
@@ -2385,7 +2631,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public static void saveModel(Model model) {
 		// FIXME: What happens if saving a model with -1 id, but with channels?
-		Logger.w(TAG, "Saving model [" + model.getName() + "]");
+		Logger.d(TAG, "Saving model [" + model.getName() + "]");
 		database.saveModel(model);
 
 	}
@@ -2396,7 +2642,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 *            id of the model to save
 	 */
 	public static void saveModel(int modelId) {
-		Logger.w(TAG, "Saving model id [" + modelId + "]");
+		Logger.d(TAG, "Saving model id [" + modelId + "]");
 		saveModel(modelMap.get(modelId));
 	}
 
@@ -2418,7 +2664,7 @@ public class FrSkyServer extends Service implements OnInitListener {
 	 */
 	public static void sendAlarms(Model model) {
 		if (statusRx) {
-			for (Alarm a : model.getFrSkyAlarms().values()) {
+			for (ModuleAlarm a : model.getFrSkyAlarms().values()) {
 				send(a.toFrame());
 			}
 		}
@@ -2433,22 +2679,6 @@ public class FrSkyServer extends Service implements OnInitListener {
 		return sim;
 	}
 
-	/**
-	 * use this to broadcast new channel information
-	 * 
-	 * Comment: Please do not use this method to communicate from hub to
-	 * consumers
-	 * 
-	 * @deprecated
-	 * 
-	 * @param sensorType
-	 */
-	public void broadcastChannelData(SensorTypes sensorType, double value) {
-		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_SENSORTYPE,
-				sensorType.toString());
-		broadcastHubDataIntent.putExtra(ActivityHubData.FIELD_VALUE, value);
-		sendBroadcast(broadcastHubDataIntent);
-	}
 
 	/**
 	 * retrieve the file sim instance

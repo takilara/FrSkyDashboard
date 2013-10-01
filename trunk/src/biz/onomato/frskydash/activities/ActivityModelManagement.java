@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.activities;
 
 import java.util.ArrayList;
@@ -6,6 +25,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
@@ -42,6 +62,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 //		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		setContentView(R.layout.activity_modelmanagement);
 
 		rbList = new ArrayList<RadioButton>();
@@ -99,7 +120,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 			if(server!=null)
 			{
 				//server.setCurrentModel(m);
-				server.setCurrentModel(ii);
+				FrSkyServer.setCurrentModel(ii);
 				
 			}
 		}
@@ -154,7 +175,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 		rbList.clear();
 		// init the current model id, if server is not available we need to init
 		// as -1. Otherwise we can get the id form the server
-		long currentModelId = server == null ? -1 : server.getCurrentModel()
+		long currentModelId = server == null ? -1 : FrSkyServer.getCurrentModel()
 				.getId();
 
 		// get modelcount so we can check how many models are available when iterating
@@ -265,7 +286,6 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	 */
 	@Override
 	protected void onCurrentModelChanged() {
-		// TODO Auto-generated method stub
 		if(server!=null)
 		{
 			try
@@ -274,7 +294,7 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 			}
 			catch (Exception e) 
 			{}
-			rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
+			rbCurrentModel = (RadioButton) findViewById((int) (10000+FrSkyServer.getCurrentModel().getId()));
 			rbCurrentModel.setChecked(true);
 		}
 		
@@ -285,10 +305,9 @@ public class ActivityModelManagement extends ActivityBase implements OnClickList
 	 */
 	@Override
 	void onServerConnected() {
-		// TODO Auto-generated method stub
 		populateModelList();
 		
-		rbCurrentModel = (RadioButton) findViewById((int) (10000+server.getCurrentModel().getId()));
+		rbCurrentModel = (RadioButton) findViewById((int) (10000+FrSkyServer.getCurrentModel().getId()));
 		rbCurrentModel.setChecked(true);
 	}
 

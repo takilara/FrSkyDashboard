@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.activities;
 
 import java.util.Collections;
@@ -15,6 +34,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -28,7 +48,7 @@ import android.widget.TextView;
 import biz.onomato.frskydash.BluetoothSerialService;
 import biz.onomato.frskydash.FrSkyServer;
 import biz.onomato.frskydash.R;
-import biz.onomato.frskydash.domain.Alarm;
+import biz.onomato.frskydash.domain.ModuleAlarm;
 import biz.onomato.frskydash.domain.Channel;
 import biz.onomato.frskydash.domain.Frame;
 import biz.onomato.frskydash.domain.Model;
@@ -54,7 +74,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	
 	private int _modelId = -1;
 	private Model _model=null;
-	private TreeMap<Integer,Alarm> _alarmMap;
+	private TreeMap<Integer,ModuleAlarm> _alarmMap;
 	private IntentFilter mIntentFilter;
 	
 	//ArrayAdapter<String> AD1alarmValueAdapter;
@@ -67,6 +87,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 		_modelId = launcherIntent.getIntExtra("modelId", -1);
 		
 		super.onCreate(savedInstanceState);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		
@@ -197,7 +218,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 			}
 			
 			//_alarmMap = _model.getFrSkyAlarms();
-			_alarmMap = new TreeMap<Integer,Alarm>(Collections.reverseOrder());
+			_alarmMap = new TreeMap<Integer,ModuleAlarm>(Collections.reverseOrder());
 			//_alarmMap.putAll(FrSkyServer.database.getAlarmsForModel(_modelId));
 			_alarmMap.putAll(FrSkyServer.modelMap.get(_modelId).getFrSkyAlarms());
 			//_alarmMap = FrSkyServer.database.getAlarmsForModel(_modelId);
@@ -253,14 +274,14 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 	{
 		btnSend.setEnabled(state);
 		btnGetAlarmsFromModule.setEnabled(state);
-		for(Alarm a : _alarmMap.values())
+		for(ModuleAlarm a : _alarmMap.values())
 		{
 			Button btn = (Button) findViewById(ID_ALARM_BUTTON_SEND+a.getFrSkyFrameType());
 			btn.setEnabled(state);
 		}
 	}
 	
-	public void updateAlarmVisualization(Alarm a)
+	public void updateAlarmVisualization(ModuleAlarm a)
 	{
 		// find the level spinner
 		Spinner splvl = (Spinner) findViewById(ID_ALARM_SPINNER_LEVEL+a.getFrSkyFrameType());
@@ -341,12 +362,12 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 
 	public void populateGUI()
 	{
-		Iterator<Alarm> i = _alarmMap.values().iterator();
+		Iterator<ModuleAlarm> i = _alarmMap.values().iterator();
 		//for(Alarm a : _alarmMap.values())
 		int id;
 		while(i.hasNext())
 		{
-			Alarm a = i.next();
+			ModuleAlarm a = i.next();
 			// Line 1
 			//LinearLayout line1 = new LinearLayout(getApplicationContext());
 			TextView tvTitle = new TextView(getApplicationContext());
@@ -403,7 +424,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 					{
 						Channel sourceChannel = (Channel) spinner.getSelectedItem();
 						int alarmId = spinner.getId()-ID_ALARM_SPINNER_SOURCECHANNEL;
-						Alarm a = _alarmMap.get(alarmId);
+						ModuleAlarm a = _alarmMap.get(alarmId);
 						if(a!=null)
 						{
 							a.setUnitChannel(sourceChannel);
@@ -438,7 +459,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 						int arg2, long arg3) {
 					
 						int alarmId = spinner.getId()-ID_ALARM_SPINNER_LEVEL;
-						Alarm a = _alarmMap.get(alarmId);
+						ModuleAlarm a = _alarmMap.get(alarmId);
 						if(a!=null)
 						{
 							a.setAlarmLevel(spinner.getSelectedItemPosition());
@@ -465,7 +486,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 						int arg2, long arg3) {
 					
 						int alarmId = spinner.getId()-ID_ALARM_SPINNER_RELATIVE;
-						Alarm a = _alarmMap.get(alarmId);
+						ModuleAlarm a = _alarmMap.get(alarmId);
 						if(a!=null)
 						{
 							a.setGreaterThan(spinner.getSelectedItemPosition());
@@ -494,7 +515,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 				public void onProgressChanged(SeekBar seekBar, int progress,
 						boolean fromUser) {
 					int alarmId = seekBar.getId()-ID_ALARM_SEEKBAR_THRESHOLD;
-					Alarm a = _alarmMap.get(alarmId);
+					ModuleAlarm a = _alarmMap.get(alarmId);
 					if(a!=null)
 					{
 						a.setThreshold(seekBar.getProgress()+a.getMinThreshold());
@@ -527,7 +548,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
 				@Override
 				public void onClick(View v) {
 					int alarmId = v.getId()-ID_ALARM_BUTTON_SEND;
-					Alarm a = _alarmMap.get(alarmId);
+					ModuleAlarm a = _alarmMap.get(alarmId);
 					if(a!=null)
 					{
 						server.send(a.toFrame());
@@ -591,7 +612,7 @@ public class ActivityModuleSettings extends Activity implements OnClickListener 
         		if(server!=null)
     			{
 	        		//for(Alarm a : _alarmMap.values())
-	        		for(Alarm a : server.getRecordedAlarmMap().values())
+	        		for(ModuleAlarm a : server.getRecordedAlarmMap().values())
 	        		{
 	        			
 	        				if((a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM1_RSSI) && (a.getFrSkyFrameType()!=Frame.FRAMETYPE_ALARM2_RSSI))

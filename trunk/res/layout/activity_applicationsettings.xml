@@ -1,66 +1,218 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/linearLayoutApplicationSettingsOuter" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
-<ScrollView 
-	    android:id="@+id/ScrollViewApplicationSettings"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
-    <LinearLayout android:id="@+id/linearLayoutApplicationSettings" android:layout_width="match_parent" android:layout_height="match_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:orientation="vertical">
-            <TextView android:background="#333333" android:id="@+id/textView4" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="center" android:gravity="center" android:text="@string/speakerSettings"></TextView>
-            <CheckBox android:id="@+id/chkAutoSetVolume" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/chkAutoSetVolume"></CheckBox>
+<!--
+    Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ 
+   This file is part of FrSky Dashboard.
+  
+    FrSky Dashboard is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+  
+    FrSky Dashboard is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+  
+    You should have received a copy of the GNU General Public License
+    along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayoutApplicationSettingsOuter"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-            <SeekBar
-                android:id="@+id/sbInitialMinimumVolume"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" 
-                android:max="100"/>
+    <ScrollView
+        android:id="@+id/ScrollViewApplicationSettings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
 
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout4">
-                <TextView android:id="@+id/textView1" android:layout_width="wrap_content" android:text="@string/intervalForCyclicSpeak" android:layout_height="match_parent" android:layout_gravity="center_vertical" android:gravity="center_vertical"></TextView>
-                <LinearLayout android:id="@+id/linearLayout5" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="right" android:gravity="right">
-                    <EditText android:imeOptions="actionDone" android:maxLength="3" android:ems="2" android:layout_width="wrap_content" android:id="@+id/edCyclicSpeakerInterval" android:layout_height="wrap_content" android:inputType="number" android:text="30" android:layout_marginRight="10dip"></EditText>
-                </LinearLayout> 
-            </LinearLayout>
-            <CheckBox android:id="@+id/chkCyclicSpeakerEnabled" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/cyclicSpeakerEnabledAtStartup"></CheckBox>
-            
-            <TextView android:background="#333333" android:id="@+id/textView3" android:layout_height="wrap_content" android:text="@string/loggerSettings" android:layout_width="match_parent" android:gravity="center"></TextView>
-            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToRaw" android:layout_height="wrap_content" android:text="@string/logToRaw"></CheckBox>
-            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToHuman" android:layout_height="wrap_content" android:text="@string/logToHuman"></CheckBox>
-            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkLogToCsv" android:layout_height="wrap_content" android:text="@string/logToCsv"></CheckBox>
-        
-            <TextView android:background="#333333" android:id="@+id/tv_Bt_Settings" android:layout_height="wrap_content" android:text="@string/btSettings" android:layout_width="match_parent" android:gravity="center"></TextView>
-            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoEnable" android:layout_height="wrap_content" android:text="@string/btAutoEnable"></CheckBox>
-            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoConnect" android:layout_height="wrap_content" android:text="@string/btAutoConnect"></CheckBox>    
-            <CheckBox android:layout_width="wrap_content" android:id="@+id/chkBtAutoSendAlarms" android:layout_height="wrap_content" android:text="@string/btAutoSendAlarms"></CheckBox>
-            <TextView android:background="#333333" android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/commands" android:layout_width="match_parent" android:gravity="center"></TextView>
-            <Button android:layout_height="wrap_content" android:text="@string/save" android:layout_gravity="center_vertical" android:layout_width="match_parent" android:id="@+id/btnSave"></Button>
-            <!-- <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/button1" android:text="@string/defaults"></Button> -->
-            
-            <Button android:layout_width="match_parent" android:text="@string/btnDeleteLogs" android:layout_height="wrap_content" android:id="@+id/btnDeleteLogs"></Button>
-
+        <LinearLayout
+            android:id="@+id/linearLayoutApplicationSettings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
             <LinearLayout
+                android:id="@+id/linearLayout3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="#333333"
+                    android:gravity="center"
+                    android:text="@string/speakerSettings" >
+                </TextView>
+
+                <CheckBox
+                    android:id="@+id/chkAutoSetVolume"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chkAutoSetVolume" >
+                </CheckBox>
+
+                <SeekBar
+                    android:id="@+id/sbInitialMinimumVolume"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="100" />
+
+                <LinearLayout
+                    android:id="@+id/linearLayout4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:text="@string/intervalForCyclicSpeak" >
+                    </TextView>
+
+                    <LinearLayout
+                        android:id="@+id/linearLayout5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:gravity="right" >
+
+                        <EditText
+                            android:id="@+id/edCyclicSpeakerInterval"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dip"
+                            android:ems="2"
+                            android:imeOptions="actionDone"
+                            android:inputType="number"
+                            android:maxLength="3"
+                            android:text="30" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/chkCyclicSpeakerEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cyclicSpeakerEnabledAtStartup" >
+                </CheckBox>
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#333333"
+                    android:gravity="center"
+                    android:text="@string/loggerSettings" >
+                </TextView>
+
+                <CheckBox
+                    android:id="@+id/chkLogToRaw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/logToRaw" >
+                </CheckBox>
+
+                <CheckBox
+                    android:id="@+id/chkLogToHuman"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/logToHuman" >
+                </CheckBox>
+
+                <CheckBox
+                    android:id="@+id/chkLogToCsv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/logToCsv" >
+                </CheckBox>
+
+                <TextView
+                    android:id="@+id/tv_Bt_Settings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#333333"
+                    android:gravity="center"
+                    android:text="@string/btSettings" >
+                </TextView>
+
+                <CheckBox
+                    android:id="@+id/chkBtAutoEnable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btAutoEnable" >
+                </CheckBox>
+
+                <CheckBox
+                    android:id="@+id/chkBtAutoConnect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btAutoConnect" >
+                </CheckBox>
+
+                <CheckBox
+                    android:id="@+id/chkBtAutoSendAlarms"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btAutoSendAlarms" >
+                </CheckBox>
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#333333"
+                    android:gravity="center"
+                    android:text="@string/commands" >
+                </TextView>
 
                 <Button
-                    android:id="@+id/btnExportModels"
-                    android:layout_width="fill_parent"
+                    android:id="@+id/btnSave"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/btnExportModels" 
-                    android:layout_weight="1">
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/save" >
                 </Button>
+                <!-- <Button android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/button1" android:text="@string/defaults"></Button> -->
 
                 <Button
-                    android:id="@+id/btnImportModels"
-                    android:layout_width="fill_parent"
+                    android:id="@+id/btnDeleteLogs"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/btnImportModels" >
+                    android:text="@string/btnDeleteLogs" >
                 </Button>
-            </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <Button
+                        android:id="@+id/btnExportModels"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btnExportModels" >
+                    </Button>
+
+                    <Button
+                        android:id="@+id/btnImportModels"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/btnImportModels" >
+                    </Button>
+                </LinearLayout>
             </LinearLayout>
-    </LinearLayout> 
+        </LinearLayout>
     </ScrollView>
+
 </LinearLayout>

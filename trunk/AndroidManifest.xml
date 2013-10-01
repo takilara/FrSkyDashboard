@@ -1,21 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="biz.onomato.frskydash" 
-      android:versionCode="25"
-      android:versionName="2.0B10"
-      android:installLocation="preferExternal">
-    
+    package="biz.onomato.frskydash"
+    android:installLocation="auto"
+    android:versionCode="37"
+    android:versionName="3.0B07" >
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.VIBRATE"/>  
+    <uses-permission android:name="android.permission.VIBRATE" />
     
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
-    
-    <application android:icon="@drawable/ic_status" android:label="@string/app_name" android:debuggable="true">
-         <!-- 
+    <!--  Maps -->
+    <permission
+        android:name="biz.onomato.frskydash.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature"/>
+	<uses-permission android:name="biz.onomato.frskydash.permission.MAPS_RECEIVE"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	
+	<uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true"/>
+	
+	
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="8" />
+
+    <application
+        android:icon="@drawable/ic_status"
+        android:label="@string/app_name" 
+        android:debuggable="true">
+
+        <!--
          <activity android:name=".FrSkyDash"
                   android:label="@string/app_name"
                   android:theme="@android:style/Theme.NoTitleBar"
@@ -23,45 +66,79 @@
                   android:screenOrientation="portrait" >
         
         </activity>
-         -->
-        <activity android:name=".activities.ActivityDashboard"
-        	android:label="@string/app_name"  
-        	android:configChanges="keyboardHidden|orientation" 
-            android:screenOrientation="portrait">
-        	 
-        	<intent-filter>
+        -->
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityDashboard"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ActivityModuleSettings"
-           	android:label="@string/activity_module_settings" />
-        <activity android:name=".activities.ActivityApplicationSettings"
-        	android:label="@string/activity_application_settings" />
-		<!--   <activity android:name=".ChannelConfigActivity" android:label="@string/activity_channel_settings" /> -->
-        <activity android:name=".activities.ActivitySimulator"
-        	android:label="@string/activity_simulator" />
-        <activity android:name=".activities.ActivityScanDevices"
-            android:theme="@android:style/Theme.NoTitleBar"
-        	android:label="@string/app_name" />
-        <activity android:name=".activities.ActivityChannelConfig"
-        	android:label="@string/activity_channel_settings" />	
-        <activity android:name=".activities.ActivityDeviceList"
-            android:theme="@android:style/Theme.NoTitleBar"
-        	android:label="@string/app_name" />
-        <activity android:name=".activities.ActivityModelConfig"
-        	android:label="@string/activity_model_configuration"
-        	android:windowSoftInputMode="stateHidden" 
-        	/>
-        <activity android:name=".activities.ActivityModelManagement"
-        	android:label="@string/activity_model_management" />
-        <activity android:name=".activities.ActivityDebug"
-        	android:label="@string/activity_debug" />
-        	
-        <activity android:name=".activities.ActivityHubData" android:label="@string/app_name"/>
-        <activity android:name=".hub.EditPreferences" android:label="@string/app_name"/>
-        
-        <service android:name="FrSkyServer" android:label="@string/app_name"></service>
-    </application> 
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityModuleSettings"
+            android:label="@string/activity_module_settings" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityApplicationSettings"
+            android:label="@string/activity_application_settings" />
+        <!-- <activity android:name=".ChannelConfigActivity" android:label="@string/activity_channel_settings" /> -->
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivitySimulator"
+            android:label="@string/activity_simulator" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityScanDevices"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityChannelConfig"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/activity_channel_settings"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityDeviceList"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityModelConfig"
+            android:label="@string/activity_model_configuration"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityModelManagement"
+            android:label="@string/activity_model_management" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityDebug"
+            android:label="@string/activity_debug" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityMaps"
+            android:label="@string/activity_maps" />
+        <activity
+            android:name="biz.onomato.frskydash.activities.ActivityHubData"
+            android:label="@string/app_name" />
+        <activity
+            android:name="biz.onomato.frskydash.hub.EditPreferences"
+            android:label="@string/app_name" />
+
+        <service
+            android:name="biz.onomato.frskydash.FrSkyServer"
+            android:label="@string/app_name" >
+        </service>
+
+    
+    <!--  Main Key -->
+    <!--
+    <meta-data
+    	android:name="com.google.android.maps.v2.API_KEY"
+    	android:value="AIzaSyA911INypA6x6lOhptQssWyRnIh2_dTQqc"/>
+    -->	
+    <!--  Debug key -->
+     
+    <meta-data
+    	android:name="com.google.android.maps.v2.API_KEY"
+    	android:value="AIzaSyABOlg1hO6K9gWPq3t8QDN1jY8lo6FZSi8"/>  
+    
+    </application>
 
 </manifest>

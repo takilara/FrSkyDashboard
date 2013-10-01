@@ -1,3 +1,23 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 /**
  * 
  */
@@ -20,9 +40,12 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +54,7 @@ import android.widget.Toast;
  * @author eso
  *
  */
-abstract class ActivityBase extends Activity {
+abstract class ActivityBase extends FragmentActivity  {
 	private static final String TAG = "Base Activity";
 	
 	// Dialogs
@@ -87,6 +110,8 @@ abstract class ActivityBase extends Activity {
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_CURRENTMODEL_CHANGED);
 		mIntentServerFilter.addAction(FrSkyServer.MESSAGE_MODELMAP_CHANGED);
 		
+		
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		doBindService();
 	}
 	
@@ -180,6 +205,10 @@ abstract class ActivityBase extends Activity {
 					.findViewById(R.id.tvAboutVersion);
 			TextView tvAboutAuthor = (TextView) dialog
 					.findViewById(R.id.tvAboutAuthor);
+			
+			TextView tvAboutLicense = (TextView) dialog
+					.findViewById(R.id.tvAboutLicense);
+			
 			tvAboutAuthor.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					// Log.d(TAG,"clicked author");
@@ -196,6 +225,17 @@ abstract class ActivityBase extends Activity {
 				}
 
 			});
+			
+			tvAboutLicense.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					// Log.d(TAG,"clicked author");
+					Uri uriUrl = Uri.parse("http://www.gnu.org/licenses/gpl-3.0-standalone.html");  
+					Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);  
+					startActivity(launchBrowser); 
+				}
+
+			});
+
 
 			PackageManager pm = this.getPackageManager();
 			try {
@@ -203,6 +243,7 @@ abstract class ActivityBase extends Activity {
 						PackageManager.GET_META_DATA);
 				tvAboutVersion.setText("Version: " + pInfo.versionName);
 				tvAboutAuthor.setText("Author: " + getString(R.string.author));
+				tvAboutLicense.setText("The FrSky Dashboard is licenced using GPL v3");
 			} catch (Exception e) {
 			}
 			break;

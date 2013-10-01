@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash;
 
 import java.io.File;
@@ -188,6 +207,20 @@ public class DataLogger {
 			//sb.append("\""+channels.get(i).getDescription()+" ("+channels.get(i).getLongUnit()+") (Avg)\""+Channel.delim);
 			
 		}
+		if(_model.getHub()!=null)
+		{
+			for(Channel c : _model.getHub().getChannels().values())
+			{
+				if(!c.getLongUnit().equals(""))
+				{
+					sb.append("\""+c.getDescription()+" ("+c.getLongUnit()+")\""+Channel.delim);
+				}
+				else
+				{
+					sb.append("\""+c.getDescription()+"\""+Channel.delim);
+				}
+			}
+		}
 		_headerString = sb.toString(); 
 	}
 	
@@ -219,6 +252,24 @@ public class DataLogger {
 					}
 					sb.append(Channel.delim);
 				}
+				
+				if(_model.getHub()!=null)
+				{
+					for(Channel c : _model.getHub().getChannels().values())
+					{
+						// behave differently if integer vs double
+						if(c.getPrecision()>0)
+						{
+							sb.append(c.getValue(true));
+						}
+						else
+						{
+							sb.append((int)c.getValue(true));
+						}
+						sb.append(Channel.delim);
+					}
+				}
+				
 				sb.append(crlf);
 
 				channelCsvBuffer.offer(sb.toString());
@@ -462,6 +513,15 @@ public class DataLogger {
 					{
 						sb.append("// Channel '"+c.getDescription()+"', Averaged over "+c.getMovingAverage()+" sample(s), shown with a precision of "+c.getPrecision()+" decimals");
 						sb.append(DataLogger.crlf);
+					}
+					
+					if(_model.getHub()!=null)
+					{
+						for(Channel c : _model.getHub().getChannels().values())
+						{
+							sb.append("// Hub Channel '"+c.getDescription()+"', Averaged over "+c.getMovingAverage()+" sample(s), shown with a precision of "+c.getPrecision()+" decimals");
+							sb.append(DataLogger.crlf);
+						}
 					}
 					
 					sb.append("// Log Started: ");

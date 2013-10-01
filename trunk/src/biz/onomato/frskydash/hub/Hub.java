@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
  * 
  */
@@ -7,6 +26,7 @@ import java.util.Collections;
 import java.util.TreeMap;
 
 import biz.onomato.frskydash.domain.Channel;
+import biz.onomato.frskydash.domain.Frame;
 
 /**
  * Used to provide (and enforce) basic hub functionality, All hub's must inherit
@@ -17,6 +37,11 @@ import biz.onomato.frskydash.domain.Channel;
  */
 public abstract class Hub {
 
+	/**
+	 * Translators must pass this if unable to create full value
+	 */
+	public final static double UNDEFINED_VALUE=-999.25;
+	
 	/**
 	 * Treemap to hold the Hubs channels
 	 */
@@ -65,9 +90,10 @@ public abstract class Hub {
 	/**
 	 * Method that should take the userbyte part of a frame and "handle" it
 	 * 
-	 * @param ints
+	 * @param ints Incoming Userbytes
+	 * @param frame Frame containing the Userbytes
 	 */
-	public abstract void addUserBytes(int[] ints);
+	public abstract void addUserBytes(int[] ints,Frame frame);
 
 	/**
 	 * Method that should take the userbyte part of a frame and "handle" it
@@ -103,5 +129,25 @@ public abstract class Hub {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
+	public String toHuman(int[] ints)
+	{
+		StringBuilder  buf = new StringBuilder(64);
+		//for(int n=0;n<_frameRaw.length;n++)
+		if(ints!=null)
+		{
+			for(int b:ints)
+			{
+				if(b<0x10)
+				{
+					buf.append("0");
+				}
+				
+				buf.append(Integer.toHexString(b));
+					buf.append(' ');
+		
+			}
+		}
+		return buf.toString();
+	}		
 }

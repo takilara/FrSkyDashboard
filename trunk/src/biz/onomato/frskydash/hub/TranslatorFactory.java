@@ -1,13 +1,32 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.hub;
 
 import java.util.HashMap;
 
-import biz.onomato.frskydash.hub.sensors.AcceleratorTranslator;
+import biz.onomato.frskydash.hub.sensors.AccelerometerTranslator;
 import biz.onomato.frskydash.hub.sensors.AltitudeTranslator;
-import biz.onomato.frskydash.hub.sensors.FAS100CurrentTranslator;
-import biz.onomato.frskydash.hub.sensors.FAS100VoltageTranslator;
+import biz.onomato.frskydash.hub.sensors.FASTranslator;
 import biz.onomato.frskydash.hub.sensors.FuelTranslator;
 import biz.onomato.frskydash.hub.sensors.GPSTranslator;
+import biz.onomato.frskydash.hub.sensors.OpenXVarioTranslator;
 import biz.onomato.frskydash.hub.sensors.RPMTranslator;
 import biz.onomato.frskydash.hub.sensors.TempTranslator;
 import biz.onomato.frskydash.hub.sensors.UserDataTranslator;
@@ -73,30 +92,38 @@ public class TranslatorFactory {
 		AltitudeTranslator altTranslator = new AltitudeTranslator();
 		dataTranslators.put(SensorTypes.altitude_before, altTranslator);
 		dataTranslators.put(SensorTypes.altitude_after, altTranslator);
+		dataTranslators.put(SensorTypes.vertical_speed, altTranslator);
 		dataTranslators.put(SensorTypes.gps_speed_before, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_speed_after, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_longitude_before, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_longitude_after, gpsTranslator);
-		dataTranslators.put(SensorTypes.gps_ew, gpsTranslator);
+		dataTranslators.put(SensorTypes.gps_longitude_ew, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_latitude_before, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_latitude_after, gpsTranslator);
-		dataTranslators.put(SensorTypes.gps_ns, gpsTranslator);
+		dataTranslators.put(SensorTypes.gps_latitude_ns, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_course_before, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_course_after, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_day_month, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_year, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_hour_minute, gpsTranslator);
 		dataTranslators.put(SensorTypes.gps_second, gpsTranslator);
-		AcceleratorTranslator accTranslator = new AcceleratorTranslator();
+		AccelerometerTranslator accTranslator = new AccelerometerTranslator();
 		dataTranslators.put(SensorTypes.acc_x, accTranslator);
 		dataTranslators.put(SensorTypes.acc_y, accTranslator);
 		dataTranslators.put(SensorTypes.acc_z, accTranslator);
 		
 		//FAS_100
-		FAS100VoltageTranslator fas100VoltageTranslator = new FAS100VoltageTranslator();
-		dataTranslators.put(SensorTypes.fas100_voltage_before, fas100VoltageTranslator);
-		dataTranslators.put(SensorTypes.fas100_voltage_after, fas100VoltageTranslator);
-		dataTranslators.put(SensorTypes.fas100_current, new FAS100CurrentTranslator());
+		FASTranslator fasTranslator = new FASTranslator();
+		dataTranslators.put(SensorTypes.fas_voltage_before, fasTranslator);
+		dataTranslators.put(SensorTypes.fas_voltage_after, fasTranslator);
+		dataTranslators.put(SensorTypes.fas_current, fasTranslator);
+		
+		//OpenXVario
+		OpenXVarioTranslator openXVarioTranslator = new OpenXVarioTranslator();
+		dataTranslators.put(SensorTypes.openxvario_vfas_voltage, openXVarioTranslator);
+		dataTranslators.put(SensorTypes.openxvario_gps_distance, openXVarioTranslator);
+		
+		
 		
 	}
 
@@ -119,10 +146,10 @@ public class TranslatorFactory {
 		dataIDs.put(0x11 + 8, SensorTypes.gps_speed_after);
 		dataIDs.put(0x12, SensorTypes.gps_longitude_before);
 		dataIDs.put(0x12 + 8, SensorTypes.gps_longitude_after);
-		dataIDs.put(0x1A + 8, SensorTypes.gps_ew);
+		dataIDs.put(0x1A + 8, SensorTypes.gps_longitude_ew);
 		dataIDs.put(0x13, SensorTypes.gps_latitude_before);
 		dataIDs.put(0x13 + 8, SensorTypes.gps_latitude_after);
-		dataIDs.put(0x1B + 8, SensorTypes.gps_ns);
+		dataIDs.put(0x1B + 8, SensorTypes.gps_latitude_ns);
 		dataIDs.put(0x14, SensorTypes.gps_course_before);
 		dataIDs.put(0x14 + 8, SensorTypes.gps_course_after);
 		dataIDs.put(0x15, SensorTypes.gps_day_month);
@@ -134,9 +161,14 @@ public class TranslatorFactory {
 		dataIDs.put(0x26, SensorTypes.acc_z);
 		
 		//FAS-100
-		dataIDs.put(0x28, SensorTypes.fas100_current);
-		dataIDs.put(0x3a, SensorTypes.fas100_voltage_before);
-		dataIDs.put(0x3b, SensorTypes.fas100_voltage_after);
+		dataIDs.put(0x28, SensorTypes.fas_current);
+		dataIDs.put(0x3a, SensorTypes.fas_voltage_before);
+		dataIDs.put(0x3b, SensorTypes.fas_voltage_after);
+		
+		//OpenXVario
+		dataIDs.put(0x30, SensorTypes.vertical_speed);
+		dataIDs.put(0x39, SensorTypes.openxvario_vfas_voltage);
+		dataIDs.put(0x3c, SensorTypes.openxvario_gps_distance);
 		
 		
 	}

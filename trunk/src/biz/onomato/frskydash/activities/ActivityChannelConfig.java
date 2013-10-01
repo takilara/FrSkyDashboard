@@ -1,6 +1,28 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.activities;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -11,6 +33,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -85,6 +108,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	// TODO remove from layout completely
 	private Button btnSave;
 	
+	private Button btnCalibOffset,btnCalibFactor,btnCalibOffsetDefault,btnCalibFactorDefault;
+	
 	/**
 	 * a collection of sourcechannels
 	 */
@@ -96,6 +121,8 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		
 		// connect to server
 		doBindService();
@@ -122,6 +149,18 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		btnSave.setVisibility(View.GONE);
 		// register listener
 		btnSave.setOnClickListener(this);
+		
+		btnCalibOffset	= (Button) findViewById(R.id.chConf_btnCalibOffset);
+		btnCalibOffset.setOnClickListener(this);
+		
+		btnCalibFactor	= (Button) findViewById(R.id.chConf_btnCalibFactor);
+		btnCalibFactor.setOnClickListener(this);
+		
+		btnCalibFactorDefault	= (Button) findViewById(R.id.chConf_btnCalibFactorDefault);
+		btnCalibFactorDefault.setOnClickListener(this);
+		
+		btnCalibOffsetDefault	= (Button) findViewById(R.id.chConf_btnCalibOffsetDefault);
+		btnCalibOffsetDefault.setOnClickListener(this);
 	}
 
 	/**
@@ -367,6 +406,40 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch(v.getId()){
+			case R.id.chConf_btnCalibOffset:
+				Logger.i(TAG, "Set offset to (-1) * Current Value");
+				double oldOffset = server.getCurrentModel().getChannels().get(_channelId).getOffset();
+				double newOffset = server.getCurrentModel().getChannels().get(_channelId).getValue() * (-1);
+				double offset = oldOffset+newOffset;
+				
+				// Ensuring that we don't put numbers with commas in
+				NumberFormat f = NumberFormat.getInstance(Locale.US);
+				if (f instanceof DecimalFormat) {
+				     ((DecimalFormat)f).applyPattern("0.00");
+				}
+				
+				
+				edOffset.setText(f.format(offset));
+				//server.getCurrentModel().getChannels().get(_channelId).setOffset((float) newOffset * (-1));
+				break;
+			case R.id.chConf_btnCalibOffsetDefault:
+				edOffset.setText("0.0");
+				break;
+			case R.id.chConf_btnCalibFactor:
+				Logger.i(TAG, "Set factor to 4.2 / Current Value");
+				double newFactor = 4.2 / FrSkyServer.getCurrentModel().getChannels().get(_channelId).getRaw();
+				//NumberFormat decFormat2 = new DecimalFormat("0.000000");
+				
+				// Ensuring that we don't put numbers with commas in
+				NumberFormat f2 = NumberFormat.getInstance(Locale.US);
+				if (f2 instanceof DecimalFormat) {
+				     ((DecimalFormat)f2).applyPattern("0.000000");
+				}
+				edFactor.setText(f2.format(newFactor));
+				break;
+			case R.id.chConf_btnCalibFactorDefault:
+				edFactor.setText("1.0");
+				break;
 			case R.id.chConf_btnSave:
 				Logger.i(TAG,"Apply settings to channel: "+_channelId);
 				saveChannel();
@@ -409,10 +482,10 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		int prec = Integer.parseInt(edPrecision.getText().toString());
 		channel.setPrecision(prec);
 		
-		float fact = Float.valueOf(edFactor.getText().toString());
+		float fact = Float.valueOf(edFactor.getText().toString().replace(",", "."));
 		channel.setFactor(fact);
 		
-		float offs = Float.valueOf(edOffset.getText().toString());
+		float offs = Float.valueOf(edOffset.getText().toString().replace(",", "."));
 		channel.setOffset(offs);
 
 		channel.setLongUnit(edUnit.getText().toString());
@@ -465,7 +538,7 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 	
 	@Override
 	public void onPause() {
-		super.onPause();
+		
 		// log information here
 		Logger.i(TAG, "onPause");
 		// make sure to persist the channel updates we did in this activity.
@@ -477,6 +550,11 @@ public class ActivityChannelConfig extends Activity implements OnClickListener {
 		// inform with result ok
 		Intent i = new Intent();
 		i.putExtra(EXTRA_CHANNEL_ID, channel.getId());
+		
+		super.onPause();
+		
+		FrSkyServer.getCurrentModel().registerListeners();
+		
 		this.setResult(RESULT_OK,i);
 		this.finish();
 		// hcpl: is this no longer needed?

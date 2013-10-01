@@ -1,3 +1,22 @@
+/*
+ * Copyright 2011-2013, Espen Solbu, Hans Cappelle
+ * 
+ * This file is part of FrSky Dashboard.
+ *
+ *  FrSky Dashboard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  FrSky Dashboard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with FrSky Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package biz.onomato.frskydash.activities;
 
 import java.io.File;
@@ -16,6 +35,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -32,7 +52,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	
 	private Button btnSchema,btnChannels,btnModels,btnExportDb;
 	private ToggleButton btnWatchdogEnabled;
-	private CheckBox chkHubEnabled,chkFilePlaybackEnabled;
+	private CheckBox chkFilePlaybackEnabled;
 	
 	
 	//chConf_edVoice
@@ -40,6 +60,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		doBindService();
 		
@@ -49,26 +70,26 @@ public class ActivityDebug extends Activity implements OnClickListener {
 		// Find all form elements
 		btnExportDb			= (Button) findViewById(R.id.debug_btnExportDb);
 		btnWatchdogEnabled  = (ToggleButton) findViewById(R.id.debug_watchdogEnabled);
-		chkHubEnabled		= (CheckBox) findViewById(R.id.debug_chk_hubEnabled);
+//		chkHubEnabled		= (CheckBox) findViewById(R.id.debug_chk_hubEnabled);
 		chkFilePlaybackEnabled		= (CheckBox) findViewById(R.id.debug_chk_filePlaybackEnabled);
 		
 		
 		
 		btnExportDb.setOnClickListener(this);
 		btnWatchdogEnabled.setOnClickListener(this);
-		chkHubEnabled.setOnClickListener(this);
+		//chkHubEnabled.setOnClickListener(this);
 		chkFilePlaybackEnabled.setOnClickListener(this);
 		
 		// button for showing sensor hub data
-		((Button) findViewById(R.id.button_show_hub_data))
-				.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						startActivity(new Intent(getApplicationContext(),
-								ActivityHubData.class));
-					}
-				});
+//		((Button) findViewById(R.id.button_show_hub_data))
+//				.setOnClickListener(new OnClickListener() {
+//
+//					@Override
+//					public void onClick(View v) {
+//						startActivity(new Intent(getApplicationContext(),
+//								ActivityHubData.class));
+//					}
+//				});
 		
 	
 	}
@@ -103,7 +124,7 @@ public class ActivityDebug extends Activity implements OnClickListener {
 			Logger.i(TAG,"Bound to Service");
 	        // ADD stuff here
 			btnWatchdogEnabled.setChecked(server.getWatchdogEnabled());
-			chkHubEnabled.setChecked(server.getHubEnabled());
+			//chkHubEnabled.setChecked(server.getHubEnabled());
 			chkFilePlaybackEnabled.setChecked(server.getFilePlaybackEnabled());
 			
 			
@@ -129,9 +150,9 @@ public class ActivityDebug extends Activity implements OnClickListener {
 				Logger.i(TAG,"Exporting DB to sdcard");
 				new ExportDatabaseFileTask().execute();
 				break;
-			case R.id.debug_chk_hubEnabled:
-				server.setHubEnabled(((CheckBox) v).isChecked());
-				break;
+//			case R.id.debug_chk_hubEnabled:
+//				server.setHubEnabled(((CheckBox) v).isChecked());
+//				break;
 			case R.id.debug_chk_filePlaybackEnabled:
 				server.setFilePlaybackEnabled(((CheckBox) v).isChecked());
 				break;
